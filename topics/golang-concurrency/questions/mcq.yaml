@@ -1,0 +1,24 @@
+- id: mcq-chan-close
+  type: multiple_choice
+  tags: [channels, correctness]
+  difficulty: 2
+  prompt: "What happens when you send on a closed channel?"
+  shuffle_options: true
+  options:
+    - { text: "It panics", correct: true }
+    - { text: "It blocks forever" }
+    - { text: "It returns the zero value" }
+    - { text: "It silently no-ops" }
+  explanation: "Sending on a closed channel panics; receiving from one yields the zero value with ok=false."
+
+- id: mcq-select-empty
+  type: multiple_choice
+  tags: [channels]
+  difficulty: 3
+  prompt: "What does a `select {}` with no cases do?"
+  options:
+    - { text: "Blocks forever (deadlock)", correct: true }
+    - { text: "Returns immediately" }
+    - { text: "Panics at runtime" }
+    - { text: "Spins the CPU busy-waiting" }
+  explanation: "An empty select has no ready case and never will — the goroutine blocks forever."

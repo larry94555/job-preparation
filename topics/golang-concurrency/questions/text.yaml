@@ -1,0 +1,19 @@
+- id: text-buffered-cap
+  type: text_input
+  tags: [channels]
+  difficulty: 1
+  parameters:
+    n: { random_int: [2, 8] }
+  prompt: "A buffered channel `make(chan int, {{n}})` can hold how many values before a send blocks?"
+  answer:
+    equals: "{{n}}"
+    numeric_tolerance: 0
+
+- id: text-race-flag
+  type: text_input
+  tags: [synchronization]
+  difficulty: 2
+  prompt: "Which `go test` flag enables the data race detector? (include the leading dash)"
+  answer:
+    regex: "^-race$"
+    normalize: true

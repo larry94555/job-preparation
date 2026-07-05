@@ -1,0 +1,25 @@
+- id: essay-mutex-vs-chan
+  type: essay
+  length: short
+  tags: [synchronization, tradeoffs]
+  difficulty: 3
+  prompt: "When would you choose a mutex over a channel in Go? Discuss the trade-off."
+  eval_skill: eval-essay-tradeoffs
+  reference_points:
+    - "Mutex: protecting shared state / simple critical sections; lower overhead."
+    - "Channel: transferring ownership / orchestrating goroutines ('share by communicating')."
+    - "Mentions contention, deadlock risk, or readability as the trade-off."
+
+- id: essay-context-cancellation
+  type: essay
+  length: long
+  tags: [patterns]
+  difficulty: 4
+  prompt: >-
+    Explain how you would use context.Context to cancel a tree of goroutines
+    performing I/O, and what can go wrong if a goroutine ignores cancellation.
+  eval_skill: eval-essay-tradeoffs
+  reference_points:
+    - "context.WithCancel/WithTimeout produces a derived ctx passed down the call tree."
+    - "Goroutines select on <-ctx.Done() and return promptly."
+    - "Ignoring cancellation leaks goroutines and holds resources."

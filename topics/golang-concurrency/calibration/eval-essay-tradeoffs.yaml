@@ -1,0 +1,29 @@
+skill: eval-essay-tradeoffs
+cases:
+  - answer: >-
+      Use a mutex when you're guarding a small piece of shared state, like a counter or a map,
+      where a short critical section is simplest and cheapest. Reach for a channel when you're
+      handing ownership of data between goroutines or orchestrating a pipeline. The trade-off is
+      overhead and clarity: mutexes are lighter but easy to misuse (forgotten unlocks, deadlocks),
+      while channels express intent but add scheduling overhead.
+    expect:
+      verdict: pass
+      checks: { both_sides: true, real_tradeoff: true, correct: true, specific: true }
+
+  - answer: "Mutexes are always better than channels because they are faster."
+    expect:
+      verdict: fail
+      checks: { both_sides: false, correct: false }
+
+  - answer: >-
+      A mutex protects shared memory and a channel passes messages. You pick whichever fits.
+    expect:
+      verdict: borderline
+      checks: { both_sides: true, real_tradeoff: false, specific: false }
+
+  - answer: >-
+      Use a mutex for simple shared state and a channel to transfer ownership between goroutines.
+      Mutexes have lower overhead but risk deadlock if you forget to unlock.
+    expect:
+      verdict: pass
+      checks: { both_sides: true, real_tradeoff: true, correct: true }

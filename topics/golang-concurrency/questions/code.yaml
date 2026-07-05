@@ -1,0 +1,16 @@
+- id: code-worker-pool
+  type: code
+  language: go
+  tags: [concurrency, patterns]
+  difficulty: 4
+  prompt: >-
+    Implement `ProcessAll(jobs []int, workers int) []int` that squares each job
+    concurrently using exactly `workers` goroutines, preserving input order.
+  starter_file: exercises/worker-pool/starter.go
+  test_command: "go test ./..."
+  runner_image: "quiz-runner-go:1.22"
+  timeout_sec: 30
+  eval_skill: eval-code-worker-pool
+  concept_checks:
+    must_use: ["goroutine", "channel", "sync.WaitGroup"]
+    avoid_antipattern: ["unbounded goroutine spawn", "busy-wait loop"]

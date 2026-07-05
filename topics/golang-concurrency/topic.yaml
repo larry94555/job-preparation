@@ -1,0 +1,8 @@
+id: golang-concurrency
+title: "Go Concurrency"
+description: "Goroutines, channels, sync primitives, and common concurrency patterns and pitfalls."
+pass_threshold: 0.7
+tag_weights:
+  channels: 1.0
+  synchronization: 1.0
+  patterns: 1.5
