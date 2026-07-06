@@ -29,3 +29,19 @@ tenant, user journey — not just per model, so cost can be optimized where it a
 | LP6 | Budgets, quotas & cost-based routing | T3 | L3 | C3.4, C6.5 | Essay |
 
 **Prereqs:** links to topics 12 (routing), 16 (observability), 21 (tradeoffs).
+
+---
+
+## Lesson flow & sections
+
+Delivered per the standard **present → check → apply → section assessment** loop
+([`README.md`](README.md), [`../Goals.md`](../Goals.md) §6.1). The value tiers above map to sections:
+
+- **Section 1 (T1 lessons)** — fundamentals; ends in a section assessment (mastery → light green).
+- **Section 2 (T2 lessons)** — practitioner depth; section assessment.
+- **Section 3 (T3 lessons)** — expert/frontier; section assessment.
+- **Cumulative assessment** — spans the sections once each reaches light green.
+
+Each lesson: present material → formative checks (MC / short-answer / flashcards) → the application
+task in its **Modes** column → contributes to its section assessment. Present-before-test is enforced;
+the dashboard shows mastery color only (no attempts, no red).

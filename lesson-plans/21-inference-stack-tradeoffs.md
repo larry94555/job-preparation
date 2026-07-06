@@ -29,3 +29,19 @@ quantization, retrieval, decoding) trades among latency, quality, cost, and reli
 | LP6 | Architect the full stack to SLOs (capstone) | T3 | L3→L4 | C4.4, C5.2 | Essay, Code |
 
 **Prereqs:** integrative — best after topics 4–8, 12, 17. Capstone for the serving cluster.
+
+---
+
+## Lesson flow & sections
+
+Delivered per the standard **present → check → apply → section assessment** loop
+([`README.md`](README.md), [`../Goals.md`](../Goals.md) §6.1). The value tiers above map to sections:
+
+- **Section 1 (T1 lessons)** — fundamentals; ends in a section assessment (mastery → light green).
+- **Section 2 (T2 lessons)** — practitioner depth; section assessment.
+- **Section 3 (T3 lessons)** — expert/frontier; section assessment.
+- **Cumulative assessment** — spans the sections once each reaches light green.
+
+Each lesson: present material → formative checks (MC / short-answer / flashcards) → the application
+task in its **Modes** column → contributes to its section assessment. Present-before-test is enforced;
+the dashboard shows mastery color only (no attempts, no red).

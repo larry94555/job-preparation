@@ -29,3 +29,19 @@ and guardrails against runaway loops and unsafe actions.
 | LP6 | HITL escalation & graceful degradation | T3 | L3 | C3.4, C4.4 | Essay |
 
 **Prereqs:** topics 1 & 10; links to topics 12, 18, 22.
+
+---
+
+## Lesson flow & sections
+
+Delivered per the standard **present → check → apply → section assessment** loop
+([`README.md`](README.md), [`../Goals.md`](../Goals.md) §6.1). The value tiers above map to sections:
+
+- **Section 1 (T1 lessons)** — fundamentals; ends in a section assessment (mastery → light green).
+- **Section 2 (T2 lessons)** — practitioner depth; section assessment.
+- **Section 3 (T3 lessons)** — expert/frontier; section assessment.
+- **Cumulative assessment** — spans the sections once each reaches light green.
+
+Each lesson: present material → formative checks (MC / short-answer / flashcards) → the application
+task in its **Modes** column → contributes to its section assessment. Present-before-test is enforced;
+the dashboard shows mastery color only (no attempts, no red).

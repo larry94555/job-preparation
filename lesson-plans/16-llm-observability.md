@@ -29,3 +29,19 @@ multi-step calls, token/latency/error telemetry, and drift detection.
 | LP6 | SLOs & alerting for agents (frontier) | T3 | L3→L4 | C4.4, C6.5 | Essay |
 
 **Prereqs:** links to topics 15 (drift↔evals), 17 (cost), 22 (silent regressions).
+
+---
+
+## Lesson flow & sections
+
+Delivered per the standard **present → check → apply → section assessment** loop
+([`README.md`](README.md), [`../Goals.md`](../Goals.md) §6.1). The value tiers above map to sections:
+
+- **Section 1 (T1 lessons)** — fundamentals; ends in a section assessment (mastery → light green).
+- **Section 2 (T2 lessons)** — practitioner depth; section assessment.
+- **Section 3 (T3 lessons)** — expert/frontier; section assessment.
+- **Cumulative assessment** — spans the sections once each reaches light green.
+
+Each lesson: present material → formative checks (MC / short-answer / flashcards) → the application
+task in its **Modes** column → contributes to its section assessment. Present-before-test is enforced;
+the dashboard shows mastery color only (no attempts, no red).

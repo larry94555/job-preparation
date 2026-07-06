@@ -29,3 +29,19 @@
 | LP6 | Component-isolated eval design (frontier) | T3 | L3→L4 | C2.4, C4.4 | Essay |
 
 **Prereqs:** topic 13; feeds topic 15 (eval methodology) & 22 (failure modes).
+
+---
+
+## Lesson flow & sections
+
+Delivered per the standard **present → check → apply → section assessment** loop
+([`README.md`](README.md), [`../Goals.md`](../Goals.md) §6.1). The value tiers above map to sections:
+
+- **Section 1 (T1 lessons)** — fundamentals; ends in a section assessment (mastery → light green).
+- **Section 2 (T2 lessons)** — practitioner depth; section assessment.
+- **Section 3 (T3 lessons)** — expert/frontier; section assessment.
+- **Cumulative assessment** — spans the sections once each reaches light green.
+
+Each lesson: present material → formative checks (MC / short-answer / flashcards) → the application
+task in its **Modes** column → contributes to its section assessment. Present-before-test is enforced;
+the dashboard shows mastery color only (no attempts, no red).

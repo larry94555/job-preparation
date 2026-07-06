@@ -21,6 +21,12 @@ It governs [`TOPIC_PLANS.md`](TOPIC_PLANS.md) (the topic outlines) and every fut
   and *certified*. Retesting is always allowed; the bar does not move.
 - **Relative to a moving frontier.** "Done" is defined against what a **state-of-the-art expert**
   commands today. Because the frontier moves, completion is dated and the course is continuous.
+- **Present before test.** Every assessed idea is *taught first* in the lesson flow — nothing untaught
+  is tested. An attentive learner who understood the lesson should reach reasonable mastery on the
+  first pass. Assessments are hard, but never *unfair*.
+- **Tough but friendly; mastery, never failure.** The bar is high and retries are unlimited and
+  encouraged. The learner-facing UI shows only **mastery level** — never attempts, tries, failures,
+  or scores-as-grades, and **never red** (§6.1). The only direction is forward.
 
 ---
 
@@ -29,13 +35,18 @@ It governs [`TOPIC_PLANS.md`](TOPIC_PLANS.md) (the topic outlines) and every fut
 | Term | Meaning |
 |---|---|
 | **Topic** | One subject area (e.g. `rag-architecture`). Has one `topics/<slug>/` folder. |
-| **Lesson Plan** | A coherent unit within a topic that teaches and certifies a declared slice of competencies (e.g. "RAG chunking fundamentals"). A topic has many, sequenced fundamentals→SOTA. |
-| **Lesson** | The taught content of a lesson plan (readings, worked examples, references). |
-| **Assessment** | A question/exercise (one of the five modes) that measures a competency. |
+| **Section** | A group of lessons within a topic that share one **section assessment**. |
+| **Lesson Plan** | A coherent unit within a section that teaches and certifies a declared slice of competencies. Sequenced fundamentals→SOTA. |
+| **Lesson** | The delivered flow of a lesson plan: **present → check → apply** (material, formative checks, application task). |
+| **Formative check** | A low-stakes, instant, encouraging exercise right after a material segment (MC / short answer / flashcard). Moves mastery *up*, never down; not attempt-counted. |
+| **Section assessment** | The hard, mixed-mode **summative** test that gates a section's mastery. |
+| **Cumulative assessment** | A summative test spanning several completed sections. |
+| **Assessment** | Any question/exercise (one of the five modes) that measures a competency, in a formative or summative role. |
+| **Mastery band** | The learner-facing color state of a section (§6.1): white → light blue → turquoise → light green → bright green. |
 | **Expert Surface** | The enumerated set of everything a SOTA expert commands for a topic — the denominator for completeness (see §8). |
 | **Certification** | A learner has demonstrated a competency at its target level, at standard, retesting allowed. |
 
-Hierarchy: **Topic → Lesson Plans → Lessons + Assessments → Competencies certified.**
+Hierarchy: **Topic → Sections → Lesson Plans → Lessons (present→check→apply) → Section/Cumulative assessments → Competencies certified.**
 
 ---
 
@@ -140,6 +151,8 @@ Every competency is certified at a **target level**. Levels adapt the Dreyfus mo
   *informed expert-level discussion*, not necessarily original research.
 - **L1 targets** may be acceptable for peripheral competencies; a lesson plan must state the target
   level for each competency it declares.
+- **Levels map to the learner-facing mastery colors** (§6.1): L0 white · L1 light blue · L2
+  turquoise · **L3 light green (the bar)** · L4 bright green.
 
 ---
 
@@ -165,6 +178,47 @@ essays) are retained as **interview evidence / portfolio artifacts**, directly s
 
 ---
 
+## 6.1 Lesson Format & Mastery Display
+
+Competencies are not tested cold — they are **taught, reinforced, applied, then assessed**. Every
+lesson follows the same loop, and mastery is shown in a deliberately encouraging way.
+
+### The lesson loop (per lesson plan)
+
+1. **Present** — a segment of material (explanation, worked examples, diagrams, references).
+2. **Check (formative)** — right after each segment: MC / short answer / **flashcards**, instant
+   feedback. These *reinforce*; they never gate and are never counted.
+3. **Apply (guided)** — once enough material is presented: applying-the-material content and applied
+   checks (for coding topics, MC on **tradeoffs, bugs-found, and maturity rating**).
+4. **Application task** — a real application: a coding exercise, essay, or configuration task.
+5. **Section assessment (summative)** — after the section's material is fully presented, the hard,
+   mixed-mode mastery gate.
+6. **Cumulative assessment** — after several section assessments, a test spanning them.
+
+**Formative vs. summative:** formative (2–3) is unlimited, instant, and only moves mastery *up*;
+summative (5–6) is the hard gate, with unlimited retries and **fresh randomized/parameterized items**
+so a retake is re-demonstration, not recall. The **present-before-test rule** is enforced at import:
+a check or assessment may only reference material already presented in the flow.
+
+### Mastery display — tough but friendly, no red
+
+The learner-facing dashboard shows **only the mastery band per section** (and a topic rollup). It
+**never** shows attempts, tries, failures, or scores-as-grades, and **never uses red** — a learner is
+never "failing," only "not yet mastered."
+
+| Band | Color | Meaning | Level |
+|---|---|---|---|
+| 0 | **White** | Not started | L0 |
+| 1 | **Light blue** | Learning — material presented / in progress | L1 |
+| 2 | **Turquoise** | Developing — formative checks passing | L2 |
+| 3 | **Light green** | Proficient — section assessment passed at standard | **L3 (interview-ready)** |
+| 4 | **Bright green** | Mastered — sustained/retained at the high bar | L4 / retained |
+
+Only `section`/`cumulative` results move a band; `formative` results never lower it. This is the
+visible expression of the philosophy in §1 and the engine's `section_mastery` state (`DESIGN.md` §10.3).
+
+---
+
 ## 7. Definition of Done
 
 There are two Definitions of Done. Keep them distinct.
@@ -180,9 +234,13 @@ A lesson plan is **content-complete** when, for every competency it declares:
    **eval skill + calibration set that passes the meta-eval gate** (see `DESIGN.md` §7). An
    un-gradeable competency is not "tested."
 4. **Sequenced** — lessons proceed fundamentals→SOTA; prerequisites are declared and satisfied.
-5. **Complete for its slice** — no declared competency is left unaddressed, and the lesson plan's
+5. **Taught before tested** — the lesson delivers the §6.1 loop (present → formative check → apply),
+   and **every check/assessment item references only material presented earlier** (present-before-test).
+6. **Assessed** — the section the lesson plan belongs to has a defined **section assessment** (and the
+   topic's sections roll up into a cumulative assessment).
+7. **Complete for its slice** — no declared competency is left unaddressed, and the lesson plan's
    slice of the topic's Expert Surface (§8) is fully covered.
-6. **Certifiable** — a certification rule is defined (thresholds, retest policy, retention check per
+8. **Certifiable** — a certification rule is defined (thresholds, retest policy, retention check per
    §7C).
 
 If any item fails, the lesson plan is **in progress**, and its completeness is reported as a
@@ -302,10 +360,13 @@ thing to build/learn" a concrete, always-available answer.
 
 The measurement machinery is not aspirational — it rides on the system in `DESIGN.md`:
 
+- **Lesson runner** (`begin-lesson`/`resume-lesson`) → delivers the §6.1 present→check→apply loop.
+- **`section_mastery` bands + dashboard** → render the tough-but-friendly color model (§6.1); scope
+  discipline means `formative` results never lower a band.
 - **Mastery + spaced repetition** tables → the substrate for *measured*, *retained* certification (§7C).
 - **Meta-eval gate + calibration** → makes essay/coding competencies *trustworthily measurable* (§7A.3).
-- **Mock-interview mode** → certifies the "explain/defend to an expert" competencies (C1.2, Domain 3).
-- **Analytics dashboard** → renders TMI, domain/level breakdowns, and the gap list (§10).
+- **Mock-interview + cumulative assessment** → certify "explain/defend to an expert" and cross-section
+  retention (C1.2, Domain 3).
 - **Randomized/parameterized items** → make unlimited retesting a re-demonstration, not recall (§7C).
 
 ---
@@ -318,6 +379,8 @@ The measurement machinery is not aspirational — it rides on the system in `DES
 - [ ] All content passes `npm run validate`.
 - [ ] Every essay/coding eval skill passes the meta-eval gate with a calibration set.
 - [ ] Lessons are sequenced fundamentals→SOTA with declared prerequisites.
+- [ ] The lesson delivers the present → check → apply loop, and no item tests un-presented material.
+- [ ] The section has a defined section assessment (rolling up into a cumulative assessment).
 - [ ] The lesson plan's slice of the Expert Surface is fully covered.
 - [ ] A certification rule (thresholds, retest, retention) is defined.
 
@@ -334,6 +397,6 @@ The measurement machinery is not aspirational — it rides on the system in `DES
 
 ---
 
-*Next: give each topic in [`TOPIC_PLANS.md`](TOPIC_PLANS.md) an **Expert Surface** and a
-**value-tiered list of lesson plans**, then author T1 lesson plans first — starting with one topic
-end-to-end to prove the plan → lesson → certify pipeline.*
+*Next: author the pilot topic as a real **lesson** (present→check→apply material + a section
+assessment per §6.1), then build the Phase 1 **lesson runner** (`begin-lesson`/`resume-lesson`) and
+the **mastery dashboard** so the loop is playable end-to-end before scaling to more topics.*

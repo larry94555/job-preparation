@@ -6,13 +6,17 @@ The authoring work queue for lesson content. Governed by [`Goals.md`](Goals.md) 
 
 ## Where we are
 
-- ✅ Charter (`Goals.md`), topic outlines (`TOPIC_PLANS.md`), and **light lesson-plan breakdowns for
-  all 22 topics** (`lesson-plans/01..22`).
-- ⬜ **Zero lessons authored as real content yet** — no `topics/<slug>/` folder exists beyond the
-  Phase-0 pilot `golang-concurrency`.
+- ✅ Charter (`Goals.md`, now with the **lesson format & mastery-color model**, §6.1), topic outlines
+  (`TOPIC_PLANS.md`), light lesson-plan breakdowns for all 22 topics (`lesson-plans/`), and the
+  **lesson-delivery model** in `DESIGN.md` (§10.1–10.3: lesson loop, `begin-lesson` runner, dashboard).
+- ✅ Wave-0 **item bank** authored: `topics/structured-output-reliability/` (26 questions across all
+  five modes + eval skills + calibration); validates green; deterministic grader + `preview`/`selfcheck`.
+- ⬜ **Not yet a "lesson":** it has questions but **no presentation material, lesson manifest, or
+  section assessment** — the pieces the `begin-lesson` runner needs.
+- ⬜ **Lesson runner + dashboard** (Phase 1) not built.
 
-The breakdowns are intentionally light so we can see the whole map and start feeding real content
-into the engine. Depth is added lesson-by-lesson as we author.
+Lessons are delivered as **present → check → apply → section assessment** (Goals §6.1). Authoring a
+topic now means material + a lesson/section manifest, not just an item bank.
 
 ## Guiding order (from Goals.md §9)
 
@@ -34,24 +38,33 @@ integrative      20 adaptation · 21 stack-tradeoffs · 22 failure-modes (capsto
 
 ---
 
-## Wave 0 — Prove the pipeline on ONE topic (do this first)
+## Wave 0 — Prove the pipeline on ONE topic
 
-**Goal:** author one topic **end-to-end** as real, valid content — the first thing the engine can
-actually run — and shake out the plan → lesson → validate → (grade) loop before scaling.
+**Pilot topic: `structured-output-reliability` (topic 9)** — concrete, code-heavy, high
+interview-frequency, and it *dogfoods this system*.
 
-**Pilot topic: `structured-output-reliability` (topic 9).** Chosen because it is concrete,
-code-heavy, high interview-frequency, and it *dogfoods this very system* (validation, repair,
-fallbacks).
+- [x] `topic.yaml` + 26 questions across all five modes
+- [x] Eval skills + calibration sets; `npm run validate` green
+- [x] Deterministic grader + `preview`/`selfcheck` (the first Phase-1 slice)
+- [ ] **Turn the item bank into a real lesson:** add presentation **material** (Markdown), a
+  **lesson manifest** (present→check→apply segments), and a **`sections.yaml`** with a **section
+  assessment** — the pieces `begin-lesson` renders (Goals §6.1, DESIGN §10.1).
 
-- [ ] `topics/structured-output-reliability/topic.yaml`
-- [ ] **LP1–LP4** questions across all five modes (MC, missing-term, free-entry, essay, code)
-- [ ] Eval skills + **calibration sets** for the essay/code questions (must pass the meta-eval gate)
-- [ ] `npm run validate` green
-- [ ] Use it as the **fixture for building Phase 1** (deterministic MC/text quiz UI)
+## Wave 0.5 — Build the lesson runner (Phase 1) against the pilot
 
-> Note: authoring content only needs the Phase-0 validator (works today). *Taking* these quizzes
-> needs Phase 1 (deterministic MC/text) and Phase 2 (essay/code grading) from `NextSteps.md`. So
-> Wave 0 content becomes the concrete test fixture that drives Phase 1/2 development.
+**Goal:** make `begin-lesson`/`resume-lesson` play the pilot lesson end-to-end (no LLM).
+
+- [ ] Lesson content model + importer (material, lesson manifest, `sections.yaml`) with the
+  **present-before-test** check enforced at import.
+- [ ] `packages/lesson` — the present→check→apply→section-assessment **state machine** + `lesson_progress`.
+- [ ] `section_mastery` bands (0–4) and the **color-coded dashboard** (white→bright green, no red).
+- [ ] `app/` Next.js **lesson runner**: Continue-button flow, inline formative checks (instant),
+  application task, section assessment; `npm run begin-lesson -- <code>` / `resume-lesson`.
+- [ ] Deterministic grading wired in (grader from `packages/engine/src/grade.ts`); essay/code
+  application tasks stubbed until Phase 2.
+
+> This is where the learner can finally *run* `begin-lesson` and watch present → check → apply →
+> section assessment with the mastery dashboard.
 
 ---
 
@@ -112,6 +125,12 @@ dated Expert Surface certified), with a ranked gap list — never a bare "not do
 
 ## Immediate next action
 
-**Author Wave 0** (`topics/structured-output-reliability/`) end-to-end and get `npm run validate`
-green. That gives the engine its first real, multi-mode topic and the fixture to build Phase 1
-against.
+Two steps to a runnable lesson:
+1. **Finish the pilot as a lesson** — add presentation material, a lesson manifest, and a
+   `sections.yaml` (with a section assessment) to `topics/structured-output-reliability/`, so it is a
+   real **present → check → apply → assess** lesson, not just an item bank.
+2. **Build the Phase 1 lesson runner** (`begin-lesson`/`resume-lesson` + mastery dashboard) against
+   it, so the loop is playable end-to-end with no LLM.
+
+At the end of step 2 you can run `npm run begin-lesson -- structured-output-reliability` and see the
+lesson, exercises, application, and section assessment with the color-coded mastery dashboard.

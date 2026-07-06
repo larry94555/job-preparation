@@ -1,11 +1,17 @@
 # Interview-Prep Quiz System — Design & Roadmap
 
-A config-driven quiz platform for interview preparation. Once the engine exists, a new
-programming topic is added by dropping in configuration files and evaluation skills — no
-engine code changes. Grading of open-ended answers is done by a **small local LLM** driven
-by carefully engineered, individually-tested evaluation skills.
+A config-driven **guided-lesson and assessment platform** for interview preparation. Content is
+delivered as *lessons* that present material, check understanding with low-stakes exercises, build
+to application, and gate on hard **section assessments** (and later **cumulative assessments**) —
+not as bare quizzes. Once the engine exists, a new topic is added by dropping in configuration files
+(material + questions + evaluation skills) — no engine code changes. Open-ended answers are graded
+by a **small local LLM** driven by carefully engineered, individually-tested evaluation skills.
 
-Status: **design agreed, not yet built.** This document is the spec to build against.
+**Pedagogy in one line:** present everything before testing it; make assessments hard but retries
+unlimited; show the learner **mastery, never failure**. See §10.1–10.3.
+
+Status: **design agreed; Phase 0 built; lesson-delivery model added (this revision).** This document
+is the spec to build against.
 
 ---
 
@@ -23,6 +29,10 @@ Status: **design agreed, not yet built.** This document is the spec to build aga
 5. **Layered evaluation — cheapest first.** Deterministic checks before LLM judgment; LLM
    judgment before human review.
 6. **Fail loud.** Malformed config never silently mis-grades — it fails validation at load/CI.
+7. **Present before test; tough but friendly.** Every assessed idea is *taught first* in the lesson
+   flow — nothing untaught is tested. Assessments are hard, but retries are unlimited and the UI
+   shows **mastery, never failure** (no attempts, no scores-as-grades, no red). An attentive learner
+   who understands the material should reach reasonable mastery on the first pass.
 
 ---
 
@@ -85,16 +95,16 @@ This is the grading target the eval-skill format must survive.
            │                               │
 ┌───────────▼─────────────┐   ┌─────────────▼─────────────────────┐
 │ ENGINE (pure TS)        │   │ EVALUATORS                        │
-│  loader · randomizer ·  │   │  deterministic (MCQ/text)         │
-│  quiz assembler ·       │   │  llm (Evaluator iface → llama)    │
-│  scorer · session ·     │   │  code (→ isolated sandbox svc)    │
+│  loader · randomizer ·  │   │  deterministic (MCQ/text/flash)   │
+│  lesson sequencer ·     │   │  llm (Evaluator iface → llama)    │
+│  scorer · mastery ·     │   │  code (→ isolated sandbox svc)    │
 │  adaptive scheduler     │   │  meta-eval (calibration gate)     │
 └───────────┬─────────────┘   └─────────────┬─────────────────────┘
            │                               │  (async jobs)
 ┌───────────▼───────────────────────────────▼──────────────────────┐
-│ NEXT.JS  UI + API                                                 │
-│   take quiz · async grading status · review · mock-exam ·          │
-│   adaptive practice · analytics · admin (import/meta-eval/flags)   │
+│ NEXT.JS  UI + API — LESSON RUNNER (begin/resume) + DASHBOARD       │
+│   present → check → apply → section assessment · Continue flow ·    │
+│   mastery dashboard (color bands) · async grading · admin          │
 └───────────────────────────────────────────────────────────────────┘
 
            ┌──────────────────────────────────────────┐
@@ -122,6 +132,14 @@ against one local `llama-server`; tier 4 is a managed provider or stubbed until 
 
 Evaluation is layered: deterministic → tests → LLM judgment → human review (escalation only).
 
+**These are the *item* types used inside lessons** (see §10.1), across three roles:
+- **Formative checks** (instant, encouraging, unlimited): multiple choice, text input, and
+  **flashcards** (a lightweight self-graded recall mode) — used right after each material segment.
+- **Application tasks**: a coding exercise, essay, or **configuration task** (a config variant of a
+  code/structured task) — used once enough material is presented.
+- **Summative assessment items**: the same modes assembled into a hard **section assessment** and,
+  later, a **cumulative assessment**.
+
 ---
 
 ## 6. Configuration file design (requirement #1)
@@ -132,7 +150,11 @@ One folder per topic. Everything is Zod-validated on import; malformed config fa
 topics/
   golang-concurrency/
     topic.yaml                 # metadata, tag weighting, pass thresholds
-    questions/
+    sections.yaml              # ordered sections; each lists its lessons + section-assessment
+    lessons/
+      01-channels.yaml         # a lesson manifest: ordered segments (material + formative checks + apply)
+      01-channels.md           # the presentation material for that lesson (Markdown)
+    questions/                 # the item bank the lessons + assessments draw from
       mcq.yaml
       text.yaml
       essay.yaml
@@ -146,6 +168,12 @@ topics/
     exercises/
       worker-pool/                     # starter code, tests, runner image ref
 ```
+
+A **lesson manifest** orders *segments*: `{material: <md-anchor>}`, `{check: <question-id>}`
+(formative), and `{apply: <question-id>}` (application task). `sections.yaml` orders lessons into
+sections and points each section at its **section assessment** (a pool + draw rule). The
+present-before-test rule (§10.1) is enforced at import: a check/assessment may only reference
+material presented earlier in the flow.
 
 **Multiple choice** (`questions/mcq.yaml`):
 ```yaml
@@ -334,6 +362,76 @@ All three drive the schema now (mastery + review-schedule tables) so nothing is 
 
 ---
 
+## 10.1 Lesson delivery model & pedagogy (the learning loop)
+
+Content is delivered as **lessons**, not bare quizzes. A lesson interleaves presentation and
+low-stakes checks, builds to application, and gates on a hard summative assessment.
+
+**Content hierarchy:** **Topic → Sections → Lessons → Segments/items.**
+- A **Lesson** runs the present→check→apply loop over one lesson plan.
+- A **Section** groups lessons that share one **section assessment**.
+- A **Cumulative assessment** spans several completed sections (within a topic, and later across topics).
+
+**The lesson loop (per lesson):**
+1. **Present** — a segment of material (Markdown: explanation, examples, diagrams, references).
+2. **Check (formative)** — immediately after each segment: multiple choice / short answer /
+   flashcards, with instant feedback. These *reinforce*; they never gate.
+3. **Apply (guided)** — once enough material is presented, "applying the material" content and
+   applied checks — for coding topics, multiple choice on **tradeoffs, bugs-found, and maturity
+   rating** (toy/prototype/demo/production).
+4. **Application task** — a real application: a coding exercise, essay, or configuration task.
+5. **Section assessment (summative)** — after a section's material is fully presented, the hard,
+   mixed-mode mastery assessment that gates the section.
+6. **Cumulative assessment** — after several section assessments, an assessment spanning them.
+
+**Formative vs. summative:**
+- **Formative** (steps 2–3): unlimited, instant, encouraging; they move mastery *up*, never down;
+  they are **not** attempt-counted or surfaced as scores.
+- **Summative** (steps 5–6): hard; the mastery gate; unlimited retries with fresh
+  randomized/parameterized items so a retake is re-demonstration, not recall.
+
+**Present-before-test rule (inviolable):** no assessment item may test material not yet presented in
+the flow. Assessments are hard but never *unfair* — an attentive learner who understood the lesson
+should reach reasonable mastery on the first pass.
+
+## 10.2 Lesson runner — `begin-lesson` / `resume-lesson`
+
+The learner-facing experience (the **Phase 1** deliverable) is a local web page driven by two commands:
+
+- `npm run begin-lesson -- <topic|section|lesson code>` — starts the local lesson server and opens
+  the target at its beginning.
+- `npm run resume-lesson -- <topic|section|lesson code>` — resumes at the learner's saved position.
+
+The page is a single guided flow with **Continue** buttons: presentation segments → inline exercises
+(auto-graded formative) → application tasks → the **section assessment** → **cumulative assessments**
+where scheduled. Deterministic checks (MC/text/flashcard) grade instantly; essay/code/config tasks
+enqueue async grading (Phase 2) and the flow continues, surfacing results when ready. Answer keys
+stay server-side. Local-first: it runs the Next.js app on the laptop (dev-stub auth, local store)
+against the local `llama-server` for open-ended grading.
+
+## 10.3 Mastery dashboard & the color model
+
+**Tough but friendly.** Because assessments are hard and retries unlimited, the dashboard shows
+**only mastery level** — never attempts, tries, failures, or scores-as-grades. **There is no red.**
+A learner is never "failing," only "not yet mastered"; the only direction is forward.
+
+**Mastery color scale** (per section, rolled up per topic):
+
+| Band | Color | Meaning | Goals level |
+|---|---|---|---|
+| 0 | **White** | Not started | L0 |
+| 1 | **Light blue** | Learning — material presented / in progress | L1 |
+| 2 | **Turquoise** | Developing — formative checks passing | L2 |
+| 3 | **Light green** | Proficient — section assessment passed at standard | **L3 (interview-ready)** |
+| 4 | **Bright green** | Mastered — sustained/retained at the high bar | L4 / retained |
+
+The dashboard surfaces, per section: the current **color band**, the **current activity**
+(e.g. "Section 2 · applying"), and a **topic rollup** — framed as encouraging progress toward bright
+green. It never renders a downward or punitive signal. This is the visible form of requirement #4C
+(analytics), reading the `section_mastery` state below.
+
+---
+
 ## 11. Data model (Postgres, multi-tenant)
 
 Content tables are a **projection of the config files** (content-hash keyed, never hand-edited).
@@ -345,14 +443,22 @@ Per-user tables carry `user_id` and are strictly owner-scoped.
 | `topics` | Projection of `topic.yaml` |
 | `questions` | Projection of question configs (+ content hash) |
 | `eval_skills` | Projection of skills + latest meta-eval score/status |
-| `sessions` | A quiz/exam instance: topic(s), **seed**, config, mode (practice \| mock) |
-| `attempts` | Per-question: submitted answer, evaluator output (JSON), score, verdict |
+| `sections` | Projection: topic, ordered lessons, section-assessment ref |
+| `lessons` | Projection: section, ordered segments (material + item refs) — the lesson manifest |
+| `sessions` | A run instance: topic(s), **seed**, config, **scope** (`formative` \| `section` \| `cumulative` \| `mock`) |
+| `attempts` | Per-item: submitted answer, evaluator output (JSON), score, verdict, **scope** |
 | `grading_jobs` | Async LLM/code grading: status, attempt ref, worker, escalation trail |
+| `lesson_progress` | Per-user resume state: current section/lesson/segment position |
 | `mastery` | Per-user, per-question/tag mastery state (for adaptive + analytics) |
+| `section_mastery` | Per-user, per-section **mastery band (0–4)** + current activity — powers the dashboard (§10.3) |
 | `review_schedule` | Spaced-repetition due dates (SM-2 state) |
 | `review_queue` | Flagged-for-human-review grading cases (admin works these) |
 
-Content lives in **git** (diffable, reviewable, eval-gated); the DB holds **attempts + progress**.
+**Scope discipline:** `formative` attempts are **never** counted, surfaced, or allowed to lower
+mastery — only `section`/`cumulative` results move a section's band. This is what keeps the UI
+"mastery, never failure" (§10.3).
+
+Content lives in **git** (diffable, reviewable, eval-gated); the DB holds **progress + mastery**.
 
 ---
 
@@ -373,9 +479,10 @@ Content lives in **git** (diffable, reviewable, eval-gated); the DB holds **atte
 
 ```
 job-preparation/
-  app/                  # Next.js UI + API routes
+  app/                  # Next.js UI + API routes — the lesson runner (begin/resume) + dashboard
   packages/
-    engine/             # loader, randomizer, quiz assembler, scorer, adaptive scheduler — pure TS
+    engine/             # loader, randomizer, lesson sequencer, scorer, mastery/adaptive — pure TS
+    lesson/             # lesson-flow state machine (present→check→apply→assess), progress + mastery bands
     schema/             # Zod schemas (config + eval-output) + validate CLI + import step
     evaluators/
       deterministic/    # MCQ + text
@@ -395,14 +502,16 @@ job-preparation/
 | Phase | Deliverable | Proves |
 |---|---|---|
 | **0 — Foundations** | Repo, Zod config schemas, importer + `validate` CLI, Postgres migrations (multi-tenant schema), dev-stub auth | Config-driven core + fail-loud validation + hosted-ready schema |
-| **1 — Deterministic quiz** | MCQ + text-input, randomization (shuffle + parameterized), quiz-runner UI, instant scoring, session review | End-to-end loop **with no LLM**; usable product |
-| **2 — LLM evaluation** | `Evaluator` interface + `llama-server` client, eval-skill format + loader, **calibration sets + meta-eval gate**, async grading queue + worker pool, essay + long-form grading, escalation/best-of-3 | Small model grades reliably **and provably** |
+| **1 — Lesson runner + mastery dashboard** | Lesson content model (material + sections/lessons manifest), lesson-flow state machine (present→check→apply→**section assessment**), `begin-lesson`/`resume-lesson` local web UI with Continue buttons, deterministic formative + summative grading, `lesson_progress` + `section_mastery` bands, **the color-coded dashboard** (§10.3) | The real guided experience runs **with no LLM**; tough-but-friendly UI |
+| **2 — LLM evaluation** | `Evaluator` interface + `llama-server` client, eval-skill format + loader, **calibration sets + meta-eval gate**, async grading queue + worker pool, essay/long-form/config-task grading, escalation/best-of-3 | Application tasks graded reliably **and provably** |
 | **3 — Programming exercises** | Sandbox-service client (managed first), test harness, static-signal extraction, code-review eval skill | Compile/run/test + concept grading, safely |
-| **4 — Adaptive + mock + analytics (req #4 A/B/C)** | Mastery tracking, spaced-repetition scheduler, mock-exam assembly + debrief, analytics dashboard | Turns quizzing into interview *preparation* |
+| **4 — Adaptive + cumulative + mock + analytics (req #4 A/B/C)** | Mastery-weighted review, spaced-repetition scheduler, **cumulative assessments** across sections, mock-interview mode + debrief, richer analytics | Turns lessons into durable interview *preparation* |
 | **5 — Hosting + authoring polish** | Real Auth.js providers, cloud deploy, worker scaling, admin content/meta-eval/review UI, topic scaffolder + skill linter | Ready for external users |
 
-A usable app exists at end of **Phase 1**; the trustworthy-grading differentiator lands in
-**Phase 2**; the "prep system" value lands in **Phase 4**.
+**Phase 1 is now the `begin-lesson` experience** — presentation, formative checks, application, and
+the section assessment with the mastery dashboard, all deterministic (no LLM). Phase 2 adds
+trustworthy grading of the open-ended application tasks; Phase 4 adds cumulative assessments and
+spaced repetition. The learner can run `begin-lesson`/`resume-lesson` at the end of **Phase 1**.
 
 ---
 
@@ -424,6 +533,7 @@ A usable app exists at end of **Phase 1**; the trustworthy-grading differentiato
 
 ---
 
-*Next steps: (a) turn this into concrete issues (`prd-to-issues`), or (b) scaffold Phase 0
-(repo + Zod schemas + importer + migrations). Recommend building the pilot topic through
-Phases 0–2 first.*
+*Next steps: (a) add presentation material + a lesson/section manifest to the pilot topic so it
+becomes a real lesson (not just an item bank), then (b) build the **Phase 1 lesson runner**
+(`begin-lesson`/`resume-lesson` + mastery dashboard) against it. Recommend proving the full
+present→check→apply→section-assessment loop on one topic before scaling.*
