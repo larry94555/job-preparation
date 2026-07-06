@@ -1,0 +1,38 @@
+# Coding exercises — engine type: code
+- id: code-get-structured
+  type: code
+  language: typescript
+  tags: [validation, repair, fallback]
+  difficulty: 4
+  prompt: >-
+    Implement `getStructured(callModel, schema, opts)` that: (1) calls the model, (2) parses and
+    validates the result against `schema`, (3) on failure, runs a BOUNDED repair loop feeding the
+    validation error back to the model up to `opts.maxRepairs` times, and (4) if still invalid,
+    returns `opts.fallback`. It must never loop unboundedly.
+  starter_file: exercises/get-structured/starter.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-structured-output-code
+  concept_checks:
+    must_use: ["schema validation", "bounded retry", "fallback value"]
+    avoid_antipattern: ["unbounded loop", "regex JSON scraping", "silent empty catch"]
+
+- id: code-classify-failure
+  type: code
+  language: typescript
+  tags: [taxonomy, validation]
+  difficulty: 3
+  prompt: >-
+    Implement `classifyFailure(raw, schema)` that returns one of
+    'malformed_json' | 'schema_violation' | 'valid'. It must try to parse `raw`; on a parse error
+    return 'malformed_json'; if it parses but fails `schema`, return 'schema_violation'; otherwise
+    'valid'.
+  starter_file: exercises/classify-failure/starter.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-structured-output-code
+  concept_checks:
+    must_use: ["JSON.parse in try/catch", "schema validation"]
+    avoid_antipattern: ["catch-all that hides the error type"]

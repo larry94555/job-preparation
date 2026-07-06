@@ -1,0 +1,10 @@
+id: structured-output-reliability
+title: "Structured Output Reliability"
+description: "Making LLMs emit valid, schema-conformant data reliably — and recovering when they don't — via prevention (constrained decoding), validation, bounded repair loops, and fallback chains."
+pass_threshold: 0.75
+tag_weights:
+  taxonomy: 1.0
+  constrained-decoding: 1.0
+  validation: 1.2
+  repair: 1.2
+  fallback: 1.2

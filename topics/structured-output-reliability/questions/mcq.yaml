@@ -1,0 +1,120 @@
+# Multiple choice — engine type: multiple_choice
+- id: mc-first-response-invalid
+  type: multiple_choice
+  tags: [repair, validation]
+  difficulty: 2
+  prompt: "A model returns JSON that fails schema validation. What is the best *first* automated response?"
+  options:
+    - { text: "Return the validation error to the model and retry, up to a bounded number of attempts", correct: true }
+    - { text: "Silently accept the output and hope downstream code copes" }
+    - { text: "Immediately switch to a more expensive model" }
+    - { text: "Throw and crash the request" }
+  explanation: "A bounded repair loop that feeds the validator error back to the model is the cheapest effective recovery; escalation and fallback come only after repair is exhausted."
+
+- id: mc-constrained-cannot-guarantee
+  type: multiple_choice
+  tags: [constrained-decoding]
+  difficulty: 3
+  prompt: "Grammar/constrained decoding can force well-formed, schema-shaped JSON. Which does it NOT guarantee?"
+  options:
+    - { text: "Semantic correctness of the field values", correct: true }
+    - { text: "Syntactically valid JSON" }
+    - { text: "Conformance to the supplied grammar" }
+    - { text: "Balanced brackets and quotes" }
+  explanation: "Constrained decoding constrains *form*, not *meaning*. The model can still emit a syntactically valid value that is factually wrong or violates a business rule."
+
+- id: mc-why-bound-repair
+  type: multiple_choice
+  tags: [repair]
+  difficulty: 2
+  prompt: "Why must a repair loop be bounded?"
+  options:
+    - { text: "To cap latency and cost and avoid looping forever on unrepairable output", correct: true }
+    - { text: "Because the schema changes on every attempt" }
+    - { text: "Because models cannot read error messages" }
+    - { text: "To force a model switch after the first failure" }
+  explanation: "Some outputs are unrepairable; without a cap the loop burns unbounded time and money. Bound it, then fall back."
+
+- id: mc-fallback-order
+  type: multiple_choice
+  tags: [fallback]
+  difficulty: 3
+  prompt: "Which recovery order is the safest for a structured-output pipeline?"
+  options:
+    - { text: "Constrained decode → validate → bounded repair → simpler schema → deterministic default → human", correct: true }
+    - { text: "Deterministic default → human → validate → repair" }
+    - { text: "Repair forever → crash" }
+    - { text: "Human review first, before any automated attempt" }
+  explanation: "Cheapest, most-automated steps first; escalate to simpler schemas, then safe defaults, then humans only when needed."
+
+- id: mc-truncation-cause
+  type: multiple_choice
+  tags: [taxonomy]
+  difficulty: 2
+  prompt: "A JSON response is cut off mid-object. What is the most likely cause?"
+  options:
+    - { text: "The output hit the max-tokens / output-length limit", correct: true }
+    - { text: "The temperature was set too low" }
+    - { text: "The grammar was invalid" }
+    - { text: "The schema had too few fields" }
+  explanation: "Truncation is usually an output-length cap. Raise max tokens or reduce requested output size; a validator should also detect and trigger repair."
+
+- id: mc-parse-then-validate
+  type: multiple_choice
+  tags: [validation]
+  difficulty: 1
+  prompt: "What is the recommended way to consume model-produced JSON?"
+  options:
+    - { text: "Parse it, then validate against an explicit schema", correct: true }
+    - { text: "Extract fields with regular expressions" }
+    - { text: "Trust it and pass it straight downstream" }
+    - { text: "Evaluate the string as code to build the object" }
+  explanation: "Parse-then-validate makes the schema the authority; regex-scraping and eval are fragile and unsafe."
+
+- id: mc-enum-violation-class
+  type: multiple_choice
+  tags: [taxonomy, validation]
+  difficulty: 2
+  prompt: "A model returns a `status` value that is not one of the allowed enum values. This failure is best classified as:"
+  options:
+    - { text: "A constraint/enum violation (parses fine, invalid value)", correct: true }
+    - { text: "Malformed JSON (syntax error)" }
+    - { text: "Truncation" }
+    - { text: "A missing-field error" }
+  explanation: "The JSON parses and the field exists — the *value* is out of the allowed set. It's a semantic/constraint violation a schema validator catches."
+
+- id: mc-constrained-quality-cost
+  type: multiple_choice
+  tags: [constrained-decoding]
+  difficulty: 4
+  prompt: "A known downside of *aggressive* grammar constraints during decoding is that they can:"
+  options:
+    - { text: "Degrade answer quality by over-restricting the token distribution", correct: true }
+    - { text: "Guarantee semantically correct values" }
+    - { text: "Eliminate the need for any validation" }
+    - { text: "Increase the context window size" }
+  explanation: "Forcing tokens to satisfy a grammar can steer the model away from better completions, hurting quality — a real tradeoff, and a reason to still validate."
+
+- id: mc-strict-schema-effect
+  type: multiple_choice
+  tags: [validation, repair]
+  difficulty: 3
+  prompt: "Adding many required fields with strict types to a schema tends to:"
+  options:
+    - { text: "Increase validation-failure and repair rates", correct: true }
+    - { text: "Decrease latency" }
+    - { text: "Guarantee the model fills every field correctly" }
+    - { text: "Have no effect on reliability" }
+  explanation: "Stricter contracts catch more, but also fail more often — budget for repair, or relax non-essential fields."
+
+- id: mc-schema-as-contract
+  type: multiple_choice
+  tags: [validation]
+  difficulty: 1
+  prompt: "In the 'schema as contract' principle, the schema is the authority on:"
+  options:
+    - { text: "What constitutes a valid output", correct: true }
+    - { text: "Which model to call" }
+    - { text: "How many tokens to generate" }
+    - { text: "The temperature setting" }
+  explanation: "The schema is the single source of truth for validity; everything else (repair, fallback) serves it."

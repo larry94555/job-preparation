@@ -11,6 +11,9 @@
   },
   "scripts": {
     "validate": "tsx packages/engine/src/cli.ts validate topics",
+    "selfcheck": "tsx packages/engine/src/cli.ts selfcheck topics",
+    "preview": "tsx packages/engine/src/cli.ts preview",
+    "test": "tsx --test packages/engine/src/grade.test.ts",
     "typecheck": "tsc --noEmit -p packages/schema/tsconfig.json && tsc --noEmit -p packages/engine/tsconfig.json"
   },
   "devDependencies": {

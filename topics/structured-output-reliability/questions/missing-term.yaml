@@ -1,0 +1,47 @@
+# Missing term (cloze) — engine type: text_input
+- id: cloze-repair-loop
+  type: text_input
+  tags: [repair]
+  difficulty: 1
+  prompt: "A bounded retry that feeds the validator's error back to the model so it can fix its output is called a ____ loop."
+  answer:
+    regex: '^repair$'
+    normalize: true
+
+- id: cloze-schema-contract
+  type: text_input
+  tags: [validation]
+  difficulty: 1
+  prompt: "Treating the schema as the single authority on validity is the 'schema as ____' principle."
+  answer:
+    regex: '^contract$'
+    normalize: true
+
+- id: cloze-constrained-decoding
+  type: text_input
+  tags: [constrained-decoding]
+  difficulty: 2
+  prompt: "____ decoding uses a grammar to force the model to emit syntactically valid, schema-shaped output. (one word)"
+  answer:
+    regex: '^constrained$'
+    normalize: true
+
+- id: cloze-fallback-chain
+  type: text_input
+  tags: [fallback]
+  difficulty: 1
+  prompt: "A layered sequence of recovery strategies ending in a safe default is called a ____ chain."
+  answer:
+    regex: '^fallback$'
+    normalize: true
+
+- id: cloze-repair-budget
+  type: text_input
+  tags: [repair]
+  difficulty: 2
+  parameters:
+    n: { random_int: [1, 5] }
+  prompt: "A repair loop capped at {{n}} attempts makes at most how many extra model calls before falling back?"
+  answer:
+    equals: "{{n}}"
+    numeric_tolerance: 0

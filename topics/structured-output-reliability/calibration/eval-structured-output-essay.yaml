@@ -1,0 +1,31 @@
+# Calibration for eval-structured-output-essay.
+# Exemplars are written against essay-why-validate ("why validate even with constrained decoding?").
+skill: eval-structured-output-essay
+cases:
+  - answer: >-
+      Constrained decoding only guarantees the shape and syntax of the JSON, not that the values are
+      correct. The model can still return an out-of-range number, a wrong enum, or a value that
+      violates a business rule — all syntactically valid. Schema validation is defense in depth: it
+      catches those semantic errors before they reach downstream code.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  - answer: "Because you should always validate everything to be safe."
+    expect:
+      verdict: fail
+      checks: { addresses_question: true, covers_key_points: false, concrete: false }
+
+  - answer: >-
+      Constrained decoding guarantees the output is completely correct, so validation is just an
+      extra safety net in case the network corrupts the JSON.
+    expect:
+      verdict: fail
+      checks: { technically_correct: false }
+
+  - answer: >-
+      Grammar decoding fixes syntax but the values can still be wrong, so you validate against the
+      schema to catch bad values.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }

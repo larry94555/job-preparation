@@ -1,0 +1,45 @@
+# Free entry (short answer) — engine type: text_input
+- id: fe-failure-class
+  type: text_input
+  tags: [taxonomy]
+  difficulty: 2
+  prompt: "Besides malformed JSON, name ONE structured-output failure class."
+  answer:
+    regex: '^(truncation|missing fields?|extra fields?|wrong types?|type mismatch|enum violation|constraint violation|hallucinated (value|enum|field)|schema violation)$'
+    normalize: true
+
+- id: fe-truncation-setting
+  type: text_input
+  tags: [taxonomy]
+  difficulty: 2
+  prompt: "If a JSON response is truncated mid-object, what single setting should you check first?"
+  answer:
+    regex: '^(max[_ ]?tokens|max output tokens|output (length|token) limit)$'
+    normalize: true
+
+- id: fe-ts-validator
+  type: text_input
+  tags: [validation]
+  difficulty: 1
+  prompt: "Name a schema-validation library commonly used in TypeScript for this. (one word)"
+  answer:
+    regex: '^(zod|ajv|yup|valibot|io-ts|typebox)$'
+    normalize: true
+
+- id: fe-repair-feedback
+  type: text_input
+  tags: [repair]
+  difficulty: 2
+  prompt: "In a repair loop, what do you feed back to the model to help it fix its output?"
+  answer:
+    regex: '^(the )?(validation |schema )?error( message)?s?$'
+    normalize: true
+
+- id: fe-last-resort
+  type: text_input
+  tags: [fallback]
+  difficulty: 3
+  prompt: "When all automated repairs fail, name a safe final fallback. (two words)"
+  answer:
+    regex: '^(deterministic default|default value|safe default|human review)$'
+    normalize: true

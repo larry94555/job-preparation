@@ -1,0 +1,27 @@
+# Calibration for eval-structured-output-code.
+# 'answer' summarizes the submitted approach + provided signals (the grader sees extracted evidence,
+# not raw code). Exemplars target code-get-structured.
+skill: eval-structured-output-code
+cases:
+  - answer: >-
+      tests_passed=true. Parses the model output, validates with the schema, retries up to
+      maxRepairs feeding the error back, and returns opts.fallback when still invalid. No unbounded
+      loop. signals.must_use=[schema validation, bounded retry, fallback value]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { validates_against_schema: true, repair_is_bounded: true, has_fallback: true, no_antipatterns: true }
+
+  - answer: >-
+      tests_passed=true, but retries in a `while (true)` with no maximum and no fallback; extracts
+      fields with a regex instead of validating. signals.avoid=[unbounded loop, regex JSON scraping].
+    expect:
+      verdict: fail
+      checks: { repair_is_bounded: false, has_fallback: false, no_antipatterns: false }
+
+  - answer: >-
+      tests_passed=true. Validates against the schema and bounds repairs to maxRepairs, but throws
+      instead of returning the fallback when repairs are exhausted. signals.must_use=[schema
+      validation, bounded retry]; missing fallback.
+    expect:
+      verdict: borderline
+      checks: { validates_against_schema: true, repair_is_bounded: true, has_fallback: false, no_antipatterns: true }
