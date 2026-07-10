@@ -9,3 +9,4 @@ segments:
   - present: operating-llm-observability-in-production
   - check: mc-ops-obs-per-route-rollup
   - check: mc-ops-obs-pii-leak-drift-rate
+  - apply: code-obs-redact

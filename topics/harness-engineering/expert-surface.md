@@ -27,7 +27,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D5 — Engineering & code craft
 - ✅ **[L4]** Implement a guarded think→act→observe loop returning its stop reason (complete/budget/duplicate-call) — `exercises/harness-loop`, `questions/code.yaml`.
-- 🟡 **[L4]** Implement deterministic post-action verification and idempotent/retry-safe tools — taught in `lessons/harness-verification.md`; no dedicated coding exercise.
+- ✅ **[L4]** Implement deterministic post-action verification and idempotent/retry-safe tools — taught in `lessons/harness-verification.md`; drilled in `exercises/idempotent-tool` (retry-safe idempotency-keyed tool), `questions/frontier-ops.yaml`.
 - 🟡 **[L4]** Implement argument validation/repair for malformed tool-call JSON — taught in `lessons/harness-boundary.md`; only drilled conceptually in `questions/free-entry.yaml`, no coding exercise.
 
 ## D6 — Ecosystem, tooling & operational judgment
@@ -42,8 +42,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a harness design under questioning — lead with the boundary, then a ReAct loop with verification, then budgets/termination — `questions/deep-dive.yaml` design essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-20 items · ✅ 18 covered · 🟡 2 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **95%**.
-Open frontier work: coding exercises for deterministic verification/idempotency and for tool-argument
-validation/repair (the two remaining D5 partials).
+20 items · ✅ 19 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **97.5%**.
+Open frontier work: a coding exercise for tool-argument validation/repair (the one remaining D5 partial).
 
-<!-- coverage: items=20 covered=18 partial=2 gap=0 -->
+<!-- coverage: items=20 covered=19 partial=1 gap=0 -->

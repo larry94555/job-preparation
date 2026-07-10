@@ -89,3 +89,24 @@
     explicitly — re-index lag, TTL expiry, incremental-update backlog — because it is invisible in
     generation-quality metrics. Grounding rate high with wrong answers points at retrieval content, not
     the generator.
+
+- id: code-rag-rerank-funnel
+  type: code
+  language: typescript
+  tags: [retrieval, review]
+  difficulty: 4
+  prompt: >-
+    Implement `rerankFunnel(candidates, k, rerank)` — a cross-encoder rerank funnel over a first-stage
+    candidate set. Take the top `k` candidates by first-stage `score` (DESC), apply the expensive
+    `rerank(id)` scoring function to **only those k**, and return their ids sorted by rerank score
+    (DESC). If fewer than k candidates exist, use all of them. A candidate with a low first-stage score
+    must never reach the reranker — the funnel only reranks the shortlist.
+  starter_file: exercises/rerank-funnel/starter.ts
+  test_file: exercises/rerank-funnel/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-rag-code
+  concept_checks:
+    must_use: ["select top-k by first-stage score DESC before reranking", "apply rerank only to the shortlisted k candidates", "sort the shortlist by rerank score descending"]
+    avoid_antipattern: ["reranking every candidate (ignoring the funnel)", "keeping first-stage order instead of the rerank order within the shortlist", "including candidates outside the top-k in the output"]

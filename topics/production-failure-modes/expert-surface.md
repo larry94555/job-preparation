@@ -29,7 +29,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D5 — Engineering & code craft
 - ✅ **[L4]** Implement a bounded `runSafely` guard suite (all-guards-pass, maxAttempts bound, fallback with `ok:false`) — `exercises/run-safely`, `questions/code.yaml`.
 - ✅ **[L3]** Compose guards with AND and know why the retry must be bounded and the fallback visible — `lessons/build-run-safely.md`, `questions/build.yaml`.
-- 🟡 **[L4]** Implement a TTL/freshness guard or a loop-detector as standalone code — taught in `lessons/guards.md`; no dedicated coding exercise beyond `runSafely`.
+- ✅ **[L4]** Implement a TTL/freshness guard or a loop-detector as standalone code — `exercises/loop-detector` (`isStuck` no-progress guard), `questions/frontier-ops.yaml` `code-fail-loop-detector`; taught in `lessons/guards.md`.
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** Eval gates, guardrails, and observability + alerting stacks as the operational tooling — `lessons/expert-context.md`, `lessons/guards.md`.
@@ -43,9 +43,9 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a full reliability design under questioning — `questions/deep-dive.yaml` design-review essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-21 items · ✅ 20 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **98%**.
+21 items · ✅ 21 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
 The D2 frontier drill (silent-regression detection, failure prediction, multi-failure recovery) and the
-D6 operational-metrics drill now land in `lessons/frontier-ops.md` + `questions/frontier-ops.yaml`. Remaining
-open work: a standalone TTL/loop-detector coding exercise (D5).
+D6 operational-metrics drill land in `lessons/frontier-ops.md` + `questions/frontier-ops.yaml`. The former
+D5 gap — a standalone TTL/loop-detector coding exercise — is now closed by `exercises/loop-detector`.
 
-<!-- coverage: items=21 covered=20 partial=1 gap=0 -->
+<!-- coverage: items=21 covered=21 partial=0 gap=0 -->

@@ -30,7 +30,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D5 — Engineering & code craft
 - ✅ **[L4]** Implement a recursive token rollup over a span tree (own tokens + children, all depths) — `exercises/token-rollup`, `questions/code.yaml`, `questions/build.yaml`.
 - 🟡 **[L4]** Instrument a call with OTel-style spans (attributes, correlation-ID propagation, async export) — mechanics in `lessons/tracing.md`/`deep-dive.md`; no dedicated coding exercise.
-- 🟡 **[L4]** Implement redaction/tokenization at capture time — taught in `lessons/drift-and-capture.md`; no dedicated coding exercise.
+- ✅ **[L4]** Implement redaction/tokenization at capture time — `exercises/redact-capture`, `questions/frontier-ops.yaml` (`code-obs-redact`).
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** Langfuse / LangSmith / Arize-Phoenix / Helicone / OpenLLMetry as the trace-store & dashboard stacks — `lessons/expert-context.md`.
@@ -45,10 +45,10 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend an OTel-based observability design under questioning — `questions/deep-dive.yaml` design-review essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-22 items · ✅ 18 covered · 🟡 4 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **91%**.
+22 items · ✅ 19 covered · 🟡 3 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **93%**.
 The D2 privacy-preserving-traces gap and a dedicated D6 production-ops drill are now closed by
-`lessons/frontier-ops.md` + `questions/frontier-ops.yaml`. Remaining partials are all coding/diagnosis
-drills: a span-instrumentation exercise, a redaction exercise, a worked silent-drift diagnosis, and a
-practitioner drift-literature reading drill.
+`lessons/frontier-ops.md` + `questions/frontier-ops.yaml`, and the D5 redaction-at-capture drill by
+`exercises/redact-capture`. Remaining partials are all coding/diagnosis drills: a span-instrumentation
+exercise, a worked silent-drift diagnosis, and a practitioner drift-literature reading drill.
 
-<!-- coverage: items=22 covered=18 partial=4 gap=0 -->
+<!-- coverage: items=22 covered=19 partial=3 gap=0 -->

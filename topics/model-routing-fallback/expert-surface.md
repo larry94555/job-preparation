@@ -28,7 +28,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D5 — Engineering & code craft
 - ✅ **[L4]** Implement a fallback-chain Router with a per-provider circuit breaker (try in order, skip open, structured `all_failed`) — `exercises/router`, `questions/code.yaml`.
 - ✅ **[L4]** Debug a broken consecutive-failure counter so a breaker actually trips open — `exercises/circuit-breaker-debug`, `questions/deep-dive.yaml`.
-- 🟡 **[L4]** Implement a cheap→strong cascade with a tuned quality gate — taught in `lessons/routing.md`/`deep-dive.md`; no dedicated coding exercise.
+- ✅ **[L4]** Implement a cheap→strong cascade with a tuned quality gate — `exercises/route-cascade`, `questions/frontier-ops.yaml` `code-route-cascade`.
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** LiteLLM / OpenRouter / gateway proxies as the multi-model routing layer — `lessons/deep-dive.md`, `lessons/expert-context.md`.
@@ -43,9 +43,10 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a fallback chain with breakers and an honest degraded-mode UX under questioning — `questions/deep-dive.yaml` design-review essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-18 items · ✅ 17 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **97%**.
-Remaining open work: a cheap→strong cascade coding exercise (D5). The frontier drill (D2) and the
-routing-metrics operational drill (D6) are now covered by `lessons/frontier-ops.md` and
+21 items · ✅ 21 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+No remaining open work: the cheap→strong cascade coding exercise (D5) is now covered by
+`exercises/route-cascade` / `questions/frontier-ops.yaml`, and the frontier drill (D2) and the
+routing-metrics operational drill (D6) are covered by `lessons/frontier-ops.md` and
 `questions/frontier-ops.yaml`.
 
-<!-- coverage: items=18 covered=17 partial=1 gap=0 -->
+<!-- coverage: items=21 covered=21 partial=0 gap=0 -->

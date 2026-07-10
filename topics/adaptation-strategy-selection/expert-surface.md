@@ -29,7 +29,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D5 — Engineering & code craft
 - ✅ **[L3]** Implement `chooseStrategy(req)` with correct precedence (freshness/attribution → rag first) — `exercises/choose-strategy`, `questions/code.yaml`.
 - ✅ **[L3]** Encode the antipattern fix in code: never pick fine-tuning for a fresh-facts requirement — `lessons/build-choose-strategy.md`, `exercises/choose-strategy/solution.test.ts`.
-- 🟡 **[L4]** Build a real RAG-vs-PEFT hybrid pipeline with per-lever eval gates — described in `lessons/deep-dive.md`; no coding exercise beyond the decision function.
+- ✅ **[L4]** Build a real RAG-vs-PEFT hybrid pipeline with per-lever eval gates — `exercises/adapter-gate` (`selectAdapters` gates candidates on quality/cost/latency), `questions/frontier-ops.yaml` `code-adapt-hybrid-gate`.
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** PEFT/LoRA libraries, RAG frameworks, distillation tooling, and open-vs-frontier model choice — `lessons/expert-context.md`.
@@ -43,9 +43,9 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Walk an interviewer through the decision axes and defend a sequenced/hybrid strategy under questioning — `questions/deep-dive.yaml` design-review essay, `questions/essay.yaml` interview essay.
 
 ## Coverage summary
-20 items · ✅ 19 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **98%**.
-Remaining open work: a real RAG+PEFT hybrid coding exercise with per-lever eval gates (D5). The
-continual/online-adaptation frontier drill and the hybrid ops-metrics operational drill are now covered
-by `lessons/frontier-ops.md` + `questions/frontier-ops.yaml`.
+20 items · ✅ 20 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+The last open item — a real RAG+PEFT hybrid coding exercise with per-lever eval gates (D5) — is now
+closed by `exercises/adapter-gate`. The continual/online-adaptation frontier drill and the hybrid
+ops-metrics operational drill are covered by `lessons/frontier-ops.md` + `questions/frontier-ops.yaml`.
 
-<!-- coverage: items=20 covered=19 partial=1 gap=0 -->
+<!-- coverage: items=20 covered=20 partial=0 gap=0 -->

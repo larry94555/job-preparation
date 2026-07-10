@@ -88,3 +88,25 @@
     signal. The fallback chain is a cost gradient (repair cheapest, human most expensive), so a rising
     human share means an earlier, cheaper layer is failing more; widening the human queue treats the
     symptom instead of the cause.
+
+- id: code-so-enforce-schema
+  type: code
+  language: typescript
+  tags: [validation, review]
+  difficulty: 4
+  prompt: >-
+    Implement `enforce(obj, schema)` that validates `obj` against a list of field rules, turning a
+    structured-output shape into a validated contract. For each field: if it is `required` and its key
+    is missing, push `"<key>: missing"`; if the key is present but `typeof obj[key]` differs from
+    `field.type`, push `"<key>: expected <type>"`; if `field.enum` is set and the value is not in it,
+    push `"<key>: not in enum"`. An optional missing field is not an error. Collect every violation;
+    `valid` is `errors.length === 0`.
+  starter_file: exercises/enforce-schema/starter.ts
+  test_file: exercises/enforce-schema/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-structured-output-code
+  concept_checks:
+    must_use: ["check required-and-missing separately from present-but-invalid", "compare typeof against field.type", "enforce enum membership when enum is set", "collect all errors (do not stop at the first)"]
+    avoid_antipattern: ["flagging an optional missing field as an error", "returning on the first error instead of collecting all", "ignoring the enum constraint"]

@@ -9,3 +9,4 @@ segments:
   - present: operating-for-failure-in-production
   - check: mc-ops-fail-burn-rate
   - check: mc-ops-fail-lead-time
+  - apply: code-fail-loop-detector

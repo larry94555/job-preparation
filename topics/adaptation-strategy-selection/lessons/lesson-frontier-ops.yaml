@@ -9,3 +9,4 @@ segments:
   - present: operating-adaptation-in-production
   - check: mc-ops-adapt-per-strategy
   - check: mc-ops-adapt-staleness-cadence
+  - apply: code-adapt-hybrid-gate

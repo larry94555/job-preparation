@@ -84,3 +84,25 @@
     The topic's cardinal rule carries into ops: never collapse the phases into one number. A deep prefill
     queue means you're prefill-bound (TTFT slips); a deep decode queue means decode-bound (TPOT slips).
     Per-phase queue depth, batch composition, and SLO-attainment tell you which phase — and which lever.
+
+# Coding exercise — engine type: code (graded by tests + concept skill)
+- id: code-pd-chunk-prefill
+  type: code
+  language: typescript
+  tags: [optimization, review]
+  difficulty: 4
+  prompt: >-
+    Implement `planChunks(promptTokens, chunkSize)` for chunked-prefill scheduling: split a prompt of
+    `promptTokens` into consecutive prefill chunks of at most `chunkSize` tokens each and return the
+    array of chunk sizes. The chunks must sum to `promptTokens`, every element must be `<= chunkSize`,
+    and only the LAST element may be smaller (the remainder) — all earlier chunks are exactly
+    `chunkSize`. `planChunks(0, chunkSize)` returns `[]`. Assume promptTokens >= 0 and chunkSize > 0.
+  starter_file: exercises/chunk-prefill/starter.ts
+  test_file: exercises/chunk-prefill/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-prefill-code
+  concept_checks:
+    must_use: ["chunks of at most chunkSize", "chunks sum to promptTokens", "only the last chunk may be the smaller remainder"]
+    avoid_antipattern: ["emitting a chunk larger than chunkSize", "dropping or duplicating the remainder tokens", "returning a non-empty array for promptTokens === 0"]

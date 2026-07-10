@@ -86,3 +86,24 @@
     tries to drive toward zero. It is the same fight as shrinking MTTD: for silent failures MTTD is the
     metric that hurts, since a loud crash has near-zero MTTD but a hallucinated-citation regression can
     run for days.
+
+- id: code-fail-loop-detector
+  type: code
+  language: typescript
+  tags: [mitigation, review]
+  difficulty: 3
+  prompt: >-
+    Implement `isStuck(actions, k)`, a standalone loop/no-progress guard. Return `true` if the LAST `k`
+    actions exist and are ALL identical to each other (the agent repeated itself `k` times running);
+    return `false` if there are fewer than `k` actions, or the last `k` are not all identical. Assume
+    k >= 1 (with k = 1, any non-empty history trips). Only the tail matters — a different action earlier
+    does not clear the guard.
+  starter_file: exercises/loop-detector/starter.ts
+  test_file: exercises/loop-detector/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-failuremodes-code
+  concept_checks:
+    must_use: ["inspect only the last k actions (the tail)", "return false when fewer than k actions exist", "trip only when all of the last k are identical"]
+    avoid_antipattern: ["scanning the whole history instead of the tail", "tripping when the last k differ", "off-by-one on the fewer-than-k boundary"]

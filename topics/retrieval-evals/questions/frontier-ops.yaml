@@ -85,3 +85,24 @@
     A static golden set the system silently overfits to (teaching to the test) rots — scores stop
     predicting production quality — and drifting judge-vs-human agreement means the labels themselves are
     unreliable. The fix is periodic label-quality audits plus refreshing the set with an adversarial slice.
+
+- id: code-reval-ndcg
+  type: code
+  language: typescript
+  tags: [metrics, review]
+  difficulty: 4
+  prompt: >-
+    Implement `ndcgAtK(gains, k)` for graded, position-discounted nDCG. `gains[i]` is the graded
+    relevance of the result at rank `i` (0-based). `DCG@k` = sum over `i` in `[0, min(k, gains.length))`
+    of `gains[i] / Math.log2(i + 2)`. `IDCG@k` is the same formula applied to `gains` sorted DESCENDING.
+    Return `DCG@k / IDCG@k`; if `IDCG@k === 0`, return `0`. This is the metric for "buried but present"
+    that recall@k can't see — a good result low in the ranking still costs you.
+  starter_file: exercises/ndcg/starter.ts
+  test_file: exercises/ndcg/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-retrievalevals-code
+  concept_checks:
+    must_use: ["position discount gains[i] / log2(i + 2)", "IDCG from gains sorted descending", "truncate DCG and IDCG at k", "return 0 when IDCG is 0"]
+    avoid_antipattern: ["forgetting the +2 in log2(i + 2)", "dividing by zero when all gains are 0", "computing IDCG without re-sorting", "applying k to only one of DCG/IDCG"]

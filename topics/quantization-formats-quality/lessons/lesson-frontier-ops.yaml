@@ -9,3 +9,4 @@ segments:
   - present: operating-quantization-in-production
   - check: mc-ops-quant-perplexity-gap
   - check: mc-ops-quant-eval-gate
+  - apply: code-quant-per-channel

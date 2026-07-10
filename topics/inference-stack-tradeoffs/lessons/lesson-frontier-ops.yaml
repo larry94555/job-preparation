@@ -9,3 +9,4 @@ segments:
   - present: operating-the-inference-stack-in-production
   - check: mc-ops-ist-cost-per-success
   - check: mc-ops-ist-triad
+  - apply: code-ist-cascade

@@ -29,7 +29,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D5 — Engineering & code craft
 - ✅ **[L4]** Implement a bounded agent loop with three stop conditions and correctly ordered checks (complete → no-progress → budget), returning the reason — `exercises/bounded-loop`, `questions/code.yaml`.
 - ✅ **[L4]** Debug a bounded-run bug (dropped stop condition / wrong check order draining budget) — `exercises/bounded-run-debug`, `questions/deep-dive.yaml`.
-- 🟡 **[L4]** Implement HITL confirmation / circuit-breaker gating on high-risk actions in code — taught in `lessons/guardrails.md`; no dedicated coding exercise.
+- ✅ **[L4]** Implement HITL confirmation / circuit-breaker gating on high-risk actions in code — `exercises/action-gate`, `questions/frontier-ops.yaml` (`code-guard-action-gate`).
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** Allow-list (deny-by-default) vs deny-list and gating high-risk actions by blast radius — `lessons/guardrails.md`, `questions/deep-dive.yaml`.
@@ -43,9 +43,9 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a bounded-and-guarded agent-runner design under questioning — `questions/deep-dive.yaml` design-review essay, `questions/essay.yaml`.
 
 ## Coverage summary
-21 items · ✅ 20 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **98%**.
-Remaining open work: a HITL-confirmation / circuit-breaker **coding** exercise (D5); the framework,
-principled-termination, and graceful-degradation gaps are now drilled in `lessons/frontier-ops.md` and
-`questions/frontier-ops.yaml`.
+21 items · ✅ 21 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+Remaining open work: none — the HITL-confirmation / circuit-breaker **coding** exercise (D5) is now covered by
+`exercises/action-gate`; the framework, principled-termination, and graceful-degradation gaps are drilled in
+`lessons/frontier-ops.md` and `questions/frontier-ops.yaml`.
 
-<!-- coverage: items=21 covered=20 partial=1 gap=0 -->
+<!-- coverage: items=21 covered=21 partial=0 gap=0 -->

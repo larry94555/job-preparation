@@ -9,3 +9,4 @@ segments:
   - present: operating-safety-in-production
   - check: mc-ops-safety-egress-leading-signal
   - check: mc-ops-safety-denial-and-fp
+  - apply: code-safety-fence

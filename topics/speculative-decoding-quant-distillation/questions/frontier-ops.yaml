@@ -88,3 +88,27 @@
     so a correct implementation shows speedup with a zero quality delta. A measured quality change means a
     bug or a deliberately lossy verification relaxation — read wall-clock speedup and quality delta
     together, never speedup alone.
+
+- id: code-spec-draft-verify
+  type: code
+  language: typescript
+  tags: [speculative, review]
+  difficulty: 4
+  prompt: >-
+    Implement `speculate(draft, target)` — the lossless draft-and-verify emit step. `draft` is the
+    drafter's proposed tokens; `target(i)` returns the target model's true token at position `i`.
+    Compare the draft left to right against the target: accept the longest leading run where
+    `draft[i] === target(i)` (call that accepted length `m`), then emit the `m` accepted tokens PLUS
+    exactly one correction/bonus token `target(m)` (the target's token at the first mismatch, or the
+    next token if the whole draft was accepted). Return the emitted array (length `m + 1`). This is
+    lossless: the output always equals what the target alone would have produced for those `m + 1`
+    positions.
+  starter_file: exercises/draft-verify/starter.ts
+  test_file: exercises/draft-verify/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-specdec-code
+  concept_checks:
+    must_use: ["accept the longest leading run where draft[i] === target(i)", "stop at the first mismatch", "always emit exactly one correction/bonus token target(m)"]
+    avoid_antipattern: ["comparing tokens after a mismatch", "omitting the bonus token when the whole draft is accepted", "emitting a draft token instead of target(m) at the mismatch (lossy)"]

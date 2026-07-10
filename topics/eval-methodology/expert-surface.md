@@ -29,7 +29,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D5 — Engineering & code craft
 - ✅ **[L4]** Implement an eval gate: run → compare → aggregate pass rate, gate on threshold, report failing names — `exercises/eval-gate`, `questions/code.yaml`.
 - ✅ **[L4]** Debug a broken gate (pass rate over passed-only denominator → always green) — `exercises/eval-gate-debug`, `questions/deep-dive.yaml`.
-- 🟡 **[L4]** Implement a calibrated LLM-as-judge with rubric decomposition and κ agreement — taught in `lessons/llm-as-judge.md`; no dedicated coding exercise.
+- ✅ **[L4]** Implement a calibrated LLM-as-judge with rubric decomposition and κ agreement — taught in `lessons/llm-as-judge.md`; κ (Cohen's kappa) agreement drilled in `exercises/cohen-kappa`, `questions/frontier-ops.yaml`.
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** promptfoo / OpenAI Evals / LangSmith / Braintrust / Inspect as the eval stacks — `lessons/expert-context.md`.
@@ -43,8 +43,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend an eval strategy under questioning (golden set + gate → adversarial → calibrated judge) — `questions/deep-dive.yaml` design-review essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-21 items · ✅ 20 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **98%**.
-Remaining open frontier work: a calibrated-judge coding exercise (D5 [L4]) with rubric decomposition
-and κ agreement.
+21 items · ✅ 21 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+The former open frontier item — a calibrated-judge coding exercise (D5 [L4]) — is now closed by the
+κ-agreement drill in `exercises/cohen-kappa`.
 
-<!-- coverage: items=21 covered=20 partial=1 gap=0 -->
+<!-- coverage: items=21 covered=21 partial=0 gap=0 -->

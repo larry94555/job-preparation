@@ -29,7 +29,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D5 — Engineering & code craft
 - ✅ **[L4]** Implement a tenant-scoped cache where identical keys across tenants never collide (cross-tenant miss) — `exercises/tenant-cache`, `questions/code.yaml`.
 - ✅ **[L4]** Debug a tenant-blind cache-key leak back to a scoped key — `exercises/tenant-cache-debug`, `questions/deep-dive.yaml`.
-- 🟡 **[L4]** Implement an authz-filtered (pre-filtered) retrieval scope — taught in `lessons/retrieval-scoping.md`; no dedicated coding exercise.
+- ✅ **[L4]** Implement an authz-filtered (pre-filtered) retrieval scope — `exercises/scoped-retrieve`, `questions/frontier-ops.yaml`.
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** vector-DB namespaces, Postgres RLS, and cache-key conventions as the tooling — `lessons/expert-context.md`, `lessons/build-tenant-cache.md`.
@@ -43,8 +43,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a tenant-isolation design under questioning (scoped keys → authz-filtered retrieval → RLS) — `questions/deep-dive.yaml` design-review essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-21 items · ✅ 19 covered · 🟡 2 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **95%**.
-Remaining partial work: a noisy-neighbor/quota-isolation capacity exercise and an
-authz-filtered-retrieval coding exercise.
+21 items · ✅ 20 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **98%**.
+Remaining partial work: a noisy-neighbor/quota-isolation capacity exercise.
 
-<!-- coverage: items=21 covered=19 partial=2 gap=0 -->
+<!-- coverage: items=21 covered=20 partial=1 gap=0 -->

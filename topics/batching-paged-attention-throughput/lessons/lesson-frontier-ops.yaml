@@ -9,3 +9,4 @@ segments:
   - present: operating-batching-in-production
   - check: mc-ops-batch-goodput-vs-throughput
   - check: mc-ops-batch-queue-preemption
+  - apply: code-batch-goodput

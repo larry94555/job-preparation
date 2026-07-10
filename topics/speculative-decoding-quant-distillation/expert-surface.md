@@ -29,7 +29,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D5 — Engineering & code craft
 - ✅ **[L3]** Implement `acceptedTokens` — count leading matches, stop at first reject, +1 bonus token — `exercises/accepted-tokens`, `questions/code.yaml`.
 - ✅ **[L2]** Reason through accepted-token edge cases (fully-rejected draft → 1, empty draft → 1) — `lessons/build-accepted-tokens.md`, `questions/build.yaml`.
-- 🟡 **[L4]** Implement a draft/verify loop or self-speculative head end-to-end — draft/verify explained in `lessons/specdec.md`; only the acceptance-count kernel is a coding exercise.
+- ✅ **[L4]** Implement a draft/verify loop or self-speculative head end-to-end — lossless draft-and-verify emit step is a sandbox-verified coding exercise in `exercises/draft-verify` (`questions/frontier-ops.yaml` `code-spec-draft-verify`); draft/verify also explained in `lessons/specdec.md`.
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** vLLM / TensorRT-LLM speculative support and Medusa/EAGLE implementations as the serving stacks — `lessons/expert-context.md`.
@@ -43,9 +43,9 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Defend a lever-choice / stacking design under interview questioning — `questions/deep-dive.yaml` L4 essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-19 items · ✅ 18 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **97%**.
-Open frontier work: an end-to-end draft/verify (or self-speculative head) coding exercise (D5). The
-combining-levers/high-acceptance frontier drill and the ops-metrics drill are now covered by
-`lessons/frontier-ops.md` + `questions/frontier-ops.yaml`.
+21 items · ✅ 21 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+The end-to-end draft/verify coding exercise (D5) now lands as `exercises/draft-verify`
+(`code-spec-draft-verify`), closing the last partial. The combining-levers/high-acceptance frontier
+drill and the ops-metrics drill are covered by `lessons/frontier-ops.md` + `questions/frontier-ops.yaml`.
 
-<!-- coverage: items=19 covered=18 partial=1 gap=0 -->
+<!-- coverage: items=21 covered=21 partial=0 gap=0 -->

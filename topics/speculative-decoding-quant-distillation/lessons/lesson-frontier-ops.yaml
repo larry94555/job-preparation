@@ -9,3 +9,4 @@ segments:
   - present: operating-these-speedups-in-production
   - check: mc-ops-spec-acceptance-signal
   - check: mc-ops-spec-speedup-quality
+  - apply: code-spec-draft-verify

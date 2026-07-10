@@ -84,3 +84,24 @@
     A widening gap between offline pass rate and canary outcomes is the leading indicator of eval-set drift
     or teaching-to-the-test: the set is stale or contaminated so the score rises without real gains. The fix
     is the freshness loop — held-out/rotating cases plus production failures fed back in and de-duplicated.
+
+- id: code-eval-kappa
+  type: code
+  language: typescript
+  tags: [judge, review]
+  difficulty: 4
+  prompt: >-
+    Implement `cohenKappa(a, b)`: Cohen's kappa (chance-corrected agreement) for two binary raters —
+    e.g. an LLM judge vs. a human — over paired boolean judgments a[i]/b[i]. Let `po` be the fraction of
+    indices where they agree. Let `pTrue = (frac a true)*(frac b true)`, `pFalse = (frac a false)*(frac b
+    false)`, and `pe = pTrue + pFalse`. Return `(po - pe) / (1 - pe)`; if `pe === 1`, return `1`. Assume
+    `a.length === b.length > 0`.
+  starter_file: exercises/cohen-kappa/starter.ts
+  test_file: exercises/cohen-kappa/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-evals-code
+  concept_checks:
+    must_use: ["observed agreement po = fraction of matching indices", "expected/chance agreement pe from each rater's true/false rates", "chance-correct: (po - pe) / (1 - pe)", "guard pe === 1 by returning 1"]
+    avoid_antipattern: ["returning raw agreement po without chance correction", "dividing by zero when pe === 1"]

@@ -9,3 +9,4 @@ segments:
   - present: operating-structured-output-in-production
   - check: mc-ops-so-failure-class-breakdown
   - check: mc-ops-so-fallback-human-queue
+  - apply: code-so-enforce-schema

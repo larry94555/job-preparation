@@ -29,7 +29,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D5 — Engineering & code craft
 - ✅ **[L4]** Implement per-tensor asymmetric uint8 quantize/dequantize (scale, zero-point, clamp, constant-tensor guard) — `exercises/int8-quant`, `questions/code.yaml`.
 - ✅ **[L3]** Reason about the reconstruction-error/half-a-step tradeoff and the clamp/divide-by-zero pitfalls — `lessons/build-int8-quant.md`, `questions/build.yaml`.
-- 🟡 **[L4]** Implement per-channel/per-group scales (the granularity that rescues outlier channels) — taught in `lessons/formats.md` and `lessons/build-int8-quant.md`; the coding exercise is per-tensor only.
+- ✅ **[L4]** Implement per-channel/per-group scales (the granularity that rescues outlier channels) — `exercises/per-channel-quant`, `questions/frontier-ops.yaml`; taught in `lessons/formats.md` and `lessons/build-int8-quant.md`.
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** AutoGPTQ / AutoAWQ / bitsandbytes / llama.cpp GGUF k-quants / TensorRT-LLM as the quant toolchain — `lessons/expert-context.md`, `lessons/deep-dive.md`.
@@ -43,8 +43,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a quantization plan under questioning (lead weight-only 4-bit, name the eval) — `questions/deep-dive.yaml` design-review essay, `questions/essay.yaml`.
 
 ## Coverage summary
-21 items · ✅ 20 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **98%**.
-The sub-4-bit/FP8 frontier drill and the eval-gating operational drill are now covered by `lessons/frontier-ops.md`.
-Open frontier work: a per-channel/per-group quantization coding exercise (the last remaining partial).
+21 items · ✅ 21 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **100%**.
+The sub-4-bit/FP8 frontier drill and the eval-gating operational drill are covered by `lessons/frontier-ops.md`,
+and the per-channel/per-group quantization coding exercise (`exercises/per-channel-quant`) closes the last D5 partial.
 
-<!-- coverage: items=21 covered=20 partial=1 gap=0 -->
+<!-- coverage: items=21 covered=21 partial=0 gap=0 -->

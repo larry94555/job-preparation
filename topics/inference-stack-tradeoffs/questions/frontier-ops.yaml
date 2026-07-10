@@ -85,3 +85,25 @@
     live eval watches the quality floor. A silent quality regression never appears on a latency or error
     graph, so reading all three together — not any one alone — is what lets you claim a lever improved the
     stack rather than quietly regressing an unmeasured axis.
+
+- id: code-ist-cascade
+  type: code
+  language: typescript
+  tags: [tradeoffs, review]
+  difficulty: 4
+  prompt: >-
+    Implement `runCascade(tiers, threshold)` for a FrugalGPT-style cost/quality cascade. `tiers` are
+    candidate models in cheap→strong order, each `{ name, cost, confidence }`. Run them in order,
+    accumulating `cost`; STOP at the first tier whose `confidence >= threshold` and return its `name`
+    with `totalCost` = cumulative cost through (and including) that tier. If NO tier reaches the
+    threshold, return the LAST tier's `name` with `totalCost` = the sum of all tiers' costs (you paid to
+    run the whole cascade).
+  starter_file: exercises/cost-cascade/starter.ts
+  test_file: exercises/cost-cascade/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-tradeoffs-code
+  concept_checks:
+    must_use: ["accumulate cost tier by tier in cheap→strong order", "stop at the first tier with confidence >= threshold", "fall back to the last tier with the full cost sum when none are confident"]
+    avoid_antipattern: ["returning before adding the confident tier's own cost", "skipping the accumulated cost of earlier tiers", "picking the highest-confidence tier instead of the first that clears the threshold"]

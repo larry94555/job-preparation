@@ -88,3 +88,24 @@
     than the economics assumed — from harder traffic or a decalibrated difficulty predictor — so
     cost-per-request drifts up. Routing exists to move the per-route cost curve, so the currency is per-route
     hit rate and cost-per-request by route, never a single blended average.
+
+- id: code-route-cascade
+  type: code
+  language: typescript
+  tags: [resilience, review]
+  difficulty: 4
+  prompt: >-
+    Implement `route(models, minQuality)` for a cheap→strong routing cascade with a tuned quality gate.
+    `models` are ordered cheap→strong, each `{ name, quality }`. Return the FIRST model whose
+    `quality >= minQuality` as `{ name, escalated }`, where `escalated` is `false` when that model is the
+    first (cheapest) one and `true` otherwise. If NO model clears the gate, return the LAST (strongest)
+    model with `escalated: true`.
+  starter_file: exercises/route-cascade/starter.ts
+  test_file: exercises/route-cascade/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-routing-code
+  concept_checks:
+    must_use: ["scan models in cheap→strong order", "return the first model with quality >= minQuality", "escalated is true only when the chosen model is not the cheapest", "fall back to the strongest model (escalated true) when none clear the gate"]
+    avoid_antipattern: ["returning the strongest model whenever escalating", "ignoring the minQuality gate", "reporting escalated true when the cheapest model already clears the gate"]

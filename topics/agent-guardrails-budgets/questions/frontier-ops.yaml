@@ -89,3 +89,24 @@
     its budget and crashes has failed its users as surely as an unbounded one. Two runners with the same
     exhaustion rate can differ entirely on whether the boundary returns value or nothing — that is what this
     metric captures.
+
+- id: code-guard-action-gate
+  type: code
+  language: typescript
+  tags: [termination, review]
+  difficulty: 4
+  prompt: >-
+    Implement `gateAction(action, ctx)` for a guarded runner combining HITL confirmation and a circuit
+    breaker. `action` is `{ risk: "low" | "high" }`; `ctx` is `{ confirmed: boolean; breakerOpen: boolean }`.
+    The circuit breaker wins over everything: if `ctx.breakerOpen`, return `"deny"` regardless of anything
+    else. Otherwise, a `"high"`-risk action that is not yet `confirmed` returns `"needs_confirmation"`;
+    everything else returns `"allow"`. Check the breaker FIRST.
+  starter_file: exercises/action-gate/starter.ts
+  test_file: exercises/action-gate/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-guardrails-code
+  concept_checks:
+    must_use: ["circuit breaker denies first (breakerOpen wins over everything)", "high-risk unconfirmed action needs confirmation (HITL gate)", "allow otherwise"]
+    avoid_antipattern: ["letting a high-risk action through without confirmation", "allowing actions while the breaker is open", "checking confirmation before the breaker"]

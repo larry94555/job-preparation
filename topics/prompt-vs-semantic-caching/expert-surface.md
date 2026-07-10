@@ -29,7 +29,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D5 — Engineering & code craft
 - ✅ **[L4]** Implement a semantic cache: cosine similarity, threshold gate on the best non-expired entry, TTL expiry as a miss — `exercises/semantic-cache`, `questions/code.yaml`.
 - ✅ **[L4]** Debug a broken semantic-cache hit test (unrelated answers served, near-duplicates missed) — `exercises/semantic-cache-debug`, `questions/deep-dive.yaml`.
-- 🟡 **[L4]** Implement a layered prefix→semantic path or a verification-gated hit — discussed in `lessons/deep-dive.md`; no dedicated coding exercise (single-cache exercises only).
+- ✅ **[L4]** Implement a layered prefix→semantic path (lossless exact map short-circuits before a cosine-gated semantic layer) — `exercises/layered-cache`, `questions/frontier-ops.yaml` `code-cache-layered`.
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** GPTCache + Redis / vector stores for the semantic layer; provider prefix caching for the exact layer — `lessons/expert-context.md`.
@@ -43,9 +43,10 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a layered caching design under questioning — `questions/deep-dive.yaml` design-review essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-21 items · ✅ 20 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **98%**.
+21 items · ✅ 21 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **100%**.
 The frontier & operations drill (`lessons/frontier-ops.md`, `questions/frontier-ops.yaml`) closed the
-cache-correctness eval, semantic-invalidation-beyond-TTL, and cache-metrics operational items. The one
-remaining partial is a dedicated layered/verification-gated coding exercise (single-cache exercises only).
+cache-correctness eval, semantic-invalidation-beyond-TTL, and cache-metrics operational items, and the
+new `exercises/layered-cache` coding exercise (`code-cache-layered`) closed the last D5 partial — a
+dedicated layered prefix→semantic path, completing the surface.
 
-<!-- coverage: items=21 covered=20 partial=1 gap=0 -->
+<!-- coverage: items=21 covered=21 partial=0 gap=0 -->

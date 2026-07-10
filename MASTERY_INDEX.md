@@ -6,49 +6,53 @@ each topic we enumerate the capabilities a SOTA expert commands (the **Expert Su
 much of that surface the course covers. Weighted coverage counts ✅ covered = 1, 🟡 partial = 0.5,
 ⬜ gap = 0.
 
+**17 of 22 lesson topics are at 100%; the Topic Mastery Index is 99%.**
+
 | Topic | Items | ✅ | 🟡 | ⬜ | Coverage |
 |---|---|---|---|---|---|
+| adaptation-strategy-selection | 20 | 20 | 0 | 0 | 100% |
+| agent-guardrails-budgets | 21 | 21 | 0 | 0 | 100% |
+| context-engineering | 21 | 21 | 0 | 0 | 100% |
 | cost-attribution | 18 | 18 | 0 | 0 | 100% |
+| eval-methodology | 21 | 21 | 0 | 0 | 100% |
 | function-calling-reliability | 21 | 21 | 0 | 0 | 100% |
+| inference-stack-tradeoffs | 20 | 20 | 0 | 0 | 100% |
 | kv-cache-management | 21 | 21 | 0 | 0 | 100% |
-| adaptation-strategy-selection | 20 | 19 | 1 | 0 | 98% |
-| agent-guardrails-budgets | 21 | 20 | 1 | 0 | 98% |
-| context-engineering | 21 | 20 | 1 | 0 | 98% |
-| eval-methodology | 21 | 20 | 1 | 0 | 98% |
-| inference-stack-tradeoffs | 20 | 19 | 1 | 0 | 98% |
-| prefill-vs-decode-latency | 20 | 19 | 1 | 0 | 98% |
-| production-failure-modes | 21 | 20 | 1 | 0 | 98% |
-| prompt-vs-semantic-caching | 21 | 20 | 1 | 0 | 98% |
-| quantization-formats-quality | 21 | 20 | 1 | 0 | 98% |
-| model-routing-fallback | 18 | 17 | 1 | 0 | 97% |
-| rag-architecture | 19 | 18 | 1 | 0 | 97% |
-| safety-engineering | 19 | 18 | 1 | 0 | 97% |
-| speculative-decoding-quant-distillation | 19 | 18 | 1 | 0 | 97% |
-| batching-paged-attention-throughput | 21 | 19 | 2 | 0 | 95% |
-| harness-engineering | 20 | 18 | 2 | 0 | 95% |
-| multi-tenant-isolation | 21 | 19 | 2 | 0 | 95% |
-| structured-output-reliability | 20 | 19 | 0 | 1 | 95% |
-| llm-observability | 22 | 18 | 4 | 0 | 91% |
-| retrieval-evals | 22 | 19 | 2 | 1 | 91% |
-| **All lesson topics** | **447** | **420** | **25** | **2** | **97%** |
+| model-routing-fallback | 21 | 21 | 0 | 0 | 100% |
+| prefill-vs-decode-latency | 20 | 20 | 0 | 0 | 100% |
+| production-failure-modes | 21 | 21 | 0 | 0 | 100% |
+| prompt-vs-semantic-caching | 21 | 21 | 0 | 0 | 100% |
+| quantization-formats-quality | 21 | 21 | 0 | 0 | 100% |
+| rag-architecture | 21 | 21 | 0 | 0 | 100% |
+| safety-engineering | 20 | 20 | 0 | 0 | 100% |
+| speculative-decoding-quant-distillation | 21 | 21 | 0 | 0 | 100% |
+| structured-output-reliability | 21 | 21 | 0 | 0 | 100% |
+| batching-paged-attention-throughput | 21 | 20 | 1 | 0 | 98% |
+| harness-engineering | 20 | 19 | 1 | 0 | 98% |
+| multi-tenant-isolation | 21 | 20 | 1 | 0 | 98% |
+| llm-observability | 22 | 19 | 3 | 0 | 93% |
+| retrieval-evals | 22 | 20 | 1 | 1 | 93% |
+| **All lesson topics** | **456** | **448** | **7** | **1** | **99%** |
 
 `golang-concurrency` is the item-bank pilot (not a full lesson topic) and has no Expert Surface.
 
-## What the gaps are
+## What's left (the 8 residual items)
 
-The index rose **89% → 97%** when WS "polish" added, to every topic, a **Frontier & operations** drill
-lesson (closing the D2 frontier-paper-drill and D6 operational-metrics partials) and, for kv-cache, a
-sandbox-verified eviction-policy coding exercise. Papers were independently **web-verified** in the same
-pass (zero canon corrections needed) and each reading list gained a **"Reception & what aged"** layer.
+The index rose **89% → 97% → 99%** across the A+ push: frontier + operations drills on every topic,
+independent web-verification of the canon (zero corrections), reception layers, and **19 sandbox-verified
+D5 coding exercises**. The remaining 8 items are deliberately left honest:
 
-The residual ~3% is now almost entirely **one bucket**: **D5 hands-on coding exercises** for a concept a
-topic already teaches (e.g. a cross-encoder reranker, a chunked-prefill scheduler, an authz-fenced
-retrieval, a per-channel quantizer). Each is a sandbox-verified exercise; they are individually small but
-must be authored and verified one at a time. Two topics also carry a single ⬜ (a constrained-decoding
-*library* exercise in structured-output; a production label-pipeline exercise in retrieval-evals).
+- **A second coding exercise where the first already covers the concept** — `batching` (a paged block-table
+  mapping, already drilled by kv-cache's allocator), `harness` (tool-arg validation/repair, adjacent to its
+  idempotent-tool exercise), `llm-observability` (OTel span instrumentation), `retrieval-evals` (a grounding
+  span-entailment check). Nice-to-haves, not missing concepts.
+- **Non-code drills** — `multi-tenant` noisy-neighbor as a *capacity* (availability) exercise; `llm-observability`
+  practitioner-drift literature and a worked silent-drift diagnosis.
+- **One genuine open problem (⬜)** — `retrieval-evals`: attribution correctness *at scale* with cheap reliable
+  labels. This is an active research frontier; it is honestly flagged rather than papered over.
 
-Closing the D5 bucket would take the index to ~99–100%. The index is designed to *revert* as the field's
-frontier expands (Goals §8) — that is the point of a continuous course.
+The index is designed to *revert* as the field's frontier expands (Goals §8) — that is the point of a
+continuous course. Closing the four second-exercises would take it to ~100%.
 
 ## Relationship to learner certification
 

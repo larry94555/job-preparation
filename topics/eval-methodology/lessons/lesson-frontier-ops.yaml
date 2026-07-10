@@ -9,3 +9,4 @@ segments:
   - present: operating-eval-methodology-in-production
   - check: mc-ops-eval-judge-agreement
   - check: mc-ops-eval-drift-gate
+  - apply: code-eval-kappa

@@ -9,3 +9,4 @@ segments:
   - present: operating-agent-guardrails-in-production
   - check: mc-ops-guard-exhaustion
   - check: mc-ops-guard-degradation
+  - apply: code-guard-action-gate

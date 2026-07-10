@@ -84,3 +84,26 @@
     The quantized build must pass a real task suite against the FP16 baseline before shipping; the eval-gate
     pass rate is the leading indicator for silent regressions. Memory win and successful loading confirm the
     benefit and basic health, but neither detects a task-quality regression.
+
+- id: code-quant-per-channel
+  type: code
+  language: typescript
+  tags: [methods, review]
+  difficulty: 4
+  prompt: >-
+    Implement `quantizePerChannel(matrix)` — per-CHANNEL (per-column) signed int8 quantization. `matrix`
+    is rows×cols; quantize each column independently so it gets its own scale (the granularity that
+    rescues outlier channels). For each column c: `scale[c] = max(|value|) over column c / 127` (if the
+    column is all zeros, use scale 1 to avoid divide-by-zero), and each `code = clamp(round(value /
+    scale[c]), -127, 127)`. Return `{ codes, scales }` where `codes` matches the matrix shape and
+    `scales` has one entry per column. A column with a large outlier gets a coarse scale while a
+    small-magnitude column keeps full int8 resolution — that is the per-channel win over one per-tensor scale.
+  starter_file: exercises/per-channel-quant/starter.ts
+  test_file: exercises/per-channel-quant/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-quant-code
+  concept_checks:
+    must_use: ["per-column scale = max(|value|)/127", "clamp codes to [-127,127] integers", "guard all-zeros column (scale 1, no divide by zero)"]
+    avoid_antipattern: ["a single per-tensor scale that crushes small columns", "unclamped codes that overflow int8", "NaN when a column is all zeros"]

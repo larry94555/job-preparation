@@ -86,3 +86,24 @@
     attack is pushing for capabilities or your scopes are over-tight for legitimate work; the trend shape
     tells you which. You tune the whole stack against confirmed incidents (drive toward zero) versus
     false positives (keep low enough that users don't route around the controls).
+
+- id: code-safety-fence
+  type: code
+  language: typescript
+  tags: [boundary, review]
+  difficulty: 4
+  prompt: >-
+    Implement `fence(spans)` for prompt-level provenance tagging. Each span is
+    `{ text, trusted }`. Assemble the spans into one prompt string **in order**: wrap each
+    **untrusted** span's text as `<untrusted>` + text + `</untrusted>` (marking it as data, not
+    instructions), leave trusted spans' text unchanged, and join all pieces with a single space.
+    An empty array yields `""`.
+  starter_file: exercises/fence-untrusted/starter.ts
+  test_file: exercises/fence-untrusted/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-safety-code
+  concept_checks:
+    must_use: ["wrap only untrusted spans in <untrusted>…</untrusted>", "leave trusted spans unchanged", "preserve span order and join with a single space"]
+    avoid_antipattern: ["wrapping trusted spans", "leaving untrusted spans unfenced", "reordering or dropping spans"]

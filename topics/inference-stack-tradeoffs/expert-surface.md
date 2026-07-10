@@ -28,7 +28,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D5 — Engineering & code craft
 - ✅ **[L4]** Implement an SLO-aware config selector (filter on all three SLOs, then rank, return null if none feasible) — `exercises/slo-selector`, `questions/code.yaml`.
-- 🟡 **[L4]** Implement a FrugalGPT-style cost/quality cascade / routing policy — taught in `lessons/deep-dive.md`; no dedicated coding exercise.
+- ✅ **[L4]** Implement a FrugalGPT-style cost/quality cascade / routing policy — `exercises/cost-cascade`, `questions/frontier-ops.yaml` (`code-ist-cascade`).
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** vLLM / TensorRT-LLM / SGLang as the serving engines, plus load-testing harnesses — `lessons/expert-context.md`.
@@ -42,9 +42,10 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend an SLO-anchored stack, reasoning about a change across all four axes — `questions/deep-dive.yaml` design-review essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-20 items · ✅ 19 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **98%**.
+20 items · ✅ 20 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
 The D2 joint-multi-objective-optimization frontier drill and the D6 eval+cost+observability operational
-metrics drill now land in `lessons/frontier-ops.md` + `questions/frontier-ops.yaml`. Remaining open
-work: a FrugalGPT cascade coding exercise (D5).
+metrics drill land in `lessons/frontier-ops.md` + `questions/frontier-ops.yaml`, and the D5 FrugalGPT
+cost/quality cascade now has a dedicated sandbox-verified coding exercise (`exercises/cost-cascade`,
+`code-ist-cascade`). No open work remains.
 
-<!-- coverage: items=20 covered=19 partial=1 gap=0 -->
+<!-- coverage: items=20 covered=20 partial=0 gap=0 -->

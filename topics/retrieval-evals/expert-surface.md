@@ -30,7 +30,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Implement `retrievalMetrics` (recall@k / precision@k / MRR) with Set membership, separate denominators, and a zero-guard — `exercises/retrieval-metrics`, `questions/code.yaml`.
 - ✅ **[L4]** Debug a broken recall@k (wrong denominator → recall > 1) with a minimal fix — `exercises/recall-at-k-debug`, `questions/deep-dive.yaml`.
 - 🟡 **[L4]** Implement a grounding/attribution span-entailment check (per-claim, fabricated-vs-supported) — taught in `lessons/attribution.md`, `lessons/grounding.md`; no dedicated coding exercise.
-- 🟡 **[L3]** Implement graded, position-discounted nDCG — named and contrasted in `lessons/metrics.md`, `lessons/deep-dive.md`; no coding exercise or numeric drill.
+- ✅ **[L3]** Implement graded, position-discounted nDCG (DCG/IDCG with the log2(i+2) discount, sorted-desc ideal, zero-guard) — `exercises/ndcg`, `questions/frontier-ops.yaml`.
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** RAGAS / TruLens / promptfoo and custom harnesses as the eval stacks; wiring evals into a CI regression gate — `lessons/expert-context.md`, `lessons/deep-dive.md`.
@@ -44,8 +44,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a component-isolated eval design (labels, per-stage metrics, calibrated judge, CI gate) under questioning — `questions/deep-dive.yaml` design-review essay, `questions/build.yaml` project essay.
 
 ## Coverage summary
-22 items · ✅ 19 covered · 🟡 2 partial · ⬜ 1 gap. Weighted coverage (covered=1, partial=0.5) ≈ **91%**.
-Open frontier work: a grounding/attribution span-check coding exercise, an nDCG numeric/coding drill,
-and attribution-correctness-at-scale coverage.
+22 items · ✅ 20 covered · 🟡 1 partial · ⬜ 1 gap. Weighted coverage (covered=1, partial=0.5) ≈ **93%**.
+Open frontier work: a grounding/attribution span-check coding exercise and
+attribution-correctness-at-scale coverage.
 
-<!-- coverage: items=22 covered=19 partial=2 gap=1 -->
+<!-- coverage: items=22 covered=20 partial=1 gap=1 -->

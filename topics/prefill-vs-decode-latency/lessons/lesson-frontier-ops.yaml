@@ -9,3 +9,4 @@ segments:
   - present: operating-prefill-and-decode-in-production
   - check: mc-ops-pd-tpot-spike
   - check: mc-ops-pd-queue-depth
+  - apply: code-pd-chunk-prefill

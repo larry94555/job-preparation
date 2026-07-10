@@ -29,7 +29,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D5 — Engineering & code craft
 - ✅ **[L4]** Implement `assembleContext(sections, budget)` — rank by priority, fit greedily, keep scanning for smaller fits — `exercises/assemble-context`, `questions/code.yaml`.
 - ✅ **[L4]** Debug a broken rank-then-fit assembler (stop-at-first-overflow / unranked bug) — `exercises/rank-then-fit-debug`, `questions/code.yaml`.
-- 🟡 **[L4]** Implement a compaction/summarize-overflow policy in code — taught in `lessons/deep-dive.md`; no dedicated coding exercise.
+- ✅ **[L4]** Implement a compaction/summarize-overflow policy in code — keep pinned items, fit droppable overflow greedily to a budget — `exercises/compact-fit`, `questions/frontier-ops.yaml`.
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** Tokenizers (tiktoken) and LangChain / LlamaIndex context builders as the assembly stack — `lessons/expert-context.md`.
@@ -43,8 +43,9 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a context-assembly design under questioning — `questions/expert.yaml` interview essay, `questions/deep-dive.yaml` design essay.
 
 ## Coverage summary
-21 items · ✅ 20 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **98%**.
-Remaining open work: a dedicated compaction-policy *coding* exercise (D5); the frontier paper drill and
-effective-context metrics drill are now covered by `lessons/frontier-ops.md`.
+21 items · ✅ 21 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+No open work remaining: the compaction-policy *coding* exercise (D5) is now covered by
+`exercises/compact-fit`, and the frontier paper drill and effective-context metrics drill are covered
+by `lessons/frontier-ops.md`.
 
-<!-- coverage: items=21 covered=20 partial=1 gap=0 -->
+<!-- coverage: items=21 covered=21 partial=0 gap=0 -->

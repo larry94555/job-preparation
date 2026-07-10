@@ -29,7 +29,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D5 — Engineering & code craft
 - ✅ **[L4]** Implement parse-then-validate structured extraction against a schema — `exercises/get-structured`, `questions/code.yaml`.
 - ✅ **[L4]** Debug a fragile JSON-extraction implementation (regex-scrape / eval antipattern) — `exercises/extract-json-debug`, `questions/deep-dive.yaml`.
-- ⬜ **[L4]** Wire a real constrained-decoding library (Outlines / GBNF / provider JSON mode) end-to-end — taught conceptually in `lessons/02-validation.md`; no hands-on library exercise yet.
+- ✅ **[L4]** Enforce a JSON schema (types/enum/required) as a validated output contract — `exercises/enforce-schema`, `questions/frontier-ops.yaml`.
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** Zod/Pydantic/Ajv, Outlines, Instructor, llama.cpp GBNF as the structured-output stack — `lessons/expert-context.md`, `deep-dive.md`.
@@ -43,9 +43,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a repair + fallback chain under questioning — `questions/essay.yaml` `essay-so-interview`, `questions/expert.yaml` interview items.
 
 ## Coverage summary
-20 items · ✅ 19 covered · 🟡 0 partial · ⬜ 1 gap. Weighted coverage (covered=1, partial=0.5) = **95%**.
-Open frontier work: a hands-on constrained-decoding library exercise (Outlines / GBNF / provider JSON
-mode end-to-end) remains the one hard gap; the frontier and operational drills are now covered by
-`lessons/frontier-ops.md`.
+21 items · ✅ 21 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+The D5 schema-enforcement gap is now closed by the hands-on `exercises/enforce-schema` contract exercise;
+the frontier and operational drills are covered by `lessons/frontier-ops.md`.
 
-<!-- coverage: items=20 covered=19 partial=0 gap=1 -->
+<!-- coverage: items=21 covered=21 partial=0 gap=0 -->

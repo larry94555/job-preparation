@@ -84,3 +84,24 @@
     Cost and latency scale with tokens spent, and beyond a point marginal tokens dilute the window and
     lower task quality. A creeping tokens-per-request trend silently raises the bill and degrades
     answers even at constant request rate — the real currency is useful tokens in a position the model reads.
+
+- id: code-context-compact
+  type: code
+  language: typescript
+  tags: [selection, review]
+  difficulty: 4
+  prompt: >-
+    Implement `compactToFit(items, budget)` for a summarize-overflow / compaction policy. Each item is
+    `{ text, tokens, pinned }`. ALWAYS keep every `pinned` item (in original order), even if the pinned
+    items alone already exceed `budget`. Then walk the items in original order and add each non-pinned
+    item only if the running total of kept tokens stays `<= budget`; if one does not fit, **skip it
+    (don't stop)** so a smaller later item can still be included. Return the kept items in ORIGINAL order.
+  starter_file: exercises/compact-fit/starter.ts
+  test_file: exercises/compact-fit/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-context-code
+  concept_checks:
+    must_use: ["always keep every pinned item (even if pinned alone exceeds budget)", "never let kept non-pinned tokens exceed the budget", "keep scanning to fit smaller later items", "return kept items in original order"]
+    avoid_antipattern: ["dropping pinned items to fit the budget", "stopping at the first item that doesn't fit", "reordering the kept items"]

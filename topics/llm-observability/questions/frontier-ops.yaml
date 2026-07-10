@@ -90,3 +90,23 @@
     assumed zero — is a real signal whose rise is a privacy incident forming. Drift-alert rate keeps
     silent-drift detection honest: too loose a threshold misses a regression, too noisy and the team
     learns to ignore it, and by definition nothing else pages when quality slides without an error.
+
+- id: code-obs-redact
+  type: code
+  language: typescript
+  tags: [capture, review]
+  difficulty: 4
+  prompt: >-
+    Implement `redact(obj, sensitiveKeys)` for redaction at capture time: return a **deep copy** of
+    `obj` in which, anywhere a plain-object KEY appears in `sensitiveKeys` (case-sensitive exact match),
+    that key's VALUE is replaced with the string `"[REDACTED]"`, recursing into nested objects and
+    arrays. Do NOT mutate the input; non-object primitives pass through unchanged.
+  starter_file: exercises/redact-capture/starter.ts
+  test_file: exercises/redact-capture/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-observability-code
+  concept_checks:
+    must_use: ["match keys against sensitiveKeys (case-sensitive exact)", "recurse into nested objects and arrays", "return a deep copy without mutating the input"]
+    avoid_antipattern: ["mutating the input object in place", "only redacting top-level keys (no recursion)", "matching on value instead of key"]

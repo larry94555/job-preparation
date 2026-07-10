@@ -9,3 +9,4 @@ segments:
   - present: operating-rag-in-production
   - check: mc-ops-rag-recall-at-k
   - check: mc-ops-rag-freshness-grounding
+  - apply: code-rag-rerank-funnel

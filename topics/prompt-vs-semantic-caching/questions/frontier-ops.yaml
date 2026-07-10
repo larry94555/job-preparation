@@ -1,4 +1,4 @@
-# Frontier & operations drill — closes D2 (frontier drill) and D6 (ops metrics drill). No code.
+# Frontier & operations drill — closes D2 (frontier drill) and D6 (ops metrics drill), plus a D5 layered-cache coding exercise.
 
 - id: mc-frontier-cache-correctness-eval
   type: multiple_choice
@@ -92,3 +92,25 @@
     searches on every request, hit or miss, so at a low hit rate that per-request tax can offset most of
     the whole-generation saving a hit-rate dashboard shows gross. The fix is to report savings net of the
     embed-and-search cost, and to raise the hit rate (or scope the layer) so the tax is worth paying.
+
+- id: code-cache-layered
+  type: code
+  language: typescript
+  tags: [tradeoffs, review]
+  difficulty: 4
+  prompt: >-
+    Implement `layeredGet(key, vec, exact, semantic, threshold)` for a layered cache: a lossless exact
+    map in front of a guarded semantic layer. FIRST try the exact map — if `exact` has `key`, return
+    `{ value, source: "exact" }` and do NOT consult the semantic layer, even if a closer semantic entry
+    exists (the lossless path always wins). Otherwise compute COSINE similarity between `vec` and each
+    semantic entry's `vec`, take the best, and if best similarity `>= threshold` return
+    `{ value, source: "semantic" }`; else return null (a miss). Implement cosine similarity in the module.
+  starter_file: exercises/layered-cache/starter.ts
+  test_file: exercises/layered-cache/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-caching-code
+  concept_checks:
+    must_use: ["try the exact map first and short-circuit on a hit", "cosine similarity (normalized dot product) for the semantic layer", "threshold gate on the best semantic match", "distinguish source exact vs semantic and return null on a miss"]
+    avoid_antipattern: ["consulting the semantic layer when the exact map already hit", "returning a semantic near-miss below threshold", "reporting an exact hit as source semantic"]

@@ -9,3 +9,4 @@ segments:
   - present: operating-caching-in-production
   - check: mc-ops-cache-false-hit-rate
   - check: mc-ops-cache-net-savings
+  - apply: code-cache-layered

@@ -90,3 +90,24 @@
     train-vs-production distribution distance, and stale-fact rate. Fixed-schedule retraining wastes
     compute when nothing drifted and lags when something did; volatile facts belong in a fresh (TTL'd)
     retrieval index, not in the weights.
+
+- id: code-adapt-hybrid-gate
+  type: code
+  language: typescript
+  tags: [decision, review]
+  difficulty: 4
+  prompt: >-
+    Implement `selectAdapters(candidates, gates)` for a RAG-vs-PEFT hybrid pipeline with per-lever eval
+    gates. Each candidate lever carries a measured `qualityGain`, `costPerReq`, and `latencyMs`. Return
+    the `lever` names of every candidate that clears **all** gates — `qualityGain >= gates.minQuality`
+    **and** `costPerReq <= gates.maxCost` **and** `latencyMs <= gates.maxLatency` — sorted by
+    `qualityGain` descending. Return an empty array if none pass.
+  starter_file: exercises/adapter-gate/starter.ts
+  test_file: exercises/adapter-gate/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-adaptation-code
+  concept_checks:
+    must_use: ["gate on all three thresholds (quality, cost, latency)", "use >= for minQuality and <= for maxCost/maxLatency", "sort passing levers by qualityGain descending"]
+    avoid_antipattern: ["passing a lever that fails any single gate", "using strict > / < that drops boundary values", "returning candidates unsorted or sorted ascending"]

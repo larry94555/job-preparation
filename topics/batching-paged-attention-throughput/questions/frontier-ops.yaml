@@ -84,3 +84,24 @@
     Queue depth/wait time and preemption rate are leading indicators: waiting requests raise TTFT and
     preempted/deferred sequences spike tail latency before capacity is formally exceeded. Occupancy and
     the goodput-vs-throughput gap are for capacity planning, not early alerting.
+
+- id: code-batch-goodput
+  type: code
+  language: typescript
+  tags: [throughput, review]
+  difficulty: 4
+  prompt: >-
+    Implement `batchSize(waiting, maxBatch, targetLatencyMs, msPerItem)` for an SLO-aware (goodput)
+    scheduler: pick the **largest** batch that still meets the latency SLO. A batch of `n` items spends
+    `n * msPerItem` ms, so the SLO caps the batch at `floor(targetLatencyMs / msPerItem)` items. Return
+    `min(waiting, maxBatch, floor(targetLatencyMs / msPerItem))`, clamped to never go negative (min 0).
+    This sizes the running batch to the goodput knee instead of a fixed cap.
+  starter_file: exercises/goodput-batch/starter.ts
+  test_file: exercises/goodput-batch/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-batching-code
+  concept_checks:
+    must_use: ["cap the batch by the latency SLO (floor(targetLatencyMs / msPerItem))", "take the min of waiting, maxBatch, and the SLO cap", "clamp the result to be non-negative (min 0)"]
+    avoid_antipattern: ["ignoring the latency SLO and returning min(waiting, maxBatch)", "returning a negative batch size when the SLO is tighter than one item", "using a fixed batch cap instead of sizing to the knee"]

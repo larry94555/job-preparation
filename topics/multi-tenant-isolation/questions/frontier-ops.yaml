@@ -87,3 +87,25 @@
     Latency variance across tenants rises before quota errors do, so it is the leading availability signal
     that partition/quota isolation is too coarse and one tenant is starving others. It is not a
     confidentiality leak and is unrelated to cache-key scope; low quota errors do not clear it.
+
+- id: code-mti-scoped-retrieve
+  type: code
+  language: typescript
+  tags: [isolation, review]
+  difficulty: 4
+  prompt: >-
+    Implement `scopedRetrieve(docs, tenantId, k)` for a shared vector index. Each doc carries the
+    `tenantId` that owns it and a relevance `score`. FIRST apply an authorization pre-filter — keep only
+    docs whose `tenantId` matches the caller's `tenantId` — THEN return the top-`k` matching ids by
+    `score` descending. Another tenant's document must never appear in the result even if its score is
+    the highest overall (pre-filter before ranking, never post-filter). If fewer than `k` docs match,
+    return all of them.
+  starter_file: exercises/scoped-retrieve/starter.ts
+  test_file: exercises/scoped-retrieve/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-isolation-code
+  concept_checks:
+    must_use: ["filter to the caller's tenantId before ranking (authz pre-filter)", "sort matches by score descending", "cap the result at k / return all when fewer than k match"]
+    avoid_antipattern: ["ranking first then stripping foreign docs (post-filter)", "returning another tenant's doc when its score is higher", "ignoring k and returning every match"]

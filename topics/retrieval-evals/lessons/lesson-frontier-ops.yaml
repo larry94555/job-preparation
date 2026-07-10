@@ -9,3 +9,4 @@ segments:
   - present: operating-retrieval-evals-in-production
   - check: mc-ops-reval-miss-vs-grounding
   - check: mc-ops-reval-label-drift
+  - apply: code-reval-ndcg

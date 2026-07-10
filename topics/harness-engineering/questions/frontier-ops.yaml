@@ -89,3 +89,23 @@
     timeouts are structural failures the harness owns via typed contracts and argument validation, not
     something a reworded prompt fixes. Verification-failure rate, by contrast, tells you the model is
     confidently wrong and the deterministic gate is catching it — a model-side rather than tooling signal.
+
+- id: code-harness-idempotent
+  type: code
+  language: typescript
+  tags: [control, review]
+  difficulty: 4
+  prompt: >-
+    Implement `runIdempotent(key, run, done)` for a retry-safe tool. `done` is a `Map<string, string>`
+    of already-completed work keyed by an idempotency `key`. If `done` already has `key`, return the
+    cached result WITHOUT calling `run` (so a retry does not repeat the side effect). Otherwise call
+    `run()` exactly once, store its result under `key` in `done`, and return it.
+  starter_file: exercises/idempotent-tool/starter.ts
+  test_file: exercises/idempotent-tool/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-harness-code
+  concept_checks:
+    must_use: ["short-circuit when done already has the key (return cached, do not call run)", "call run exactly once for a new key", "store the result under key in done before returning"]
+    avoid_antipattern: ["calling run again on a cached key", "not persisting the result so retries re-run", "keying results incorrectly so different keys collide"]

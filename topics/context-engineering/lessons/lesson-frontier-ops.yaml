@@ -9,3 +9,4 @@ segments:
   - present: operating-context-engineering-in-production
   - check: mc-ops-context-truncation-rate
   - check: mc-ops-context-tokens-trend
+  - apply: code-context-compact

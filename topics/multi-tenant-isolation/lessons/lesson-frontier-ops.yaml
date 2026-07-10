@@ -9,3 +9,4 @@ segments:
   - present: operating-multi-tenant-isolation-in-production
   - check: mc-ops-mti-leak-test-rate
   - check: mc-ops-mti-noisy-variance
+  - apply: code-mti-scoped-retrieve

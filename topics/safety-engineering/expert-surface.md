@@ -28,7 +28,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D5 — Engineering & code craft
 - ✅ **[L4]** Implement provenance-aware authorization (block untrusted + high-risk + unconfirmed) — `exercises/authz`, `questions/code.yaml`.
-- 🟡 **[L4]** Implement prompt-level fencing / provenance tagging of untrusted spans — taught in `lessons/boundary.md`; no dedicated coding exercise.
+- ✅ **[L4]** Implement prompt-level fencing / provenance tagging of untrusted spans — `exercises/fence-untrusted`, `questions/frontier-ops.yaml` `[boundary]`.
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** Guardrails frameworks and injection detectors (Rebuff, LLM-Guard), policy engines as the tooling — `lessons/expert-context.md`, `lessons/deep-dive.md`.
@@ -42,7 +42,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a defense-in-depth agent-security design under questioning — `questions/deep-dive.yaml` design-review essay, `questions/essay.yaml`.
 
 ## Coverage summary
-19 items · ✅ 18 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **97%**.
-Open work: a fencing/provenance-tagging coding exercise (D5) is the one remaining partial.
+20 items · ✅ 20 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+Open work: none — the D5 fencing/provenance-tagging coding exercise closed the last partial.
 
-<!-- coverage: items=19 covered=18 partial=1 gap=0 -->
+<!-- coverage: items=20 covered=20 partial=0 gap=0 -->

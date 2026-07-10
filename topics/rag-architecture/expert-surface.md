@@ -29,7 +29,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D5 — Engineering & code craft
 - ✅ **[L4]** Implement Reciprocal Rank Fusion (1/(k+rank), sum across lists, sort desc, deterministic ties) — `exercises/rrf`, `questions/code.yaml`, `lessons/build-rrf.md`.
 - ✅ **[L4]** Debug a broken RRF fusion (raw-score normalization / dropped items) — `exercises/rrf-debug`, `questions/deep-dive.yaml`.
-- 🟡 **[L4]** Implement a cross-encoder rerank funnel over a first-stage candidate set — taught in `lessons/retrieval.md`; no dedicated coding exercise.
+- ✅ **[L4]** Implement a cross-encoder rerank funnel over a first-stage candidate set — `exercises/rerank-funnel`, `questions/frontier-ops.yaml` (`code-rag-rerank-funnel`), taught in `lessons/retrieval.md`.
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** Vector/index stacks (FAISS, pgvector, Elastic/OpenSearch, Qdrant/Weaviate) and rerankers (bge, Cohere Rerank) — `lessons/expert-context.md`.
@@ -43,8 +43,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend an end-to-end RAG pipeline design under questioning — `questions/deep-dive.yaml` design-review essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-19 items · ✅ 18 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **97%**.
-Open frontier work: a cross-encoder rerank coding exercise (D5). This surface will revert to partial as
-the field's frontier expands.
+21 items · ✅ 21 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+The D5 cross-encoder rerank funnel now has a dedicated sandbox-verified exercise. This surface will
+revert to partial as the field's frontier expands.
 
-<!-- coverage: items=19 covered=18 partial=1 gap=0 -->
+<!-- coverage: items=21 covered=21 partial=0 gap=0 -->

@@ -9,3 +9,4 @@ segments:
   - present: operating-model-routing-in-production
   - check: mc-ops-route-breaker-open-rate
   - check: mc-ops-route-hit-rate-drift
+  - apply: code-route-cascade

@@ -28,7 +28,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D5 — Engineering & code craft
 - ✅ **[L2]** Implement a phase-aware latency model (`total = TTFT + outputTokens × tpot`, phases kept separate) — `exercises/latency-model`, `questions/code.yaml`.
-- 🟡 **[L4]** Implement chunked-prefill scheduling / a P/D disaggregation interface — taught conceptually in `lessons/batching.md`, `lessons/deep-dive.md`; no dedicated coding exercise.
+- ✅ **[L4]** Implement chunked-prefill scheduling / a P/D disaggregation interface — `exercises/chunk-prefill` (`planChunks` splits a prompt into `<= chunkSize` chunks, remainder last), `questions/frontier-ops.yaml` `code-pd-chunk-prefill`.
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** vLLM / TensorRT-LLM as the serving stacks, GenAI-Perf for benchmarking the two SLOs — `lessons/expert-context.md`, `lessons/deep-dive.md`.
@@ -42,9 +42,10 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a phase-aware serving design under questioning — `questions/deep-dive.yaml` design-review essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-20 items · ✅ 19 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **98%**.
-The frontier awareness (D2) and per-phase operational-metrics (D6) drills now ship in
-`lessons/frontier-ops.md` + `questions/frontier-ops.yaml`. Remaining partial: a dedicated
-chunked-prefill / disaggregation **coding** exercise (D5). The surface will revert as the frontier moves.
+20 items · ✅ 20 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+The frontier awareness (D2) and per-phase operational-metrics (D6) drills ship in
+`lessons/frontier-ops.md` + `questions/frontier-ops.yaml`, and the D5 chunked-prefill **coding**
+exercise now ships in `exercises/chunk-prefill` (`code-pd-chunk-prefill`). The surface will revert as
+the frontier moves.
 
-<!-- coverage: items=20 covered=19 partial=1 gap=0 -->
+<!-- coverage: items=20 covered=20 partial=0 gap=0 -->
