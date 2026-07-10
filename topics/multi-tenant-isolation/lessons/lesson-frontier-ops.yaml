@@ -10,3 +10,4 @@ segments:
   - check: mc-ops-mti-leak-test-rate
   - check: mc-ops-mti-noisy-variance
   - apply: code-mti-scoped-retrieve
+  - apply: code-mti-tenant-quota

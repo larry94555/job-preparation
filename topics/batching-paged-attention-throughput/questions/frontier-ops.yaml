@@ -105,3 +105,25 @@
   concept_checks:
     must_use: ["cap the batch by the latency SLO (floor(targetLatencyMs / msPerItem))", "take the min of waiting, maxBatch, and the SLO cap", "clamp the result to be non-negative (min 0)"]
     avoid_antipattern: ["ignoring the latency SLO and returning min(waiting, maxBatch)", "returning a negative batch size when the SLO is tighter than one item", "using a fixed batch cap instead of sizing to the knee"]
+
+- id: code-batch-block-table
+  type: code
+  language: typescript
+  tags: [paged-attention, review]
+  difficulty: 4
+  prompt: >-
+    Implement `blockTable(seqLens, blockSize)` for paged KV memory: build the per-sequence block table
+    from a single running counter starting at 0. Sequence `i` needs `Math.ceil(seqLens[i] / blockSize)`
+    blocks; give it the next that-many **consecutive** block ids, then advance the counter so blocks are
+    globally unique and non-overlapping across sequences. Return one array of block ids per sequence, in
+    order. A length-0 sequence needs 0 blocks → `[]` (and consumes no id). E.g.
+    `blockTable([3, 5], 2)` → `[[0, 1], [2, 3, 4]]`.
+  starter_file: exercises/block-table/starter.ts
+  test_file: exercises/block-table/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-batching-code
+  concept_checks:
+    must_use: ["allocate ceil(seqLens[i] / blockSize) blocks per sequence", "draw ids from one running counter starting at 0 so blocks are globally unique", "give each sequence consecutive ids and preserve input order"]
+    avoid_antipattern: ["restarting block ids per sequence (overlapping ids across sequences)", "allocating a block for a length-0 sequence", "leaving gaps in the global id sequence"]

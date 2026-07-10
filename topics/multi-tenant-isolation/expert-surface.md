@@ -24,7 +24,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D4 — Problem solving
 - ✅ **[L3]** Diagnose a cross-tenant leak to its surface (cache key, unscoped index, reused session, pooled logs) — `lessons/dimensions.md`, `lessons/retrieval-scoping.md`.
-- 🟡 **[L3]** Reason about noisy-neighbor / quota isolation as an availability (not confidentiality) concern — named in `lessons/dimensions.md`; not drilled as a capacity exercise.
+- ✅ **[L4]** Enforce per-tenant quota admission so a noisy neighbor can't starve others (availability, not confidentiality) — `exercises/tenant-quota`, `questions/frontier-ops.yaml`.
 
 ## D5 — Engineering & code craft
 - ✅ **[L4]** Implement a tenant-scoped cache where identical keys across tenants never collide (cross-tenant miss) — `exercises/tenant-cache`, `questions/code.yaml`.
@@ -43,7 +43,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a tenant-isolation design under questioning (scoped keys → authz-filtered retrieval → RLS) — `questions/deep-dive.yaml` design-review essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-21 items · ✅ 20 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **98%**.
-Remaining partial work: a noisy-neighbor/quota-isolation capacity exercise.
+21 items · ✅ 21 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+No remaining partial or gap work.
 
-<!-- coverage: items=21 covered=20 partial=1 gap=0 -->
+<!-- coverage: items=21 covered=21 partial=0 gap=0 -->

@@ -14,7 +14,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L3]** RAGAS (Exploding Gradients, 2023) as the source of RAG-specific metrics (faithfulness, answer relevance, context precision/recall) — `lessons/expert-context.md`, `questions/expert.yaml`.
 - ✅ **[L3]** BEIR (Thakur et al., 2021) and MTEB (Muennighoff et al., 2022) as the retriever/embedding benchmarks; TREC as the classic pooled-qrels relevance methodology — `lessons/expert-context.md`, `questions/expert.yaml`.
 - ✅ **[L4]** Faithful grounding metrics as an open problem (NLI vs. LLM-judge, false-precision risk) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
-- ⬜ **[L4]** Attribution correctness *at scale* beyond per-claim span checks (cheap reliable labels, judge-agreement drift) — flagged as an open problem in `lessons/expert-context.md`; not yet covered.
+- ✅ **[L4]** Aware of attribution-at-scale as an open problem and the current best-effort approaches (LLM-judge + agreement + sampled audits) — drilled in `questions/frontier-ops.yaml`.
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L4]** The five retrieval-eval levers (isolation, labels, metric choice, grounding/attribution judge, gating) and their tradeoffs — `lessons/deep-dive.md` tradeoff table.
@@ -29,7 +29,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D5 — Engineering & code craft
 - ✅ **[L4]** Implement `retrievalMetrics` (recall@k / precision@k / MRR) with Set membership, separate denominators, and a zero-guard — `exercises/retrieval-metrics`, `questions/code.yaml`.
 - ✅ **[L4]** Debug a broken recall@k (wrong denominator → recall > 1) with a minimal fix — `exercises/recall-at-k-debug`, `questions/deep-dive.yaml`.
-- 🟡 **[L4]** Implement a grounding/attribution span-entailment check (per-claim, fabricated-vs-supported) — taught in `lessons/attribution.md`, `lessons/grounding.md`; no dedicated coding exercise.
+- ✅ **[L4]** Implement a grounding/attribution span-entailment check (per-claim, fabricated-vs-supported) — `exercises/grounding-check`, `questions/frontier-ops.yaml`.
 - ✅ **[L3]** Implement graded, position-discounted nDCG (DCG/IDCG with the log2(i+2) discount, sorted-desc ideal, zero-guard) — `exercises/ndcg`, `questions/frontier-ops.yaml`.
 
 ## D6 — Ecosystem, tooling & operational judgment
@@ -44,8 +44,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a component-isolated eval design (labels, per-stage metrics, calibrated judge, CI gate) under questioning — `questions/deep-dive.yaml` design-review essay, `questions/build.yaml` project essay.
 
 ## Coverage summary
-22 items · ✅ 20 covered · 🟡 1 partial · ⬜ 1 gap. Weighted coverage (covered=1, partial=0.5) ≈ **93%**.
-Open frontier work: a grounding/attribution span-check coding exercise and
-attribution-correctness-at-scale coverage.
+22 items · ✅ 22 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+No open gaps: the grounding/attribution span-check coding exercise (`exercises/grounding-check`) and
+attribution-correctness-at-scale drills (`questions/frontier-ops.yaml`) both land this pass.
 
-<!-- coverage: items=22 covered=20 partial=1 gap=1 -->
+<!-- coverage: items=22 covered=22 partial=0 gap=0 -->

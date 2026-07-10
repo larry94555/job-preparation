@@ -28,7 +28,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D5 — Engineering & code craft
 - ✅ **[L4]** Implement a continuous-batching scheduler (active set ≤ batchSize, per-step decrement, free-and-refill, makespan) — `exercises/continuous-batching`, `questions/code.yaml`.
-- 🟡 **[L4]** Implement a paged block allocator / block-table mapping for KV memory — described in `lessons/scheduling-paging.md`; no dedicated coding exercise in this topic.
+- ✅ **[L4]** Implement a paged block allocator / block-table mapping for KV memory — `exercises/block-table`, `questions/frontier-ops.yaml` (`code-batch-block-table`); described in `lessons/scheduling-paging.md`.
 - ✅ **[L4]** Implement SLO-aware/goodput admission that sizes the batch to the knee — `exercises/goodput-batch`, `questions/frontier-ops.yaml` (`code-batch-goodput`); taught in `lessons/throughput.md` and `lessons/deep-dive.md`.
 
 ## D6 — Ecosystem, tooling & operational judgment
@@ -43,8 +43,9 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a high-throughput serving path (continuous batching + paged attention + SLO-aware scheduling) under questioning — `questions/deep-dive.yaml` design-review essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-21 items · ✅ 20 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **98%**.
-Remaining partial work is code-craft only: a paged-block-allocator coding exercise. The D2-frontier and
-D6-ops drills are now covered by `lessons/frontier-ops.md` + `questions/frontier-ops.yaml`.
+21 items · ✅ 21 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+The last code-craft gap — a paged-block-allocator coding exercise — is now closed by `exercises/block-table`
+(`code-batch-block-table`). The D2-frontier and D6-ops drills are covered by `lessons/frontier-ops.md` +
+`questions/frontier-ops.yaml`.
 
-<!-- coverage: items=21 covered=20 partial=1 gap=0 -->
+<!-- coverage: items=21 covered=21 partial=0 gap=0 -->

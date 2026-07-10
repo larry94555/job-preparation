@@ -13,7 +13,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D2 — Literature, canon & frontier awareness
 - ✅ **[L3]** OpenTelemetry GenAI semantic conventions as the trace/span standard — `lessons/expert-context.md`, `questions/expert.yaml`.
 - ✅ **[L3]** The field is tooling/standards-led (Langfuse, LangSmith, Arize/Phoenix, Helicone, OpenLLMetry), not paper-led — `lessons/expert-context.md`, `questions/expert.yaml`.
-- 🟡 **[L4]** Practitioner drift/monitoring literature as the body of knowledge — framed in `lessons/expert-context.md`; no dedicated reading drill.
+- ✅ **[L4]** Practitioner drift/monitoring literature as the body of knowledge — framed in `lessons/expert-context.md`; drilled in `questions/frontier-ops.yaml` (`mc-obs-drift-literature`: data vs concept drift vs quality regression).
 - ✅ **[L4]** Frontier awareness: stabilizing OTel GenAI semantic conventions, privacy-preserving traces beyond redaction, and automated silent-drift detection — `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D3 — Architecture, design & tradeoff judgment
@@ -25,11 +25,11 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D4 — Problem solving
 - ✅ **[L3]** Diagnose a slow/expensive agent turn to the responsible span via per-step signals — `lessons/signals.md`, `questions/mcq.yaml`.
 - ✅ **[L3]** Choose a sampling + redaction policy under storage/PII pressure — `lessons/drift-and-capture.md`, `questions/deep-dive.yaml`.
-- 🟡 **[L4]** Detect silent quality drift with no code change (eval-score/distribution trend + canary) — taught in `lessons/drift-and-capture.md`; not drilled as a worked diagnosis.
+- ✅ **[L4]** Detect silent quality drift with no code change (eval-score/distribution trend + canary) — taught in `lessons/drift-and-capture.md`; drilled as a worked diagnosis in `questions/frontier-ops.yaml` (`mc-obs-silent-diagnosis-1`/`-2`: model-swap vs input-drift, canary-anchored).
 
 ## D5 — Engineering & code craft
 - ✅ **[L4]** Implement a recursive token rollup over a span tree (own tokens + children, all depths) — `exercises/token-rollup`, `questions/code.yaml`, `questions/build.yaml`.
-- 🟡 **[L4]** Instrument a call with OTel-style spans (attributes, correlation-ID propagation, async export) — mechanics in `lessons/tracing.md`/`deep-dive.md`; no dedicated coding exercise.
+- ✅ **[L4]** Instrument a call with OTel-style spans (attributes, correlation-ID propagation, async export) — mechanics in `lessons/tracing.md`/`deep-dive.md`; coding exercise `exercises/span-tree`, `questions/frontier-ops.yaml` (`code-obs-span-tree`: correlation-ID propagation over a span tree).
 - ✅ **[L4]** Implement redaction/tokenization at capture time — `exercises/redact-capture`, `questions/frontier-ops.yaml` (`code-obs-redact`).
 
 ## D6 — Ecosystem, tooling & operational judgment
@@ -45,10 +45,10 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend an OTel-based observability design under questioning — `questions/deep-dive.yaml` design-review essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-22 items · ✅ 19 covered · 🟡 3 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **93%**.
-The D2 privacy-preserving-traces gap and a dedicated D6 production-ops drill are now closed by
-`lessons/frontier-ops.md` + `questions/frontier-ops.yaml`, and the D5 redaction-at-capture drill by
-`exercises/redact-capture`. Remaining partials are all coding/diagnosis drills: a span-instrumentation
-exercise, a worked silent-drift diagnosis, and a practitioner drift-literature reading drill.
+22 items · ✅ 22 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+The three former partials are now closed in `questions/frontier-ops.yaml`: OTel-style span
+instrumentation by the `exercises/span-tree` coding exercise (`code-obs-span-tree`), the practitioner
+drift/monitoring literature by `mc-obs-drift-literature`, and silent quality-drift detection as a
+worked diagnosis by `mc-obs-silent-diagnosis-1`/`-2`. No partials or gaps remain.
 
-<!-- coverage: items=22 covered=19 partial=3 gap=0 -->
+<!-- coverage: items=22 covered=22 partial=0 gap=0 -->

@@ -6,7 +6,10 @@ segments:
   - check: mc-frontier-reval-faithfulness-judge
   - check: mc-frontier-reval-synthetic-labels
   - check: mc-frontier-reval-mteb-generalization
+  - check: mc-reval-attribution-scale-1
+  - check: mc-reval-attribution-scale-2
   - present: operating-retrieval-evals-in-production
   - check: mc-ops-reval-miss-vs-grounding
   - check: mc-ops-reval-label-drift
   - apply: code-reval-ndcg
+  - apply: code-reval-grounding

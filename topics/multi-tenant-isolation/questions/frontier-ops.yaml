@@ -109,3 +109,26 @@
   concept_checks:
     must_use: ["filter to the caller's tenantId before ranking (authz pre-filter)", "sort matches by score descending", "cap the result at k / return all when fewer than k match"]
     avoid_antipattern: ["ranking first then stripping foreign docs (post-filter)", "returning another tenant's doc when its score is higher", "ignoring k and returning every match"]
+
+- id: code-mti-tenant-quota
+  type: code
+  language: typescript
+  tags: [isolation, review]
+  difficulty: 4
+  prompt: >-
+    Implement `admitByQuota(requests, quotaPerTenant)` for a shared service — the availability face of
+    isolation, so one noisy tenant can't starve the others. Process `requests` (each names a `tenantId`)
+    strictly in order. Admit a request (`true`) only while its tenant has FEWER than `quotaPerTenant`
+    already-admitted requests so far; otherwise reject it (`false`). Count ONLY admitted requests toward
+    a tenant's quota — a rejected request must not consume quota. Return the per-request admit/reject
+    decisions in the original order. A burst from one tenant is capped at `quotaPerTenant` while other
+    tenants keep their own independent quota.
+  starter_file: exercises/tenant-quota/starter.ts
+  test_file: exercises/tenant-quota/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-isolation-code
+  concept_checks:
+    must_use: ["track admitted count per tenant (independent quota)", "admit only while the tenant is under quotaPerTenant", "count only admitted requests toward the quota", "preserve request order in the result"]
+    avoid_antipattern: ["a single global counter shared across tenants", "letting rejected requests consume quota", "admitting a tenant already at its quota", "reordering or dropping the per-request decisions"]

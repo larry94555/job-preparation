@@ -109,3 +109,24 @@
   concept_checks:
     must_use: ["short-circuit when done already has the key (return cached, do not call run)", "call run exactly once for a new key", "store the result under key in done before returning"]
     avoid_antipattern: ["calling run again on a cached key", "not persisting the result so retries re-run", "keying results incorrectly so different keys collide"]
+
+- id: code-harness-arg-repair
+  type: code
+  language: typescript
+  tags: [boundary, review]
+  difficulty: 4
+  prompt: >-
+    Implement `repairToolArgs(raw, numberKeys)` for a harness that repairs malformed tool-call argument
+    JSON before dispatch. The model may wrap the arg object in prose or markdown fences, so extract the
+    JSON object by taking the substring from the FIRST `{` to the LAST `}` and `JSON.parse` it; if there
+    is no `{`/`}` or the parse fails, return `null`. Then for every key in `numberKeys` whose parsed
+    value is a numeric STRING (e.g. "42", "3.5"), coerce it to a Number, and return the repaired object.
+  starter_file: exercises/arg-repair/starter.ts
+  test_file: exercises/arg-repair/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-harness-code
+  concept_checks:
+    must_use: ["extract substring from first { to last } before parsing", "return null when no braces or JSON.parse throws", "coerce numeric-string values to Number only for keys listed in numberKeys"]
+    avoid_antipattern: ["passing raw prose straight to JSON.parse", "coercing keys that are not in numberKeys", "throwing instead of returning null on malformed input"]

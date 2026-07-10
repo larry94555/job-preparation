@@ -86,6 +86,66 @@
     predicting production quality — and drifting judge-vs-human agreement means the labels themselves are
     unreliable. The fix is periodic label-quality audits plus refreshing the set with an adversarial slice.
 
+- id: mc-reval-attribution-scale-1
+  type: multiple_choice
+  tags: [grounding, frontier]
+  difficulty: 4
+  prompt: >-
+    Attribution correctness is a per-claim, span-entailment property. Why doesn't running that reliable
+    per-claim span check on every production answer scale — and why is it still called an OPEN problem?
+  options:
+    - { text: "Reliable per-claim labels are expensive — trustworthy human review of every cited span doesn't scale, and the cheaper LLM-judge substitute suffers judge-agreement drift, so there's no settled way to get correctness at scale", correct: true }
+    - { text: "Span-entailment checks are mathematically impossible to compute" }
+    - { text: "Attribution can be read off the raw citation count, so per-claim checks are unnecessary" }
+    - { text: "The check scales fine; teams simply forget to run it" }
+  explanation: >-
+    Per-claim span/entailment checks are the right idea, but the reliable version — human review of every
+    cited span — is too costly to run at production volume, and the cheap substitute (an LLM-judge)
+    drifts: inter-judge agreement degrades over time and across domains. Cheap reliable labels at scale
+    remain unsolved, which is exactly why attribution-correctness-at-scale is an open problem, not a
+    settled metric.
+
+- id: mc-reval-attribution-scale-2
+  type: multiple_choice
+  tags: [grounding, frontier]
+  difficulty: 4
+  prompt: >-
+    Given that attribution-at-scale is unsolved, what is the current best-effort recipe a strong team
+    uses — while being honest that it is a mitigation, not a solution?
+  options:
+    - { text: "Automate the span check with an LLM-judge, track inter-judge agreement, route low-agreement cases to sampled human audits, and monitor for judge/label drift — accepting this bounds the risk rather than closing the open problem", correct: true }
+    - { text: "Declare the problem solved once the LLM-judge reports high faithfulness, and stop auditing" }
+    - { text: "Replace attribution entirely with a single end-to-end pass/fail score" }
+    - { text: "Report the raw number of citations per answer as the attribution metric" }
+  explanation: >-
+    The honest best-effort stack is: automate per-claim span checks with an LLM-judge, measure
+    inter-judge agreement, sample low-agreement (and random) cases into human audits, and monitor
+    judge/label drift over time. This bounds the error but does not eliminate it — attribution
+    correctness at scale stays an open problem, so treating a confident judge score as proof is the
+    antipattern.
+
+- id: code-reval-grounding
+  type: code
+  language: typescript
+  tags: [grounding, review]
+  difficulty: 4
+  prompt: >-
+    Implement `isGrounded(claim, sources)`, a per-claim supported-vs-fabricated grounding check.
+    Normalize the claim and each source by lowercasing, trimming, and collapsing every run of internal
+    whitespace to a single space. Return `true` iff the normalized claim appears as a substring of ANY
+    normalized source (supported), else `false` (fabricated/unsupported). Empty `sources` → false. This
+    is the per-claim core of a grounding/faithfulness eval: an answer is grounded only when each claim is
+    entailed by some retrieved passage.
+  starter_file: exercises/grounding-check/starter.ts
+  test_file: exercises/grounding-check/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-retrievalevals-code
+  concept_checks:
+    must_use: ["normalize claim and sources (lowercase, trim, collapse whitespace)", "substring match against any source", "empty sources returns false"]
+    avoid_antipattern: ["comparing without normalizing", "requiring a match in every source instead of any", "counting matches instead of returning a boolean"]
+
 - id: code-reval-ndcg
   type: code
   language: typescript

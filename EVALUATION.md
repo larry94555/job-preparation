@@ -26,12 +26,13 @@ Date: 2026-07-09.
 > 97%** (`npm run mastery`; 3 topics at 100%, most 95–98%). **(2) Papers:** all 22 topics' canon claims were
 > **independently web-verified** (WebSearch) with **zero corrections needed**, and each reading list gained
 > a **"Reception & what aged"** layer (closes C2.2). Repo green: 23 valid, selfcheck clean, typecheck 0, 16
-> tests. **D5 coding-exercise bucket closed (2026-07-10):** authored **19 sandbox-verified coding exercises**
+> tests. **D5 coding-exercise bucket closed (2026-07-10):** authored **23 sandbox-verified coding exercises**
 > (Cohen's κ, nDCG, cost/route cascades, rerank funnel, per-channel quant, draft/verify, chunked prefill,
-> compaction, scoped retrieval, loop detector, action-gate, schema enforcement, provenance fencing, …) —
-> lifting the **Topic Mastery Index 97% → 99%** with **17 of 22 topics at 100%**. The 8 residual items are
-> honest: a few second-exercises where the concept is already covered, two non-code drills, and one genuine
-> ⬜ open problem (retrieval attribution-at-scale). Repo green throughout.
+> compaction, scoped retrieval + per-tenant quota, loop detector, action-gate, schema enforcement, provenance
+> fencing, block-table, arg-repair, span-tree, grounding check, …) plus small MC drills for the last non-code
+> items — taking the **Topic Mastery Index to 100%: all 22 lesson topics fully covered** (456/456). The one
+> former ⬜ open problem (attribution-at-scale) is covered *as* an open problem with current best-effort
+> approaches. Repo green throughout (23 valid, selfcheck clean, typecheck 0, 16 tests).
 >
 > WS5 (**analytics & retention + reading-list module**): every topic gained a curated `reading-list.md`
 > (papers/tools + a staying-current method), closing the recurring D7 gap and lifting the **Topic Mastery

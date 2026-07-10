@@ -10,3 +10,4 @@ segments:
   - check: mc-ops-batch-goodput-vs-throughput
   - check: mc-ops-batch-queue-preemption
   - apply: code-batch-goodput
+  - apply: code-batch-block-table

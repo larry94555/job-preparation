@@ -110,3 +110,91 @@
   concept_checks:
     must_use: ["match keys against sensitiveKeys (case-sensitive exact)", "recurse into nested objects and arrays", "return a deep copy without mutating the input"]
     avoid_antipattern: ["mutating the input object in place", "only redacting top-level keys (no recursion)", "matching on value instead of key"]
+
+# --- Drift/monitoring literature drill (closes D2 practitioner drift/monitoring literature) ---
+- id: mc-obs-drift-literature
+  type: multiple_choice
+  tags: [drift, frontier]
+  difficulty: 4
+  prompt: >-
+    The practitioner drift/monitoring body of knowledge distinguishes several failure shapes an
+    observability system must tell apart. Which mapping matches how the canon uses these terms?
+  options:
+    - { text: "Data (input) drift = the input distribution shifts; concept drift = the input→correct-output relationship changes so a once-right model is now wrong; quality regression = measured output quality drops (e.g. eval scores) regardless of cause — each is watched with a different signal", correct: true }
+    - { text: "All three are the same phenomenon and are detected by the identical error-rate alarm" }
+    - { text: "Data drift means the model weights changed on disk; concept drift means the GPU driver changed; quality regression means latency rose" }
+    - { text: "Concept drift is only ever caused by a code deploy, so version tags alone fully detect it" }
+  explanation: >-
+    The monitoring literature this topic leans on (practitioner writing and tool docs, not landmark
+    papers) separates data/input drift — the input distribution moves — from concept drift — the
+    mapping from input to correct output changes, so a model that was right silently becomes wrong —
+    from a quality regression, the measured drop in output quality itself. They need different signals:
+    input-distribution trends for data drift, eval-score/output trends for concept drift and quality
+    regression. Collapsing them into one error alarm is exactly why silent drift goes unnoticed.
+
+# --- Worked silent-drift diagnosis (closes D4 detect silent quality drift as a worked diagnosis) ---
+- id: mc-obs-silent-diagnosis-1
+  type: multiple_choice
+  tags: [drift, frontier]
+  difficulty: 4
+  prompt: >-
+    Over three weeks your summarization endpoint's rolling eval score drifts from 0.86 to 0.71. Error
+    rate, latency, and cost are flat; there was no deploy and no code change; the input distribution
+    looks unchanged. Your canary (pinned prompt+model version) still scores 0.86 on the same traffic.
+    What is the diagnosis, and what does the canary holding tell you?
+  options:
+    - { text: "A silent quality regression from an underlying change the pinned canary is shielded from — most likely a provider-side model swap behind the same API. The canary holding at 0.86 while live drifts localizes the cause to the version live is using, not to the inputs", correct: true }
+    - { text: "Nothing is wrong — with no errors and no deploy, a falling eval score can be ignored" }
+    - { text: "It must be an input-distribution (data) drift, even though the distribution is unchanged and the canary on the same traffic is fine" }
+    - { text: "The latency dashboard is broken and should be the focus of the investigation" }
+  explanation: >-
+    This is the canonical silent-drift signature: quality slides with no error, no deploy, no code
+    change, so loud-error alerting never fires. Because the version-pinned canary scores the SAME
+    unchanged inputs and stays at 0.86 while live traffic falls, the inputs are exonerated and the cause
+    is isolated to whatever changed underneath live — classically a provider rotating the model behind a
+    stable API. The eval-score trend against a version-tagged baseline plus the canary is exactly the
+    detection loop, since nothing else pages when quality drifts without an error.
+
+- id: mc-obs-silent-diagnosis-2
+  type: multiple_choice
+  tags: [drift, frontier]
+  difficulty: 4
+  prompt: >-
+    A second endpoint shows the OTHER silent-drift shape: eval score falls, but this time the canary
+    (pinned prompt+model) ALSO falls in lockstep with live, and your input-distribution monitor shows
+    the mix of incoming requests has shifted toward a topic the prompt handles poorly. No code changed.
+    What does this pattern indicate, and how does it differ from the model-swap case?
+  options:
+    - { text: "Input (data) drift: the model/prompt are unchanged and still deterministic, but the input distribution moved, so even the pinned canary degrades on the new mix. Unlike a model swap — where the canary holds — here the canary tracks live, pointing at inputs, not the version", correct: true }
+    - { text: "It is identical to the model-swap case and needs no different response, since both show a falling eval score" }
+    - { text: "It proves the eval harness is miscalibrated, because a pinned canary can never change score" }
+    - { text: "It is a latency regression, since eval score and latency always move together" }
+  explanation: >-
+    When the version-pinned canary falls in lockstep with live and the input-distribution monitor shows
+    a shifted request mix, the version is exonerated: the same prompt+model now faces inputs it handles
+    worse. That is data/input drift, distinguished from the model-swap case precisely by the canary — a
+    held canary points at the underlying version, a canary that tracks live points at the inputs. The
+    fix differs too: the swap calls for pinning/version negotiation, the input shift for prompt/coverage
+    work — which is why the diagnosis must separate the two even though both show a falling eval score.
+
+# --- Span instrumentation exercise (closes D5 OTel-style span instrumentation) ---
+- id: code-obs-span-tree
+  type: code
+  language: typescript
+  tags: [tracing, review]
+  difficulty: 4
+  prompt: >-
+    Implement `rootOf(spans)` for correlation-ID propagation over a span tree. A trace is a tree of
+    spans linked by `parentId`; the ROOT span has `parentId === null`. Return a map from EVERY span id
+    to the id of its root ancestor: for each span, walk `parentId` upward until you reach the span whose
+    `parentId` is null and record that id. All spans in one trace share a root (that root id is the
+    trace/correlation ID); a lone root maps to itself. Assume valid trees (no cycles).
+  starter_file: exercises/span-tree/starter.ts
+  test_file: exercises/span-tree/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-observability-code
+  concept_checks:
+    must_use: ["walk parentId upward until parentId is null", "map every span id to its root ancestor", "a root (parentId null) maps to itself"]
+    avoid_antipattern: ["returning the immediate parentId instead of the root ancestor", "stopping after one hop instead of walking to the root", "mapping only root spans instead of every span"]

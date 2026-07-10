@@ -10,3 +10,4 @@ segments:
   - check: mc-ops-harness-budget-exhaustion
   - check: mc-ops-harness-verify-vs-tool
   - apply: code-harness-idempotent
+  - apply: code-harness-arg-repair
