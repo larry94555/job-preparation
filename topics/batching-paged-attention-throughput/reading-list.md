@@ -48,3 +48,22 @@ year is given it is context, not something to memorize.
   latency/fairness), what regime does it win in, and what eval proves it?* — the same lens the deep-dive
   lesson uses.
 - Re-read this topic's `expert-surface.md` when the frontier shifts; its 🟡/⬜ items are your next reads.
+
+## Reception & what aged
+- **Continuous batching is now table stakes.** Orca's iteration-level scheduling (OSDI 2022) went from novel
+  to universal: it's the default in vLLM, TGI, SGLang, and TensorRT-LLM (as inflight batching). Static
+  batching under variable output lengths is now the textbook anti-pattern — exactly the canon red flag. The
+  Orca entry aged as well as any in the curriculum.
+- **Orca + PagedAttention fused into one standard paradigm.** The two were separate papers; in practice they
+  are inseparable — 2025/2026 write-ups treat "continuous batching + paged attention" as a single serving
+  bedrock, and vLLM's combination of the two is the reference implementation the rest of the field is
+  measured against.
+- **The throughput claims held; the framing shifted to goodput.** The ~2–4× throughput / larger-batch gains
+  reproduced widely, but the field moved past raw tokens/sec: goodput / SLO-aware scheduling (the canon's
+  "step past raw throughput") is now the accepted way to size a batch, validating that frontier bullet.
+- **FlashAttention became a hard dependency, not an optional kernel.** Dao's IO-aware kernel (2022) and its
+  successors (FlashAttention-2/3, FlashInfer) are now assumed underneath serving stacks — a compounding
+  lever, as the canon framed it, rather than a competing one.
+- **What to watch next:** the open problems the canon named — SLO-*fair* scheduling, multi-tenant throughput
+  isolation, and prefill/decode interference inside a shared batch — are still genuinely unsolved and are
+  where 2026 scheduling research (per-deadline / congestion-aware policies) is concentrated.

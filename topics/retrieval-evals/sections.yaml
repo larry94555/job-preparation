@@ -1,7 +1,7 @@
 sections:
   - id: sec-metrics
     title: "Retrieval metrics"
-    lessons: [lesson-metrics, lesson-build-metrics, lesson-expert-context, lesson-deep-dive]
+    lessons: [lesson-metrics, lesson-build-metrics, lesson-expert-context, lesson-deep-dive, lesson-frontier-ops]
     assessment:
       title: "Section 1 — recall@k, precision@k, MRR"
       from_tags: [metrics]
@@ -10,7 +10,7 @@ sections:
 
   - id: sec-grounding-attribution
     title: "Grounding & attribution"
-    lessons: [lesson-grounding, lesson-attribution]
+    lessons: [lesson-grounding, lesson-attribution, lesson-frontier-ops]
     assessment:
       title: "Section 2 — Grounding & citation quality"
       from_tags: [grounding, attribution]

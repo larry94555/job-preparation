@@ -43,3 +43,26 @@ year is given it is context, not something to memorize.
   (latency / memory-cost / size), is it lossless or lossy, and what eval proves it doesn't cost quality?* —
   the same lens the deep-dive and when-wrong lessons use.
 - Re-read this topic's `expert-surface.md` when the frontier shifts; its 🟡/⬜ items are your next reads.
+
+## Reception & what aged
+- **Speculative decoding got adopted as a lossless default.** The Leviathan (Google) and Chen (DeepMind)
+  draft-verify approach moved from 2022–23 research to native, production-ready support in vLLM,
+  TensorRT-LLM, and SGLang. The *lossless* guarantee held up under scrutiny — it is still correctly
+  described as producing exactly the target model's distribution — so the canon's "name which lever is
+  lossless" framing aged perfectly.
+- **Self-speculative heads won the "where does the draft come from" argument.** Medusa (Cai et al., 2024)
+  and especially the EAGLE line (EAGLE-2/EAGLE-3) became the strong default, pushing acceptance rates toward
+  ~80% and removing the need to serve a separate draft model. The canon's Medusa/EAGLE framing (drafter
+  folded into the target) aged well.
+- **Acceptance rate proved to be the real, durable bottleneck.** The frontier bullet — speedup is
+  acceptance-bound and domain-dependent — is exactly where the field concentrated: a stream of 2025–2026
+  work (margin-aware verification, acceptance-rate-optimized losses, randomized drafting) targets holding
+  acceptance up on code/reasoning/long-tail. This aged as the *central* problem, not a footnote.
+- **The lossless-vs-lossy line is the live debate.** A notable shift the canon didn't call: newer work
+  deliberately relaxes exact-match verification for negligible-quality lossy speculation to cut latency
+  further in low-margin regimes. So "which levers are lossless" is now a spectrum, not a binary — worth
+  flagging in interviews.
+- **Distillation's data-vs-logits debate stayed unsettled.** Hinton et al. (2015) soft-target distillation
+  remains the reference, but whether to transfer via logits/features vs. synthetic data is still contested
+  — validating the canon's "distillation is a lossy, train-time size lever" caution and its red flag against
+  distilling for volatile facts.

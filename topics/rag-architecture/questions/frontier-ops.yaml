@@ -1,0 +1,91 @@
+# Frontier & operations drill — closes D2 (GraphRAG / retrieval-for-reasoning frontier) and
+# D6 (operational retrieval/freshness metrics drill).
+
+- id: mc-frontier-rag-graphrag
+  type: multiple_choice
+  tags: [retrieval, frontier]
+  difficulty: 4
+  prompt: >-
+    GraphRAG / retrieval-for-reasoning replaces flat top-k passage retrieval with structured multi-hop
+    retrieval over a graph. What specific limitation of classic RAG is this frontier direction targeting?
+  options:
+    - { text: "Questions whose evidence spans multiple documents and lives in the connections between passages, which a single flat top-k lookup can't assemble", correct: true }
+    - { text: "Embeddings being too slow to compute at query time" }
+    - { text: "The context window being too small to hold any retrieved passages" }
+    - { text: "BM25 being unable to match exact identifiers" }
+  explanation: >-
+    GraphRAG extracts entities and relations so a query spanning documents can be assembled via multi-hop
+    traversal rather than hoped for in a flat top-k. It wins on genuinely multi-hop, cross-document
+    reasoning; the open question is when the graph's build-and-maintenance cost is earned versus being
+    over-engineering on lookup-style queries.
+
+- id: mc-frontier-rag-contextual
+  type: multiple_choice
+  tags: [retrieval, frontier]
+  difficulty: 4
+  prompt: >-
+    Anthropic's Contextual Retrieval attacks the chunking problem at index time. What does it actually do,
+    and what is the failure mode it fixes?
+  options:
+    - { text: "Prepends a document-situating summary to each chunk before embedding, fixing chunks that lost their referents — paid for with one LLM call per chunk at index time", correct: true }
+    - { text: "Reranks the whole corpus with a cross-encoder on every query" }
+    - { text: "Compresses the vector index so more chunks fit in memory" }
+    - { text: "Rewrites the user's query multiple times until retrieval succeeds" }
+  explanation: >-
+    Contextual Retrieval enriches each chunk with document-level context before embedding so an isolated
+    fragment still retrieves on its own meaning — it attacks chunking at index time, not query time. The
+    cost is one LLM call per chunk at build, spent once rather than per query.
+
+- id: mc-frontier-rag-agentic
+  type: multiple_choice
+  tags: [retrieval, frontier]
+  difficulty: 4
+  prompt: >-
+    A hard query is phrased badly and one-shot dense+hybrid retrieval keeps missing the relevant passages.
+    Which frontier direction most directly targets *that* failure, and what does it trade?
+  options:
+    - { text: "Agentic / iterative retrieval — rewrite the query, retrieve, inspect, retrieve again — buying recall on hard queries at the cost of extra latency and retrieval calls", correct: true }
+    - { text: "Switching the embedding model to a larger one, which always fixes recall" }
+    - { text: "Disabling the reranker to widen the candidate set for free" }
+    - { text: "Moving the entire corpus into the prompt so retrieval is unnecessary" }
+  explanation: >-
+    The distinguishing feature is a query the first phrasing gets wrong. Agentic/iterative retrieval loops
+    (query rewrite → retrieve → inspect → repeat) recover recall the single lookup missed, paying with
+    added latency and more retrieval calls per answer. Proving it beats plain hybrid+rerank on a labelled
+    set — eval fidelity — is the frontier's hard part.
+
+- id: mc-ops-rag-recall-at-k
+  type: multiple_choice
+  tags: [retrieval, ops]
+  difficulty: 4
+  prompt: >-
+    You want the earliest operational signal that a retrieval-side regression (a bad re-index or an
+    embedding-model swap) has degraded your RAG system — before users complain. Which metric leads?
+  options:
+    - { text: "Retrieval hit rate / recall@k in production — whether the relevant passage still lands in the top-k the generator sees", correct: true }
+    - { text: "Total GPU power draw of the serving cluster" }
+    - { text: "The size of the vector index on disk" }
+    - { text: "The number of tokens in the system prompt" }
+  explanation: >-
+    Recall@k on real traffic is the leading indicator of a retrieval-side regression: a bad re-index,
+    an embedding swap, or drifting queries drop the gold passage out of the top-k before users notice.
+    It is also the signal that separates a retrieval miss from a generation problem.
+
+- id: mc-ops-rag-freshness-grounding
+  type: multiple_choice
+  tags: [retrieval, ops]
+  difficulty: 4
+  prompt: >-
+    Your model-side generation-quality evals are all green, but users report confidently wrong answers on
+    recently-changed facts, and grounding rate is high. What operational signal is the likely culprit?
+  options:
+    - { text: "Index freshness / staleness — the index has fallen behind the live corpus, so the model faithfully grounds on out-of-date passages, which model-side evals can't catch", correct: true }
+    - { text: "Reranker latency has increased" }
+    - { text: "The candidate-set size for reranking is too large" }
+    - { text: "The grounding rate is too high and should be lowered" }
+  explanation: >-
+    A stale index serves confidently wrong answers that no eval on the model will catch: the generator is
+    faithfully grounding (high grounding rate) on out-of-date passages. Freshness must be monitored
+    explicitly — re-index lag, TTL expiry, incremental-update backlog — because it is invisible in
+    generation-quality metrics. Grounding rate high with wrong answers points at retrieval content, not
+    the generator.

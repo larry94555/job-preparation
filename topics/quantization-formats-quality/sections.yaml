@@ -10,7 +10,7 @@ sections:
 
   - id: sec-methods
     title: "Methods & quality"
-    lessons: [lesson-methods-quality, lesson-build-int8-quant, lesson-deep-dive]
+    lessons: [lesson-methods-quality, lesson-build-int8-quant, lesson-deep-dive, lesson-frontier-ops]
     assessment:
       title: "Section 2 — Methods & when quantization hurts"
       from_tags: [methods, quality]

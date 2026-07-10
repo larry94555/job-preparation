@@ -46,3 +46,25 @@ year is given it is context, not something to memorize.
   on, what does the unit metric hide (retries/abandonment/shared cost), and does it survive shared/cached/
   async cost?* — the same lens the deep-dive lesson uses.
 - Re-read this topic's `expert-surface.md` when the frontier shifts; its 🟡/⬜ items are your next reads.
+
+## Reception & what aged
+- **FrugalGPT's framing — quality-per-dollar via cascades — aged into standard practice; its exact numbers are
+  period pieces.** The paper (Chen, Zaharia & Zou, Stanford, 2023) reported matching GPT-4 at up to ~98% cost
+  reduction on its benchmarks. That headline was model- and price-specific and shouldn't be quoted as a general
+  law, but the *idea* — route cheap-first, escalate on low confidence, measure cost as a first-class target —
+  became the default lens for LLM cost engineering.
+- **The cascade pattern generalized and kept being reinvented.** Later work (calibrated model cascades, task
+  cascades for unstructured data) confirms the direction rather than overturning it; FrugalGPT reads as the
+  origin point, not the last word.
+- **Provider prompt/prefix caching turned "tag and attribute" into a harder, more valuable problem.** Cached
+  reads now bill at ~10% of input on flagship models, and real deployments report 59–70% cost cuts from raising
+  cache-hit rates — which is exactly why attributing *shared and cached* cost fairly (a canon open problem) got
+  more urgent, not less: the cheap tokens still belong to *some* feature.
+- **Cost-per-successful-task over cost-per-token held up as the honest unit; per-model cost aged out.** The
+  argument that retries, abandonment, and over-retrieval hide in a per-token view is now conventional FinOps-for-
+  LLM wisdom, and the divide-by-zero on zero-success features remains a real guard to implement.
+- **Predicting per-feature cost before ship stayed genuinely open.** It is still forecasting against unknown
+  traffic mixes, not accounting — the canon's "open problem" label held.
+- **Sources:** [FrugalGPT (arXiv:2305.05176)](https://arxiv.org/abs/2305.05176);
+  [stanford-futuredata/FrugalGPT](https://github.com/stanford-futuredata/FrugalGPT);
+  [Prompt Caching with OpenAI, Anthropic, and Google (PromptHub)](https://www.prompthub.us/blog/prompt-caching-with-openai-anthropic-and-google-models).

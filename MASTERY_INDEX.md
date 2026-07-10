@@ -1,6 +1,6 @@
 # Topic Mastery Index — coverage of the Expert Surface
 
-**Snapshot: 2026-07-09.** Regenerate with `npm run mastery` (parses the machine-readable coverage line
+**Snapshot: 2026-07-10.** Regenerate with `npm run mastery` (parses the machine-readable coverage line
 in each `topics/<t>/expert-surface.md`). This is the *content* completeness metric of Goals §8/§9: for
 each topic we enumerate the capabilities a SOTA expert commands (the **Expert Surface**) and measure how
 much of that surface the course covers. Weighted coverage counts ✅ covered = 1, 🟡 partial = 0.5,
@@ -8,55 +8,52 @@ much of that surface the course covers. Weighted coverage counts ✅ covered = 1
 
 | Topic | Items | ✅ | 🟡 | ⬜ | Coverage |
 |---|---|---|---|---|---|
-| function-calling-reliability | 19 | 17 | 2 | 0 | 95% |
-| adaptation-strategy-selection | 20 | 17 | 3 | 0 | 93% |
-| eval-methodology | 18 | 15 | 3 | 0 | 92% |
-| model-routing-fallback | 18 | 15 | 3 | 0 | 92% |
-| quantization-formats-quality | 18 | 15 | 3 | 0 | 92% |
-| rag-architecture | 19 | 16 | 3 | 0 | 92% |
-| safety-engineering | 19 | 16 | 3 | 0 | 92% |
-| speculative-decoding-quant-distillation | 19 | 16 | 3 | 0 | 92% |
-| context-engineering | 18 | 15 | 2 | 1 | 89% |
-| cost-attribution | 18 | 15 | 2 | 1 | 89% |
-| inference-stack-tradeoffs | 19 | 16 | 2 | 1 | 89% |
-| kv-cache-management | 18 | 15 | 2 | 1 | 89% |
-| prefill-vs-decode-latency | 18 | 15 | 2 | 1 | 89% |
-| prompt-vs-semantic-caching | 18 | 15 | 2 | 1 | 89% |
-| structured-output-reliability | 20 | 16 | 3 | 1 | 88% |
-| agent-guardrails-budgets | 19 | 15 | 3 | 1 | 87% |
-| production-failure-modes | 19 | 15 | 3 | 1 | 87% |
-| batching-paged-attention-throughput | 18 | 14 | 3 | 1 | 86% |
-| harness-engineering | 18 | 14 | 3 | 1 | 86% |
-| retrieval-evals | 18 | 14 | 3 | 1 | 86% |
-| llm-observability | 19 | 14 | 4 | 1 | 84% |
-| multi-tenant-isolation | 18 | 13 | 4 | 1 | 83% |
-| **All lesson topics** | **408** | **333** | **61** | **14** | **89%** |
+| cost-attribution | 18 | 18 | 0 | 0 | 100% |
+| function-calling-reliability | 21 | 21 | 0 | 0 | 100% |
+| kv-cache-management | 21 | 21 | 0 | 0 | 100% |
+| adaptation-strategy-selection | 20 | 19 | 1 | 0 | 98% |
+| agent-guardrails-budgets | 21 | 20 | 1 | 0 | 98% |
+| context-engineering | 21 | 20 | 1 | 0 | 98% |
+| eval-methodology | 21 | 20 | 1 | 0 | 98% |
+| inference-stack-tradeoffs | 20 | 19 | 1 | 0 | 98% |
+| prefill-vs-decode-latency | 20 | 19 | 1 | 0 | 98% |
+| production-failure-modes | 21 | 20 | 1 | 0 | 98% |
+| prompt-vs-semantic-caching | 21 | 20 | 1 | 0 | 98% |
+| quantization-formats-quality | 21 | 20 | 1 | 0 | 98% |
+| model-routing-fallback | 18 | 17 | 1 | 0 | 97% |
+| rag-architecture | 19 | 18 | 1 | 0 | 97% |
+| safety-engineering | 19 | 18 | 1 | 0 | 97% |
+| speculative-decoding-quant-distillation | 19 | 18 | 1 | 0 | 97% |
+| batching-paged-attention-throughput | 21 | 19 | 2 | 0 | 95% |
+| harness-engineering | 20 | 18 | 2 | 0 | 95% |
+| multi-tenant-isolation | 21 | 19 | 2 | 0 | 95% |
+| structured-output-reliability | 20 | 19 | 0 | 1 | 95% |
+| llm-observability | 22 | 18 | 4 | 0 | 91% |
+| retrieval-evals | 22 | 19 | 2 | 1 | 91% |
+| **All lesson topics** | **447** | **420** | **25** | **2** | **97%** |
 
 `golang-concurrency` is the item-bank pilot (not a full lesson topic) and has no Expert Surface.
 
 ## What the gaps are
 
-Coverage is deliberately **not** 100% — a surface with no gaps would not be a credible SOTA inventory.
-WS5 shipped a **reading-list / staying-current module** (`topics/<t>/reading-list.md`) for every topic,
-which closed the recurring D7 partial and lifted the index from **86% → 89%**. The remaining 🟡/⬜ items
-cluster into three honest, addressable buckets:
+The index rose **89% → 97%** when WS "polish" added, to every topic, a **Frontier & operations** drill
+lesson (closing the D2 frontier-paper-drill and D6 operational-metrics partials) and, for kv-cache, a
+sandbox-verified eviction-policy coding exercise. Papers were independently **web-verified** in the same
+pass (zero canon corrections needed) and each reading list gained a **"Reception & what aged"** layer.
 
-1. **Frontier paper drills (D2).** Named in the "Expert context" and reading-list files but without a
-   dedicated question set — e.g. cross-request prefix caches (RadixAttention), KV/low-bit quantization
-   frontier, GraphRAG, LLM-as-judge calibration.
-2. **Missing coding exercises for a taught concept (D5).** Several topics teach a mechanism but only ship
-   one runnable exercise — e.g. an eviction-policy allocator, a cross-encoder reranker, an authz-fenced
-   retrieval, a chunked-prefill scheduler.
-3. **Operational-metrics drills (D6).** Signals are discussed in the deep-dive lessons but not drilled as
-   a metrics exercise (KV utilization, per-phase latency, cache hit-rate, stop-reason distribution).
+The residual ~3% is now almost entirely **one bucket**: **D5 hands-on coding exercises** for a concept a
+topic already teaches (e.g. a cross-encoder reranker, a chunked-prefill scheduler, an authz-fenced
+retrieval, a per-channel quantizer). Each is a sandbox-verified exercise; they are individually small but
+must be authored and verified one at a time. Two topics also carry a single ⬜ (a constrained-decoding
+*library* exercise in structured-output; a production label-pipeline exercise in retrieval-evals).
 
-Closing these is incremental content work. The index is designed to *revert* when the surface expands as
-the field moves (Goals §8) — that is the point of a continuous course.
+Closing the D5 bucket would take the index to ~99–100%. The index is designed to *revert* as the field's
+frontier expands (Goals §8) — that is the point of a continuous course.
 
 ## Relationship to learner certification
 
 This index measures **content** coverage (is the material there?). It is distinct from **learner**
-certification (has *this* user demonstrated the competency at its target level?), which the runner tracks
-per user via mastery bands + spaced repetition — and now a **mastery-over-time + retention analytics** view
-(`/api/analytics` in the runner) — and from **eval-skill** certification (can the grader reproduce its own
-labels?), which `npm run eval-gate` measures — see [CERTIFICATION.md](CERTIFICATION.md).
+certification (has *this* user demonstrated the competency?), tracked per user via mastery bands + spaced
+repetition + the runner's analytics view, and from **eval-skill** certification (can the grader reproduce
+its own labels? — 44/46 on the pinned Qwen2.5-3B), measured by `npm run eval-gate`. See
+[CERTIFICATION.md](CERTIFICATION.md).

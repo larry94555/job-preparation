@@ -1,7 +1,7 @@
 sections:
   - id: sec-levers
     title: "Three levers, three goals & when each is wrong"
-    lessons: [lesson-levers, lesson-when-wrong, lesson-expert-context, lesson-deep-dive]
+    lessons: [lesson-levers, lesson-when-wrong, lesson-expert-context, lesson-deep-dive, lesson-frontier-ops]
     assessment:
       title: "Section 1 — Levers, goals & tradeoffs"
       from_tags: [tradeoffs, quantization, distillation]

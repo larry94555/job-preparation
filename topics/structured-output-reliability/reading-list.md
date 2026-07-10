@@ -52,3 +52,23 @@ year is given it is context, not something to memorize.
   (quality vs. guaranteed shape), what regime does it win in, and what eval proves the quality cost is
   acceptable?* — the same lens the deep-dive lesson uses.
 - Re-read this topic's `expert-surface.md` when the frontier shifts; its 🟡/⬜ items are your next reads.
+
+## Reception & what aged
+- **Constrained decoding became standard and productized.** Outlines' finite-state framing was adopted broadly
+  and now sits alongside a whole ecosystem — Guidance, XGrammar, llama.cpp, plus provider structured-output /
+  JSON modes — with benchmarks like **JSONSchemaBench** (2025) treating constrained decoding as a mature,
+  comparable class of tools rather than a research novelty.
+- **Instructor aged extremely well as the ergonomic default.** Jason Liu's schema-first, validate-and-retry
+  library (open-sourced 2023) became one of the most popular ways to get structured data from LLMs, spreading
+  the "Pydantic/Zod as executable contract + bounded repair" pattern into everyday practice.
+- **The canon's "syntax valid ≠ semantically correct" caution was vindicated by a real quality debate.**
+  "Let Me Speak Freely?" (Tam et al., EMNLP 2024) and follow-ups documented that hard format restrictions can
+  measurably degrade reasoning/content (reports of ~10–30% drops under aggressive constraints), and that field
+  *ordering* in schemas (answer-before-reasoning) hurts — validating the "measure the quality cost, don't just
+  celebrate that it parses" stance rather than any blanket "always return valid JSON" claim.
+- **The mechanism behind the degradation got named.** Later work attributed quality loss to logit masking
+  distorting the model's probability distribution when preferred tokens are blocked and renormalized — turning
+  a practitioner worry into a specific, cited failure mode.
+- **jsonformer aged into a footnote; the grammar/automaton line won.** Field-by-field JSON templating was an
+  important early proof-of-concept, but the durable approach is grammar/finite-state constrained decoding
+  (Outlines, GBNF, XGrammar), with schema validation layered on top for semantics.

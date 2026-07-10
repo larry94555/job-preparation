@@ -1,0 +1,11 @@
+id: lesson-frontier-ops
+title: "Frontier & operations: semantic validity, constraint quality cost, and the signals to watch"
+material: frontier-ops.md
+segments:
+  - present: the-structured-output-reliability-frontier
+  - check: mc-frontier-so-semantic-validity
+  - check: mc-frontier-so-quality-cost
+  - check: mc-frontier-so-two-problems
+  - present: operating-structured-output-in-production
+  - check: mc-ops-so-failure-class-breakdown
+  - check: mc-ops-so-fallback-human-queue

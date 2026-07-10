@@ -13,8 +13,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D2 — Literature, canon & frontier awareness
 - ✅ **[L3]** ReAct (reason-then-act loop) and Reflexion (self-reflection/retry) as the loops budgets must bound — `lessons/expert-context.md`, `questions/expert.yaml`.
 - ✅ **[L3]** Anthropic "Building Effective Agents" as the practitioner guidance for bounded, verified autonomy — `lessons/expert-context.md`, `lessons/deep-dive.md`.
-- 🟡 **[L3]** NeMo Guardrails / Guardrails AI as the named enforcement frameworks — named in `lessons/expert-context.md`; no dedicated framework drill or hands-on rail authoring.
-- ⬜ **[L4]** Principled/proof-backed budget & termination guarantees beyond heuristics (formal termination bounds) — canon open problem, not yet covered.
+- ✅ **[L4]** NeMo Guardrails / Guardrails AI as the named enforcement frameworks — rails/validators as reviewable, versionable policy vs. incidental code — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
+- ✅ **[L4]** Principled/proof-backed budget & termination guarantees beyond heuristics (formal termination bounds, generalizing no-progress detection, long-horizon containment) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L4]** The five levers (budget dimensions, termination conditions, no-progress detection, action gating, failure containment) and their tradeoffs — `lessons/deep-dive.md` tradeoff table.
@@ -33,7 +33,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** Allow-list (deny-by-default) vs deny-list and gating high-risk actions by blast radius — `lessons/guardrails.md`, `questions/deep-dive.yaml`.
-- 🟡 **[L3]** Graceful degradation: return best partial result + inspectable state on exhaustion rather than crash — taught in `lessons/budgets.md`, `lessons/termination.md`; not drilled as an operational metric/signal.
+- ✅ **[L3]** Graceful degradation: return best partial result + inspectable state on exhaustion rather than crash — drilled as an operational signal (steps-per-task distribution, budget-exhaustion rate, loop/stuck-detection triggers, graceful-degradation rate) in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D7 — Staying current & meta-learning
 - ✅ **[L2]** Know where the guardrails frontier moves (reliable "stuck" detection, safe long-horizon autonomy, principled budgets) and how to track it — pointers in `lessons/expert-context.md`; curated reading-list module in `reading-list.md`.
@@ -43,9 +43,9 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a bounded-and-guarded agent-runner design under questioning — `questions/deep-dive.yaml` design-review essay, `questions/essay.yaml`.
 
 ## Coverage summary
-19 items · ✅ 15 covered · 🟡 3 partial · ⬜ 1 gap. Weighted coverage (covered=1, partial=0.5) ≈ **87%**.
-Open frontier work: a hands-on NeMo Guardrails / Guardrails AI rail-authoring drill, formal/principled
-termination guarantees beyond heuristics, a HITL/circuit-breaker coding exercise, and a graceful-degradation
-operational drill.
+21 items · ✅ 20 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **98%**.
+Remaining open work: a HITL-confirmation / circuit-breaker **coding** exercise (D5); the framework,
+principled-termination, and graceful-degradation gaps are now drilled in `lessons/frontier-ops.md` and
+`questions/frontier-ops.yaml`.
 
-<!-- coverage: items=19 covered=15 partial=3 gap=1 -->
+<!-- coverage: items=21 covered=20 partial=1 gap=0 -->

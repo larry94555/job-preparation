@@ -1,7 +1,7 @@
 sections:
   - id: sec-injection-boundaries
     title: "Injection & trust boundaries"
-    lessons: [lesson-injection, lesson-boundary, lesson-expert-context, lesson-deep-dive]
+    lessons: [lesson-injection, lesson-boundary, lesson-expert-context, lesson-deep-dive, lesson-frontier-ops]
     assessment:
       title: "Section 1 — Injection & boundaries"
       from_tags: [injection, boundary]
@@ -10,7 +10,7 @@ sections:
 
   - id: sec-leakage-permissions
     title: "Data leakage & permission boundaries"
-    lessons: [lesson-permission, lesson-build-authz]
+    lessons: [lesson-permission, lesson-build-authz, lesson-frontier-ops]
     assessment:
       title: "Section 2 — Leakage & permissions"
       from_tags: [leakage, permission]

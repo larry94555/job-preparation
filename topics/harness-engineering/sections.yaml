@@ -10,7 +10,7 @@ sections:
 
   - id: sec-reliability
     title: "Reliability: verification & control"
-    lessons: [lesson-verification]
+    lessons: [lesson-verification, lesson-frontier-ops]
     assessment:
       title: "Section 2 — Verification & control"
       from_tags: [verification, control]

@@ -49,3 +49,19 @@ year is given it is context, not something to memorize.
   privilege), what threat regime does it actually cover, and what proves it isn't just a filter?* — the same
   lens the deep-dive lesson uses.
 - Re-read this topic's `expert-surface.md` when the frontier shifts; its 🟡/⬜ items are your next reads.
+
+## Reception & what aged
+- **Prompt injection still has no robust general defense — the open problem outlasted the hype.** Willison
+  coined/popularized the term in September 2022, and years later the honest consensus remains that no filter
+  reliably stops it; the field has shifted from "detect" to provenance, least privilege, and containment.
+- **Indirect injection became the load-bearing agentic threat.** Greshake et al. (2023,
+  arXiv:2302.12173, "Not What You've Signed Up For") aged extremely well: as RAG and tool-using agents went
+  mainstream, injection-via-retrieved-content is now the canonical attack, and its taxonomy (data theft,
+  worming, ecosystem contamination) is routinely cited.
+- **OWASP LLM Top 10 became the industry checklist, with prompt injection entrenched at #1.** The 2025
+  edition keeps Prompt Injection at LLM01 for the second consecutive release and added agent-era categories
+  (Excessive Agency, System Prompt Leakage, Unbounded Consumption) — evidence the guardrails/egress framing aged correctly.
+- **The confused-deputy reframing proved the durable mental model.** Treating injection as delegated-authority
+  misuse (not "bad text") is what justified the defense-in-depth / least-privilege / egress-control stack that
+  is now standard advice, over the filter-only approaches that kept getting bypassed.
+

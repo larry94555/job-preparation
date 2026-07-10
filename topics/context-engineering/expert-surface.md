@@ -13,8 +13,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D2 — Literature, canon & frontier awareness
 - ✅ **[L3]** "Lost in the Middle" (Liu et al., Stanford 2023) as the U-shaped position finding — `lessons/context-position.md`, `lessons/expert-context.md`, `questions/expert.yaml`.
 - ✅ **[L3]** Needle-in-a-Haystack / RULER (NVIDIA 2024) as the advertised-vs-effective-context stress tests — `lessons/expert-context.md`, `questions/expert.yaml`.
-- 🟡 **[L4]** Principled compaction without information loss — named as a live open problem in `lessons/expert-context.md`; no dedicated paper drill.
-- ⬜ **[L4]** Long-context architecture frontier beyond position/retrieval (e.g. attention sinks, retrieval-head / KV-native long context) — not yet covered.
+- ✅ **[L4]** Principled compaction without information loss (retrieve-then-compact; the open problem is measuring what a summary lost) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
+- ✅ **[L4]** Long-context frontier beyond bigger windows: the effective-vs-advertised gap and RULER-style measurement ("Lost in the Middle" U-shape, Needle-in-a-Haystack, RULER) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L4]** The five context levers (budget allocation, selection, position, compaction, structure/reuse) and their tradeoffs — `lessons/deep-dive.md`.
@@ -33,7 +33,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** Tokenizers (tiktoken) and LangChain / LlamaIndex context builders as the assembly stack — `lessons/expert-context.md`.
-- 🟡 **[L3]** Measure effective context operationally (RULER / needle sweeps) rather than trusting the advertised window — motivated in `lessons/deep-dive.md`, `lessons/expert-context.md`; not drilled as a metrics exercise.
+- ✅ **[L3]** Measure effective context operationally and watch context-ops signals (effective-vs-advertised utilization, position of key facts, truncation/eviction rate, tokens-per-request trend) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D7 — Staying current & meta-learning
 - ✅ **[L2]** Know where the context frontier moves (retrieval + compaction pipelines, effective-context gap) and how to track it — curated primary sources and a staying-current routine in `reading-list.md`, with pointers in `lessons/expert-context.md`.
@@ -43,8 +43,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a context-assembly design under questioning — `questions/expert.yaml` interview essay, `questions/deep-dive.yaml` design essay.
 
 ## Coverage summary
-18 items · ✅ 15 covered · 🟡 2 partial · ⬜ 1 gap. Weighted coverage (covered=1, partial=0.5) ≈ **89%**.
-Open frontier work: a compaction paper drill, a long-context architecture module (attention sinks / retrieval heads),
-a compaction-policy coding exercise, and an effective-context metrics drill.
+21 items · ✅ 20 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **98%**.
+Remaining open work: a dedicated compaction-policy *coding* exercise (D5); the frontier paper drill and
+effective-context metrics drill are now covered by `lessons/frontier-ops.md`.
 
-<!-- coverage: items=18 covered=15 partial=2 gap=1 -->
+<!-- coverage: items=21 covered=20 partial=1 gap=0 -->

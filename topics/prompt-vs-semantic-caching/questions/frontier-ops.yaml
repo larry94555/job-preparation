@@ -1,0 +1,94 @@
+# Frontier & operations drill — closes D2 (frontier drill) and D6 (ops metrics drill). No code.
+
+- id: mc-frontier-cache-correctness-eval
+  type: multiple_choice
+  tags: [semantic, frontier]
+  difficulty: 4
+  prompt: >-
+    The caching frontier treats "cache correctness" as a measured quantity rather than an assumption.
+    What does that concretely mean, and why does it matter?
+  options:
+    - { text: "Run a cache-correctness eval over a realistic query mix that measures how often a served semantic hit was actually the right answer, and gate threshold changes behind it — because a false-positive hit is a silent regression a spot check won't catch", correct: true }
+    - { text: "Measure the prefix cache's hit rate more precisely, since that is where wrong answers come from" }
+    - { text: "Assume any hit above the similarity threshold is correct and only re-check on user complaints" }
+    - { text: "Prove correctness once at design time so no ongoing evaluation is needed" }
+  explanation: >-
+    Semantic caching returns an approximate match, so a loose threshold can serve a stored answer to a
+    genuinely different question — a false-positive hit and a silent regression. The frontier is to stop
+    assuming and start measuring: a cache-correctness eval over a realistic query mix answers "how often
+    was a hit actually right?" and becomes the gate on any threshold change. A prefix cache is lossless,
+    so it is not the source of wrong answers.
+
+- id: mc-frontier-cache-invalidation
+  type: multiple_choice
+  tags: [semantic, frontier]
+  difficulty: 4
+  prompt: >-
+    Beyond a TTL, semantic-cache invalidation is an open problem. What is the core reason a TTL alone is
+    insufficient?
+  options:
+    - { text: "A TTL keys on time passing, but a stored answer can go wrong because meaning changed — embedding drift or content that changed under a still-similar query — which time-based expiry does not detect", correct: true }
+    - { text: "A TTL is too expensive to compute per entry, so it is never used in practice" }
+    - { text: "A TTL invalidates the prefix cache as well, which is the real problem" }
+    - { text: "A TTL makes semantic hits lossless, removing the need for any eval" }
+  explanation: >-
+    A TTL is the crude lever: expiry just turns a hit into a miss, and "how long is this answer still
+    true?" is a per-query property, not one global constant. The open problem is invalidation that keys on
+    meaning changing — embedding drift, or content that changed under a still-similar query — none of which
+    crude time-based expiry detects. This is why the layered exact-prefix-in-front-of-guarded-semantic
+    shape endures.
+
+- id: mc-frontier-cache-lossless-vs-risky
+  type: multiple_choice
+  tags: [semantic, frontier]
+  difficulty: 4
+  prompt: >-
+    Why does the caching frontier (correctness evals, invalidation research, safe thresholds) concentrate
+    almost entirely on the semantic cache rather than the prefix cache?
+  options:
+    - { text: "The prefix cache is lossless — a hit returns the same computation, so its only failure mode is a miss; the semantic cache serves an approximate match that can be wrong, so making that safe is where the open problems live", correct: true }
+    - { text: "The prefix cache is newer and less studied, so the frontier hasn't reached it yet" }
+    - { text: "The semantic cache saves less compute, so it needs more research to be worthwhile" }
+    - { text: "The prefix cache uses embeddings, which are inherently the risky component" }
+  explanation: >-
+    A provider prefix cache reuses prefill for byte-identical leading tokens, so a hit returns the same
+    result the model would have produced — the only failure mode is a miss, never a wrong answer. The
+    semantic cache (GPTCache pattern) returns a stored response on an approximate embedding match, so it
+    can be wrong. Every frontier item — cache-correctness eval, invalidation beyond TTL, safe thresholds —
+    exists to make that approximate serve safe.
+
+- id: mc-ops-cache-false-hit-rate
+  type: multiple_choice
+  tags: [tradeoffs, ops]
+  difficulty: 4
+  prompt: >-
+    You are choosing the one operational metric to alert on for a live semantic cache. Which is the
+    correctness signal, and why that one?
+  options:
+    - { text: "False-hit / incorrect-serve rate — the fraction of served semantic hits that were wrong for the request; a rise there is a correctness incident that a loosened threshold silently inflates and a demo never shows", correct: true }
+    - { text: "Total prefix-cache hit rate, because a high prefix hit rate guarantees the semantic layer is correct" }
+    - { text: "GPU utilization on the embedding service, because it bounds correctness" }
+    - { text: "The number of entries stored in the vector database" }
+  explanation: >-
+    Only the semantic layer can serve a wrong answer, and the false-hit / incorrect-serve rate is that
+    correctness signal — the live form of the cache-correctness eval. A loosened threshold inflates it
+    silently, so a rise there is a correctness incident, not a cost one. Prefix hit rate, embedding-service
+    utilization, and entry count say nothing about whether a served hit was right.
+
+- id: mc-ops-cache-net-savings
+  type: multiple_choice
+  tags: [semantic, ops]
+  difficulty: 4
+  prompt: >-
+    Your dashboard shows a semantic cache saving a large amount of generation cost, yet the endpoint's
+    total cost barely moved. What is the most likely operational explanation?
+  options:
+    - { text: "The reported saving is gross, not net: the semantic layer pays an embedding + vector-search tax on every request (hit or miss), and at a low hit rate that per-request overhead can eat most of the generation it saves", correct: true }
+    - { text: "The prefix cache is stealing the savings, because the two caches cannot both save at once" }
+    - { text: "Semantic caches never actually reduce cost; the dashboard is wrong" }
+    - { text: "The TTL is too long, which increases generation cost on every hit" }
+  explanation: >-
+    Cost/latency saved must be reported net of the cache's own overhead. The semantic layer embeds and
+    searches on every request, hit or miss, so at a low hit rate that per-request tax can offset most of
+    the whole-generation saving a hit-rate dashboard shows gross. The fix is to report savings net of the
+    embed-and-search cost, and to raise the hit rate (or scope the layer) so the tax is worth paying.

@@ -52,3 +52,18 @@ year is given it is context, not something to memorize.
 - Treat **CI leak tests** (a zero cross-tenant leak-rate assertion) as the operational signal that your
   isolation still holds as the system changes.
 - Re-read this topic's `expert-surface.md` when the frontier shifts; its 🟡/⬜ items are your next reads.
+
+## Reception & what aged
+- **Postgres RLS became the reference "fail-closed in the engine" isolation lever.** The SaaS pattern of
+  engine-enforced tenant predicates (over an application-level `WHERE tenant_id` you can forget) is now the
+  default recommendation, and vector DBs copied it with namespaces/partitions as the retrieval-side analogue.
+- **Semantic-cache cross-tenant leakage aged from a footnote into a recognized LLM-specific risk.** OWASP's
+  2025 list adding "Vector and Embedding Weaknesses" (LLM08) and "Sensitive Information Disclosure" (LLM02)
+  reflects that embedding-store and cache leakage crossed from theory into an acknowledged production surface.
+- **Pre-filter vs. post-filter scoping held up as the load-bearing distinction.** The lesson that
+  post-filtering has *already read* the cross-tenant data (so telemetry/ranking/caches built from it can leak)
+  remains the most testable and most-often-botched point on the topic.
+- **Provable isolation and safe cross-user reuse stayed open.** Tenant-blind cache keys and unscoped vector
+  search are still the recurring real-world bugs; nobody ships a *proof* of embedding-space non-leakage, so
+  CI leak-tests (assert zero cross-tenant hits) remain the practical operational signal rather than a guarantee.
+

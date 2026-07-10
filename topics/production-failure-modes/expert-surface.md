@@ -13,8 +13,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D2 — Literature, canon & frontier awareness
 - ✅ **[L3]** Google SRE tradition (postmortems, error budgets) as the reliability lineage this topic borrows — `lessons/expert-context.md`, `questions/expert.yaml` `[canon]`.
 - ✅ **[L3]** OWASP LLM Top 10 as the field checklist of LLM-specific risks — `lessons/expert-context.md`, `questions/expert.yaml` `[canon]`.
-- 🟡 **[L4]** End-to-end failure prediction and graceful recovery from multiple simultaneous failures — named as open problems in `lessons/expert-context.md`; no dedicated drill.
-- ⬜ **[L4]** Catching silent regressions *early* as the live open problem beyond CI-eval/canary — framed but not carried into a research/frontier drill.
+- ✅ **[L4]** End-to-end failure prediction and graceful recovery from multiple simultaneous failures — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml` `[frontier]`.
+- ✅ **[L4]** Catching silent regressions *early* as the live open problem beyond CI-eval/canary — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml` `[frontier]`.
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L4]** The five reliability levers (detection surface, mitigation policy, containment bounds, prevention gates, rollout safety) and their tradeoffs — `lessons/deep-dive.md` tradeoff table.
@@ -33,7 +33,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** Eval gates, guardrails, and observability + alerting stacks as the operational tooling — `lessons/expert-context.md`, `lessons/guards.md`.
-- 🟡 **[L3]** Operational signals to instrument (quality/eval score over time, fallback rate, budget breaches, canary deltas) — discussed in `lessons/deep-dive.md`/`guards.md`; not drilled as concrete metrics.
+- ✅ **[L3]** Operational signals to instrument (error-budget burn rate, silent-regression lead time, guardrail-trigger rate, MTTD/MTTR) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml` `[ops]`.
 
 ## D7 — Staying current & meta-learning
 - ✅ **[L2]** Know where the reliability frontier moves (silent-regression detection, failure prediction) and how to track it — pointers in `lessons/expert-context.md`; curated reading-list module in `reading-list.md` (WS5).
@@ -43,8 +43,9 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a full reliability design under questioning — `questions/deep-dive.yaml` design-review essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-19 items · ✅ 15 covered · 🟡 3 partial · ⬜ 1 gap. Weighted coverage (covered=1, partial=0.5) ≈ **87%**.
-Open frontier work: a silent-regression-detection research drill, an end-to-end failure-prediction /
-multi-failure-recovery drill, a standalone TTL/loop-detector coding exercise, and an operational-metrics drill.
+21 items · ✅ 20 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **98%**.
+The D2 frontier drill (silent-regression detection, failure prediction, multi-failure recovery) and the
+D6 operational-metrics drill now land in `lessons/frontier-ops.md` + `questions/frontier-ops.yaml`. Remaining
+open work: a standalone TTL/loop-detector coding exercise (D5).
 
-<!-- coverage: items=19 covered=15 partial=3 gap=1 -->
+<!-- coverage: items=21 covered=20 partial=1 gap=0 -->

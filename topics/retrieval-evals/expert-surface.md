@@ -13,7 +13,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D2 — Literature, canon & frontier awareness
 - ✅ **[L3]** RAGAS (Exploding Gradients, 2023) as the source of RAG-specific metrics (faithfulness, answer relevance, context precision/recall) — `lessons/expert-context.md`, `questions/expert.yaml`.
 - ✅ **[L3]** BEIR (Thakur et al., 2021) and MTEB (Muennighoff et al., 2022) as the retriever/embedding benchmarks; TREC as the classic pooled-qrels relevance methodology — `lessons/expert-context.md`, `questions/expert.yaml`.
-- 🟡 **[L4]** Faithful grounding metrics as an open problem (NLI vs. LLM-judge, false-precision risk) — named in `lessons/expert-context.md`, `lessons/deep-dive.md`; no dedicated frontier drill.
+- ✅ **[L4]** Faithful grounding metrics as an open problem (NLI vs. LLM-judge, false-precision risk) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 - ⬜ **[L4]** Attribution correctness *at scale* beyond per-claim span checks (cheap reliable labels, judge-agreement drift) — flagged as an open problem in `lessons/expert-context.md`; not yet covered.
 
 ## D3 — Architecture, design & tradeoff judgment
@@ -34,7 +34,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** RAGAS / TruLens / promptfoo and custom harnesses as the eval stacks; wiring evals into a CI regression gate — `lessons/expert-context.md`, `lessons/deep-dive.md`.
-- 🟡 **[L3]** The eval token/label budget (judge calls dominate; labels are the true bottleneck; sampling/caching) — discussed in `lessons/deep-dive.md`; not drilled as an operational metric.
+- ✅ **[L3]** Operational eval signals (recall@k/nDCG in prod, grounding/faithfulness rate, label-quality audits, eval-set drift) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D7 — Staying current & meta-learning
 - ✅ **[L2]** Know where the eval frontier moves (calibrated judges, synthetic-label validation, attribution at scale) and how to track it — pointers in `lessons/expert-context.md`; curated reading-list module in `reading-list.md`.
@@ -44,8 +44,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a component-isolated eval design (labels, per-stage metrics, calibrated judge, CI gate) under questioning — `questions/deep-dive.yaml` design-review essay, `questions/build.yaml` project essay.
 
 ## Coverage summary
-18 items · ✅ 14 covered · 🟡 3 partial · ⬜ 1 gap. Weighted coverage (covered=1, partial=0.5) ≈ **86%**.
+22 items · ✅ 19 covered · 🟡 2 partial · ⬜ 1 gap. Weighted coverage (covered=1, partial=0.5) ≈ **91%**.
 Open frontier work: a grounding/attribution span-check coding exercise, an nDCG numeric/coding drill,
-a synthetic-label-quality operational drill, and attribution-at-scale coverage.
+and attribution-correctness-at-scale coverage.
 
-<!-- coverage: items=18 covered=14 partial=3 gap=1 -->
+<!-- coverage: items=22 covered=19 partial=2 gap=1 -->

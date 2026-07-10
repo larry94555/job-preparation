@@ -1,0 +1,86 @@
+# Frontier & operations drill — closes D2 (frontier drill: compaction + long-context architecture)
+# and D6 (effective-context metrics drill). Canon-only; no exact-year answers.
+
+- id: mc-frontier-context-compaction
+  type: multiple_choice
+  tags: [selection, frontier]
+  difficulty: 4
+  prompt: >-
+    "Principled compaction without information loss" is named as the open problem at the frontier of the
+    retrieve-then-compact pipeline. What specifically makes it hard?
+  options:
+    - { text: "Summarizing or pruning overflow while provably keeping the load-bearing detail — the open question is measuring what a summary actually lost", correct: true }
+    - { text: "Tokenizers can no longer count tokens in a long window" }
+    - { text: "Compaction requires a bigger advertised context window to work" }
+    - { text: "Summaries are always longer than the text they replace" }
+  explanation: >-
+    The SOTA pipeline is retrieve-then-compact; the two failure surfaces are retrieval that misses and
+    compaction that drops the detail the task needed. Frontier compaction arrives with an eval that
+    measures what was discarded, not a vibe — that measurement is the unsolved part.
+
+- id: mc-frontier-context-effective-gap
+  type: multiple_choice
+  tags: [selection, frontier]
+  difficulty: 4
+  prompt: >-
+    A model advertises a very long context window, yet accuracy sags on facts buried mid-context. Which
+    canon finding names this effect, and what does it imply for the frontier?
+  options:
+    - { text: "'Lost in the Middle' (Liu et al.) — retrieval accuracy over position is U-shaped, so effective context is a measured per-model/per-task quantity, not the advertised number", correct: true }
+    - { text: "RAG (Lewis et al.) — retrieval always fixes long-context degradation" }
+    - { text: "ColBERT — late interaction removes any position effect" }
+    - { text: "The advertised window is always the effective window once you pay for more tokens" }
+  explanation: >-
+    "Lost in the Middle" made position a first-class variable: strong at the start/end, weak in the
+    middle. The frontier is closing the effective-vs-advertised gap by architecture or serving, so
+    effective context must be measured per model and task, not read off a spec sheet.
+
+- id: mc-frontier-context-ruler
+  type: multiple_choice
+  tags: [selection, frontier]
+  difficulty: 4
+  prompt: >-
+    Why do Needle-in-a-Haystack and RULER (NVIDIA) matter as frontier tools rather than just demos?
+  options:
+    - { text: "They turn 'can the model use its window?' into a regression-testable number (single- and multi-needle, tracing, aggregation), exposing degradation well before the stated window", correct: true }
+    - { text: "They increase the model's advertised context length" }
+    - { text: "They are retrieval rerankers that reorder candidates by relevance" }
+    - { text: "They compress the KV cache so more tokens fit" }
+  explanation: >-
+    Needle-in-a-Haystack sweeps a planted fact across depths; RULER generalizes it into synthetic
+    long-context tasks. Both make effective context measurable, so a new long-context claim is only
+    interesting if it is eval-gated on these tasks rather than on raw window size.
+
+- id: mc-ops-context-truncation-rate
+  type: multiple_choice
+  tags: [budget, ops]
+  difficulty: 4
+  prompt: >-
+    You want the earliest operational signal that your context budget is under-provisioned for the
+    offered load — before users report worse answers as outright errors. Which metric leads?
+  options:
+    - { text: "Truncation / eviction rate — how often the assembler drops or hard-truncates candidates that didn't fit; it rises as quietly-worse answers before it becomes errors", correct: true }
+    - { text: "The model's advertised context length" }
+    - { text: "Total number of documents in the vector store" }
+    - { text: "GPU weight size on disk" }
+  explanation: >-
+    A rising truncation/eviction rate means the budget is too small for the load and manifests as
+    silently degraded answers before hard failures — so it is the metric to alert on. Effective-context
+    drift is the companion leading indicator; tokens-per-request is for cost/capacity planning.
+
+- id: mc-ops-context-tokens-trend
+  type: multiple_choice
+  tags: [budget, ops]
+  difficulty: 4
+  prompt: >-
+    Average input tokens-per-request on your endpoint has crept up 30% over a month at constant request
+    rate. What does capacity-and-quality planning conclude?
+  options:
+    - { text: "Cost and latency rose and the window is diluting — past a point extra tokens lower quality, so plan in useful tokens landed, not request rate", correct: true }
+    - { text: "Nothing changed, because the request rate is constant" }
+    - { text: "The model's effective context automatically grew to match" }
+    - { text: "Position of key facts no longer matters at higher token counts" }
+  explanation: >-
+    Cost and latency scale with tokens spent, and beyond a point marginal tokens dilute the window and
+    lower task quality. A creeping tokens-per-request trend silently raises the bill and degrades
+    answers even at constant request rate — the real currency is useful tokens in a position the model reads.

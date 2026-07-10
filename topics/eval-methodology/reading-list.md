@@ -45,3 +45,28 @@ year is given it is context, not something to memorize.
 - When a new eval or benchmark appears, ask the three canon questions: *what does it trade (cost/fidelity/
   coverage), what regime does it win in, and is its judge calibrated?* — the same lens the deep-dive lesson uses.
 - Re-read this topic's `expert-surface.md` when the frontier shifts; its 🟡/⬜ items are your next reads.
+
+## Reception & what aged
+- **LLM-as-judge became the dominant reference-free scoring pattern — and its biases are now textbook.**
+  Zheng et al.'s finding that GPT-4 agreed with humans ~85% (above human-human ~81%) legitimized the method,
+  and it is now deployed across hundreds of production pipelines. But the *biases they flagged* — position,
+  verbosity, self-enhancement — aged into the central caveat: 2025-26 stress tests (JudgeBiasBench, "Reliability
+  without Validity") show frontier judges failing 50%+ of bias tests and flipping under trivial formatting
+  changes, so "calibrate against humans before trusting a judge" is now standard advice, not a nice-to-have.
+- **Chatbot Arena / Elo became the de-facto frontier leaderboard — then drew serious methodological fire.**
+  It rebranded to LMArena and spun out as a company (2024), and billions in investment now track its scores. The
+  2025 "Leaderboard Illusion" paper (Cohere Labs, AI2, Princeton, Stanford, Waterloo, UW) documented selective
+  disclosure and private-variant testing; the Llama 4 launch exposed a leaderboard-vs-released model mismatch.
+  What aged well: pairwise preference + Bradley-Terry. What aged poorly: treating one Overall number as
+  procurement-grade truth.
+- **HELM's "matrix, not one number" thesis held up and generalized.** The multi-metric, multi-scenario framing
+  (accuracy + calibration + robustness + bias + toxicity + efficiency) is now the assumed shape of a serious
+  eval, and CRFM keeps HELM alive as a living framework with refreshed scenarios (MMLU-Pro, GPQA, IFEval).
+- **Contamination and construct validity moved from footnote to headline.** The concern that benchmarks leak into
+  training data and that a benchmark may not measure what it claims is now a first-order reason teams build
+  private, rotating golden sets rather than chase public leaderboards.
+- **Sources:** [Zheng et al. 2023 (arXiv:2306.05685)](https://arxiv.org/abs/2306.05685);
+  [Simon Willison — criticism of the Chatbot Arena](https://simonwillison.net/2025/Apr/30/criticism-of-the-chatbot-arena/);
+  [LMArena response to "The Leaderboard Illusion"](https://lmarena.ai/blog/our-response/);
+  [Reliability without Validity (arXiv:2606.19544)](https://arxiv.org/html/2606.19544v1);
+  [stanford-crfm/helm](https://github.com/stanford-crfm/helm).

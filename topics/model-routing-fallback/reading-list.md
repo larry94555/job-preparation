@@ -45,3 +45,23 @@ year is given it is context, not something to memorize.
   (cost/quality/latency), what regime does it win in, and what eval proves it?* — the same lens the deep-dive
   lesson uses. Be especially wary of silent model substitution dressed up as a free win.
 - Re-read this topic's `expert-surface.md` when the frontier shifts; its 🟡/⬜ items are your next reads.
+
+## Reception & what aged
+- **FrugalGPT (Chen et al., Stanford, 2023) aged as the canonical cascade citation.** Its headline — up to
+  ~98% cost reduction while matching a strong model on a benchmark — is the number everyone quotes, but it
+  also aged into the standard caution: the savings are benchmark- and threshold-specific, and the quality
+  gate is where all the risk lives. "Cheaper with no quality loss" is now read as a claim to be eval-gated,
+  not accepted.
+- **RouteLLM (LMSYS, 2024) reframed routing as a learned prediction problem** and became the reference for
+  *learned* routers (its similarity-weighted, matrix-factorization, BERT, and causal-LLM variants, trained
+  on Chatbot Arena preference data). It reported ~2x cost reductions on held-out traffic; the durable lesson
+  is that difficulty prediction is the load-bearing unknown — which is exactly canon's open problem.
+- **The routing-vs-fallback distinction held up and is now standard interview framing:** routing = cost/
+  quality decision up front; fallback = availability decision on failure. Conflating them is a recognized
+  anti-pattern.
+- **Gateways (LiteLLM, OpenRouter) became the default place cascades and breakers actually live.** What aged
+  is that most production "routing" is gateway config plus circuit breakers and jittered backoff, not a
+  learned router — the research framing outran typical deployment. Silent model substitution remains the
+  named red flag.
+- **Verified: FrugalGPT (Stanford, 2023) and RouteLLM (LMSYS, 2024) authorship, venues, and what each
+  technique does all check out** — no canon corrections for this topic.

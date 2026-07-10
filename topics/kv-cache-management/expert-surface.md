@@ -13,8 +13,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D2 — Literature, canon & frontier awareness
 - ✅ **[L3]** PagedAttention/vLLM (Kwon et al. 2023) as the paging origin — `lessons/expert-context.md`, `questions/expert.yaml`.
 - ✅ **[L3]** Continuous/iteration-level batching (Orca) and its coupling to KV capacity — `lessons/expert-context.md`, `lessons/deep-dive.md`.
-- 🟡 **[L4]** KV quantization frontier (KVQuant, KIVI, fp8 KV) — named as a lever in `lessons/deep-dive.md`; no dedicated paper drill.
-- ⬜ **[L4]** Cross-request KV reuse / prefix-cache research beyond vLLM copy-on-write (e.g. SGLang RadixAttention) — not yet covered.
+- ✅ **[L4]** KV quantization frontier (KIVI per-channel, KVQuant non-uniform; key channel-wise outliers as the obstacle) — `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
+- ✅ **[L4]** Cross-request KV reuse / prefix-cache research beyond vLLM copy-on-write (SGLang RadixAttention, radix-tree LRU) — `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L4]** The five KV levers (layout, attention sharing, precision, placement, reuse) and their tradeoffs — `lessons/deep-dive.md` tradeoff table.
@@ -29,11 +29,11 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D5 — Engineering & code craft
 - ✅ **[L4]** Implement a paged block allocator (ceil sizing, no over-allocation, no block sharing) — `exercises/paged-allocator`, `questions/code.yaml`.
 - ✅ **[L4]** Debug a KV block-reuse corruption bug (slice-vs-splice pool leak) — `exercises/paged-allocator-debug`, `questions/deep-dive.yaml`.
-- 🟡 **[L4]** Implement an eviction/admission policy under pressure — taught in `lessons/eviction.md`; no dedicated coding exercise.
+- ✅ **[L4]** Implement an eviction/admission policy under pressure (LRU eviction, reject-when-oversized) — `exercises/eviction-policy`, `questions/frontier-ops.yaml`.
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** vLLM / TGI / TensorRT-LLM as the serving stacks that page KV — `lessons/expert-context.md`.
-- 🟡 **[L3]** Operational signals (KV utilization, preemption/eviction rate, admission rejects) — discussed in `lessons/deep-dive.md`; not drilled as metrics.
+- ✅ **[L3]** Operational signals (KV utilization, preemption/eviction rate, admission rejects, avg context trend) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D7 — Staying current & meta-learning
 - ✅ **[L2]** Know where the KV frontier moves (quantized KV, disaggregated prefix caches) and how to track it — `reading-list.md` (curated papers/tools + a staying-current method), pointers in `lessons/expert-context.md`.
@@ -43,8 +43,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a KV capacity + paging design under questioning — `questions/deep-dive.yaml` design-review essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-18 items · ✅ 15 covered · 🟡 2 partial · ⬜ 1 gap. Weighted coverage (covered=1, partial=0.5) ≈ **89%**.
-Open frontier work: dedicated KV-quantization paper drill, cross-request prefix-cache research (RadixAttention),
-an eviction-policy coding exercise, and a KV-metrics operational drill.
+21 items · ✅ 21 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+This surface is fully covered as of the snapshot; it will revert to partial as the field's frontier expands.
 
-<!-- coverage: items=18 covered=15 partial=2 gap=1 -->
+<!-- coverage: items=21 covered=21 partial=0 gap=0 -->

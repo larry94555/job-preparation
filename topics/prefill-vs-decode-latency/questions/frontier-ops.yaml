@@ -1,0 +1,86 @@
+# Frontier & operations drill — closes D2 (frontier scheduling drill) and D6 (per-phase ops metrics drill).
+
+- id: mc-frontier-pd-disagg-tradeoff
+  type: multiple_choice
+  tags: [optimization, frontier]
+  difficulty: 4
+  prompt: >-
+    Prefill/decode disaggregation (DistServe, Splitwise) puts the two phases on separate resource pools.
+    What is the central tradeoff a frontier practitioner names — the reason it isn't a universal win?
+  options:
+    - { text: "It removes cross-phase interference but must ship the KV state built during prefill to the decode tier, so it pays off only in specific regimes (high mixed load), not universally", correct: true }
+    - { text: "It makes prefill sequential and decode parallel, inverting both phases" }
+    - { text: "It only works if the two phases share the same GPU step" }
+    - { text: "It eliminates the need to measure TTFT and TPOT separately" }
+  explanation: >-
+    DistServe and Splitwise scale each phase to its own SLO by separating them, removing the stall that
+    co-location causes. The cost is transferring the prefill-built KV state to the decode pool, plus
+    imbalance under bursty arrivals — so disaggregation wins under high, mixed load rather than always.
+
+- id: mc-frontier-pd-chunked-prefill
+  type: multiple_choice
+  tags: [optimization, frontier]
+  difficulty: 4
+  prompt: >-
+    Chunked prefill (Sarathi) is the interleaving primitive that lets one GPU serve both phases well.
+    What does it actually do, and which SLO does it protect?
+  options:
+    - { text: "Slices a long prompt's prefill into chunks interleaved with ongoing decode, so no single prefill monopolizes a step — protecting in-flight requests' TPOT", correct: true }
+    - { text: "Runs the whole prompt's prefill as one large step to minimize scheduling overhead" }
+    - { text: "Moves decode onto a separate machine and leaves prefill monolithic" }
+    - { text: "Compresses the prompt so fewer tokens need prefilling" }
+  explanation: >-
+    Sarathi's contribution is interleaving: split prefill into chunks scheduled alongside decode so a big
+    prompt never stalls every in-flight decode. That bounds the TPOT damage a monolithic prefill would
+    cause; it is now a standard scheduling knob in vLLM and TensorRT-LLM.
+
+- id: mc-frontier-pd-open-problem
+  type: multiple_choice
+  tags: [optimization, frontier]
+  difficulty: 4
+  prompt: >-
+    Disaggregation sidesteps cross-phase interference by paying for separate hardware. The canon flags a
+    harder, still-open direction. What is it?
+  options:
+    - { text: "SLO-optimal joint P/D scheduling and modeling/predicting cross-phase interference, so a co-located scheduler can hit both TTFT and TPOT targets without the transfer tax", correct: true }
+    - { text: "Proving that a single latency number is sufficient after all" }
+    - { text: "Making prefill memory-bandwidth-bound so it matches decode" }
+    - { text: "Eliminating decode entirely via longer prefill" }
+  explanation: >-
+    The open problems are SLO-optimal P/D scheduling (order prefill chunks and decode steps to hit TTFT
+    and TPOT as a joint objective) and modeling phase interference rather than only avoiding it by
+    disaggregating. Predicting the stall on shared hardware is the frontier, not paying to sidestep it.
+
+- id: mc-ops-pd-tpot-spike
+  type: multiple_choice
+  tags: [metrics, ops]
+  difficulty: 4
+  prompt: >-
+    On a live endpoint, TPOT p95 spikes exactly when large prompts arrive, while TTFT stays flat. Reading
+    the per-phase signals, what is happening and which lever addresses it?
+  options:
+    - { text: "A monolithic prefill of a long prompt is stalling in-flight decode; chunked prefill interleaves it so no single prefill spikes others' inter-token latency", correct: true }
+    - { text: "Decode is memory-starved; the fix is to report one combined latency number" }
+    - { text: "Prefill is too small; the fix is decode batching for the long prompt" }
+    - { text: "The weights grew; the fix is re-quantizing the model" }
+  explanation: >-
+    A TPOT (inter-token latency) spike correlated with big prompts is the signature of a monolithic
+    prefill occupying a whole GPU step while in-flight decode waits behind it. Chunked prefill splits that
+    step into chunks interleaved with decode, bounding the TPOT tax on everyone else.
+
+- id: mc-ops-pd-queue-depth
+  type: multiple_choice
+  tags: [metrics, ops]
+  difficulty: 4
+  prompt: >-
+    You are choosing which operational signals to watch so you always know which phase is the bottleneck.
+    Why track prefill and decode queue depth (and SLO-attainment) separately rather than as one number?
+  options:
+    - { text: "A deep prefill queue vs. a deep decode queue points at different bound phases (TTFT vs. TPOT) and different levers; one combined 'pending requests' number hides which phase to fix", correct: true }
+    - { text: "Combined queue depth is always more accurate than per-phase depth" }
+    - { text: "Queue depth is irrelevant once you disaggregate, so any number works" }
+    - { text: "Per-phase metrics only matter for prefill, never for decode" }
+  explanation: >-
+    The topic's cardinal rule carries into ops: never collapse the phases into one number. A deep prefill
+    queue means you're prefill-bound (TTFT slips); a deep decode queue means decode-bound (TPOT slips).
+    Per-phase queue depth, batch composition, and SLO-attainment tell you which phase — and which lever.

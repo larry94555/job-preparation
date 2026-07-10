@@ -52,3 +52,22 @@ year is given it is context, not something to memorize.
   it bound, what regime does it win in, and how would you know it fired?* — the same lens the deep-dive
   lesson uses.
 - Re-read this topic's `expert-surface.md` when the frontier shifts; its 🟡/⬜ items are your next reads.
+
+## Reception & what aged
+- **ReAct became the default agent-loop framing** and Reflexion the canonical "self-critique on top of the
+  loop" reference — both are near-universally cited as the baseline structure that budgets have to bound.
+  What aged: the loops themselves were never a safety mechanism, which is exactly why the guardrail/budget
+  layer had to be bolted on separately.
+- **Anthropic's "Building Effective Agents" (2024) landed as the reigning practitioner counter-narrative:**
+  its headline finding — the most successful teams used *simple, composable patterns*, not heavyweight
+  agent frameworks — is now the standard rebuttal to over-engineered orchestration. Its LLM-as-a-second-
+  instance guardrail pattern (one model answers, another screens) held up as a recommended structure.
+- **Guardrail frameworks split by role, not merged:** NeMo Guardrails (NVIDIA) and Guardrails AI settled in
+  as *content/policy* rails (input/output validation, deny-by-default), while step/tool/token/cost ceilings
+  moved into the agent SDKs themselves. The lesson that aged well is that these are different axes — content
+  guards do not bound a loop, and a step cap does not screen output.
+- **"Detecting stuck" stayed an open problem, as canon claims.** No principled no-progress detector became
+  standard; production still leans on heuristic step-diffing and hard budgets. Criticism of open-ended,
+  budget-less agent loops (runaway cost, retry storms) is now conventional wisdom rather than a hot take.
+- **Verified: ReAct/Reflexion authorship and framing, Anthropic "Building Effective Agents", and the two
+  named guardrail frameworks all check out** — no canon corrections for this topic.

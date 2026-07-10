@@ -1,0 +1,92 @@
+# Frontier & operations drill — closes D2 (frontier awareness drill) and D6 (ops metrics drill).
+
+- id: mc-frontier-obs-otel-stabilizing
+  type: multiple_choice
+  tags: [tracing, frontier]
+  difficulty: 4
+  prompt: >-
+    You instrument your LLM traces against the OpenTelemetry GenAI semantic conventions. What is the
+    frontier caveat an expert flags about relying on them today?
+  options:
+    - { text: "The gen_ai.* conventions are still largely experimental and their scope keeps growing, so pin/opt-in to a convention version and expect attribute churn", correct: true }
+    - { text: "They are a frozen, finalized standard, so no version pinning is ever needed" }
+    - { text: "They only work with a single proprietary vendor's backend" }
+    - { text: "They forbid recording token counts on spans" }
+  explanation: >-
+    The bet that observability should be a portable, vendor-neutral standard aged well, but the standard
+    itself is not frozen: most gen_ai.* attributes remain experimental and scope has crept from
+    single-call tracing toward agent orchestration. Instrument against the conventions for portability,
+    but pin a convention version so a spec bump doesn't silently break dashboards.
+
+- id: mc-frontier-obs-privacy-capture
+  type: multiple_choice
+  tags: [capture, frontier]
+  difficulty: 4
+  prompt: >-
+    Field-level redaction is the current baseline for keeping PII out of captured traces. Where does the
+    privacy-preserving-traces frontier go beyond it, and why?
+  options:
+    - { text: "Toward tokenization/pseudonymization and privacy-preserving capture that survives an audit — because redaction only catches the named fields you thought of, and captured payloads are where PII hides", correct: true }
+    - { text: "Toward logging every raw prompt so nothing is ever lost" }
+    - { text: "Toward disabling payload capture entirely so no debugging is possible" }
+    - { text: "Toward encrypting only the correlation ID while storing prompts in plaintext" }
+  explanation: >-
+    Redaction is brittle: it only masks the PII you named, and prompts/completions are exactly where
+    sensitive data lives. The frontier moves past field redaction toward tokenization/pseudonymization
+    and capture that survives an audit — capture is a privacy liability, and "we redact the obvious
+    fields" is the classic way to ship a leak the rules never saw.
+
+- id: mc-frontier-obs-silent-drift
+  type: multiple_choice
+  tags: [drift, frontier]
+  difficulty: 4
+  prompt: >-
+    Tracing and cost rollups are essentially solved. Which observability problem is still genuinely open
+    at the frontier, and what shape does the emerging approach take?
+  options:
+    - { text: "Automated silent quality-drift detection with no code change — via eval-gated, canary-anchored trending against a version-tagged baseline, not a single static threshold", correct: true }
+    - { text: "Recording latency on a span, which no tool can yet do" }
+    - { text: "Propagating a correlation ID across two services" }
+    - { text: "Summing token counts up a trace tree" }
+    - { text: "Displaying p95 latency on a dashboard" }
+  explanation: >-
+    Tooling converged on spans, correlation IDs, and token/cost rollups. The open problem is catching a
+    silent quality slide with no deploy — a model swap, input-distribution shift, or rotting prompt that
+    never errors. The direction is eval-gated, canary-anchored detection trending scores/distribution
+    against a versioned baseline, since alerting on loud errors misses drift entirely.
+
+- id: mc-ops-obs-per-route-rollup
+  type: multiple_choice
+  tags: [signals, ops]
+  difficulty: 4
+  prompt: >-
+    In production you want to catch the one endpoint whose spend or tail latency is quietly creeping up.
+    Which operational rollup surfaces that, and how should it be grouped?
+  options:
+    - { text: "Recursive token/cost/latency rollups (own + children, all depths) grouped per route/feature/tenant, trending p95/p99 latency and cost per route", correct: true }
+    - { text: "A single global average latency number across all endpoints", correct: false }
+    - { text: "Only the count of total HTTP requests, ungrouped" }
+    - { text: "The model weight file size on disk" }
+  explanation: >-
+    A global number hides the offending route. The discipline is the recursive rollup — own value plus
+    children at all depths — grouped per route/feature/tenant, then trend and alert on p95/p99 latency,
+    cost per route, and error/retry rate. That's the golden-signals lens applied per route, which is how
+    you point at the endpoint whose average tokens or tail latency crept up.
+
+- id: mc-ops-obs-pii-leak-drift-rate
+  type: multiple_choice
+  tags: [drift, ops]
+  difficulty: 4
+  prompt: >-
+    Two live signals specific to safe, trustworthy LLM traces are the PII-leak rate and the drift-alert
+    rate. Why watch each as an ongoing operational metric rather than assuming it's fine?
+  options:
+    - { text: "PII-leak rate is non-zero because redaction only catches named fields, so a rising rate is a forming privacy incident; drift-alert rate must be tuned since too-quiet misses real regressions and too-noisy gets ignored", correct: true }
+    - { text: "Both should always read exactly zero, so no monitoring is required" }
+    - { text: "Both measure GPU temperature and belong to hardware monitoring" }
+    - { text: "PII-leak rate measures disk usage and drift-alert rate measures CPU load" }
+  explanation: >-
+    Redaction only masks named fields, so PII-leak rate — measured by scanning captured payloads, not
+    assumed zero — is a real signal whose rise is a privacy incident forming. Drift-alert rate keeps
+    silent-drift detection honest: too loose a threshold misses a regression, too noisy and the team
+    learns to ignore it, and by definition nothing else pages when quality slides without an error.

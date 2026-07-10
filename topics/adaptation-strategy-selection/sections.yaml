@@ -1,7 +1,7 @@
 sections:
   - id: sec-approaches-and-axes
     title: "Approaches & decision axes"
-    lessons: [lesson-approaches, lesson-decision, lesson-build-choose-strategy, lesson-expert-context, lesson-deep-dive]
+    lessons: [lesson-approaches, lesson-decision, lesson-build-choose-strategy, lesson-expert-context, lesson-deep-dive, lesson-frontier-ops]
     assessment:
       title: "Section 1 — Approaches & decision axes"
       from_tags: [approaches, decision]

@@ -1,0 +1,93 @@
+# Frontier & operations drill — closes D2 (frontier drill) and D6 (ops metrics drill).
+
+- id: mc-frontier-fc-leaderboard
+  type: multiple_choice
+  tags: [contract, frontier]
+  difficulty: 4
+  prompt: >-
+    The Berkeley Function-Calling Leaderboard made tool-calling reliability comparable across models.
+    What does it actually score — and what is the reliability lesson to carry from it?
+  options:
+    - { text: "Argument correctness and call structure (not vibes) — reliability is an evaluated property, so you regression-test a dispatcher the way the leaderboard scores a model", correct: true }
+    - { text: "How fast each model emits its first token, so you pick the lowest-latency model" }
+    - { text: "Whether the model's prose answer sounds confident about the tool it chose" }
+    - { text: "The total number of tools a model has memorized, rewarding larger tool menus" }
+  explanation: >-
+    The Berkeley Function-Calling Leaderboard evaluates argument correctness and call structure across
+    models — a measurable property, not vibes. The frontier lesson is that reliability is *evaluated*:
+    you regression-test your own dispatcher against a fixed set rather than trusting that it "usually"
+    calls the right tool. Latency and confidence are not what it scores.
+
+- id: mc-frontier-fc-mcp
+  type: multiple_choice
+  tags: [contract, frontier]
+  difficulty: 4
+  prompt: >-
+    MCP (Model Context Protocol, Anthropic) is described as the open standard for the tool boundary.
+    Why does standardizing that boundary matter for *reliability* specifically?
+  options:
+    - { text: "It moves tool discovery, scoping, and validation to one shared seam, so a tool is validated and observed once instead of re-wired and re-checked per vendor", correct: true }
+    - { text: "It guarantees the model never hallucinates a tool call, removing the need to validate arguments" }
+    - { text: "It compresses tool schemas so they cost zero context tokens" }
+    - { text: "It replaces idempotency keys by making every mutating call automatically exactly-once" }
+  explanation: >-
+    MCP standardizes *where the contract lives*: discovery, scoping, and validation collapse to a single
+    shared seam, so validation and observability are implemented once rather than per integration. It
+    does not remove the need to validate, make schemas free, or solve exactly-once — those remain the
+    dispatcher's and the open problems' job.
+
+- id: mc-frontier-fc-open-problem
+  type: multiple_choice
+  tags: [idempotency, frontier]
+  difficulty: 4
+  prompt: >-
+    A retrying agent loop hedges a mutating tool call and occasionally applies the effect twice under
+    partial failure. Which named open problem on the function-calling frontier is this, and what is the
+    direction of the fix?
+  options:
+    - { text: "Exactly-once at scale — the distributed-systems edge of idempotency; the direction is pushing idempotency keys end-to-end so retries and hedges converge on one effect", correct: true }
+    - { text: "Robust argument grounding — fixed by adding more few-shot examples to the prompt" }
+    - { text: "Reliable multi-tool orchestration — fixed by sending every tool schema on every request" }
+    - { text: "It is not an open problem; a single idempotency key trivially guarantees exactly-once under any failure" }
+  explanation: >-
+    Double-applying a mutation under retries/hedging/partial failure is exactly-once at scale — canon's
+    hard, unsolved edge of idempotency. The direction is end-to-end idempotency keys so identical retries
+    converge on one effect. Argument grounding (keeping args tied to real state) and multi-tool
+    orchestration are the other two open problems, and a single local key does not "trivially" solve
+    exactly-once under partial failure.
+
+- id: mc-ops-fc-validation-rate
+  type: multiple_choice
+  tags: [validation, ops]
+  difficulty: 4
+  prompt: >-
+    Your dispatcher's tool-argument validation-failure rate climbs steadily after a model upgrade,
+    though no wrong side effects have fired yet. What is the right read?
+  options:
+    - { text: "It is a leading indicator that argument grounding is drifting — you fail closed, so rejections rise before any wrong side effect executes; investigate the model/schema change", correct: true }
+    - { text: "Nothing to act on until an actual bad side effect executes and causes an incident" }
+    - { text: "The tools themselves have gotten slower, so raise their latency timeouts" }
+    - { text: "The registry is missing tools, so the fix is to add more tools" }
+  explanation: >-
+    Validation-failure rate is the share of calls rejected for failing schema validation. Because you
+    fail closed, a rising rate surfaces grounding drift (a model regression, a changed schema) *before*
+    a wrong side effect can execute — it is a leading indicator to investigate, not a non-event.
+    Latency and registry size are different signals (tool latency/error rate and unknown-tool rate).
+
+- id: mc-ops-fc-duplicate-exec
+  type: multiple_choice
+  tags: [idempotency, ops]
+  difficulty: 4
+  prompt: >-
+    You want the operational signal that most directly catches a broken or missing idempotency key on a
+    mutating tool — before it becomes a double-charge incident. Which metric do you watch?
+  options:
+    - { text: "Duplicate-execution rate — how often a mutating call actually runs more than once, distinct from retry count, which exposes idempotency collapsing (or failing to)", correct: true }
+    - { text: "Total prompt tokens spent on tool schemas per request" }
+    - { text: "The number of distinct tools registered in the dispatcher" }
+    - { text: "The model's average confidence score on its tool selection" }
+  explanation: >-
+    Retries are expected; the reliability question is whether idempotency collapses N retries into one
+    effect. Duplicate *executions* (not retries) is therefore the metric that catches a broken/missing
+    idempotency key before it becomes a double-charge. Schema token budget and tool count are other
+    operational concerns; model confidence is not an execution-safety signal.

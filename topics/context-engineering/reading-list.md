@@ -53,3 +53,23 @@ year is given it is context, not something to memorize.
 - For any new context technique, ask the three canon questions: *what does it trade (quality/latency/
   budget), what regime does it win in, and what eval proves it?* — the same lens the deep-dive lesson uses.
 - Re-read this topic's `expert-surface.md` when the frontier shifts; its 🟡/⬜ items are your next reads.
+
+## Reception & what aged
+- **"Lost in the Middle" aged remarkably well — the U-curve is now conventional wisdom.** The finding was
+  replicated and extended: the positional sag first shown at 4K–32K windows was later confirmed to persist in
+  128K+ models, and 2025 "context rot" studies across GPT-4.1, Claude 4, Gemini 2.5 and Qwen3 found newer
+  models still don't use context uniformly and degrade as input grows. "Rank and place, don't just dump"
+  became standard practice.
+- **The paper described the *what*; later work supplied the *why*.** The original attributed the effect
+  empirically; 2025 analyses tied it to architectural causes (causal masking, attention/positional dynamics),
+  turning a surprising benchmark result into a better-understood property of transformers.
+- **Needle-in-a-Haystack aged into a *floor*, not a ceiling.** NIAH became the ubiquitous first stress test,
+  but the field quickly judged single-needle retrieval too easy — **RULER** was built precisely because NIAH
+  is "only a superficial form of long-context understanding," generalizing to multi-needle, tracing, and
+  aggregation tasks. Passing NIAH is now table stakes, not evidence of usable long context.
+- **RULER succeeded at making "effective vs. advertised context" measurable and stuck.** Its framing — that
+  the claimed window and the usable window diverge, often well before the stated limit — is now the standard
+  lens for evaluating long-context claims, and it is routinely run out to very long sequence lengths.
+- **The "long context replaces RAG?" debate is where this topic's stakes landed.** The positional/rot findings
+  are a core reason retrieval + compaction pipelines persisted rather than being made obsolete by bigger
+  windows — building the context stayed the unit of progress, exactly as the canon frames it.

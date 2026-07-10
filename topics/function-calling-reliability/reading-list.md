@@ -46,3 +46,25 @@ year is given it is context, not something to memorize.
 - When a new tool-calling technique appears, ask the three canon questions: *what does it trade (reliability/latency/
   cost), what regime does it win in, and what eval proves it?* — the same lens the deep-dive lesson uses.
 - Re-read this topic's `expert-surface.md` when the frontier shifts; its 🟡/⬜ items are your next reads.
+
+## Reception & what aged
+- **Toolformer's *thesis* (tool use is learnable) aged well; its *recipe* did not become the deployed path.**
+  Production tool use converged on instruction-tuned / RLHF'd **native function calling** baked into the
+  models by providers, not on Toolformer's specific self-supervised annotation method. The lasting takeaway is
+  the boundary — model as *caller* of contracts, harness as *executor/validator*.
+- **Gorilla's retrieval-augmented grounding aged better than "just fine-tune on APIs."** The durable idea is
+  conditioning the model on retrieved API signatures at inference time (so it adapts to changing/version-shifting
+  tools without memorizing them) — a pattern that persisted even as the standalone LLaMA-based Gorilla model
+  was overtaken by native tool-calling in frontier models.
+- **BFCL succeeded and stuck as *the* reliability yardstick, and evolved with the field.** It made
+  argument-correctness and call-structure measurable across models and now distinguishes native FC from
+  prompt-based workarounds; it has since expanded from single tool calls toward multi-turn / agentic
+  evaluation (BFCL V4), tracking where the hard problems actually moved.
+- **MCP aged from a bet into a de-facto standard fast.** Announced by Anthropic on 2024-11-25, it was adopted
+  across the industry within months (OpenAI in early 2025, Google DeepMind shortly after), validating the
+  canon's "the interface every host/agent is converging on" framing — the tool boundary standardized roughly
+  as predicted.
+- **The unglamorous engineering — typed contracts, argument validation, idempotency — aged as the real
+  reliability lever.** Even with native tool calling and constrained output, validate-and-reject plus
+  idempotency keys remained necessary; the open edges (multi-tool orchestration, exactly-once at scale) are
+  still where failures are silent and compounding, exactly as flagged.

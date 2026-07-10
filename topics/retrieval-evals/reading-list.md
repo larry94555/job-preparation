@@ -57,3 +57,24 @@ year is given it is context, not something to memorize.
   lens the deep-dive lesson uses. Above all, keep asking whether a score is separating retrieval from
   grounding or quietly conflating them.
 - Re-read this topic's `expert-surface.md` when the frontier shifts; its 🟡/⬜ items are your next reads.
+
+## Reception & what aged
+- **"Recall@k alone is insufficient" became the consensus criticism.** The field converged on the view that
+  a retriever can hit recall@k and still produce ungrounded answers — which is why grounding/faithfulness
+  metrics (not just ranked-list metrics) are now considered mandatory for RAG eval. Canon's "separate a
+  retrieval miss from a grounding failure" is the standard framing.
+- **BEIR (Thakur et al., 2021) aged into the default zero-shot retrieval benchmark** and MTEB (Muennighoff
+  et al., 2022; note the paper carries a 2023 venue date) into the default embedding leaderboard — later
+  extended by MMTEB (multilingual). The durable lesson held: a strong MTEB score is necessary but not
+  sufficient, because it grades the embedding, not the end-to-end answer.
+- **RAGAS (Exploding Gradients, 2023) popularized component-isolated, reference-free RAG metrics**
+  (faithfulness, answer relevance, context precision/recall) and became the most-cited RAG eval framework.
+  What aged into criticism: its LLM-judge-based faithfulness scoring inherits judge bias and cost, so it is
+  now treated as a signal to validate, not a ground truth.
+- **The judge tension (NLI-entailment vs. LLM-judge) stayed unresolved,** as canon claims. Faithfulness
+  measurement, cheap reliable labels, and judge-agreement drift remain open; "our judge is calibrated"
+  claims are met with demands for eval-of-the-eval evidence.
+- **TREC's pooled-qrels methodology aged as the acknowledged ancestor** of all the above — modern benchmarks
+  inherited both its pooling method and its labeling-cost problem, which is why synthetic-label quality is
+  now the live bottleneck. Verified: RAGAS 2023, BEIR 2021, MTEB (Muennighoff), and TREC framing all check
+  out — no canon corrections.

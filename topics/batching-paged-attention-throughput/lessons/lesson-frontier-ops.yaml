@@ -1,0 +1,11 @@
+id: lesson-frontier-ops
+title: "Frontier & operations: goodput scheduling, fairness/interference, and the signals to watch"
+material: frontier-ops.md
+segments:
+  - present: the-batching-paged-attention-throughput-frontier
+  - check: mc-frontier-batch-goodput-knee
+  - check: mc-frontier-batch-fairness-isolation
+  - check: mc-frontier-batch-chunked-prefill
+  - present: operating-batching-in-production
+  - check: mc-ops-batch-goodput-vs-throughput
+  - check: mc-ops-batch-queue-preemption

@@ -49,3 +49,19 @@ year is given it is context, not something to memorize.
   what SLO regime does it win in, and what eval + cost measurement proves it?* — the SLO-anchored lens the
   deep-dive lesson uses.
 - Re-read this topic's `expert-surface.md` when the frontier shifts; its 🟡/⬜ items are your next reads.
+
+## Reception & what aged
+- **vLLM/PagedAttention and continuous batching became table stakes.** Orca's iteration-level batching (Yu
+  et al., OSDI 2022) and PagedAttention (Kwon et al., 2023) aged into the *baseline* every serving engine now
+  ships; the interesting debates moved up-stack to scheduling and disaggregation, not whether to page the KV cache.
+- **Chunked prefill vs. prefill/decode disaggregation is a live, unsettled debate.** Sarathi's chunked-prefill
+  (Agrawal et al., MSR; Sarathi-Serve at OSDI 2024) and DistServe/Splitwise's physical P/D split (2024) are
+  competing answers to the same TTFT/TPOT tension — recent work (2025) even argues for unifying both, so the
+  "which wins" question aged as genuinely open.
+- **FrugalGPT's cascade idea aged well and productized.** Chen, Zaharia & Zou (Stanford, 2023,
+  arXiv:2305.05176) framed the cost-vs-quality cascade that now underlies routing gateways (LiteLLM,
+  OpenRouter, RouteLLM), confirming cost as a first-class axis rather than an afterthought.
+- **The "no free lunch / four coupled axes" frame held up; joint multi-objective SLO optimization stayed open.**
+  The load-bearing claim that every lever moves at least two axes remains true in practice, and predictable p99
+  under load / joint latency-throughput-cost-quality optimization is still the acknowledged frontier.
+

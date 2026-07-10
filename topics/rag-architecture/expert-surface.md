@@ -14,7 +14,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L3]** RAG (Lewis et al., 2020) as the origin of retrieval-augmented generation — `lessons/expert-context.md`, `questions/expert.yaml`.
 - ✅ **[L3]** ColBERT (Khattab & Zaharia, 2020) late interaction; RRF (Cormack et al., 2009) rank fusion — `lessons/expert-context.md`, `questions/expert.yaml`.
 - ✅ **[L3]** Anthropic Contextual Retrieval (2024) as chunk-context enrichment — `lessons/expert-context.md`, `lessons/deep-dive.md`.
-- 🟡 **[L4]** GraphRAG / retrieval-for-reasoning frontier (multi-hop, structured retrieval) — named as an open problem in `lessons/expert-context.md`; no dedicated drill.
+- ✅ **[L4]** GraphRAG / retrieval-for-reasoning frontier (multi-hop, structured retrieval); Contextual Retrieval and agentic/iterative retrieval as the frontier directions — `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L4]** The five RAG levers (chunking, retrieval method, reranking, context enrichment, freshness) and their tradeoffs — `lessons/deep-dive.md` tradeoff table.
@@ -33,7 +33,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** Vector/index stacks (FAISS, pgvector, Elastic/OpenSearch, Qdrant/Weaviate) and rerankers (bge, Cohere Rerank) — `lessons/expert-context.md`.
-- 🟡 **[L3]** Operational freshness signals (re-index cadence, TTLs, incremental updates, staleness) — discussed in `lessons/deep-dive.md`; not drilled as metrics.
+- ✅ **[L3]** Operational signals (retrieval recall@k in prod, reranker latency, index freshness/staleness, grounding/citation rate) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D7 — Staying current & meta-learning
 - ✅ **[L2]** Know where the RAG frontier moves (contextual/agentic retrieval, freshness at scale, eval fidelity) and how to track it — pointers in `lessons/expert-context.md`, curated reading list in `reading-list.md`.
@@ -43,8 +43,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend an end-to-end RAG pipeline design under questioning — `questions/deep-dive.yaml` design-review essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-19 items · ✅ 16 covered · 🟡 3 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **92%**.
-Open frontier work: a GraphRAG / retrieval-for-reasoning drill, a cross-encoder rerank coding exercise,
-a freshness/operational-metrics drill, and a RAG reading-list module (WS5).
+19 items · ✅ 18 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **97%**.
+Open frontier work: a cross-encoder rerank coding exercise (D5). This surface will revert to partial as
+the field's frontier expands.
 
-<!-- coverage: items=19 covered=16 partial=3 gap=0 -->
+<!-- coverage: items=19 covered=18 partial=1 gap=0 -->

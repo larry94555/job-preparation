@@ -1,0 +1,89 @@
+# Frontier & operations drill — closes D2 (embedding-space-leakage frontier drill) and
+# D6 (ops metrics drill). Section tag is [isolation] so these enter the Section 1 pool.
+
+- id: mc-frontier-mti-embedding-leak
+  type: multiple_choice
+  tags: [isolation, frontier]
+  difficulty: 4
+  prompt: >-
+    Your design already uses tenant-scoped cache keys and pre-filtered retrieval. What is the open
+    frontier problem that these still do not close?
+  options:
+    - { text: "Embedding-space leakage — the geometry of a shared embedding space (similarity scores, nearest-neighbor structure) can carry information across tenants even with scoped keys, and nobody ships a proof of non-leakage", correct: true }
+    - { text: "Nothing — scoped keys plus pre-filtering are a proven guarantee of isolation" }
+    - { text: "The cache key hash is too slow and must be replaced" }
+    - { text: "Retrieval must be post-filtered instead of pre-filtered to be safe" }
+  explanation: >-
+    Even with scoped keys and pre-filtering, a shared embedding space can leak through its geometry —
+    similarity itself becomes a side channel. Provable isolation and safe cross-user reuse remain open;
+    nobody ships a proof of embedding-space non-leakage. Post-filtering is unsafe, and the hash is not
+    the issue.
+
+- id: mc-frontier-mti-owasp-llm08
+  type: multiple_choice
+  tags: [isolation, frontier]
+  difficulty: 4
+  prompt: >-
+    OWASP's LLM Top 10 added an entry that names embedding-store and cross-tenant retrieval leakage as a
+    recognized production risk. Which entry is it?
+  options:
+    - { text: "Vector and Embedding Weaknesses (LLM08) — it acknowledges embedding-store and cross-tenant retrieval leakage as a real weakness class, not a footnote", correct: true }
+    - { text: "A rule that bans caching in multi-tenant systems entirely" }
+    - { text: "A requirement that all tenants share one global embedding namespace" }
+    - { text: "A guarantee that vector databases are isolated by default" }
+  explanation: >-
+    OWASP added Vector and Embedding Weaknesses (LLM08), alongside Sensitive Information Disclosure
+    (LLM02), reflecting that embedding-store and cache leakage crossed from theory into an acknowledged
+    production surface. It names the weakness class; it does not ban caching or guarantee isolation.
+
+- id: mc-frontier-mti-noisy-neighbor
+  type: multiple_choice
+  tags: [isolation, frontier]
+  difficulty: 4
+  prompt: >-
+    A reviewer says "one tenant's burst of expensive long-context requests slows every other tenant."
+    How is this framed differently from the usual cross-tenant leak?
+  options:
+    - { text: "It is the availability face of isolation, not confidentiality — no data crosses the boundary; you bound the blast radius with per-tenant quotas, rate limits, and partitions", correct: true }
+    - { text: "It is the same as a cache-key leak and is fixed by scoping the cache key" }
+    - { text: "It is solved by switching embedding models so tenants separate in vector space" }
+    - { text: "It is a confidentiality breach because latency reveals another tenant's data" }
+  explanation: >-
+    Noisy-neighbor / quota isolation is about availability and fairness — one tenant starving shared
+    capacity — with no data crossing the tenant boundary. You reason about it as capacity, bounding the
+    blast radius with per-tenant quotas, rate limits, and partitions, not with a cache-key or embedding
+    fix.
+
+- id: mc-ops-mti-leak-test-rate
+  type: multiple_choice
+  tags: [isolation, ops]
+  difficulty: 4
+  prompt: >-
+    Which single operational signal do you gate every release on to confirm the tenant boundary still
+    holds across shared surfaces?
+  options:
+    - { text: "Cross-tenant leak-test pass rate — a suite that seeds tenant A, queries as tenant B across cache, index, sessions, and logs, and asserts a zero cross-tenant leak rate", correct: true }
+    - { text: "Total GPU power draw across the cluster" }
+    - { text: "The number of tenants signed up this quarter" }
+    - { text: "The size of the embedding model on disk" }
+  explanation: >-
+    The release gate is a cross-tenant leak test asserting a zero leak rate across every shared surface.
+    Any leak, ever, fails the build — this is what distinguishes a production-grade design from one that
+    only "works in the demo." Power draw, tenant count, and model size say nothing about the boundary.
+
+- id: mc-ops-mti-noisy-variance
+  type: multiple_choice
+  tags: [isolation, ops]
+  difficulty: 4
+  prompt: >-
+    Per-tenant tail-latency spread under shared load has widened — some tenants fast, some starved —
+    while quota-error counts are still near zero. What does this tell you?
+  options:
+    - { text: "Rising noisy-neighbor latency variance is the leading indicator that quota/partition isolation is too coarse — one tenant's load is bleeding into another's latency before it shows up as quota errors", correct: true }
+    - { text: "Nothing — with quota errors near zero, isolation on the availability axis is fine" }
+    - { text: "It is a confidentiality leak and should fail the cross-tenant leak test" }
+    - { text: "It means the cache keys regressed to tenant-blind" }
+  explanation: >-
+    Latency variance across tenants rises before quota errors do, so it is the leading availability signal
+    that partition/quota isolation is too coarse and one tenant is starving others. It is not a
+    confidentiality leak and is unrelated to cache-key scope; low quota errors do not clear it.

@@ -47,3 +47,25 @@ year is given it is context, not something to memorize.
   lens the deep-dive lesson uses to separate a retrieval miss from a grounding failure.
 - Re-read this topic's `expert-surface.md` when the frontier shifts; its 🟡/⬜ items — a GraphRAG drill,
   a cross-encoder rerank exercise, freshness metrics — are your next reads.
+
+## Reception & what aged
+- **RAG (Lewis et al., FAIR, NeurIPS 2020) named the paradigm that became the default architecture** for
+  knowledge-grounded LLM apps. What aged: the original RAG-Sequence/RAG-Token formulation is now historical
+  — production RAG looks nothing like it — but the core bet (volatile facts in an updatable index, not in
+  weights) is more entrenched than ever.
+- **"Naive RAG" became a term of criticism.** Fixed-size chunking + dense-only retrieval + no reranker is
+  now the widely-cited straw man; the field moved decisively to hybrid (dense + BM25) + fusion + cross-
+  encoder rerank as the expected baseline. Canon's red-flag list matches how practitioners actually
+  critique pipelines today.
+- **Reciprocal Rank Fusion (Cormack, Clarke & Buettcher, SIGIR 2009) became *the* default hybrid-fusion
+  baseline.** Its position-only, score-normalization-free combination is what vector DBs and search stacks
+  ship as their built-in hybrid fusion — a 2009 IR method that aged into the modern RAG default.
+- **Anthropic "Contextual Retrieval" (2024) landed as a concrete, widely-adopted fix for lost-referent
+  chunks:** prepend document context before embedding + BM25, and its reported failure-rate reductions
+  (~35% contextual embeddings, ~49% adding contextual BM25, ~67% adding reranking) are frequently cited.
+  It reinforced that chunking quality, not just the retriever, is often the bottleneck.
+- **ColBERT (Khattab & Zaharia, SIGIR 2020) aged as the reference for late interaction** — more expressive
+  matching at the cost of a larger, heavier index. That storage/latency tradeoff (partly addressed by
+  ColBERTv2) is exactly why single-vector dense retrieval stayed the common default. Verified: all four
+  named papers/venues (Lewis 2020, ColBERT 2020, RRF 2009, Contextual Retrieval 2024) check out — no canon
+  corrections.

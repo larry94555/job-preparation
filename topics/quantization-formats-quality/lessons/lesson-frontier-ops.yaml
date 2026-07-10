@@ -1,0 +1,11 @@
+id: lesson-frontier-ops
+title: "Frontier & operations: sub-4-bit/FP8, activation quantization, and eval-gating in production"
+material: frontier-ops.md
+segments:
+  - present: the-quantization-formats-quality-frontier
+  - check: mc-frontier-quant-fp8-range
+  - check: mc-frontier-quant-smoothquant-move
+  - check: mc-frontier-quant-low-bit-prediction
+  - present: operating-quantization-in-production
+  - check: mc-ops-quant-perplexity-gap
+  - check: mc-ops-quant-eval-gate

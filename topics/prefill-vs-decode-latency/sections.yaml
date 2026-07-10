@@ -10,7 +10,7 @@ sections:
 
   - id: sec-optimization
     title: "Optimization: batching, chunked prefill & disaggregation"
-    lessons: [lesson-batching, lesson-build-latency-model, lesson-deep-dive]
+    lessons: [lesson-batching, lesson-build-latency-model, lesson-deep-dive, lesson-frontier-ops]
     assessment:
       title: "Section 2 — Batching & scheduling"
       from_tags: [optimization]

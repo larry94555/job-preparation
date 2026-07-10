@@ -13,8 +13,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D2 — Literature, canon & frontier awareness
 - ✅ **[L3]** FrugalGPT (Chen et al. 2023) as the LLM-cascade cost paper — `lessons/expert-context.md`, `questions/expert.yaml` `[canon]`.
 - ✅ **[L3]** FinOps-for-LLM practice: tag, attribute, optimize continuously rather than read one invoice — `lessons/expert-context.md`, `lessons/deep-dive.md`.
-- 🟡 **[L4]** Predicting per-feature cost before ship and cost-per-successful-outcome vs. per-token unit economics — named as open problems in `lessons/expert-context.md`; no dedicated drill.
-- ⬜ **[L4]** Fair per-tenant/per-feature attribution at scale (shared/cached/async allocation policy) — named as the hard open problem in `lessons/deep-dive.md`; no exercise or policy drill.
+- ✅ **[L4]** Predicting per-feature cost before ship and cost-per-successful-outcome vs. per-token unit economics — `lessons/frontier-ops.md`, `questions/frontier-ops.yaml` `[frontier]`.
+- ✅ **[L4]** Fair per-tenant/per-feature attribution at scale (shared/cached/async allocation policy; FrugalGPT cascades across tiers) — `lessons/frontier-ops.md`, `questions/frontier-ops.yaml` `[frontier]`.
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L4]** The five cost-attribution levers (granularity, tag propagation, unit metric, cost lens, shared-cost handling) and their tradeoffs — `lessons/deep-dive.md` tradeoff table.
@@ -32,7 +32,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** Helicone / LiteLLM / Langfuse as the per-request cost-tracking stacks, plus custom aggregators — `lessons/expert-context.md`, `lessons/deep-dive.md`.
-- 🟡 **[L3]** Operational coverage signals (unattributed spend %, tenant-blind cache, untagged async jobs) — discussed in `lessons/deep-dive.md`; not drilled as metrics.
+- ✅ **[L3]** Operational cost signals (cost-per-success by feature/tenant, tag-coverage %, cache-hit cost savings, cost-per-request trend) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml` `[ops]`.
 
 ## D7 — Staying current & meta-learning
 - ✅ **[L2]** Know where the cost frontier moves (predictive per-feature cost, fair shared-cost allocation) and how to track it — `reading-list.md`, plus pointers in `lessons/expert-context.md`.
@@ -42,9 +42,10 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a cost-attribution design under questioning — `questions/deep-dive.yaml` design-review essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-18 items · ✅ 15 covered · 🟡 2 partial · ⬜ 1 gap. Weighted coverage (covered=1, partial=0.5) ≈ **89%**.
-Open frontier work: a predictive per-feature-cost / cost-per-successful-outcome drill, a fair
-shared-cost allocation exercise for per-tenant/per-feature attribution at scale, and an operational
-coverage-metrics drill.
+18 items · ✅ 18 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+The D2 frontier (cost-per-successful-outcome vs. per-token, FrugalGPT cascades, fair shared/cached/async
+allocation) and the D6 operational cost signals are now drilled in `lessons/frontier-ops.md` and
+`questions/frontier-ops.yaml`. This surface is fully covered as of the snapshot; it will revert to
+partial as the field's frontier expands.
 
-<!-- coverage: items=18 covered=15 partial=2 gap=1 -->
+<!-- coverage: items=18 covered=18 partial=0 gap=0 -->

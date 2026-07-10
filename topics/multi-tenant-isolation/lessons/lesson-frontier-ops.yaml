@@ -1,0 +1,11 @@
+id: lesson-frontier-ops
+title: "Frontier & operations: embedding-space leakage, noisy neighbors, and the signals to watch"
+material: frontier-ops.md
+segments:
+  - present: the-multi-tenant-isolation-frontier
+  - check: mc-frontier-mti-embedding-leak
+  - check: mc-frontier-mti-owasp-llm08
+  - check: mc-frontier-mti-noisy-neighbor
+  - present: operating-multi-tenant-isolation-in-production
+  - check: mc-ops-mti-leak-test-rate
+  - check: mc-ops-mti-noisy-variance

@@ -56,3 +56,18 @@ year is given it is context, not something to memorize.
 - Watch for work on the open problems: principled selection, method combination, and continual/online
   adaptation — these are where the frontier moves.
 - Re-read this topic's `expert-surface.md` when the frontier shifts; its 🟡/⬜ items are your next reads.
+
+## Reception & what aged
+- **LoRA became *the* default PEFT method.** Hu et al. (2021 preprint, arXiv:2106.09685; ICLR 2022) is now
+  the canonical parameter-efficient fine-tuning technique — reference implementations, QLoRA, and adapter
+  ecosystems made "fine-tune = train a LoRA" the practitioner default, exactly as the topic frames it.
+- **RAG became the default lever for volatile facts and attribution.** Lewis et al. (2020) aged into an
+  entire product category; the parametric-vs-nonparametric-memory framing held, and RAG (not fine-tuning)
+  is the accepted answer for freshness and citations across the industry.
+- **The escalation ladder (prompt → RAG → fine-tune → distill) held up as guidance.** "Reach for the lightest
+  lever first" remains sound advice, and "fine-tuning for volatile facts" is still the textbook antipattern —
+  neither aged out as the tooling matured.
+- **Distillation aged into a mainstream deployment step, and hybrids became normal.** Hinton et al. (2015)
+  soft-target distillation underpins today's small/"mini" production models, and stacked RAG+PEFT+distillation
+  pipelines are common — validating the open-problem note that each added lever multiplies the eval surface.
+

@@ -14,7 +14,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L3]** ReAct (Yao et al. 2022) as the reason-then-act loop that most harnesses harden — `lessons/expert-context.md`, `questions/expert.yaml` `[canon]`.
 - ✅ **[L3]** Reflexion (Shinn et al. 2023) for self-reflection/retry and Toolformer (Schick et al. 2023) for learned tool use — `lessons/expert-context.md`, `questions/expert.yaml`.
 - ✅ **[L3]** Anthropic "Building Effective Agents" (2024) as the simplicity/composability touchstone — `lessons/expert-context.md`.
-- ⬜ **[L4]** SWE-bench-style agentic coding harnesses as a benchmark frontier — named in `lessons/expert-context.md`; no dedicated paper/benchmark drill.
+- ✅ **[L4]** SWE-bench-style agentic coding harnesses as a benchmark frontier — long-horizon verifiable work where verification (tests/diff) decides success — `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L4]** The five harness levers (boundary placement, loop control, verification, tool contract/permissions, orchestration shape) and their tradeoffs — `lessons/deep-dive.md` tradeoff table.
@@ -32,7 +32,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** Claude Agent SDK, OpenAI Agents SDK, LangChain/LlamaIndex, smolagents as harness stacks; AutoGPT as the unbounded-loop cautionary tale — `lessons/expert-context.md`.
-- 🟡 **[L3]** Operational signals for a running harness (step/tool/token/cost budgets consumed, stop-reason distribution, retry/verification-failure rate) — budgets discussed in `lessons/deep-dive.md`; not drilled as production metrics.
+- ✅ **[L3]** Operational signals for a running harness (steps/task, stop-reason distribution, budget-exhaustion rate, tool-error/retry rate, verification-failure rate, stuck/no-progress detection) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D7 — Staying current & meta-learning
 - ✅ **[L2]** Know where the harness frontier moves (long-horizon autonomy, verifying open-ended tasks, robust error recovery) and how to track it — `reading-list.md` (curated papers/tools + a staying-current method), plus pointers in `lessons/expert-context.md`.
@@ -42,8 +42,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a harness design under questioning — lead with the boundary, then a ReAct loop with verification, then budgets/termination — `questions/deep-dive.yaml` design essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-18 items · ✅ 14 covered · 🟡 3 partial · ⬜ 1 gap. Weighted coverage (covered=1, partial=0.5) ≈ **86%**.
-Open frontier work: a SWE-bench-style agentic-coding benchmark drill, coding exercises for verification/idempotency
-and tool-argument validation/repair, and a harness operational-metrics drill.
+20 items · ✅ 18 covered · 🟡 2 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **95%**.
+Open frontier work: coding exercises for deterministic verification/idempotency and for tool-argument
+validation/repair (the two remaining D5 partials).
 
-<!-- coverage: items=18 covered=14 partial=3 gap=1 -->
+<!-- coverage: items=20 covered=18 partial=2 gap=0 -->

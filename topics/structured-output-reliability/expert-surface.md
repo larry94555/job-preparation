@@ -13,8 +13,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D2 — Literature, canon & frontier awareness
 - ✅ **[L3]** Outlines (Willard & Louf, 2023) as the grammar/finite-state constrained-decoding origin — `lessons/expert-context.md`, `questions/expert.yaml` `[canon]`.
 - ✅ **[L3]** Instructor (Jason Liu), jsonformer, and provider "JSON mode" as schema-first structured-output tooling — `lessons/expert-context.md`, `questions/expert.yaml` `[canon]`.
-- 🟡 **[L4]** Semantic (not just syntactic) validity as the live open problem — named in `lessons/expert-context.md`/`deep-dive.md`; no dedicated business-rule-validation drill.
-- 🟡 **[L4]** Quality effects of aggressive constraints (token-distribution steering) — named as a cost in `lessons/02-validation.md`/`deep-dive.md`; not measured or drilled.
+- ✅ **[L4]** Semantic (not just syntactic) validity as the live open problem — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
+- ✅ **[L4]** Quality effects of aggressive constraints (token-distribution steering; eval-gated adoption) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L4]** The five levers (prevention, contract, recovery, degradation, observability) and their tradeoffs — `lessons/deep-dive.md` tradeoff table.
@@ -33,7 +33,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** Zod/Pydantic/Ajv, Outlines, Instructor, llama.cpp GBNF as the structured-output stack — `lessons/expert-context.md`, `deep-dive.md`.
-- 🟡 **[L3]** Log and classify failures (malformed/missing/type/enum/truncation) to decide prevention-vs-repair investment — discussed in `lessons/deep-dive.md`; not drilled as an observability/metrics exercise.
+- ✅ **[L3]** Operational signals (schema-validation failure rate by class, repair-attempt rate, fallback rate, constrained-decoding latency overhead) to decide prevention-vs-repair investment — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D7 — Staying current & meta-learning
 - ✅ **[L2]** Track where the frontier moves (semantic validity, constraint quality cost, new constrained-decoding runtimes) — pointers in `lessons/expert-context.md`; curated `reading-list.md` (WS5).
@@ -43,9 +43,9 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a repair + fallback chain under questioning — `questions/essay.yaml` `essay-so-interview`, `questions/expert.yaml` interview items.
 
 ## Coverage summary
-20 items · ✅ 16 covered · 🟡 3 partial · ⬜ 1 gap. Weighted coverage (covered=1, partial=0.5) ≈ **88%**.
-Open frontier work: a hands-on constrained-decoding library exercise (the one hard gap), a
-semantic/business-rule validation drill, a measured constraint-quality-cost exercise, and a
-failure-classification observability drill.
+20 items · ✅ 19 covered · 🟡 0 partial · ⬜ 1 gap. Weighted coverage (covered=1, partial=0.5) = **95%**.
+Open frontier work: a hands-on constrained-decoding library exercise (Outlines / GBNF / provider JSON
+mode end-to-end) remains the one hard gap; the frontier and operational drills are now covered by
+`lessons/frontier-ops.md`.
 
-<!-- coverage: items=20 covered=16 partial=3 gap=1 -->
+<!-- coverage: items=20 covered=19 partial=0 gap=1 -->

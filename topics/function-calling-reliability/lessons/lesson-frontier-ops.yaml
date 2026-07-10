@@ -1,0 +1,11 @@
+id: lesson-frontier-ops
+title: "Frontier & operations: leaderboards, MCP, exactly-once, and the signals to watch"
+material: frontier-ops.md
+segments:
+  - present: the-function-calling-reliability-frontier
+  - check: mc-frontier-fc-leaderboard
+  - check: mc-frontier-fc-mcp
+  - check: mc-frontier-fc-open-problem
+  - present: operating-function-calling-in-production
+  - check: mc-ops-fc-validation-rate
+  - check: mc-ops-fc-duplicate-exec

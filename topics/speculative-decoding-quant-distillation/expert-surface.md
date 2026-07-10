@@ -14,7 +14,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L3]** Speculative decoding origin: Leviathan et al. (Google) and Chen et al. (DeepMind), 2023 — `lessons/expert-context.md`, `questions/expert.yaml`.
 - ✅ **[L3]** Self-speculative heads (Medusa, Cai et al. 2024; EAGLE) that fold the drafter into the target — `lessons/expert-context.md`, `questions/expert.yaml`.
 - ✅ **[L3]** Knowledge distillation traces to Hinton et al. (2015) — teacher → student — `lessons/expert-context.md`, `lessons/levers.md`.
-- 🟡 **[L4]** Combining levers without quality loss / high acceptance across domains as live open problems — named in `lessons/deep-dive.md` and `lessons/expert-context.md`; no dedicated frontier drill.
+- ✅ **[L4]** Combining levers without quality loss / high acceptance across domains, and self-speculative heads (Medusa/EAGLE) folding the drafter into the target — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L4]** The three levers as a tradeoff table (buys / costs / when to reach for it) — `lessons/deep-dive.md` tradeoff table.
@@ -33,7 +33,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** vLLM / TensorRT-LLM speculative support and Medusa/EAGLE implementations as the serving stacks — `lessons/expert-context.md`.
-- 🟡 **[L3]** Operational judgment on gating every lossy stage behind a task eval between stacked levers — argued in `lessons/deep-dive.md`; not drilled as an ops/metrics exercise.
+- ✅ **[L3]** Operational signals for these speedups (draft acceptance rate, accepted tokens/step, wall-clock speedup vs quality delta, throughput under load) and eval-gating every lossy stage — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D7 — Staying current & meta-learning
 - ✅ **[L2]** Track where the frontier moves (high acceptance across domains, joint latency/cost/quality stacking) — pointers in `lessons/expert-context.md` and a curated `reading-list.md` module (WS5).
@@ -43,8 +43,9 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Defend a lever-choice / stacking design under interview questioning — `questions/deep-dive.yaml` L4 essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-19 items · ✅ 16 covered · 🟡 3 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **92%**.
-Open frontier work: a combining-levers-without-quality-loss drill, an end-to-end draft/verify (or self-speculative
-head) coding exercise, an eval-gate/ops metrics drill, and a speculative-decoding reading-list module (WS5).
+19 items · ✅ 18 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **97%**.
+Open frontier work: an end-to-end draft/verify (or self-speculative head) coding exercise (D5). The
+combining-levers/high-acceptance frontier drill and the ops-metrics drill are now covered by
+`lessons/frontier-ops.md` + `questions/frontier-ops.yaml`.
 
-<!-- coverage: items=19 covered=16 partial=3 gap=0 -->
+<!-- coverage: items=19 covered=18 partial=1 gap=0 -->

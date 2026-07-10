@@ -1,0 +1,11 @@
+id: lesson-frontier-ops
+title: "Frontier & operations: cache correctness, invalidation beyond TTL, and the signals to watch"
+material: frontier-ops.md
+segments:
+  - present: the-prompt-vs-semantic-caching-frontier
+  - check: mc-frontier-cache-correctness-eval
+  - check: mc-frontier-cache-invalidation
+  - check: mc-frontier-cache-lossless-vs-risky
+  - present: operating-caching-in-production
+  - check: mc-ops-cache-false-hit-rate
+  - check: mc-ops-cache-net-savings

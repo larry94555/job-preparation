@@ -10,7 +10,7 @@ sections:
 
   - id: sec-drift-capture
     title: "Drift, canaries & capture/replay"
-    lessons: [lesson-drift-capture, lesson-deep-dive]
+    lessons: [lesson-drift-capture, lesson-deep-dive, lesson-frontier-ops]
     assessment:
       title: "Section 2 — Drift & capture"
       from_tags: [drift, capture]

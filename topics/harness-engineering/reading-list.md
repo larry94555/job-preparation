@@ -44,3 +44,23 @@ year is given it is context, not something to memorize.
 - When a new agent technique appears, ask the three canon questions: *what does it trade (reliability/
   latency/autonomy), what regime does it win in, and what eval proves it?* — the same lens the deep-dive uses.
 - Re-read this topic's `expert-surface.md` when the frontier shifts; its 🟡/⬜ items are your next reads.
+
+## Reception & what aged
+- **ReAct's *idea* aged well; its *prompt format* largely did not.** The think→act→observe loop became the
+  canonical mental model for agents, but hand-written ReAct-style prompting was superseded from late 2023
+  onward by **native function/tool calling** (OpenAI, Anthropic, Google, Mistral) — providers trained the
+  loop into the models and moved it behind the API. Explicit ReAct prompts survive mainly where an API lacks
+  native tool calling or where you want visible reasoning traces for debugging/audit.
+- **Toolformer was more influential as a *direction* than as a *method*.** Self-supervised API-call
+  annotation proved that tool use is learnable, but production tool use converged on instruction-tuned /
+  RLHF'd native tool calling rather than Toolformer's specific self-annotation recipe — the lasting lesson is
+  the model-vs-harness boundary, not the training trick.
+- **Reflexion's verbal self-reflection held up as a pattern** (verify → reflect → retry lives in the harness)
+  and is widely cited, but naive "just reflect and retry" loops are now understood to need budgets and
+  no-progress detection to avoid burning tokens without converging — reflection is necessary, not sufficient.
+- **"Building Effective Agents" aged very well as practitioner guidance.** Its "reach for the simplest thing
+  that works, add agency only when needed" stance became the mainstream corrective to over-orchestration, and
+  **AutoGPT** is now cited almost exclusively as the cautionary unbounded-loop example it warns against.
+- **The frontier moved from prompting to *verification*.** SWE-bench-style agentic coding harnesses made clear
+  that wins come from running tests and checking diffs, not from cleverer prompts — reinforcing that the
+  harness (not the base model alone) is where reliability is engineered.

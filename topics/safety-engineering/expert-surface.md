@@ -14,7 +14,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L3]** "Prompt injection" coined by Simon Willison (2022) — `lessons/expert-context.md`, `questions/expert.yaml` `[canon]`.
 - ✅ **[L3]** Indirect prompt injection characterized by Greshake et al. (2023) — `lessons/expert-context.md`, `questions/expert.yaml` `[canon]`.
 - ✅ **[L3]** OWASP LLM Top 10 as the field risk checklist; injection as confused-deputy — `lessons/expert-context.md`, `lessons/deep-dive.md`.
-- 🟡 **[L4]** No robust general injection defense as the standing open problem (provenance at scale, agent egress control) — named in `lessons/expert-context.md`, `lessons/deep-dive.md`; no dedicated frontier drill.
+- ✅ **[L4]** No robust general injection defense as the standing open problem (indirect/agent injection, provenance at scale, agent egress control, OWASP LLM Top 10 evolution) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L4]** The five safety levers (provenance, fencing, filtering, least privilege, egress) and their tradeoffs — `lessons/deep-dive.md` tradeoff table.
@@ -32,7 +32,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** Guardrails frameworks and injection detectors (Rebuff, LLM-Guard), policy engines as the tooling — `lessons/expert-context.md`, `lessons/deep-dive.md`.
-- 🟡 **[L3]** Operational egress controls (allow-lists, human confirmation) and their throughput cost — discussed in `lessons/permission.md`, `lessons/deep-dive.md`; not drilled as ops metrics.
+- ✅ **[L3]** Operational egress controls and safety signals (injection-attempt detection, blocked-egress, tool-permission-denial, incident/false-positive rate) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D7 — Staying current & meta-learning
 - ✅ **[L2]** Know where the safety frontier moves (provenance at scale, agent egress control) and how to track it — `reading-list.md`, pointers in `lessons/expert-context.md`.
@@ -42,8 +42,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a defense-in-depth agent-security design under questioning — `questions/deep-dive.yaml` design-review essay, `questions/essay.yaml`.
 
 ## Coverage summary
-19 items · ✅ 16 covered · 🟡 3 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **92%**.
-Open frontier work: a dedicated injection-frontier/reading-list drill, a fencing/provenance-tagging coding exercise,
-and an egress-metrics operational drill.
+19 items · ✅ 18 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **97%**.
+Open work: a fencing/provenance-tagging coding exercise (D5) is the one remaining partial.
 
-<!-- coverage: items=19 covered=16 partial=3 gap=0 -->
+<!-- coverage: items=19 covered=18 partial=1 gap=0 -->

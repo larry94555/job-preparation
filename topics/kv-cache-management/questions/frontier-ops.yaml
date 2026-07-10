@@ -1,0 +1,107 @@
+# Frontier & operations drill — closes D2 (frontier paper drill) and D6 (ops metrics drill).
+
+- id: mc-frontier-kv-outliers
+  type: multiple_choice
+  tags: [memory, frontier]
+  difficulty: 4
+  prompt: >-
+    Low-bit KV-cache quantization work (KIVI, KVQuant) converges on one central obstacle to going below
+    fp16 without wrecking long-context quality. What is it?
+  options:
+    - { text: "Channel-wise outliers — a few key channels have very large magnitudes that naive uniform low-bit quantization can't represent", correct: true }
+    - { text: "The value tensors are too small to quantize" }
+    - { text: "Quantization only works on weights, never on the KV cache" }
+    - { text: "The KV cache must be fp32 or the model diverges" }
+  explanation: >-
+    KIVI and KVQuant both identify channel-wise outliers (especially in the keys) as the blocker. KIVI
+    quantizes keys per-channel to isolate them; KVQuant uses non-uniform quantization so the few large
+    values keep resolution. The win is real capacity but must be gated by a long-context eval.
+
+- id: mc-frontier-kv-radix
+  type: multiple_choice
+  tags: [paging, frontier]
+  difficulty: 4
+  prompt: >-
+    SGLang's RadixAttention extends prefix sharing beyond vLLM's within-request copy-on-write. What does
+    it actually do?
+  options:
+    - { text: "Keeps past requests' KV in a radix tree with LRU eviction so a new request sharing a prefix reuses those blocks — cutting prefill and TTFT", correct: true }
+    - { text: "Compresses the KV cache with a lossy codec to fit more sequences" }
+    - { text: "Moves the entire KV cache to disk between requests" }
+    - { text: "Replaces attention with a linear-time approximation" }
+  explanation: >-
+    RadixAttention stores KV across requests in a radix tree (edges are token sequences) with an LRU
+    policy, enabling automatic cross-request reuse on shared prefixes — the KV cache becomes
+    cluster-level state, not per-replica scratch. High prefix overlap → high hit rate and lower TTFT.
+
+- id: mc-frontier-kv-which-lever
+  type: multiple_choice
+  tags: [memory, frontier]
+  difficulty: 4
+  prompt: >-
+    A chat product where thousands of requests share the same long system prompt is KV-capacity-bound.
+    Which frontier lever most directly targets *that* workload's bottleneck?
+  options:
+    - { text: "Cross-request prefix reuse (RadixAttention) — pay for the shared prefix's KV once instead of per request", correct: true }
+    - { text: "Int4 KV quantization, because it always dominates every other lever" }
+    - { text: "Switching from GQA back to full multi-head attention" }
+    - { text: "Disabling paging to reduce bookkeeping" }
+  explanation: >-
+    The distinguishing feature is a large *shared* prefix, so reuse (pay once for shared tokens) is the
+    targeted lever. Quantization (make each token cheaper) also helps but doesn't exploit the sharing;
+    reverting GQA and disabling paging both make KV pressure worse.
+
+- id: mc-ops-kv-preemption
+  type: multiple_choice
+  tags: [eviction, ops]
+  difficulty: 4
+  prompt: >-
+    You want the earliest operational signal that your KV pool is too small for the offered load —
+    before users see errors. Which metric leads?
+  options:
+    - { text: "Preemption/eviction rate — the scheduler evicting or recomputing running sequences' KV rises first, showing up as latency spikes before errors", correct: true }
+    - { text: "Total GPU power draw" }
+    - { text: "Model weight size on disk" }
+    - { text: "The number of CUDA kernels compiled" }
+  explanation: >-
+    Preemption rate is a leading indicator: under pressure the scheduler evicts/recomputes KV, spiking
+    tail latency before capacity is formally exceeded. Admission rejects/queue depth are the next signal;
+    utilization and average context length are for capacity planning.
+
+- id: mc-ops-kv-currency
+  type: multiple_choice
+  tags: [memory, ops]
+  difficulty: 4
+  prompt: >-
+    Average context length on your endpoint has crept up 30% over a month at constant request rate.
+    What does capacity planning conclude?
+  options:
+    - { text: "Effective concurrency has dropped — bytes-per-sequence rose, so the fixed KV pool holds fewer sequences; plan in KV tokens, not requests", correct: true }
+    - { text: "Nothing changed, because request rate is constant" }
+    - { text: "Weights now take more memory" }
+    - { text: "The model got slower per token due to context length alone" }
+  explanation: >-
+    Concurrency ≈ KV_pool / bytes_per_sequence, and bytes_per_sequence grows with context. A rising
+    average context silently halves concurrency even at constant request rate — which is why the real
+    capacity currency is KV tokens, not requests.
+
+- id: code-kv-eviction
+  type: code
+  language: typescript
+  tags: [eviction, ops]
+  difficulty: 4
+  prompt: >-
+    Implement `planAdmission(capacity, live, need)` for a paged KV pool: admit a request needing `need`
+    blocks, evicting **least-recently-used sequences first** only when necessary. Reject (evict nothing)
+    if `need > capacity`; admit with no eviction if there is already room; otherwise evict LRU
+    sequences (smallest `lastUsed` first) until enough is free, returning the evicted ids in order and
+    stopping as soon as it fits.
+  starter_file: exercises/eviction-policy/starter.ts
+  test_file: exercises/eviction-policy/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-kvcache-code
+  concept_checks:
+    must_use: ["evict least-recently-used first (sort by lastUsed)", "reject when need > capacity", "evict the minimum necessary (stop once free >= need)"]
+    avoid_antipattern: ["evicting most-recently-used", "evicting more sequences than needed", "admitting when it cannot fit"]

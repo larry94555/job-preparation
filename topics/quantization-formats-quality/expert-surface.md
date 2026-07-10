@@ -14,7 +14,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L3]** GPTQ (Frantar et al. 2022) as calibration-based Hessian-guided layerwise weight quant — `lessons/expert-context.md`, `questions/expert.yaml` `[canon]`.
 - ✅ **[L3]** AWQ (Lin et al. 2023) — protecting salient channels tied to large activations — `lessons/expert-context.md`, `questions/expert.yaml` `[canon]`.
 - ✅ **[L3]** SmoothQuant (Xiao et al.) and LLM.int8() (Dettmers et al. 2022) as the activation-outlier prior art — `lessons/expert-context.md`, `lessons/methods-and-quality.md`.
-- 🟡 **[L4]** The sub-4-bit / FP8 frontier and reliable low-bit quality prediction as open problems — named in `lessons/expert-context.md`; no dedicated paper drill.
+- ✅ **[L4]** The sub-4-bit / FP8 frontier and reliable low-bit quality prediction as open problems (FP8 float range for activations, SmoothQuant activation migration, AWQ/GPTQ as the settled 4-bit floor) — `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L4]** The five quantization levers (bit-width, what-you-quantize, method, granularity, verification) and their tradeoffs — `lessons/deep-dive.md` tradeoff table.
@@ -33,7 +33,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** AutoGPTQ / AutoAWQ / bitsandbytes / llama.cpp GGUF k-quants / TensorRT-LLM as the quant toolchain — `lessons/expert-context.md`, `lessons/deep-dive.md`.
-- 🟡 **[L3]** Verification-as-operations: gating on real task evals (MMLU/GSM8K, code, long-context) vs. perplexity against an FP16 baseline — taught in `lessons/methods-and-quality.md`; not drilled as an operational metrics workflow.
+- ✅ **[L3]** Verification-as-operations: eval-gating on real task evals (MMLU/GSM8K, code, long-context) vs. perplexity against an FP16 baseline, and reading the throughput/memory win against the per-task delta — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D7 — Staying current & meta-learning
 - ✅ **[L2]** Know where the quantization frontier moves (FP8, activation-INT4, long-context degradation) and how to track it — `reading-list.md` (curated sources + a staying-current workflow), pointers in `lessons/expert-context.md`.
@@ -43,8 +43,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a quantization plan under questioning (lead weight-only 4-bit, name the eval) — `questions/deep-dive.yaml` design-review essay, `questions/essay.yaml`.
 
 ## Coverage summary
-18 items · ✅ 15 covered · 🟡 3 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **92%**.
-Open frontier work: a dedicated low-bit/FP8 paper drill, a per-channel/per-group quantization coding exercise,
-and an eval-gating operational drill.
+21 items · ✅ 20 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **98%**.
+The sub-4-bit/FP8 frontier drill and the eval-gating operational drill are now covered by `lessons/frontier-ops.md`.
+Open frontier work: a per-channel/per-group quantization coding exercise (the last remaining partial).
 
-<!-- coverage: items=18 covered=15 partial=3 gap=0 -->
+<!-- coverage: items=21 covered=20 partial=1 gap=0 -->

@@ -47,3 +47,18 @@ year is given it is context, not something to memorize.
 - Treat every postmortem you read (yours or public) as a source: the failure catalog is built from real
   incidents, not from theory.
 - Re-read this topic's `expert-surface.md` when the frontier shifts; its 🟡/⬜ items are your next reads.
+
+## Reception & what aged
+- **Google SRE error budgets and blameless postmortems aged into cross-industry reliability doctrine.** The
+  error budget (a spendable, SLO-derived tolerance) and blame-free postmortem are now standard practice well
+  beyond Google, and transplanted cleanly onto LLM systems as the "manage failure, don't chase 100%" frame.
+- **OWASP LLM Top 10 grew as predicted, tracking real incidents.** The 2025 revision added agent-era failure
+  classes (Excessive Agency, Unbounded Consumption, System Prompt Leakage) — direct evidence for the topic's
+  claim that the checklist expands as new LLM-specific failure modes surface in the wild.
+- **The "silent regressions are worse than loud errors" thesis held up as the central lesson.** A confident
+  wrong answer behind a clean 200 remains the failure that error-rate dashboards miss, and closing the gap
+  between "shipped" and "noticed" is still an acknowledged open problem, not a solved one.
+- **Validate-repair-fallback + eval-gates + canaries became the accepted guard stack.** These patterns,
+  borrowed from structured-output/agent/eval work, aged into standard production hygiene — with the durable
+  caveat that a fallback is not a fix and a CI gate doesn't help you at 3am (detect/mitigate/prevent stay distinct).
+

@@ -1,0 +1,88 @@
+# Frontier & operations drill — closes D2 (frontier awareness drill) and D6 (ops metrics drill).
+
+- id: mc-frontier-safety-no-general-defense
+  type: multiple_choice
+  tags: [injection, frontier]
+  difficulty: 4
+  prompt: >-
+    The standing open problem in LLM safety is often summarized as "no robust general injection defense."
+    What does an expert take that to mean for how you design?
+  options:
+    - { text: "No classifier reliably stops injection in the general case, so the honest direction is containment (provenance, least privilege, egress) — not a better detector", correct: true }
+    - { text: "Injection is solved as long as you add a good enough input filter" }
+    - { text: "The only fix is to stop retrieving external content entirely" }
+    - { text: "Larger models are immune, so the fix is to scale up the model" }
+  explanation: >-
+    A determined attacker rephrases, encodes, or splits payloads past any fixed classifier, so detection
+    can't be the boundary. The frontier accepts that detection loses and shifts weight to provenance,
+    least privilege, and egress control so a *successful* injection still can't do damage.
+
+- id: mc-frontier-safety-indirect-agent
+  type: multiple_choice
+  tags: [injection, frontier]
+  difficulty: 4
+  prompt: >-
+    Why is *indirect* prompt injection (Greshake et al., 2023) the load-bearing threat in agentic systems
+    specifically, rather than in a plain chatbot?
+  options:
+    - { text: "The payload rides in on retrieved/tool content the agent reads later, so input-side filtering can't see it — and every external source an agent touches becomes attack surface", correct: true }
+    - { text: "Agents use larger context windows, which makes filters slower" }
+    - { text: "Indirect injection only affects the user's typed prompt, which agents ignore" }
+    - { text: "It requires the attacker to have the developer's system prompt first" }
+  explanation: >-
+    Indirect injection plants instructions in content the system reads later — a web page, document,
+    email, or tool return value — so the attacker never touches the prompt and input-side filtering is
+    blind to it. As agents gain tools, every external source is attack surface, which is why the frontier
+    is agentic, not chatbot-shaped.
+
+- id: mc-frontier-safety-provenance-scale
+  type: multiple_choice
+  tags: [injection, frontier]
+  difficulty: 4
+  prompt: >-
+    "Provenance at scale" is listed as an open frontier problem. What is the hard part that makes it
+    unsolved in production?
+  options:
+    - { text: "Keeping the trusted/untrusted tag alive as content flows through retrieval, summarization, and multi-hop tool calls — pipelines quietly launder provenance away", correct: true }
+    - { text: "Deciding whether the developer's own system prompt is trusted" }
+    - { text: "Storing the tags takes too much disk space at scale" }
+    - { text: "Provenance only matters for direct injection, not indirect" }
+  explanation: >-
+    Tagging a single span is easy; the frontier is keeping the tag alive through transformations. A
+    summary of an untrusted document is still untrusted, but most pipelines drop that provenance — and
+    without it no downstream control (fencing, egress gate) can enforce a boundary.
+
+- id: mc-ops-safety-egress-leading-signal
+  type: multiple_choice
+  tags: [permission, ops]
+  difficulty: 4
+  prompt: >-
+    You want the operational signal that most directly indicates an exfiltration attempt is in progress
+    on a previously quiet agent endpoint. Which metric leads?
+  options:
+    - { text: "Blocked-egress rate — a rising count of data-out steps stopped by the allow-list/confirmation means something got far enough to try to send data out", correct: true }
+    - { text: "Injection-attempt detection rate, because a quiet detector proves the system is safe" }
+    - { text: "Total tokens processed per hour" }
+    - { text: "The number of tool definitions registered" }
+  explanation: >-
+    Blocked-egress rate is the signal that the last line is doing work; a rise on a quiet endpoint means
+    an injection got far enough to attempt an outbound send. Injection-attempt detection is only a trend
+    signal — because no classifier catches every rephrasing, a low rate can mean "quiet" or "being evaded."
+
+- id: mc-ops-safety-denial-and-fp
+  type: multiple_choice
+  tags: [permission, ops]
+  difficulty: 4
+  prompt: >-
+    Your tool-permission-denial rate has climbed sharply this week. What is the correct operational
+    reading, and what tension do you tune it against?
+  options:
+    - { text: "Either an attack is driving the agent toward capabilities it shouldn't have, or scopes are too tight for real work — tune against the incident vs. false-positive tension", correct: true }
+    - { text: "Denials are always a bug; loosen every scope until they stop" }
+    - { text: "It proves the model got smarter and needs more tools permanently granted" }
+    - { text: "It only reflects GPU load and can be ignored" }
+  explanation: >-
+    Denials are blast radius being enforced, so they're healthy — but a sharp climb means either an
+    attack is pushing for capabilities or your scopes are over-tight for legitimate work; the trend shape
+    tells you which. You tune the whole stack against confirmed incidents (drive toward zero) versus
+    false positives (keep low enough that users don't route around the controls).

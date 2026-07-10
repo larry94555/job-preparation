@@ -1,0 +1,11 @@
+id: lesson-frontier-ops
+title: "Frontier & operations: faithful grounding, label quality, and the signals to watch"
+material: frontier-ops.md
+segments:
+  - present: the-retrieval-evals-frontier
+  - check: mc-frontier-reval-faithfulness-judge
+  - check: mc-frontier-reval-synthetic-labels
+  - check: mc-frontier-reval-mteb-generalization
+  - present: operating-retrieval-evals-in-production
+  - check: mc-ops-reval-miss-vs-grounding
+  - check: mc-ops-reval-label-drift

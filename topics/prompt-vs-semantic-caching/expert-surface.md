@@ -13,8 +13,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D2 — Literature, canon & frontier awareness
 - ✅ **[L3]** GPTCache (Zilliz, 2023) as the semantic-caching origin, backed by Redis / vector stores — `lessons/expert-context.md`, `questions/expert.yaml`.
 - ✅ **[L3]** Provider prompt/prefix caching (Anthropic, OpenAI) as the exact-leading-token cache — `lessons/expert-context.md`, `questions/expert.yaml`.
-- 🟡 **[L4]** Cache-correctness evaluation as a measured quantity (how often a "hit" was actually right) — named as the frontier in `lessons/deep-dive.md`/`expert-context.md`; no dedicated eval drill.
-- ⬜ **[L4]** Semantic-cache invalidation research beyond TTL (embedding-drift, provider prefix-cache lifetimes) — named as an open problem in `lessons/expert-context.md`; not covered.
+- ✅ **[L4]** Cache-correctness evaluation as a measured quantity (how often a "hit" was actually right; gate threshold changes behind it) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
+- ✅ **[L4]** Semantic-cache invalidation research beyond TTL (embedding drift, content changed under a still-similar query, provider prefix-cache lifetimes) — `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L4]** The caching levers (which cache, prompt structure, threshold, keys/scope, invalidation/TTL, verification) and their tradeoffs — `lessons/deep-dive.md` tradeoff table.
@@ -33,7 +33,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** GPTCache + Redis / vector stores for the semantic layer; provider prefix caching for the exact layer — `lessons/expert-context.md`.
-- 🟡 **[L3]** Operational signals for a cache layer (hit rate, false-positive rate, staleness) — discussed in `lessons/deep-dive.md`/`semantic-thresholds.md`; not drilled as metrics.
+- ✅ **[L3]** Operational signals for a cache layer (hit rate by type, false-hit/incorrect-serve rate, staleness/TTL-miss rate, net cost/latency saved) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D7 — Staying current & meta-learning
 - ✅ **[L2]** Know where the caching frontier moves (measured cache correctness, semantic invalidation) and how to track it — `reading-list.md`, with pointers in `lessons/expert-context.md`.
@@ -43,8 +43,9 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a layered caching design under questioning — `questions/deep-dive.yaml` design-review essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-18 items · ✅ 15 covered · 🟡 2 partial · ⬜ 1 gap. Weighted coverage (covered=1, partial=0.5) ≈ **89%**.
-Open frontier work: a dedicated cache-correctness eval drill, semantic-cache invalidation beyond TTL,
-a layered/verification-gated coding exercise, and a cache-metrics operational drill.
+21 items · ✅ 20 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **98%**.
+The frontier & operations drill (`lessons/frontier-ops.md`, `questions/frontier-ops.yaml`) closed the
+cache-correctness eval, semantic-invalidation-beyond-TTL, and cache-metrics operational items. The one
+remaining partial is a dedicated layered/verification-gated coding exercise (single-cache exercises only).
 
-<!-- coverage: items=18 covered=15 partial=2 gap=1 -->
+<!-- coverage: items=21 covered=20 partial=1 gap=0 -->

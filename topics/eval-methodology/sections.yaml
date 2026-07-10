@@ -10,7 +10,7 @@ sections:
 
   - id: sec-coverage
     title: "Coverage & judging: adversarial tests & LLM-as-judge"
-    lessons: [lesson-adversarial, lesson-judge]
+    lessons: [lesson-adversarial, lesson-judge, lesson-frontier-ops]
     assessment:
       title: "Section 2 — Adversarial tests & LLM-as-judge"
       from_tags: [adversarial, judge]

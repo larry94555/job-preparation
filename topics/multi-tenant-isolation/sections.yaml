@@ -1,7 +1,7 @@
 sections:
   - id: sec-foundations
     title: "Foundations: isolation dimensions & cache safety"
-    lessons: [lesson-dimensions, lesson-cache, lesson-build-tenant-cache, lesson-expert-context, lesson-deep-dive]
+    lessons: [lesson-dimensions, lesson-cache, lesson-build-tenant-cache, lesson-expert-context, lesson-deep-dive, lesson-frontier-ops]
     assessment:
       title: "Section 1 — Isolation & cache safety"
       from_tags: [isolation, cache-safety]

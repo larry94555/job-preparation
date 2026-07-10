@@ -20,6 +20,14 @@ Date: 2026-07-09.
 > **run live over all 46 skills** — 19 pass / 27 needs-work at 0.7 on llama3:8b (essays 16/23, code 3/23;
 > the gate correctly fails, flagging skills to regrade on the pinned Qwen2.5-3B + tighten — see
 > [CERTIFICATION.md](CERTIFICATION.md)).
+> **A+ push (2026-07-10):** closed the two A+ blockers. **(1) Expert-Surface completeness:** every topic
+> gained a **Frontier & operations** drill lesson (frontier paper-drill D2 + operational-metrics drill D6),
+> plus a sandbox-verified eviction coding exercise on kv-cache — lifting the **Topic Mastery Index 89% →
+> 97%** (`npm run mastery`; 3 topics at 100%, most 95–98%). **(2) Papers:** all 22 topics' canon claims were
+> **independently web-verified** (WebSearch) with **zero corrections needed**, and each reading list gained
+> a **"Reception & what aged"** layer (closes C2.2). Repo green: 23 valid, selfcheck clean, typecheck 0, 16
+> tests. Residual to ~100%: the **D5 coding-exercise bucket** (~one sandbox-verified exercise per topic).
+>
 > WS5 (**analytics & retention + reading-list module**): every topic gained a curated `reading-list.md`
 > (papers/tools + a staying-current method), closing the recurring D7 gap and lifting the **Topic Mastery
 > Index 86% → 89%**; the runner gained a **mastery-over-time + spaced-repetition retention** analytics view

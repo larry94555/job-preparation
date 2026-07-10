@@ -14,7 +14,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L3]** RAG (Lewis et al., 2020) as the origin of query-time retrieval without weight change — `lessons/expert-context.md`, `questions/expert.yaml`.
 - ✅ **[L3]** LoRA/PEFT (Hu et al., Microsoft, 2021) as the canonical parameter-efficient fine-tuning method — `lessons/expert-context.md`, `questions/expert.yaml` `[canon]`.
 - ✅ **[L3]** Knowledge distillation (Hinton et al., 2015) as teacher→student behavior copying — `lessons/expert-context.md`, `questions/expert.yaml` `[canon]`.
-- 🟡 **[L4]** Continual / online adaptation as data drifts — named as an open problem in `lessons/deep-dive.md` and `lessons/expert-context.md`; no dedicated drill.
+- ✅ **[L4]** Continual / online adaptation as data drifts, principled RAG+PEFT+distill combination, and when-to-fine-tune-vs-prompt/RAG as an open decision problem — `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L4]** The four-lever tradeoff table (buys/costs/reach-for-it-when) across freshness, cost, latency, attribution — `lessons/deep-dive.md` tradeoff table.
@@ -33,7 +33,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** PEFT/LoRA libraries, RAG frameworks, distillation tooling, and open-vs-frontier model choice — `lessons/expert-context.md`.
-- 🟡 **[L3]** Operational cost of hybrids (two eval surfaces, index-freshness/TTL, silent-regression risk) — discussed in `lessons/deep-dive.md`; not drilled as ops metrics.
+- ✅ **[L3]** Operating adaptation in production (per-strategy quality/cost/latency tracking, staleness of fine-tuned knowledge, retrieval freshness/TTL, re-train cadence signals) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D7 — Staying current & meta-learning
 - ✅ **[L2]** Track where the adaptation frontier moves (principled selection, method combination, continual adaptation) — pointers in `lessons/expert-context.md`; curated reading-list & staying-current module in `reading-list.md`.
@@ -43,8 +43,9 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Walk an interviewer through the decision axes and defend a sequenced/hybrid strategy under questioning — `questions/deep-dive.yaml` design-review essay, `questions/essay.yaml` interview essay.
 
 ## Coverage summary
-20 items · ✅ 17 covered · 🟡 3 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **93%**.
-Open frontier work: a continual/online-adaptation drill, a real RAG+PEFT hybrid coding exercise, and an
-ops-metrics operational drill for hybrids.
+20 items · ✅ 19 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **98%**.
+Remaining open work: a real RAG+PEFT hybrid coding exercise with per-lever eval gates (D5). The
+continual/online-adaptation frontier drill and the hybrid ops-metrics operational drill are now covered
+by `lessons/frontier-ops.md` + `questions/frontier-ops.yaml`.
 
-<!-- coverage: items=20 covered=17 partial=3 gap=0 -->
+<!-- coverage: items=20 covered=19 partial=1 gap=0 -->

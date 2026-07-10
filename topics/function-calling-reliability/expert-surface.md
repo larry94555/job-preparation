@@ -14,7 +14,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L3]** Toolformer (Schick et al. 2023) as tool use becoming a learnable capability — `lessons/expert-context.md`, `questions/expert.yaml`.
 - ✅ **[L3]** Gorilla (Patil et al., Berkeley) and the Berkeley Function-Calling Leaderboard as the tool-calling benchmark — `lessons/expert-context.md`, `questions/expert.yaml`.
 - ✅ **[L3]** MCP (Anthropic, 2024) as the open standard for the tool boundary — `lessons/expert-context.md`, `questions/expert.yaml`.
-- 🟡 **[L4]** Frontier open problems: reliable multi-tool orchestration, robust argument grounding, exactly-once at scale — named in `lessons/deep-dive.md`/`lessons/expert-context.md`; no dedicated drill.
+- ✅ **[L4]** Frontier open problems: reliable multi-tool orchestration, robust argument grounding, exactly-once at scale (plus Berkeley Function-Calling Leaderboard as the eval scoreboard and MCP as the standardized boundary) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L4]** The five function-calling levers (contract typing, validation strictness, read/write separation, idempotency, tool-boundary standardization) and their tradeoffs — `lessons/deep-dive.md` tradeoff table.
@@ -33,7 +33,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** MCP + provider tool/function APIs + Pydantic/Zod validators as the practical stack — `lessons/expert-context.md`, `lessons/deep-dive.md`.
-- 🟡 **[L4]** Tool-schema token budget and per-request tool scoping/retrieval at scale — discussed in `lessons/deep-dive.md`; not drilled as an operational exercise.
+- ✅ **[L4]** Operational signals (tool-arg validation-failure rate, unknown-tool rate, retry/duplicate-execution rate, per-tool latency/error rate) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D7 — Staying current & meta-learning
 - ✅ **[L2]** Know where the function-calling frontier moves (parallel/streaming tool calls, multi-tool orchestration) and how to track it — `reading-list.md`, plus pointers in `lessons/expert-context.md`.
@@ -43,8 +43,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a reliable function-calling layer under questioning — `questions/deep-dive.yaml` design-review essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-19 items · ✅ 17 covered · 🟡 2 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **95%**.
-Open frontier work: a multi-tool-orchestration / argument-grounding drill, a tool-schema token-budget
-operational exercise, and a WS5 reading-list module tracking parallel/streaming tool calls.
+21 items · ✅ 21 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+This surface is fully covered as of the snapshot; it will revert to partial as the field's frontier
+expands (parallel/streaming tool calls, multi-tool orchestration evals).
 
-<!-- coverage: items=19 covered=17 partial=2 gap=0 -->
+<!-- coverage: items=21 covered=21 partial=0 gap=0 -->

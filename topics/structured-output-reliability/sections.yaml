@@ -2,7 +2,7 @@
 sections:
   - id: sec-failures-and-validation
     title: "Failures & the validation contract"
-    lessons: [lesson-taxonomy, lesson-validation, lesson-expert-context]
+    lessons: [lesson-taxonomy, lesson-validation, lesson-expert-context, lesson-frontier-ops]
     assessment:
       title: "Section 1 — Failures & validation"
       from_tags: [taxonomy, validation, constrained-decoding]

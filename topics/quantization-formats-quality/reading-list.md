@@ -44,3 +44,17 @@ year is given it is context, not something to memorize.
 - When a new quantization technique appears, ask the three canon questions: *what does it trade (quality vs.
   footprint/bandwidth), what regime does it win in, and what eval — not just perplexity — proves it?*
 - Re-read this topic's `expert-surface.md` when the frontier shifts; its 🟡/⬜ items are your next reads.
+
+## Reception & what aged
+- **AWQ and GPTQ became the default 4-bit weight-only methods.** Both shipped as reference libraries
+  (AutoAWQ, AutoGPTQ) and are the practical baseline for INT4 serving in 2024–2026; AWQ is often framed as
+  GPTQ's activation-aware successor. GPTQ landed as an ICLR 2023 paper (arXiv:2210.17323).
+- **LLM.int8() aged as the framing, not the deployed default.** Dettmers et al. (NeurIPS 2022,
+  arXiv:2208.07339) is cited less for its exact int8 recipe today and more for *naming the enemy* —
+  emergent outlier features — which every later method (SmoothQuant, AWQ) reacts to.
+- **SmoothQuant's "move the difficulty" idea proved durable.** The activation→weight migration transform
+  (Xiao et al., ICML 2023, arXiv:2211.10438) is now a standard building block for W8A8 and reappears in
+  later outlier-handling and rotation-based schemes.
+- **The frontier moved to FP8 and sub-4-bit, and the "perplexity hides task loss" caveat held up.** FP8 on
+  new hardware and INT3/INT2 experiments are the live edge, and recent work confirms low-bit quant can pass
+  perplexity while regressing on reasoning — vindicating the eval-gated, don't-trust-perplexity-alone stance.

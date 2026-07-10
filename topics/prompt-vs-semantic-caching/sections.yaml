@@ -10,7 +10,7 @@ sections:
 
   - id: sec-semantic
     title: "Semantic caching: thresholds & tradeoffs"
-    lessons: [lesson-semantic-thresholds, lesson-build-semantic-cache, lesson-deep-dive]
+    lessons: [lesson-semantic-thresholds, lesson-build-semantic-cache, lesson-deep-dive, lesson-frontier-ops]
     assessment:
       title: "Section 2 — Semantic caching & tradeoffs"
       from_tags: [semantic, tradeoffs]

@@ -14,7 +14,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L3]** This is a SaaS/security tradition with no single seminal LLM paper — say so aloud — `lessons/expert-context.md`, `questions/expert.yaml` `[canon]`.
 - ✅ **[L3]** Row-level security (RLS) as the engine-enforced tenant predicate — `lessons/expert-context.md`, `lessons/deep-dive.md`, `questions/expert.yaml`.
 - ✅ **[L3]** Semantic-cache cross-tenant leakage as the modern LLM twist on an old problem — `lessons/cache-safety.md`, `lessons/expert-context.md`.
-- 🟡 **[L4]** Embedding-space leakage as a similarity side channel (open problem) — named in `lessons/expert-context.md`; no dedicated drill.
+- ✅ **[L4]** Embedding-space leakage as a similarity side channel (open problem), OWASP LLM08 vector/embedding weaknesses, and semantic-cache cross-tenant leakage as the frontier — `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L4]** The five isolation levers (partitioning, boundary enforcement, retrieval scoping, cache keying, session/state scope) and their tradeoffs — `lessons/deep-dive.md` tradeoff table.
@@ -33,7 +33,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** vector-DB namespaces, Postgres RLS, and cache-key conventions as the tooling — `lessons/expert-context.md`, `lessons/build-tenant-cache.md`.
-- 🟡 **[L3]** Isolation/leak tests in CI asserting a zero cross-tenant leak rate — described in `lessons/deep-dive.md`; not drilled as an operational metrics exercise.
+- ✅ **[L3]** Operational signals (cross-tenant leak-test pass rate, per-tenant quota/rate-limit hits, cache-key-scope audits, noisy-neighbor latency variance) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D7 — Staying current & meta-learning
 - ✅ **[L2]** Know where the isolation frontier moves (safe cross-user reuse, provable isolation, embedding-space leakage) and how to track it — `reading-list.md`, plus pointers in `lessons/expert-context.md`.
@@ -43,8 +43,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a tenant-isolation design under questioning (scoped keys → authz-filtered retrieval → RLS) — `questions/deep-dive.yaml` design-review essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-18 items · ✅ 13 covered · 🟡 4 partial · ⬜ 1 gap. Weighted coverage (covered=1, partial=0.5) ≈ **83%**.
-Open frontier work: an embedding-space-leakage drill, a noisy-neighbor/quota-isolation exercise, an
-authz-filtered-retrieval coding exercise, and a leak-test/CI operational drill.
+21 items · ✅ 19 covered · 🟡 2 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **95%**.
+Remaining partial work: a noisy-neighbor/quota-isolation capacity exercise and an
+authz-filtered-retrieval coding exercise.
 
-<!-- coverage: items=18 covered=13 partial=4 gap=1 -->
+<!-- coverage: items=21 covered=19 partial=2 gap=0 -->

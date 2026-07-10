@@ -10,7 +10,7 @@ sections:
 
   - id: sec-retrieval
     title: "Retrieval: search & reranking"
-    lessons: [lesson-retrieval, lesson-build-rrf, lesson-deep-dive]
+    lessons: [lesson-retrieval, lesson-build-rrf, lesson-deep-dive, lesson-frontier-ops]
     assessment:
       title: "Section 2 — Search & reranking"
       from_tags: [retrieval, reranking]

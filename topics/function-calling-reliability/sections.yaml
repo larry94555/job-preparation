@@ -10,7 +10,7 @@ sections:
 
   - id: sec-idempotency
     title: "Idempotency & safe retries"
-    lessons: [lesson-idempotency, lesson-build-dispatcher]
+    lessons: [lesson-idempotency, lesson-build-dispatcher, lesson-frontier-ops]
     assessment:
       title: "Section 2 — Idempotency & safe retries"
       from_tags: [idempotency]

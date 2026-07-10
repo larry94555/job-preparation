@@ -47,3 +47,24 @@ year is given it is context, not something to memorize.
 - When a new serving technique appears, ask the three canon questions: *which phase does it touch (TTFT
   or TPOT), what regime does it win in, and what benchmark proves it?* — the same lens the deep-dive lesson uses.
 - Re-read this topic's `expert-surface.md` when the frontier shifts; its 🟡/⬜ items are your next reads.
+
+## Reception & what aged
+- **Chunked prefill won and became a default knob.** Sarathi's idea shipped: `Sarathi-Serve` landed at OSDI
+  '24 and chunked prefill is now a standard scheduling option in vLLM and TensorRT-LLM. The TTFT-vs-decode
+  stall it was designed to bound is now something operators tune rather than suffer — the entry aged very
+  well.
+- **P/D disaggregation moved from research claim to production architecture.** DistServe (arXiv Jan 2024)
+  and Splitwise (2024) argued for separate prefill/decode pools; by 2025–2026 nearly every production stack
+  — NVIDIA Dynamo, llm-d, SGLang, vLLM, LMCache, MoonCake — supports disaggregated serving. The "opposite
+  resource profiles" thesis held.
+- **The nuance that aged in: disaggregation isn't free.** Follow-up work (e.g. "Beyond the Buzz" /
+  pragmatic-disaggregation retrospectives) tempered the early wins — KV transfer cost, bursty-arrival
+  imbalance, and idle decode compute mean disaggregation pays off in specific regimes, not universally. So
+  the canon framing (chunked prefill *or* disaggregation, chosen per SLO) aged better than "always
+  disaggregate."
+- **Separate TTFT/TPOT reporting is now the norm.** GenAI-Perf and peers report the two phases separately by
+  default; the topic's central lesson (never collapse the phases into one latency number) is now baked into
+  the standard tooling.
+- **What to watch next:** the open problems the canon flagged — SLO-optimal joint P/D scheduling and
+  modeling cross-phase interference rather than just avoiding it — remain the active frontier (2026 work on
+  load-aware prefill deflection and targeted P/D pruning is chipping at exactly this).

@@ -10,7 +10,7 @@ sections:
 
   - id: sec-throughput
     title: "Throughput, latency & goodput"
-    lessons: [lesson-throughput, lesson-build-continuous-batching]
+    lessons: [lesson-throughput, lesson-build-continuous-batching, lesson-frontier-ops]
     assessment:
       title: "Section 2 — Throughput & goodput"
       from_tags: [throughput]

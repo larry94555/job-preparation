@@ -1,7 +1,7 @@
 sections:
   - id: sec-catalog
     title: "Foundations: the failure catalog & handling"
-    lessons: [lesson-catalog, lesson-handling, lesson-expert-context]
+    lessons: [lesson-catalog, lesson-handling, lesson-expert-context, lesson-frontier-ops]
     assessment:
       title: "Section 1 — Failures & detection"
       from_tags: [failures, detection]

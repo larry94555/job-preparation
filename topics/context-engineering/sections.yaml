@@ -10,7 +10,7 @@ sections:
 
   - id: sec-selection
     title: "Selection & retrieval"
-    lessons: [lesson-selection, lesson-build-assemble-context, lesson-deep-dive]
+    lessons: [lesson-selection, lesson-build-assemble-context, lesson-deep-dive, lesson-frontier-ops]
     assessment:
       title: "Section 2 — Selection & retrieval"
       from_tags: [selection]

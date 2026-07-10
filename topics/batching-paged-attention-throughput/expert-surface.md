@@ -14,7 +14,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L3]** Iteration-level (continuous) batching → Orca (Yu et al., OSDI 2022) as the origin — `lessons/expert-context.md`, `questions/expert.yaml`.
 - ✅ **[L3]** Paged KV → vLLM / PagedAttention (Kwon et al., 2023) and why it enables continuous batching — `lessons/scheduling-paging.md`, `lessons/expert-context.md`.
 - ✅ **[L3]** FlashAttention (Dao, 2022) as the IO-aware attention kernel underneath, distinct from batching/KV storage — `lessons/expert-context.md`.
-- 🟡 **[L4]** SLO-fair scheduling / multi-tenant throughput isolation / interference as live open problems — named in `lessons/expert-context.md` and `lessons/deep-dive.md`; no dedicated frontier drill.
+- ✅ **[L4]** SLO-fair scheduling / multi-tenant throughput isolation / prefill-decode interference as live open problems — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L4]** The five levers (batch formation, scheduling granularity, KV layout, operating batch size, SLO awareness) and their tradeoffs — `lessons/deep-dive.md` tradeoff table.
@@ -33,7 +33,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** vLLM / TGI / TensorRT-LLM / SGLang / LMDeploy as the serving stacks that do continuous batching + paging — `lessons/batching.md`, `lessons/expert-context.md`.
-- 🟡 **[L3]** Operational signals (running-batch size, goodput vs. raw throughput, TPOT/p95, prefill-vs-decode interference) — discussed in `lessons/throughput.md`, `lessons/deep-dive.md`; not drilled as metrics.
+- ✅ **[L3]** Operational signals (goodput vs. raw throughput, batch occupancy, queue depth/wait time, preemption rate) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D7 — Staying current & meta-learning
 - ✅ **[L2]** Know where the throughput frontier moves (SLO-fair scheduling, multi-tenant isolation, P/D-aware scheduling) and how to track it — `reading-list.md`, pointers in `lessons/expert-context.md`.
@@ -43,8 +43,9 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a high-throughput serving path (continuous batching + paged attention + SLO-aware scheduling) under questioning — `questions/deep-dive.yaml` design-review essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-18 items · ✅ 14 covered · 🟡 3 partial · ⬜ 1 gap. Weighted coverage (covered=1, partial=0.5) ≈ **86%**.
-Open frontier work: an SLO-fair / multi-tenant-isolation frontier drill, a paged-block-allocator coding
-exercise, an SLO-aware/goodput admission coding exercise, and an operational-metrics drill.
+21 items · ✅ 19 covered · 🟡 2 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **95%**.
+Remaining partial work is code-craft only: a paged-block-allocator coding exercise and an
+SLO-aware/goodput admission coding exercise. The D2-frontier and D6-ops drills are now covered by
+`lessons/frontier-ops.md` + `questions/frontier-ops.yaml`.
 
-<!-- coverage: items=18 covered=14 partial=3 gap=1 -->
+<!-- coverage: items=21 covered=19 partial=2 gap=0 -->

@@ -1,7 +1,7 @@
 sections:
   - id: sec-routing
     title: "Routing & fallback fundamentals"
-    lessons: [lesson-routing, lesson-build-router, lesson-expert-context]
+    lessons: [lesson-routing, lesson-build-router, lesson-expert-context, lesson-frontier-ops]
     assessment:
       title: "Section 1 — Routing & fallback"
       from_tags: [routing, fallback]

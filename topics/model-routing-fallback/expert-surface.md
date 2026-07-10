@@ -13,7 +13,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D2 — Literature, canon & frontier awareness
 - ✅ **[L3]** FrugalGPT (Chen et al., Stanford 2023) as the cost-cutting LLM-cascade origin — `lessons/expert-context.md`, `questions/expert.yaml` `[canon]`.
 - ✅ **[L3]** RouteLLM (LMSYS, 2024) as learned, difficulty-based request routing — `lessons/expert-context.md`, `lessons/deep-dive.md`, `questions/expert.yaml`.
-- 🟡 **[L4]** Open frontier: accurate difficulty prediction, quality-preserving routing, consistency under model swaps — named in `lessons/expert-context.md`; no dedicated frontier drill.
+- ✅ **[L4]** Open frontier: FrugalGPT cost cascades vs. RouteLLM learned routing, accurate difficulty prediction, quality-preserving routing / consistency under model swaps — `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L4]** The five routing/fallback levers (routing policy, cascade depth, failure handling, latency shaping, degraded-mode UX) and their tradeoffs — `lessons/deep-dive.md` tradeoff table.
@@ -33,7 +33,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** LiteLLM / OpenRouter / gateway proxies as the multi-model routing layer — `lessons/deep-dive.md`, `lessons/expert-context.md`.
 - ✅ **[L3]** Honest degraded mode and the fallback-rate metric on a dashboard — `lessons/degraded.md`, `questions/deep-dive.yaml`.
-- 🟡 **[L3]** Operational signals beyond fallback rate (breaker trip rate, escalation rate, hedge rate, per-route cost) — discussed across `lessons/deep-dive.md`; not drilled as metrics.
+- ✅ **[L3]** Operational signals beyond fallback rate (per-route hit rate, fallback/escalation rate, circuit-breaker open rate, cost-per-request by route) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D7 — Staying current & meta-learning
 - ✅ **[L2]** Know where the routing frontier moves (learned routers, quality-preserving routing) and how to track it — pointers in `lessons/expert-context.md`; curated reading list in `reading-list.md`.
@@ -43,8 +43,9 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend a fallback chain with breakers and an honest degraded-mode UX under questioning — `questions/deep-dive.yaml` design-review essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-18 items · ✅ 15 covered · 🟡 3 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **92%**.
-Open frontier work: a cheap→strong cascade coding exercise, a routing-metrics operational drill, a
-difficulty-prediction/quality-preserving-routing frontier drill, and a WS5 reading-list module.
+18 items · ✅ 17 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **97%**.
+Remaining open work: a cheap→strong cascade coding exercise (D5). The frontier drill (D2) and the
+routing-metrics operational drill (D6) are now covered by `lessons/frontier-ops.md` and
+`questions/frontier-ops.yaml`.
 
-<!-- coverage: items=18 covered=15 partial=3 gap=0 -->
+<!-- coverage: items=18 covered=17 partial=1 gap=0 -->

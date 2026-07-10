@@ -1,0 +1,11 @@
+id: lesson-frontier-ops
+title: "Frontier & operations: chunked prefill, P/D disaggregation, and the per-phase signals to watch"
+material: frontier-ops.md
+segments:
+  - present: the-prefill-vs-decode-latency-frontier
+  - check: mc-frontier-pd-disagg-tradeoff
+  - check: mc-frontier-pd-chunked-prefill
+  - check: mc-frontier-pd-open-problem
+  - present: operating-prefill-and-decode-in-production
+  - check: mc-ops-pd-tpot-spike
+  - check: mc-ops-pd-queue-depth

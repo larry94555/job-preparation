@@ -1,0 +1,12 @@
+id: lesson-frontier-ops
+title: "Frontier & operations: KV quantization, cross-request reuse, and the signals to watch"
+material: frontier-ops.md
+segments:
+  - present: the-kv-cache-frontier
+  - check: mc-frontier-kv-outliers
+  - check: mc-frontier-kv-radix
+  - check: mc-frontier-kv-which-lever
+  - present: operating-a-kv-cache-in-production
+  - check: mc-ops-kv-preemption
+  - check: mc-ops-kv-currency
+  - apply: code-kv-eviction

@@ -52,3 +52,27 @@ year is given it is context, not something to memorize.
   hit), what regime does it win in (low- vs. high-stakes), and what eval proves the hits were right?*
 - Re-read this topic's `expert-surface.md` when the frontier shifts; its 🟡/⬜ items — measured cache
   correctness and invalidation beyond TTL — are your next reads.
+
+## Reception & what aged
+- **Provider prefix caching went from novelty to default cost lever, and the two providers converged.** The
+  "lossless, only-failure-is-a-miss" framing held. Anthropic shipped explicit `cache_control` breakpoints
+  (writes ~1.25x, reads ~10% of input, 5-min default TTL); OpenAI shipped *automatic* prefix caching (initially
+  ~50% off, later matched to ~90% on newer flagships). The canon's "stable prefix, variable suffix" advice aged
+  into standard prompt architecture, backed by real 59–70% cost reductions from raising hit rates.
+- **GPTCache stayed the reference implementation of the *idea*, but the idea proved riskier than the tooling.**
+  It was published at NLP-OSS 2023 and popularized embed-then-similarity-search semantic caching (Milvus/Zilliz/
+  FAISS backends, LangChain + LlamaIndex integration). What aged is the warning, not the library: the
+  false-positive hit — serving a stored answer to a genuinely different question — is now recognized as a silent
+  regression, which is why "gate the threshold with an eval, not a guess" became the consensus.
+- **Cache-correctness-as-an-eval moved from frontier toward practice.** 2025-26 work explicitly targets the
+  calibration gap in semantic caching and treats "was this hit actually right?" as a measured quantity — exactly
+  the canon's frontier item, now being operationalized.
+- **Invalidation beyond TTL stayed hard.** Embedding drift and content that changes under a still-similar query
+  remain unsolved by crude time-based expiry; the layered "exact prefix in front of guarded semantic" shape
+  endured as the safe default, with the semantic layer still the one that needs scoping and verification.
+- **The high-stakes caveat held firm.** Consensus is unchanged: exact/prefix caching is broadly safe; semantic
+  caching belongs on low-stakes, tolerant answers unless correctness is actively evaluated.
+- **Sources:** [GPTCache (ACL Anthology, NLP-OSS 2023)](https://aclanthology.org/2023.nlposs-1.24.pdf);
+  [zilliztech/GPTCache](https://github.com/zilliztech/GPTCache);
+  [Prompt Caching with OpenAI, Anthropic, and Google (PromptHub)](https://www.prompthub.us/blog/prompt-caching-with-openai-anthropic-and-google-models);
+  [Closing the Calibration Gap in Semantic Caching (arXiv:2606.19719)](https://arxiv.org/pdf/2606.19719).

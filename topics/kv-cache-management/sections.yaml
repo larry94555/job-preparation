@@ -1,7 +1,7 @@
 sections:
   - id: sec-memory
     title: "Memory & sizing: what the KV cache costs"
-    lessons: [lesson-kv-memory, lesson-expert-context]
+    lessons: [lesson-kv-memory, lesson-expert-context, lesson-frontier-ops]
     assessment:
       title: "Section 1 — KV memory & sizing"
       from_tags: [memory, sizing]

@@ -14,7 +14,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L3]** LLM-as-judge, MT-Bench, and Chatbot Arena (Zheng et al., LMSYS 2023), incl. documented judge biases — `lessons/expert-context.md`, `questions/expert.yaml`.
 - ✅ **[L3]** HELM (Liang et al., Stanford CRFM 2022) as the holistic-benchmark reference — `lessons/expert-context.md`, `questions/expert.yaml`.
 - ✅ **[L3]** Practitioner canon: Hamel Husain, Eugene Yan on looking at data and calibrating judges — `lessons/expert-context.md`.
-- 🟡 **[L4]** Open frontier — trustworthy cheap judges, contamination, benchmark construct validity — named in `lessons/expert-context.md`; no dedicated frontier drill.
+- ✅ **[L4]** Open frontier — LLM-as-judge calibration & bias (position/verbosity/self-enhancement), Chatbot Arena/Elo methodology, contamination & benchmark construct validity — `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L4]** The five eval levers (scoring method, dataset composition, gate placement, judge calibration, freshness) and their tradeoffs — `lessons/deep-dive.md` tradeoff table.
@@ -33,7 +33,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** promptfoo / OpenAI Evals / LangSmith / Braintrust / Inspect as the eval stacks — `lessons/expert-context.md`.
-- 🟡 **[L3]** Operational freshness loop (canary → feed production failures back → de-dup) — described in `lessons/deep-dive.md`, `lessons/adversarial.md`; not drilled as an operational metric.
+- ✅ **[L3]** Operational eval metrics (judge–human agreement, eval-set drift/contamination checks, regression-gate pass rate, golden-set coverage) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
 
 ## D7 — Staying current & meta-learning
 - ✅ **[L2]** Know where the eval frontier moves (judge calibration, eval-set drift/contamination) and how to track it — `reading-list.md` (curated papers/tools + a staying-current method), pointers in `lessons/expert-context.md`.
@@ -43,8 +43,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L4]** Whiteboard/defend an eval strategy under questioning (golden set + gate → adversarial → calibrated judge) — `questions/deep-dive.yaml` design-review essay, `questions/expert.yaml` interview essay.
 
 ## Coverage summary
-18 items · ✅ 15 covered · 🟡 3 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **92%**.
-Open frontier work: a judge-calibration coding exercise, an eval-set drift/contamination drill,
-and an operational freshness-metric drill.
+21 items · ✅ 20 covered · 🟡 1 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) ≈ **98%**.
+Remaining open frontier work: a calibrated-judge coding exercise (D5 [L4]) with rubric decomposition
+and κ agreement.
 
-<!-- coverage: items=18 covered=15 partial=3 gap=0 -->
+<!-- coverage: items=21 covered=20 partial=1 gap=0 -->

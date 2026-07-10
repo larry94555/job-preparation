@@ -1,0 +1,90 @@
+# Frontier & operations drill — closes D2 (frontier drill) and D6 (ops metrics drill).
+
+- id: mc-frontier-so-semantic-validity
+  type: multiple_choice
+  tags: [constrained-decoding, frontier]
+  difficulty: 4
+  prompt: >-
+    Constrained decoding (Outlines-style FSM masking, GBNF grammars, provider JSON mode) compiles a
+    schema into a token mask so only valid tokens are sampled. What is the central *open problem* it
+    provably does not solve?
+  options:
+    - { text: "Semantic validity — a grammar guarantees a well-formed shape but not that values satisfy business rules (dates in range, IDs that exist, fields that agree)", correct: true }
+    - { text: "Syntactic validity — masked decoding still emits unbalanced braces at a nonzero rate" }
+    - { text: "It cannot guarantee the output is valid UTF-8" }
+    - { text: "It only works for XML, never for JSON" }
+  explanation: >-
+    Constrained decoding makes syntax/shape valid by construction, so the live open problem is
+    *semantic* validity: the grammar can't express "this order total equals the sum of its line items"
+    or "this ID exists." That is why a schema-validation layer (Zod/Pydantic/Ajv) and business-rule
+    checks still sit on top of constrained decoding.
+
+- id: mc-frontier-so-quality-cost
+  type: multiple_choice
+  tags: [constrained-decoding, frontier]
+  difficulty: 4
+  prompt: >-
+    A team reports "100% valid JSON" after switching to an aggressive grammar and calls it a pure win.
+    What frontier concern are they ignoring?
+  options:
+    - { text: "Aggressive constraints steer the token distribution and can degrade the answer's content even while it parses — adoption should be eval-gated against a task metric, not just the parse rate", correct: true }
+    - { text: "Nothing — a 100% parse rate proves the answers are correct" }
+    - { text: "Grammars make the model output invalid UTF-8 more often" }
+    - { text: "Constrained decoding removes the need for any schema at all" }
+  explanation: >-
+    Heavy masking steers the model away from completions it would otherwise pick, so it can lower answer
+    quality even at a perfect parse rate. The frontier discipline is eval-gated adoption: measure the
+    quality cost against a task metric. A green parse rate is not a correct answer — the constraint
+    moved cost, it did not erase it.
+
+- id: mc-frontier-so-two-problems
+  type: multiple_choice
+  tags: [constrained-decoding, frontier]
+  difficulty: 4
+  prompt: >-
+    The two open problems for constrained decoding attack the same seam from opposite sides. Which
+    pairing states them correctly?
+  options:
+    - { text: "Semantic validity = 'the shape is right but the meaning may be wrong'; quality cost = 'forcing the shape may make the meaning worse'", correct: true }
+    - { text: "Both are about the decoder emitting malformed syntax under load" }
+    - { text: "Semantic validity is about latency; quality cost is about memory footprint" }
+    - { text: "Both are solved as soon as you turn on provider JSON mode" }
+  explanation: >-
+    Constrained decoding is a *syntactic* guarantee. Semantic validity is the gap that the values may be
+    wrong even when the shape is right; the quality-cost problem is that forcing the shape can make the
+    content worse. Both flow from the same fact: masking guarantees form, not meaning.
+
+- id: mc-ops-so-failure-class-breakdown
+  type: multiple_choice
+  tags: [validation, ops]
+  difficulty: 4
+  prompt: >-
+    Your schema-validation failure rate is stable at 3%, but you can't tell whether to invest in
+    prevention (constrained decoding) or in the repair loop. What operational signal resolves this?
+  options:
+    - { text: "Break the failure rate down by class (malformed vs. missing-field vs. enum vs. truncation) — the dominant class tells you whether to add prevention or strengthen repair", correct: true }
+    - { text: "Total GPU power draw during generation" }
+    - { text: "The size of the model weights on disk" }
+    - { text: "The number of tokens in the system prompt" }
+  explanation: >-
+    Without a per-class breakdown you are tuning blind. If malformed output dominates, prevention
+    (constrained decoding) is the lever; if missing-field/enum violations dominate, the schema and
+    repair loop are where to invest. The aggregate rate alone can't route the decision.
+
+- id: mc-ops-so-fallback-human-queue
+  type: multiple_choice
+  tags: [validation, ops]
+  difficulty: 4
+  prompt: >-
+    Over a month, the share of traffic reaching the *human review* step at the end of your fallback
+    chain has doubled. What does operational judgment conclude?
+  options:
+    - { text: "An earlier layer (prompt, schema strictness, decoder, or repair) is slipping — strengthen it rather than widening the human queue, which is a symptom not a fix", correct: true }
+    - { text: "Hire more reviewers and consider the incident closed" }
+    - { text: "Nothing changed, because the fallback chain still returns something valid" }
+    - { text: "The model weights must be corrupted" }
+  explanation: >-
+    Fallback rate — especially reaching the expensive human step — is the "automated path failed"
+    signal. The fallback chain is a cost gradient (repair cheapest, human most expensive), so a rising
+    human share means an earlier, cheaper layer is failing more; widening the human queue treats the
+    symptom instead of the cause.

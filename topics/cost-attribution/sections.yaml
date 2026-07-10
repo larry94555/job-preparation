@@ -10,7 +10,7 @@ sections:
 
   - id: sec-economics
     title: "Unit economics & hidden costs"
-    lessons: [lesson-economics, lesson-build-cost-aggregator, lesson-deep-dive]
+    lessons: [lesson-economics, lesson-build-cost-aggregator, lesson-deep-dive, lesson-frontier-ops]
     assessment:
       title: "Section 2 — Unit economics & hidden costs"
       from_tags: [economics, hidden]

@@ -48,3 +48,27 @@ year is given it is context, not something to memorize.
   redact, what regime does it win in, and what does it cost (cardinality, async export, storage)?* — the
   same lens the deep-dive lesson uses.
 - Re-read this topic's `expert-surface.md` when the frontier shifts; its 🟡/⬜ items are your next reads.
+
+## Reception & what aged
+- **OTel GenAI semantic conventions won the mindshare battle but are still officially "experimental."** The bet
+  that observability should be a portable, vendor-neutral standard aged very well — but the standard itself is
+  still stabilizing. The GenAI SIG formed in April 2024; as of 2026 most `gen_ai.*` conventions remain in
+  Development/experimental status, with `OTEL_SEMCONV_STABILITY_OPT_IN` provided to survive attribute churn.
+  Read them as "the direction," not "the frozen spec."
+- **Vendor adoption ran ahead of stabilization.** Despite experimental status, Arize Phoenix and Langfuse
+  support the GenAI conventions natively, Datadog began native support around OTel v1.37, and OpenLLMetry /
+  OpenLIT extended instrumentation to more languages and frameworks — evidence the semantics are useful enough
+  that tools shipped against a moving target.
+- **The trace/span tree model was the durable idea; request-only metrics for agents aged out fast.** As agent
+  turns became multi-step fan-outs, "one request line" stopped being tenable, and the distributed-tracing
+  correlation-ID model the canon centers on is now the assumed mental model across every major platform.
+- **Scope crept from "LLM call tracing" to agent orchestration, MCP tool calls, content capture, and quality
+  eval.** The original SIG scope was just client-call tracing; it expanded to agentic systems, which is exactly
+  why the conventions are still moving — the target kept growing.
+- **Quality-drift detection and privacy-preserving capture stayed genuinely open.** Tooling converged on tracing
+  and cost rollups, but reliable silent-regression detection and audit-surviving PII handling remain frontier,
+  not solved — the canon's "open problems" framing held.
+- **Sources:** [OpenTelemetry GenAI semantic conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/);
+  [Inside the LLM Call: GenAI Observability with OpenTelemetry](https://opentelemetry.io/blog/2026/genai-observability/);
+  [Greptime — OTel GenAI semantic conventions](https://greptime.com/blogs/2026-05-09-opentelemetry-genai-semantic-conventions);
+  [Langfuse — OpenTelemetry for LLM observability](https://langfuse.com/integrations/native/opentelemetry).
