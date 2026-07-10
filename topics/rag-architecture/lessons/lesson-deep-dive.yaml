@@ -1,0 +1,14 @@
+id: lesson-deep-dive
+title: "Architecture & tradeoffs: reviewing a RAG design"
+material: deep-dive.md
+segments:
+  - present: the-rag-architecture-design-space
+  - present: a-tradeoff-table-for-rag-architecture
+  - check: mc-review-rag-dense-only
+  - check: mc-review-rag-no-reranker
+  - present: common-sota-and-antipattern
+  - check: mc-review-rag-stale-index
+  - present: scaling-performance-and-the-token-budget
+  - present: reviewing-a-rag-architecture-design
+  - apply: essay-rag-deep-dive
+  - apply: debug-rag-rrf

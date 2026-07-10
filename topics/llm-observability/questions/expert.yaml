@@ -1,0 +1,59 @@
+# Literature/canon (WS1) + interview (WS2) — tags [canon]/[interview] are NOT in any section's
+# from_tags, so these don't enter the deterministic section-assessment pools.
+- id: mc-canon-obs-standard
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Which standard defines GenAI trace/span semantics so traces are portable across observability tools?"
+  options:
+    - { text: "OpenTelemetry GenAI semantic conventions", correct: true }
+    - { text: "The RAGAS metric suite" }
+    - { text: "The Berkeley Function-Calling Leaderboard" }
+    - { text: "PagedAttention" }
+  explanation: "LLM observability is standards- and tooling-led: OpenTelemetry's GenAI semantic conventions define how GenAI traces/spans and their attributes are structured. RAGAS is a RAG eval metric, the BFCL is a tool-use benchmark, and PagedAttention is a KV-cache serving technique."
+
+- id: mc-interview-obs-signal
+  type: multiple_choice
+  tags: [interview]
+  difficulty: 3
+  prompt: "In an LLM-observability interview, the point that most separates strong candidates is explaining:"
+  options:
+    - { text: "Why request-level metrics are insufficient for agents and what to trace/sample/redact/alert on", correct: true }
+    - { text: "Which tokenizer library to import" }
+    - { text: "How to reduce a Docker image's layer count" }
+    - { text: "The exact release year of each observability tool" }
+  explanation: "The senior signal is understanding that an agent request fans out into many steps, so aggregate request metrics hide where time/tokens/errors/cost go — and knowing what to trace, sample, redact, and alert on (including drift). The field is tool/standards-led, so exact release years are not the point."
+
+- id: essay-obs-literature
+  type: essay
+  length: long
+  tags: [canon]
+  difficulty: 4
+  prompt: >-
+    LLM observability is often described as tooling- and standards-led rather than paper-led. Explain
+    what that means: name the standard that defines GenAI trace/span semantics, the main tools in the
+    space, what today's state of the art looks like, and the open problems that remain.
+  eval_skill: eval-observability-essay
+  reference_points:
+    - "The field is tool/standards-led, not paper-led: there is no small set of landmark papers; the key artifact is a standard plus the tools that implement it, alongside practitioner writing on drift/monitoring."
+    - "OpenTelemetry (OTel) GenAI semantic conventions define how GenAI traces/spans and their attributes (model, tokens, latency, cost) are structured so traces are portable across tools."
+    - "Tools in the space: Langfuse, LangSmith, Arize/Phoenix, Helicone, OpenLLMetry."
+    - "SOTA now: OTel-based tracing with token/latency/cost rollups plus drift and canary detection."
+    - "Open problems: standardized semantics (conventions still stabilizing), quality-drift detection, and privacy-preserving traces."
+
+- id: essay-obs-interview
+  type: essay
+  length: long
+  tags: [interview]
+  difficulty: 4
+  prompt: >-
+    You're interviewing for a role owning observability of an LLM agent. Convince the interviewer you
+    understand the space: why request-level metrics are insufficient for agents, what you would
+    trace/sample/redact/alert on, and which standard and tools you'd reach for. Call out the red flags
+    a weak candidate would miss.
+  eval_skill: eval-observability-essay
+  reference_points:
+    - "Request-level metrics are insufficient for agents because one request fans out into planning, tool calls, retrieval, retries, and sub-model calls, so an aggregate metric hides where time/tokens/errors/cost go; traces and spans with correlation IDs give per-step visibility."
+    - "Trace spans with correlation IDs; sample to control volume/cost; redact PII at capture time; alert on latency/cost/error rate and on drift in quality or input distribution."
+    - "Name the OpenTelemetry GenAI semantic conventions as the standard and Langfuse/LangSmith/Arize-Phoenix/Helicone/OpenLLMetry as the tools; note the field is standards/tooling-led, not paper-led."
+    - "Red flags: request-only metrics for agents (no per-step visibility), logging raw PII into traces, and shipping prompt/model changes with no version tagging so regressions can't be attributed."

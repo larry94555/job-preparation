@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Interview-prep lessons</title>
+<style>
+  :root {
+    --bg: #eef2f5; --surface: #ffffff; --ink: #1a2230; --muted: #5c6a72;
+    --hairline: #e2e8ec; --accent: #0e7c86; --accent-ink: #0a5d64;
+    --good-bg: #e9f8ef; --good-ink: #1e7a4d; --soft-bg: #e7f5f2; --soft-ink: #0a5d64;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.55; }
+  .layout { display: grid; grid-template-columns: 1fr 300px; gap: 22px; max-width: 1080px; margin: 0 auto; padding: 22px; }
+  @media (max-width: 820px) { .layout { grid-template-columns: 1fr; } aside { order: -1; } }
+
+  header.top { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+  header.top h1 { font-size: 19px; margin: 0; letter-spacing: -0.01em; }
+  .linkback { background: none; border: none; color: var(--accent-ink); cursor: pointer; font-size: 13px; padding: 0; }
+  .linkback:hover { text-decoration: underline; }
+  .steps { margin-left: auto; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+  .bar { height: 6px; background: var(--hairline); border-radius: 999px; overflow: hidden; margin: 8px 0 18px; }
+  .bar > i { display: block; height: 100%; background: var(--accent); transition: width .25s; }
+
+  .card { background: var(--surface); border: 1px solid var(--hairline); border-radius: 14px; padding: 26px 28px; }
+  .eyebrow { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent-ink); margin-bottom: 10px; }
+  .material h2 { font-size: 22px; margin: 0 0 12px; line-height: 1.25; }
+  .material h3 { font-size: 17px; margin: 20px 0 8px; }
+  .material p { margin: 12px 0; } .material ul { margin: 12px 0; padding-left: 22px; } .material li { margin: 5px 0; }
+  .material code { font-family: var(--mono); font-size: 0.9em; background: #eef2f4; padding: 1px 5px; border-radius: 5px; }
+  .material pre { background: #f2f5f6; border: 1px solid var(--hairline); border-radius: 8px; padding: 12px 14px; overflow-x: auto; }
+  .material pre code { background: none; padding: 0; }
+
+  .prompt { font-size: 17px; margin: 4px 0 18px; }
+  .opts { display: flex; flex-direction: column; gap: 10px; }
+  label.opt { display: flex; gap: 11px; align-items: flex-start; padding: 12px 14px; border: 1px solid var(--hairline); border-radius: 10px; cursor: pointer; transition: border-color .12s, background .12s; }
+  label.opt:hover { border-color: var(--accent); } label.opt.sel { border-color: var(--accent); background: #f0fbfb; }
+  label.opt input { margin-top: 3px; }
+  input.text, textarea { font: inherit; width: 100%; padding: 11px 13px; border: 1px solid var(--hairline); border-radius: 10px; background: #fbfdfd; }
+  textarea { min-height: 150px; resize: vertical; }
+
+  .row { display: flex; gap: 10px; align-items: center; margin-top: 20px; flex-wrap: wrap; }
+  button { font: inherit; font-size: 15px; cursor: pointer; border: 1px solid var(--accent); background: var(--accent); color: #fff; border-radius: 10px; padding: 10px 18px; transition: background .12s; }
+  button:hover { background: var(--accent-ink); } button.ghost { background: #fff; color: var(--accent-ink); } button.ghost:hover { background: #f0fbfb; }
+  button:disabled { opacity: .5; cursor: default; }
+
+  .feedback { margin-top: 18px; padding: 13px 15px; border-radius: 10px; font-size: 15px; }
+  .feedback.good { background: var(--good-bg); color: var(--good-ink); } .feedback.soft { background: var(--soft-bg); color: var(--soft-ink); }
+  .qblock { padding: 16px 0; border-top: 1px solid var(--hairline); } .qblock:first-child { border-top: none; }
+  ul.checks { list-style: none; padding: 0; margin: 10px 0 0; } ul.checks li { font-size: 14px; color: var(--muted); margin: 3px 0; }
+  .qnum { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .refs { margin-top: 14px; background: #f6faf9; border: 1px solid var(--hairline); border-radius: 10px; padding: 12px 16px; }
+  .refs ul { margin: 0; padding-left: 20px; } .refs li { margin: 4px 0; color: var(--muted); }
+
+  /* home */
+  .hero h2 { margin: 0 0 6px; font-size: 22px; } .hero p { color: var(--muted); max-width: 62ch; margin: 0 0 16px; }
+  .topics { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; margin-top: 20px; }
+  .tcard { text-align: left; background: var(--surface); border: 1px solid var(--hairline); border-radius: 12px; padding: 16px; cursor: pointer; transition: border-color .12s, box-shadow .12s; }
+  .tcard:hover { border-color: var(--accent); box-shadow: 0 2px 10px rgba(14,124,134,0.08); }
+  .tcard h3 { margin: 0 0 4px; font-size: 15.5px; } .tcard .act { font-size: 12.5px; color: var(--muted); }
+  .dots { display: flex; gap: 6px; margin-top: 10px; } .dot-sm { width: 15px; height: 15px; border-radius: 50%; border: 1px solid #cfd8dc; }
+  .tactions { display: flex; gap: 8px; margin-top: 12px; } button.mini { font-size: 12.5px; padding: 5px 10px; }
+
+  aside { align-self: start; position: sticky; top: 22px; }
+  .panel { background: var(--surface); border: 1px solid var(--hairline); border-radius: 14px; padding: 18px; }
+  .panel h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: 0 0 14px; }
+  .sec { display: flex; align-items: center; gap: 11px; padding: 9px 8px; border-radius: 9px; } .sec.cur { background: #f0fbfb; }
+  .dot { width: 18px; height: 18px; border-radius: 50%; border: 1px solid #cfd8dc; flex: none; }
+  .sec .t { font-size: 14px; } .sec .b { font-size: 11.5px; color: var(--muted); }
+  .legend { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--hairline); display: flex; flex-direction: column; gap: 7px; }
+  .legend .li { display: flex; align-items: center; gap: 9px; font-size: 12px; color: var(--muted); } .legend .dot { width: 13px; height: 13px; }
+  .done { text-align: center; padding: 30px 10px; } .done .big { font-size: 44px; }
+  .kpis { display: flex; gap: 10px; flex-wrap: wrap; margin: 4px 0 8px; }
+  .stat { flex: 1 1 90px; min-width: 90px; background: var(--card, #fff); border: 1px solid var(--hairline, #e5e7eb); border-radius: 12px; padding: 12px 14px; text-align: center; }
+  .stat .big { font-size: 26px; font-weight: 700; line-height: 1.1; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <main>
+    <header class="top">
+      <button id="back" class="linkback" style="display:none">← All lessons</button>
+      <h1 id="topic">Lessons</h1><span class="steps" id="steps"></span>
+    </header>
+    <div class="bar" id="barwrap"><i id="barfill" style="width:0%"></i></div>
+    <div class="card" id="card"></div>
+  </main>
+  <aside>
+    <div class="panel">
+      <h2 id="panelh">Mastery</h2>
+      <div id="dash"></div>
+      <div class="legend" id="legend"></div>
+    </div>
+  </aside>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+async function api(path, body) {
+  const r = await fetch(path, body !== undefined ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) } : {});
+  return r.json();
+}
+const el = (tag, props = {}, ...kids) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(props)) {
+    if (k === "class") n.className = v; else if (k === "html") n.innerHTML = v; else if (k === "text") n.textContent = v;
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v); else n.setAttribute(k, v);
+  }
+  for (const c of kids) if (c) n.append(c);
+  return n;
+};
+function escapeHtml(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+let S = null, H = null, P = null, practiceTimer = null;
+function clearPracticeTimer() { if (practiceTimer) { clearInterval(practiceTimer); practiceTimer = null; } }
+async function refresh() {
+  clearPracticeTimer();
+  S = await api("/api/state");
+  if (S.home) { H = await api("/api/home"); renderHome(); } else render();
+}
+$("back").addEventListener("click", async () => { clearPracticeTimer(); await api("/api/home", {}); refresh(); });
+
+function renderLegend(legend) {
+  const lg = $("legend"); lg.innerHTML = "";
+  for (const b of legend) lg.append(el("div", { class: "li" }, el("span", { class: "dot", style: `background:${b.color}` }), el("span", { text: b.name })));
+}
+
+/* ---------------- home ---------------- */
+function renderHome() {
+  $("back").style.display = "none";
+  $("topic").textContent = "Your lessons";
+  $("steps").textContent = `${H.readinessPct}% interview-ready · ${H.masteredTopics}/${H.items.length} mastered`;
+  $("barwrap").style.display = "none";
+  $("panelh").textContent = "Mastery scale";
+  $("dash").innerHTML = "";
+  renderLegend(H.legend);
+
+  const card = $("card"); card.innerHTML = "";
+  const heroRow = el("div", { class: "row" }, el("button", { text: "Proceed →", onclick: async () => { await api("/api/continue", {}); refresh(); } }));
+  if (H.dueCount > 0) heroRow.append(el("button", { class: "ghost", text: `Review ${H.dueCount} due →`, onclick: () => startPractice("review") }));
+  heroRow.append(el("button", { class: "ghost", text: "Analytics →", onclick: () => renderAnalytics() }));
+  const hero = el("div", { class: "hero" },
+    el("h2", { text: "Pick up where you left off" }),
+    el("p", { text: "Proceed continues the full path based on what you've done. Jump to any lesson below, run a timed mock interview, or take a topic-wide cumulative." }),
+    heroRow);
+  const grid = el("div", { class: "topics" });
+  for (const it of H.items) {
+    const dots = el("div", { class: "dots" });
+    for (const d of it.dashboard) dots.append(el("span", { class: "dot-sm", style: `background:${d.color}`, title: d.title + " — " + d.name }));
+    const actions = el("div", { class: "tactions" },
+      el("button", { class: "ghost mini", text: "Mock", onclick: (e) => { e.stopPropagation(); startPractice("mock", it.id); } }),
+      el("button", { class: "ghost mini", text: "Cumulative", onclick: (e) => { e.stopPropagation(); startPractice("cumulative", it.id); } }));
+    grid.append(el("div", { class: "tcard", onclick: async () => { await api("/api/select", { topic: it.id }); refresh(); } },
+      el("h3", { text: it.title }),
+      el("div", { class: "act", text: it.activity + (it.fullyMastered ? " · mastered" : "") }),
+      dots, actions));
+  }
+  card.append(hero, grid);
+}
+
+/* ---------------- analytics: mastery trend + retention ---------------- */
+function sparkline(points) {
+  const w = 320, h = 64, pad = 4;
+  if (!points.length) return el("div", { class: "act", text: "No mastery history yet — play a lesson and it will appear here." });
+  const xs = (i) => pad + (points.length === 1 ? w - 2 * pad : (i * (w - 2 * pad)) / (points.length - 1));
+  const ys = (v) => h - pad - (v / 100) * (h - 2 * pad);
+  const d = points.map((p, i) => `${i === 0 ? "M" : "L"}${xs(i).toFixed(1)},${ys(p.pct).toFixed(1)}`).join(" ");
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", `0 0 ${w} ${h}`); svg.setAttribute("width", "100%"); svg.setAttribute("height", "64");
+  const base = document.createElementNS(ns, "line");
+  base.setAttribute("x1", pad); base.setAttribute("y1", h - pad); base.setAttribute("x2", w - pad); base.setAttribute("y2", h - pad);
+  base.setAttribute("stroke", "#e5e7eb"); svg.append(base);
+  const path = document.createElementNS(ns, "path");
+  path.setAttribute("d", d); path.setAttribute("fill", "none"); path.setAttribute("stroke", "#34C759"); path.setAttribute("stroke-width", "2");
+  svg.append(path);
+  const last = points[points.length - 1];
+  const dot = document.createElementNS(ns, "circle");
+  dot.setAttribute("cx", xs(points.length - 1)); dot.setAttribute("cy", ys(last.pct)); dot.setAttribute("r", "3"); dot.setAttribute("fill", "#34C759");
+  svg.append(dot);
+  return svg;
+}
+async function renderAnalytics() {
+  const A = await api("/api/analytics");
+  $("back").style.display = ""; $("barwrap").style.display = "none";
+  $("topic").textContent = "Analytics"; $("steps").textContent = "mastery over time · retention";
+  $("panelh").textContent = "Mastery scale"; $("dash").innerHTML = ""; renderLegend((H && H.legend) || []);
+  const card = $("card"); card.innerHTML = "";
+  const m = A.masteryNow, r = A.retention;
+  const stat = (big, label) => el("div", { class: "stat" }, el("div", { class: "big", text: String(big) }), el("div", { class: "act", text: label }));
+  const kpis = el("div", { class: "kpis" },
+    stat(m.avgPct + "%", "avg mastery"),
+    stat(m.proficientSections + "/" + m.totalSections, "sections proficient+"),
+    stat(m.masteredSections, "sections mastered"));
+  const trendCard = el("div", { class: "hero" }, el("h2", { text: "Mastery over time" }),
+    el("p", { text: "Average mastery across all topics, each point a moment your mastery changed." }), sparkline(A.trend));
+  const retCard = el("div", { class: "hero" }, el("h2", { text: "Retention (spaced repetition)" }),
+    el("div", { class: "kpis" },
+      stat(r.dueNow, "due now"), stat(r.dueSoon, "due <24h"), stat(r.dueWeek, "due <7d"),
+      stat(r.matured, "well-retained"), stat(r.scheduled, "tracked"), stat(r.avgIntervalDays + "d", "avg interval")));
+  const bars = el("div", { class: "topics" });
+  for (const t of A.perTopic) {
+    const fill = el("i", { style: `width:${t.scorePct}%;background:#34C759` });
+    bars.append(el("div", { class: "tcard", onclick: async () => { await api("/api/select", { topic: t.id }); refresh(); } },
+      el("h3", { text: t.title }),
+      el("div", { class: "act", text: `${t.scorePct}% · ${t.proficient}/${t.sections} sections proficient+` }),
+      el("div", { class: "bar" }, fill)));
+  }
+  const back = el("div", { class: "row", style: "justify-content:center" }, el("button", { text: "← Back to lessons", onclick: () => refresh() }));
+  card.append(kpis, trendCard, retCard, el("h2", { text: "By topic", style: "margin:6px 0" }), bars, back);
+}
+
+/* ---------------- practice: review / mock / cumulative ---------------- */
+async function startPractice(kind, topic) {
+  clearPracticeTimer();
+  P = await api("/api/practice/start", topic ? { kind, topic } : { kind });
+  $("back").style.display = ""; $("barwrap").style.display = "none"; $("panelh").textContent = "Practice";
+  $("dash").innerHTML = ""; renderLegend((H && H.legend) || (S && S.legend) || []);
+  const card = $("card"); card.innerHTML = "";
+  if (P.empty) {
+    $("topic").textContent = "Review"; $("steps").textContent = "";
+    card.append(el("div", { class: "done" }, el("div", { class: "big", text: "✓" }), el("h2", { text: "Nothing due right now" }),
+      el("p", { text: "You're caught up on reviews. Come back later, or keep going through the lessons." }),
+      el("div", { class: "row", style: "justify-content:center" }, el("button", { text: "Back to lessons", onclick: async () => { await api("/api/home", {}); refresh(); } }))));
+    return;
+  }
+  renderPractice();
+}
+function renderPractice() {
+  $("topic").textContent = P.title;
+  const card = $("card"); card.innerHTML = "";
+  const form = el("div", {});
+  P.items.forEach((q, i) => form.append(el("div", { class: "qblock" }, el("div", { class: "qnum", text: "Q" + (i + 1) }), el("div", { class: "prompt", text: q.prompt }), optionInputs(q, "p_" + q.id))));
+  const result = el("div", {}), row = el("div", { class: "row" });
+  const submit = el("button", { text: "Submit", onclick: () => submitPractice(form, result, row, submit) });
+  row.append(submit);
+  card.append(form, result, row);
+  if (P.timeLimitSec) {
+    let left = P.timeLimitSec;
+    const tick = () => {
+      const m = Math.floor(left / 60), sec = String(Math.max(0, left) % 60).padStart(2, "0");
+      $("steps").textContent = `⏱ ${m}:${sec}`;
+      if (left <= 0) { clearPracticeTimer(); submitPractice(form, result, row, submit); }
+      left--;
+    };
+    tick(); practiceTimer = setInterval(tick, 1000);
+  } else $("steps").textContent = `${P.items.length} questions`;
+}
+async function submitPractice(form, result, row, submit) {
+  clearPracticeTimer(); submit.disabled = true;
+  const answers = {}; for (const q of P.items) answers[q.id] = getVal(form, "p_" + q.id);
+  const r = await api("/api/practice/grade", { answers });
+  result.innerHTML = "";
+  const pct = Math.round(r.score * 100);
+  const label = r.kind === "review" ? "Review complete" : r.passed ? "Strong result" : "Good practice";
+  const note = r.kind === "review" ? "Items you missed will come back sooner; the rest are scheduled further out." : "Retry any time — mastery only moves forward.";
+  result.append(el("div", { class: "feedback " + (r.passed || r.kind === "review" ? "good" : "soft"), text: `${label}: ${r.correct} / ${r.total} (${pct}%). ${note}` }));
+  row.innerHTML = "";
+  row.append(el("button", { text: "Try again", onclick: () => startPractice(P.kind, P.topic) }));
+  row.append(el("button", { class: "ghost", text: "Back to lessons", onclick: async () => { await api("/api/home", {}); refresh(); } }));
+}
+
+/* ---------------- lesson ---------------- */
+function renderDash() {
+  const d = $("dash"); d.innerHTML = "";
+  for (const s of S.dashboard) {
+    d.append(el("div", { class: "sec" + (s.id === S.currentSectionId ? " cur" : "") },
+      el("span", { class: "dot", style: `background:${s.color}` }),
+      el("div", {}, el("div", { class: "t", text: s.title }), el("div", { class: "b", text: s.name }))));
+  }
+  renderLegend(S.legend);
+}
+function optionInputs(q, name) {
+  const wrap = el("div", { class: "opts" });
+  if (q.options) {
+    for (const opt of q.options) {
+      const input = el("input", { type: "radio", name }); input.value = opt;
+      const lab = el("label", { class: "opt" }, input, el("span", { text: opt }));
+      input.addEventListener("change", () => { wrap.querySelectorAll("label.opt").forEach((l) => l.classList.remove("sel")); lab.classList.add("sel"); });
+      wrap.append(lab);
+    }
+  } else wrap.append(el("input", { class: "text", name, placeholder: "Type your answer…" }));
+  return wrap;
+}
+const getVal = (scope, name) => {
+  const r = scope.querySelector(`input[name="${name}"]:checked`); if (r) return r.value;
+  const t = scope.querySelector(`input[name="${name}"].text`); return t ? t.value : "";
+};
+
+function render() {
+  $("back").style.display = "";
+  $("panelh").textContent = "Mastery";
+  $("barwrap").style.display = "";
+  $("topic").textContent = S.topic.title;
+  $("steps").textContent = S.done ? "Complete" : `Step ${S.index + 1} / ${S.total}`;
+  $("barfill").style.width = Math.round((S.index / S.total) * 100) + "%";
+  renderDash();
+  const card = $("card"); card.innerHTML = "";
+  if (S.done) return renderDone(card);
+  const step = S.step;
+  if (step.kind === "material") return renderMaterial(card, step);
+  if (step.kind === "check") return renderCheck(card, step);
+  if (step.kind === "apply") return renderApply(card, step);
+  if (step.kind === "assessment") return renderAssessment(card, step);
+}
+function renderMaterial(card, step) {
+  card.append(el("div", { class: "eyebrow", text: step.lessonTitle }),
+    el("div", { class: "material", html: `<h2>${escapeHtml(step.heading)}</h2>` + step.html }),
+    el("div", { class: "row" }, el("button", { text: "Continue →", onclick: async () => { await api("/api/next", {}); refresh(); } })));
+}
+function renderCheck(card, step) {
+  const q = step.question, name = "c_" + q.id;
+  const body = el("div", {}, el("div", { class: "eyebrow", text: "Check your understanding" }), el("div", { class: "prompt", text: q.prompt }));
+  const opts = optionInputs(q, name); body.append(opts);
+  const fb = el("div", {}), row = el("div", { class: "row" });
+  const checkBtn = el("button", { text: "Check answer", onclick: async () => {
+    const answer = getVal(opts, name); if (!answer) return;
+    const r = await api("/api/answer", { answer }); fb.innerHTML = "";
+    fb.append(el("div", { class: "feedback " + (r.correct ? "good" : "soft"), text: (r.correct ? "✓ Correct. " : "Almost — review the material above and keep going. ") + (r.explanation || "") }));
+    checkBtn.disabled = true;
+    row.append(el("button", { class: "ghost", text: "Continue →", onclick: async () => { await api("/api/next", {}); refresh(); } }));
+  }});
+  row.append(checkBtn); card.append(body, fb, row);
+}
+function renderApply(card, step) {
+  const q = step.question;
+  const ta = el("textarea", { placeholder: q.type === "code" ? "Write your code here…" : "Write your answer here…" });
+  const refs = q.referencePoints && q.referencePoints.length
+    ? el("div", { class: "refs" }, el("div", { class: "eyebrow", text: "What a strong answer covers" }), el("ul", {}, ...q.referencePoints.map((p) => el("li", { text: p })))) : null;
+  const out = el("div", {}), row = el("div", { class: "row" });
+  const submit = el("button", { text: "Submit for grading", onclick: async () => {
+    submit.disabled = true; out.innerHTML = "";
+    out.append(el("div", { class: "feedback soft", text: "Grading with the local model… this can take a few seconds." }));
+    const r = await api("/api/apply", { answer: ta.value }); out.innerHTML = "";
+    if (r.graded) {
+      if (r.tests_ran) out.append(el("div", { class: "feedback " + (r.tests_passed ? "good" : "soft"), text: r.tests_passed ? "✓ Tests passed." : "Tests not passing yet — check the output and try again." }));
+      if (r.concept_offline && r.tests_ran) out.append(el("div", { class: "qnum", text: "Concept feedback needs the local model (offline) — tests still ran." }));
+      const good = r.verdict === "pass", label = { pass: "Mastered", borderline: "Almost there", fail: "Keep going" }[r.verdict] || r.verdict;
+      out.append(el("div", { class: "feedback " + (good ? "good" : "soft"), text: `${good ? "✓ " : ""}${label} — ${r.feedback || ""}` }));
+      if (r.checks) { const ul = el("ul", { class: "checks" }); for (const [k, v] of Object.entries(r.checks)) ul.append(el("li", { text: (v ? "✓ " : "○ ") + k.replace(/_/g, " ") })); out.append(ul); }
+    } else if (r.offline) out.append(el("div", { class: "feedback soft", text: "Local model offline — your answer is recorded. Start llama-server/Ollama (or set LLAMA_BASE_URL) for graded feedback; compare with the guidance below meanwhile." }));
+    else out.append(el("div", { class: "feedback soft", text: "Couldn't auto-grade this time — recorded. Compare with the guidance below." }));
+    if (refs) out.append(refs);
+    row.append(el("button", { class: "ghost", text: "Continue →", onclick: async () => { await api("/api/next", {}); refresh(); } }));
+  }});
+  row.append(submit);
+  card.append(el("div", { class: "eyebrow", text: "Apply it — " + q.type }), el("div", { class: "prompt", text: q.prompt }), ta, out, row);
+}
+function renderAssessment(card, step) {
+  card.append(el("div", { class: "eyebrow", text: "Section assessment" }), el("div", { class: "prompt", text: step.title + " — answer all, then submit. Retry as many times as you like." }));
+  const form = el("div", {});
+  step.items.forEach((q, i) => form.append(el("div", { class: "qblock" }, el("div", { class: "qnum", text: "Q" + (i + 1) }), el("div", { class: "prompt", text: q.prompt }), optionInputs(q, "a_" + q.id))));
+  const result = el("div", {}), row = el("div", { class: "row" });
+  const submit = el("button", { text: "Submit assessment", onclick: async () => {
+    const answers = {}; for (const q of step.items) answers[q.id] = getVal(form, "a_" + q.id);
+    const r = await api("/api/assessment", { answers }); result.innerHTML = "";
+    const pct = Math.round(r.score * 100);
+    const msg = r.passed ? `✓ Mastered ${r.correct} / ${r.total} (${pct}%). Section mastery: ${r.bandName}.` : `You've got ${r.correct} / ${r.total} (${pct}%). Almost there — review the material and try again whenever you like.`;
+    result.append(el("div", { class: "feedback " + (r.passed ? "good" : "soft"), text: msg }));
+    row.innerHTML = "";
+    row.append(el("button", { text: "Try again", onclick: () => refresh() }));
+    row.append(el("button", { class: "ghost", text: "Continue →", onclick: async () => { await api("/api/next", {}); refresh(); } }));
+  }});
+  row.append(submit); card.append(form, result, row);
+}
+function renderDone(card) {
+  const mastered = S.dashboard.filter((s) => s.band >= 3).length;
+  card.append(el("div", { class: "done" }, el("div", { class: "big", text: "🎉" }), el("h2", { text: "You reached the end of this lesson" }),
+    el("p", { text: `${mastered} of ${S.dashboard.length} sections at proficient or above. Retry any assessment to push toward bright green.` }),
+    el("div", { class: "row", style: "justify-content:center; flex-wrap:wrap" },
+      el("button", { text: "Back to all lessons", onclick: async () => { await api("/api/home", {}); refresh(); } }),
+      el("button", { class: "ghost", text: "Mock interview", onclick: () => startPractice("mock", S.topic.id) }),
+      el("button", { class: "ghost", text: "Cumulative assessment", onclick: () => startPractice("cumulative", S.topic.id) }),
+      el("button", { class: "ghost", text: "Restart this lesson", onclick: async () => { await api("/api/reset", {}); refresh(); } }))));
+}
+refresh();
+</script>
+</body>
+</html>

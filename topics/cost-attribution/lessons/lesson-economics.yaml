@@ -1,0 +1,16 @@
+id: lesson-economics
+title: "Unit economics & hidden costs"
+material: economics.md
+segments:
+  - present: cost-per-successful-task
+  - check: mc-cost-per-success
+  - check: mc-blended-vs-marginal
+  - check: cloze-unit-economics
+  - check: cloze-marginal
+  - check: fe-cost-per-success
+  - apply: essay-cost-per-success
+  - present: hidden-costs
+  - check: mc-hidden-retries
+  - check: mc-over-retrieval
+  - check: fe-hidden-cost
+  - apply: essay-hidden-costs

@@ -1,0 +1,16 @@
+id: lesson-permission
+title: "Data leakage & permission boundaries"
+material: permission.md
+segments:
+  - present: data-leakage-and-exfiltration
+  - check: mc-data-leakage
+  - check: cloze-exfiltration
+  - present: permission-boundaries-and-least-privilege
+  - check: mc-least-privilege
+  - check: mc-egress-confirm
+  - check: cloze-least-privilege
+  - present: the-confused-deputy
+  - check: mc-confused-deputy
+  - check: fe-egress-control
+  - check: fe-blast-radius
+  - apply: essay-permission-leakage

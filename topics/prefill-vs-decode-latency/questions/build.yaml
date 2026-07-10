@@ -1,0 +1,41 @@
+- id: mc-ttft-driver
+  type: multiple_choice
+  tags: [optimization]
+  difficulty: 2
+  prompt: "Time-to-first-token (TTFT) is driven mainly by:"
+  options:
+    - { text: "The prefill phase — i.e. the prompt length", correct: true }
+    - { text: "The decode phase — i.e. the output length" }
+    - { text: "The temperature setting" }
+    - { text: "The size of the vocabulary" }
+  explanation: "Prefill processes the whole prompt before the first token, so TTFT scales with prompt length; decode/TPOT scales with output length."
+
+- id: mc-longer-output
+  type: multiple_choice
+  tags: [optimization]
+  difficulty: 2
+  prompt: "Doubling the OUTPUT length primarily increases:"
+  options:
+    - { text: "Decode time (TPOT × output tokens), not TTFT", correct: true }
+    - { text: "TTFT, not decode time" }
+    - { text: "Neither — output length is free" }
+    - { text: "The prefill throughput" }
+  explanation: "Output length drives the decode phase; TTFT depends on the prompt, so it's unchanged."
+
+- id: essay-serving-config
+  type: essay
+  length: long
+  tags: [optimization]
+  difficulty: 4
+  prompt: >-
+    Project: a product needs low TTFT for interactive chat and high throughput for batch summarization
+    on shared hardware. Design the serving configuration and justify the per-phase choices (chunked
+    prefill, prefill/decode disaggregation, batch size). Include a test plan that measures TTFT and
+    TPOT separately.
+  eval_skill: eval-prefill-essay
+  reference_points:
+    - "Prefill is compute-bound and sets TTFT; decode is memory-bandwidth-bound and sets TPOT."
+    - "Chunked prefill / disaggregation lower TTFT; batching raises decode throughput at a TPOT cost."
+    - "Interactive traffic prioritizes TTFT; batch traffic prioritizes tokens/sec."
+    - "Measure TTFT and TPOT (and p95) separately — a single latency number hides the phase you must tune."
+    - "Test plan: vary prompt vs output length and confirm each moves the expected metric."

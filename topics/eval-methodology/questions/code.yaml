@@ -1,0 +1,20 @@
+# Coding exercise — engine type: code (graded by tests + concept skill)
+- id: code-eval-gate
+  type: code
+  language: typescript
+  tags: [regression]
+  difficulty: 3
+  prompt: >-
+    Implement `runEvalGate(cases, run, threshold)`. Each case is `{ name, input, expected }`. Run
+    `run(input)` for each and compare to `expected` by strict equality. Return
+    `{ passRate, passed, failures }` where passRate = passing / total, passed = passRate >= threshold,
+    and failures is the list of failing case names.
+  starter_file: exercises/eval-gate/starter.ts
+  test_file: exercises/eval-gate/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-evals-code
+  concept_checks:
+    must_use: ["pass rate = passing / total", "passed gated on threshold", "collect failing case names"]
+    avoid_antipattern: ["passed always true", "ignoring the threshold"]

@@ -1,0 +1,20 @@
+# Coding exercise — engine type: code (graded by tests + concept skill)
+- id: code-tenant-cache
+  type: code
+  language: typescript
+  tags: [cache-safety]
+  difficulty: 3
+  prompt: >-
+    Implement a `TenantCache`. `set(tenant, key, value)` stores an entry; `get(tenant, key)` returns
+    the value stored for THAT tenant+key, or null. Critically: another tenant's entry under the same
+    `key` must NOT be returned — scope the internal key by tenant so identical keys across tenants
+    never collide.
+  starter_file: exercises/tenant-cache/starter.ts
+  test_file: exercises/tenant-cache/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-isolation-code
+  concept_checks:
+    must_use: ["cache key includes the tenant scope", "cross-tenant lookup misses (null)", "missing key returns null"]
+    avoid_antipattern: ["keying only by the request/key", "returning another tenant's value"]

@@ -1,0 +1,12 @@
+id: lesson-contract
+title: "Tools are APIs: the contract"
+material: tool-contract.md
+segments:
+  - present: tools-are-apis-with-a-contract
+  - check: mc-tool-is-api
+  - check: mc-schema-purpose
+  - check: cloze-contract
+  - check: cloze-schema
+  - present: read-vs-write-the-side-effect-class
+  - check: mc-read-write-sep
+  - apply: essay-tool-contract

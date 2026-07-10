@@ -1,0 +1,36 @@
+# Free entry (short answer)
+- id: fe-prefix-saves
+  type: text_input
+  tags: [prefix, tradeoffs]
+  difficulty: 2
+  prompt: "A prefix-cache hit saves the compute for which pipeline stage? (one word)"
+  answer:
+    regex: '^prefill$'
+    normalize: true
+
+- id: fe-prompt-order
+  type: text_input
+  tags: [prefix]
+  difficulty: 3
+  prompt: "For prefix-cache hits, where in the prompt should the stable, shared content go? (one word)"
+  answer:
+    regex: '^(first|front|beginning|start|top|prefix)$'
+    normalize: true
+
+- id: fe-semantic-match
+  type: text_input
+  tags: [semantic]
+  difficulty: 2
+  prompt: "A semantic cache decides a hit by comparing request ____ (one word)."
+  answer:
+    regex: '^(embeddings?|vectors?|similarity)$'
+    normalize: true
+
+- id: fe-false-positive-cost
+  type: text_input
+  tags: [semantic, tradeoffs]
+  difficulty: 3
+  prompt: "The main correctness risk of a too-permissive semantic threshold is a false-____ hit. (one word)"
+  answer:
+    regex: '^positive$'
+    normalize: true

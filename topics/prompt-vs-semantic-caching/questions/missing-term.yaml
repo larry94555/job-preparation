@@ -1,0 +1,45 @@
+# Missing term (cloze)
+- id: cloze-prefix
+  type: text_input
+  tags: [prefix]
+  difficulty: 1
+  prompt: "Reusing the model's already-computed attention state for identical leading tokens is called ____ caching (also known as prompt caching)."
+  answer:
+    regex: '^prefix$'
+    normalize: true
+
+- id: cloze-prefill
+  type: text_input
+  tags: [prefix]
+  difficulty: 2
+  prompt: "A prefix-cache hit reuses the ____ computation for the shared leading tokens, but the model still generates the rest."
+  answer:
+    regex: '^prefill$'
+    normalize: true
+
+- id: cloze-threshold
+  type: text_input
+  tags: [semantic]
+  difficulty: 2
+  prompt: "A semantic cache returns a stored response when the request's embedding is within a similarity ____."
+  answer:
+    regex: '^threshold$'
+    normalize: true
+
+- id: cloze-false-positive
+  type: text_input
+  tags: [semantic]
+  difficulty: 3
+  prompt: "Returning a stored answer for a request that is actually different is a false-____ hit."
+  answer:
+    regex: '^positive$'
+    normalize: true
+
+- id: cloze-ttl
+  type: text_input
+  tags: [semantic, tradeoffs]
+  difficulty: 3
+  prompt: "To bound how stale a cached response can get, entries are given a time-to-live, abbreviated ____."
+  answer:
+    regex: '^ttl$'
+    normalize: true

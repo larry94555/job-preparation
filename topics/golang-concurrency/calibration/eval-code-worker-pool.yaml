@@ -1,0 +1,36 @@
+skill: eval-code-worker-pool
+cases:
+  - answer: >-
+      tests_passed=true. Starts exactly `workers` goroutines that range over a jobs channel; a
+      sync.WaitGroup waits for them to finish. Each worker writes its result into results[index]
+      by the job's index, so output order matches input order. No busy-wait — it blocks on the
+      channel. signals.must_use: goroutine, channel, sync.WaitGroup. signals.avoid_antipattern: none.
+    expect:
+      verdict: pass
+      checks: { bounded_concurrency: true, uses_primitives: true, no_busywait: true, order_preserved: true }
+
+  - answer: >-
+      tests_passed=true, but it launches one goroutine per job (unbounded spawn) instead of a fixed
+      pool of `workers`, and coordinates with a WaitGroup. Results are appended as each finishes, so
+      order is not preserved. signals.must_use: goroutine, channel, sync.WaitGroup.
+      signals.avoid_antipattern: unbounded goroutine spawn.
+    expect:
+      verdict: fail
+      checks: { bounded_concurrency: false, uses_primitives: true, no_busywait: false, order_preserved: false }
+
+  - answer: >-
+      tests_passed=true. Uses exactly `workers` goroutines and channels, and writes results back by
+      index so order is preserved, but coordinates completion with a busy-wait loop that spins on an
+      atomic counter instead of a WaitGroup/channel close. signals.must_use: goroutine, channel.
+      signals.avoid_antipattern: busy-wait loop.
+    expect:
+      verdict: borderline
+      checks: { bounded_concurrency: true, uses_primitives: false, no_busywait: false, order_preserved: true }
+
+  - answer: >-
+      tests_passed=true. Fixed pool of `workers` goroutines draining a buffered jobs channel, a
+      WaitGroup to join, no spinning, and results stored at results[job.index] to keep input order.
+      signals.must_use: goroutine, channel, sync.WaitGroup. signals.avoid_antipattern: none.
+    expect:
+      verdict: pass
+      checks: { bounded_concurrency: true, uses_primitives: true, no_busywait: true, order_preserved: true }

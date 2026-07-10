@@ -1,0 +1,13 @@
+id: lesson-selection
+title: "Selection & retrieval into the window"
+material: context-selection.md
+segments:
+  - present: selecting-what-enters-the-window
+  - check: mc-selection-goal
+  - check: mc-rank-then-fit
+  - check: cloze-selection
+  - check: fe-selection-method
+  - check: fe-selection-signal
+  - present: ordering-and-reuse
+  - check: mc-stable-prefix
+  - apply: essay-selection-design

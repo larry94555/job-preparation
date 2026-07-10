@@ -1,0 +1,14 @@
+id: lesson-deep-dive
+title: "Architecture & tradeoffs: reviewing an agent-guardrails design"
+material: deep-dive.md
+segments:
+  - present: the-agent-guardrails-budgets-design-space
+  - present: a-tradeoff-table-for-agent-guardrails-budgets
+  - check: mc-review-guard-success-only
+  - check: mc-review-guard-onebudget
+  - present: common-sota-and-antipattern
+  - check: mc-review-guard-denylist-log
+  - present: scaling-performance-and-the-token-budget
+  - present: reviewing-an-agent-guardrails-budgets-design
+  - apply: essay-guard-deep-dive
+  - apply: debug-guard-bounded

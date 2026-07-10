@@ -1,0 +1,30 @@
+# Calibration for eval-evals-essay (exemplars target essay-why-evals).
+skill: eval-evals-essay
+cases:
+  - answer: >-
+      "Looks better" isn't repeatable — you can't compare it across changes. An eval fixes that: a
+      golden set of curated inputs with known-good outputs is ground truth to score against, and a
+      regression gate runs that eval on every change and blocks the merge if the score drops. So a
+      fix for one case can't silently break others, and you steer on a real number instead of vibes.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  - answer: "Evals are good and everyone should use them because quality matters."
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, concrete: false }
+
+  - answer: >-
+      A golden set gives you something to measure against instead of guessing, so changes can be
+      compared rather than eyeballed.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
+
+  - answer: >-
+      You don't really need a golden set or a gate — if the outputs look better to you then quality
+      has clearly improved, so eyeballing a few examples is the most reliable measure.
+    expect:
+      verdict: fail
+      checks: { technically_correct: false }

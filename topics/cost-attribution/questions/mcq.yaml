@@ -1,0 +1,108 @@
+# Multiple choice
+- id: mc-cost-drivers
+  type: multiple_choice
+  tags: [drivers]
+  difficulty: 2
+  prompt: "Which set best captures the real drivers of an LLM call's cost?"
+  options:
+    - { text: "Input tokens, output tokens, model tier, plus retries, tool calls, and cache hits/misses", correct: true }
+    - { text: "Only the number of output tokens" }
+    - { text: "Only which model was chosen" }
+    - { text: "The wall-clock latency of the request alone" }
+  explanation: "Cost is driven by token volume in and out, the model tier's per-token price, and multipliers like retries, extra tool/round-trip calls, and whether prompt caching was hit."
+
+- id: mc-per-model-wrong
+  type: multiple_choice
+  tags: [drivers]
+  difficulty: 3
+  prompt: "Why is 'cost per model' the wrong granularity for optimizing spend?"
+  options:
+    - { text: "It tells you what you spent but not where value or waste accrues, so you can't target the feature, workflow, or tenant driving the bill", correct: true }
+    - { text: "Models never differ in price, so the number is meaningless" }
+    - { text: "It double-counts input and output tokens" }
+    - { text: "It is impossible to measure per-model cost accurately" }
+  explanation: "Per-model totals aggregate across every use of that model. They hide which feature, workflow, or tenant is generating the cost, so you can't decide where to optimize."
+
+- id: mc-attribution-dimensions
+  type: multiple_choice
+  tags: [attribution]
+  difficulty: 2
+  prompt: "Which of these are useful business dimensions to attribute LLM cost to?"
+  options:
+    - { text: "Feature, workflow, tenant, and user journey", correct: true }
+    - { text: "Only the model name and the API region" }
+    - { text: "Only the calendar month" }
+    - { text: "The color of the dashboard chart" }
+  explanation: "The business cares about cost per feature, per workflow, per tenant, and per user journey — the dimensions where you can act on the number."
+
+- id: mc-tag-propagation
+  type: multiple_choice
+  tags: [attribution]
+  difficulty: 3
+  prompt: "What does 'tag propagation' mean in a cost-attribution pipeline?"
+  options:
+    - { text: "Attaching attribution tags (feature, tenant, journey) at the entry point and carrying them through every downstream call so each cost record is labeled", correct: true }
+    - { text: "Renaming the model on every retry" }
+    - { text: "Deleting tags before they reach the aggregator to save space" }
+    - { text: "Letting each service invent its own unrelated tags" }
+  explanation: "You set the attribution context once at the request boundary and propagate it through embeddings, retrieval, tool, and generation calls, so every token record can be rolled up by dimension."
+
+- id: mc-lost-tag
+  type: multiple_choice
+  tags: [attribution]
+  difficulty: 4
+  prompt: "An async background job makes LLM calls but carries no attribution tags. What is the consequence?"
+  options:
+    - { text: "Its cost lands in an 'unattributed' bucket and can't be rolled up by feature or tenant, blinding you to that spend", correct: true }
+    - { text: "The job automatically inherits the most expensive tenant's tags" }
+    - { text: "The cost disappears entirely from the provider bill" }
+    - { text: "The aggregator refuses to record any cost at all" }
+  explanation: "Without propagated tags, async/shared work becomes unattributed cost — visible in the provider total but not rollable up by any business dimension, which is exactly where attribution breaks."
+
+- id: mc-cost-per-success
+  type: multiple_choice
+  tags: [economics]
+  difficulty: 3
+  prompt: "Why is 'cost per successful task' a better unit-economics metric than 'cost per API call'?"
+  options:
+    - { text: "It charges the cost of failed and abandoned attempts to the tasks that actually succeeded, revealing the true price of delivering value", correct: true }
+    - { text: "It is always a smaller number, which looks better to finance" }
+    - { text: "It ignores retries, making the math simpler" }
+    - { text: "API calls are free, so only successes cost anything" }
+  explanation: "A user's successful outcome may take several calls, retries, and even abandoned attempts. Cost per successful task amortizes all of that over real value delivered, unlike per-call cost."
+
+- id: mc-blended-vs-marginal
+  type: multiple_choice
+  tags: [economics]
+  difficulty: 4
+  prompt: "A new feature triggers extra retrieval and larger contexts. Which cost lens best tells you whether to ship it?"
+  options:
+    - { text: "The marginal cost the feature adds per task, not the blended average across all features", correct: true }
+    - { text: "The blended average cost, because it is smoother" }
+    - { text: "The provider's list price per million tokens alone" }
+    - { text: "The cost of the cheapest feature as a proxy" }
+  explanation: "Blended averages hide what a specific feature adds. Marginal cost — the incremental spend the feature causes per task — is the number that decides whether its value justifies it."
+
+- id: mc-hidden-retries
+  type: multiple_choice
+  tags: [hidden]
+  difficulty: 3
+  prompt: "Which is a commonly-overlooked ('hidden') cost in an LLM system?"
+  options:
+    - { text: "Retries after malformed output, tokens spent on abandoned sessions, and over-retrieval that stuffs unused context", correct: true }
+    - { text: "The price printed on the provider's pricing page" }
+    - { text: "The output tokens of a successful first-try call" }
+    - { text: "The cost of the input prompt you deliberately sent" }
+  explanation: "Hidden costs are the spend that doesn't show up in the happy-path estimate: retries, abandoned/failed runs, and over-retrieval that pads context with tokens the model never needed."
+
+- id: mc-over-retrieval
+  type: multiple_choice
+  tags: [hidden]
+  difficulty: 3
+  prompt: "How does over-retrieval inflate cost even when the answer is correct?"
+  options:
+    - { text: "It stuffs the context with more chunks than needed, so you pay for input tokens that add no value on every call", correct: true }
+    - { text: "It forces the provider to raise the per-token price" }
+    - { text: "It only affects storage, never the per-call bill" }
+    - { text: "It reduces output tokens, which raises cost" }
+  explanation: "Retrieving and pasting far more context than the task needs means paying for input tokens that carry no value — a recurring hidden cost on every single call."

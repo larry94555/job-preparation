@@ -1,0 +1,120 @@
+# Multiple choice
+- id: mc-four-axes
+  type: multiple_choice
+  tags: [tradeoffs]
+  difficulty: 2
+  prompt: "The four axes you trade among across the full inference stack are:"
+  options:
+    - { text: "Latency, quality, cost, and reliability", correct: true }
+    - { text: "Latency, throughput, GPU count, and model size" }
+    - { text: "Accuracy, precision, recall, and F1" }
+    - { text: "Tokens, parameters, layers, and heads" }
+  explanation: "The integrative view frames every serving decision as a joint tradeoff among latency, quality, cost, and reliability — no single one can be optimized in isolation."
+
+- id: mc-no-free-lunch
+  type: multiple_choice
+  tags: [tradeoffs]
+  difficulty: 2
+  prompt: "Why is 'no free lunch' the right mental model for the inference stack?"
+  options:
+    - { text: "Almost every lever that improves one axis costs you on at least one other, so gains are traded, not created", correct: true }
+    - { text: "Because inference is always more expensive than training" }
+    - { text: "Because larger models are strictly better on every axis" }
+    - { text: "Because latency and cost are the same quantity measured differently" }
+  explanation: "The stack is a multi-objective system: batching, quantization, fallback, and the rest each shift load among latency, quality, cost, and reliability. Improvements are almost always paid for elsewhere."
+
+- id: mc-single-metric
+  type: multiple_choice
+  tags: [tradeoffs]
+  difficulty: 3
+  prompt: "Optimizing a single metric (say, minimize cost) in isolation is an antipattern because:"
+  options:
+    - { text: "It silently blows the other axes — e.g. cheapest config may miss the latency SLO or degrade quality", correct: true }
+    - { text: "Cost can never actually be reduced in practice" }
+    - { text: "Single-metric optimization is impossible to implement" }
+    - { text: "It always improves reliability as a side effect" }
+  explanation: "A config chosen to minimize one axis usually pushes an unmeasured axis past its limit. You must optimize jointly against all the SLO constraints, not one number."
+
+- id: mc-batching-axis
+  type: multiple_choice
+  tags: [levers]
+  difficulty: 3
+  prompt: "Increasing batch size (e.g. continuous batching) primarily trades:"
+  options:
+    - { text: "Higher throughput and better cost-per-token against higher per-request latency", correct: true }
+    - { text: "Higher quality against lower reliability" }
+    - { text: "Lower latency against higher cost" }
+    - { text: "Higher reliability against lower throughput" }
+  explanation: "Batching amortizes fixed GPU work over more requests, raising throughput and lowering $/token, but a request may wait for the batch to fill, so per-request (especially tail) latency rises."
+
+- id: mc-quant-axis
+  type: multiple_choice
+  tags: [levers]
+  difficulty: 3
+  prompt: "Quantizing the model (e.g. FP16 → INT8/INT4) dominantly trades:"
+  options:
+    - { text: "Lower cost and memory (and often lower latency) against some risk to output quality", correct: true }
+    - { text: "Higher quality against higher cost" }
+    - { text: "Higher reliability against higher latency" }
+    - { text: "Nothing — it is a pure win on every axis" }
+  explanation: "Quantization shrinks weights/activations, cutting memory and cost and often speeding inference, but reduced numerical precision can degrade quality — the amount depends on the method and how carefully it is validated."
+
+- id: mc-fallback-axis
+  type: multiple_choice
+  tags: [levers]
+  difficulty: 3
+  prompt: "Adding a fallback path (retry, a backup model, or a second provider) dominantly trades:"
+  options:
+    - { text: "Higher reliability/availability against higher cost (and sometimes latency from the extra hop)", correct: true }
+    - { text: "Higher quality against lower cost" }
+    - { text: "Lower latency against lower reliability" }
+    - { text: "Lower cost against higher throughput" }
+  explanation: "A fallback buys availability by paying for redundancy — the standby capacity, the extra call, and often added latency on the retry path. Reliability is not free."
+
+- id: mc-caching-axis
+  type: multiple_choice
+  tags: [levers]
+  difficulty: 3
+  prompt: "A response/prefix cache in front of the model dominantly helps by:"
+  options:
+    - { text: "Cutting latency and cost on cache hits, at the cost of possible staleness and cache-management complexity", correct: true }
+    - { text: "Improving quality on every request regardless of the cache" }
+    - { text: "Increasing per-request compute to raise throughput" }
+    - { text: "Guaranteeing every request is served from the model directly" }
+  explanation: "Caching returns prior work instead of recomputing it, so hits are cheap and fast; the tradeoffs are stale results if inputs changed and the operational cost of invalidation and hit-rate management."
+
+- id: mc-speculative-axis
+  type: multiple_choice
+  tags: [levers]
+  difficulty: 4
+  prompt: "Speculative decoding (a small draft model proposes tokens the target verifies) mainly trades:"
+  options:
+    - { text: "Lower latency for the same output quality, at the cost of extra compute/memory for the draft model", correct: true }
+    - { text: "Lower quality for lower cost" }
+    - { text: "Higher reliability for higher latency" }
+    - { text: "Smaller model size for slower generation" }
+  explanation: "Speculative decoding preserves the target model's distribution (quality is unchanged) and speeds generation, but it spends extra compute running and verifying the draft model — a latency-for-compute trade."
+
+- id: mc-slo-anchor
+  type: multiple_choice
+  tags: [slos]
+  difficulty: 2
+  prompt: "In an SLO-anchored design, the SLOs function as:"
+  options:
+    - { text: "The fixed constraints you optimize within — meet them, then minimize cost or maximize quality", correct: true }
+    - { text: "Targets you hit only if there is spare budget left over" }
+    - { text: "A single latency number that overrides quality and cost" }
+    - { text: "Marketing goals with no effect on architecture" }
+  explanation: "SLOs (e.g. p99 TTFT, availability, a quality floor) are the anchor: they define the acceptable region, and you choose the config that satisfies all of them while optimizing whatever is left."
+
+- id: mc-budget-decomp
+  type: multiple_choice
+  tags: [slos]
+  difficulty: 4
+  prompt: "You have a 900 ms p99 end-to-end latency SLO. Budget decomposition means:"
+  options:
+    - { text: "Splitting that 900 ms into per-stage sub-budgets (retrieval, queue, prefill, decode, network) so each layer has a target to hit", correct: true }
+    - { text: "Spending the whole 900 ms on the decode stage and ignoring the rest" }
+    - { text: "Averaging latency across requests until the mean is under 900 ms" }
+    - { text: "Setting every stage's budget to 900 ms independently" }
+  explanation: "An end-to-end budget is decomposed into additive per-stage sub-budgets that sum to the SLO, giving each layer a concrete target and revealing which stage to optimize when the budget is blown."

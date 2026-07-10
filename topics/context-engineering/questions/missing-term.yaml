@@ -1,0 +1,45 @@
+# Missing term (cloze)
+- id: cloze-budget
+  type: text_input
+  tags: [budget]
+  difficulty: 1
+  prompt: "Treating the context window as a finite, ranked resource means treating it as a token ____."
+  answer:
+    regex: '^budget$'
+    normalize: true
+
+- id: cloze-lost-middle
+  type: text_input
+  tags: [position]
+  difficulty: 2
+  prompt: "The tendency to under-use information placed mid-context is called 'lost in the ____'."
+  answer:
+    regex: '^middle$'
+    normalize: true
+
+- id: cloze-recency
+  type: text_input
+  tags: [position]
+  difficulty: 2
+  prompt: "Stronger use of tokens at the *end* of the window is the ____ effect."
+  answer:
+    regex: '^recency$'
+    normalize: true
+
+- id: cloze-primacy
+  type: text_input
+  tags: [position]
+  difficulty: 2
+  prompt: "Stronger use of tokens at the *start* of the window is the ____ effect."
+  answer:
+    regex: '^primacy$'
+    normalize: true
+
+- id: cloze-selection
+  type: text_input
+  tags: [selection]
+  difficulty: 2
+  prompt: "Choosing which candidate chunks enter the window is the ____ (or retrieval) step."
+  answer:
+    regex: '^selection$'
+    normalize: true

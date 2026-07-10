@@ -1,0 +1,8 @@
+id: context-engineering
+title: "Context Engineering"
+description: "Get the right tokens into a bounded window at the right time — treat the context window as a ranked, budgeted resource, not a place to dump everything."
+pass_threshold: 0.8
+tag_weights:
+  budget: 1.0
+  position: 1.2
+  selection: 1.2

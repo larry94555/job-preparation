@@ -1,0 +1,18 @@
+sections:
+  - id: sec-traces-signals
+    title: "Traces & the core signals"
+    lessons: [lesson-tracing, lesson-signals, lesson-build-token-rollup, lesson-expert-context]
+    assessment:
+      title: "Section 1 — Traces & signals"
+      from_tags: [tracing, signals]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-drift-capture
+    title: "Drift, canaries & capture/replay"
+    lessons: [lesson-drift-capture, lesson-deep-dive]
+    assessment:
+      title: "Section 2 — Drift & capture"
+      from_tags: [drift, capture]
+      count: 5
+      pass_threshold: 0.8

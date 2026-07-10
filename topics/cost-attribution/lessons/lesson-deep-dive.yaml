@@ -1,0 +1,14 @@
+id: lesson-deep-dive
+title: "Architecture & tradeoffs: reviewing a cost-attribution design"
+material: deep-dive.md
+segments:
+  - present: the-cost-attribution-design-space
+  - present: a-tradeoff-table-for-cost-attribution
+  - check: mc-review-cost-permodel
+  - check: mc-review-cost-async-untagged
+  - present: common-sota-and-antipattern
+  - check: mc-review-cost-percall-unit
+  - present: scaling-performance-and-the-token-budget
+  - present: reviewing-a-cost-attribution-design
+  - apply: essay-cost-deep-dive
+  - apply: debug-cost-per-success

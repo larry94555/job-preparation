@@ -1,0 +1,36 @@
+# Free entry (short answer)
+- id: fe-driver-multiplier
+  type: text_input
+  tags: [drivers]
+  difficulty: 2
+  prompt: "Name one cost multiplier beyond raw input/output tokens. (one or two words)"
+  answer:
+    regex: '^(retries|retry|tool calls?|tool use|caching|cache misses?|model tier|round-?trips?)$'
+    normalize: true
+
+- id: fe-attribution-dimension
+  type: text_input
+  tags: [attribution]
+  difficulty: 2
+  prompt: "Name one business dimension you would attribute LLM cost to (besides model). (one or two words)"
+  answer:
+    regex: '^(feature|workflow|tenant|user journey|journey|user|customer)$'
+    normalize: true
+
+- id: fe-cost-per-success
+  type: text_input
+  tags: [economics]
+  difficulty: 3
+  prompt: "The unit-economics metric that charges failed/abandoned attempts to the wins is cost per ____ task. (one word)"
+  answer:
+    regex: '^(successful|success)$'
+    normalize: true
+
+- id: fe-hidden-cost
+  type: text_input
+  tags: [hidden]
+  difficulty: 3
+  prompt: "Name one hidden cost that the happy-path estimate usually misses. (one or two words)"
+  answer:
+    regex: '^(retries|retry|abandonment|abandoned (runs?|sessions?)?|over-?retrieval|failed runs?|oversized context)$'
+    normalize: true

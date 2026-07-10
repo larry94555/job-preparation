@@ -1,0 +1,27 @@
+# Free entry (short answer)
+- id: fe-invalid-json
+  type: text_input
+  tags: [boundary]
+  difficulty: 2
+  prompt: "When the model returns invalid tool-call JSON, what should the harness do with it? (one word)"
+  answer:
+    regex: '^(validate|reject|repair|retry)$'
+    normalize: true
+
+- id: fe-verify-method
+  type: text_input
+  tags: [verification]
+  difficulty: 2
+  prompt: "Name one concrete way a coding harness verifies that an edit actually worked."
+  answer:
+    regex: '^(run(ning)? tests?|tests?|git diff|diff|run the code|type-?check|build)$'
+    normalize: true
+
+- id: fe-noprogress
+  type: text_input
+  tags: [control]
+  difficulty: 3
+  prompt: "Name one signal that an agent is making no progress."
+  answer:
+    regex: '^(repeated (tool )?calls?|same (action|state)|no state change|oscillat(ing|ion)|loop(ing)?|repeating( actions)?)$'
+    normalize: true

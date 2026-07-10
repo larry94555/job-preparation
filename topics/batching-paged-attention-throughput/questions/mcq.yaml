@@ -1,0 +1,120 @@
+# Multiple choice
+- id: mc-static-batching-flaw
+  type: multiple_choice
+  tags: [batching]
+  difficulty: 2
+  prompt: "In static batching, a batch of requests is launched together and the batch does not finish until:"
+  options:
+    - { text: "The single longest request in the batch finishes generating", correct: true }
+    - { text: "The first request in the batch finishes generating" }
+    - { text: "A fixed wall-clock timeout expires regardless of the requests" }
+    - { text: "Every request has produced exactly one token" }
+  explanation: "Static batching holds the whole batch together until the slowest (longest-output) request completes; short requests sit idle waiting, wasting GPU cycles."
+
+- id: mc-dynamic-batching
+  type: multiple_choice
+  tags: [batching]
+  difficulty: 2
+  prompt: "Dynamic batching improves on static batching mainly by:"
+  options:
+    - { text: "Assembling a batch on the fly from whatever requests are queued, up to a size or time window", correct: true }
+    - { text: "Letting requests join and leave the running batch on every decoding step" }
+    - { text: "Paging the KV cache into non-contiguous blocks" }
+    - { text: "Eliminating the prefill phase entirely" }
+  explanation: "Dynamic batching groups queued requests at admission time (by max batch size or a short wait window), but once a batch starts it still runs to completion together — it does not swap members mid-generation."
+
+- id: mc-continuous-batching-def
+  type: multiple_choice
+  tags: [batching, scheduling]
+  difficulty: 3
+  prompt: "What distinguishes continuous (in-flight) batching from dynamic batching?"
+  options:
+    - { text: "A finished request is evicted and a waiting one admitted at the granularity of individual decoding iterations, not whole requests", correct: true }
+    - { text: "It uses a larger fixed batch size chosen ahead of time" }
+    - { text: "It runs each request in its own separate CUDA stream" }
+    - { text: "It only batches the prefill phase, never decode" }
+  explanation: "Continuous batching schedules at the iteration (token-step) level: as soon as a request emits its end-of-sequence token it leaves the batch and a queued request takes its slot on the next step, keeping the batch full."
+
+- id: mc-head-of-line
+  type: multiple_choice
+  tags: [scheduling]
+  difficulty: 3
+  prompt: "Head-of-line blocking in static/dynamic batching refers to:"
+  options:
+    - { text: "Short requests being stuck waiting for a long request in the same batch to finish before the slot frees up", correct: true }
+    - { text: "The first token of a request always arriving late" }
+    - { text: "The KV cache overflowing and evicting the head of the sequence" }
+    - { text: "The scheduler queue being sorted in the wrong order" }
+  explanation: "When batch membership is fixed for the batch's lifetime, one long-output request holds its slot (and blocks the queue behind it) even though short requests could have completed and freed capacity."
+
+- id: mc-iteration-scheduling
+  type: multiple_choice
+  tags: [scheduling]
+  difficulty: 3
+  prompt: "Iteration-level scheduling (as introduced by Orca) makes its scheduling decision:"
+  options:
+    - { text: "Once per decoding iteration, deciding which requests run in the next forward pass", correct: true }
+    - { text: "Once per request, when the request is first admitted" }
+    - { text: "Once per epoch of training the model" }
+    - { text: "Only when the GPU runs out of memory" }
+  explanation: "Orca-style iteration-level scheduling re-evaluates the running set every forward pass, so completed requests exit and queued ones enter at token granularity — the mechanism behind continuous batching."
+
+- id: mc-paged-attention-what
+  type: multiple_choice
+  tags: [paged-attention]
+  difficulty: 3
+  prompt: "PagedAttention (vLLM) manages the KV cache by:"
+  options:
+    - { text: "Storing each sequence's KV cache in fixed-size non-contiguous blocks, mapped via a block table like OS virtual memory paging", correct: true }
+    - { text: "Recomputing the KV cache from scratch on every token" }
+    - { text: "Keeping every sequence's KV cache in one large contiguous pre-reserved buffer" }
+    - { text: "Compressing the KV cache with quantization to 4 bits" }
+  explanation: "PagedAttention splits the KV cache into fixed-size blocks addressed through a per-sequence block table, so memory need not be contiguous — mirroring virtual-memory paging."
+
+- id: mc-paged-attention-why
+  type: multiple_choice
+  tags: [paged-attention, throughput]
+  difficulty: 4
+  prompt: "Why does paged attention raise serving throughput?"
+  options:
+    - { text: "It nearly eliminates KV-cache fragmentation and over-reservation, so more concurrent sequences fit in GPU memory and batches can be larger", correct: true }
+    - { text: "It makes each matrix multiply run faster on the GPU" }
+    - { text: "It removes the need for an attention kernel altogether" }
+    - { text: "It lets the model skip generating end-of-sequence tokens" }
+  explanation: "Contiguous KV allocation wastes memory to internal/external fragmentation and worst-case max-length reservation. Paging packs KV tightly, freeing memory for more concurrent requests, which enlarges the effective batch and lifts throughput."
+
+- id: mc-paged-enables-continuous
+  type: multiple_choice
+  tags: [paged-attention, batching]
+  difficulty: 4
+  prompt: "How does paged attention act as the *enabler* for high-occupancy continuous batching?"
+  options:
+    - { text: "Block-level KV allocation lets sequences of differing and growing lengths be added and dropped without contiguous-buffer reshuffling or reservation", correct: true }
+    - { text: "It forces every sequence to the same length so the batch is rectangular" }
+    - { text: "It disables the scheduler so requests never wait" }
+    - { text: "It caches full responses so repeated queries skip generation" }
+  explanation: "Continuous batching mixes sequences of varying, still-growing lengths. Paged KV blocks are allocated on demand per sequence, so admitting/evicting requests each iteration needs no giant contiguous re-layout — that flexibility is what makes high occupancy practical."
+
+- id: mc-throughput-latency-tradeoff
+  type: multiple_choice
+  tags: [throughput]
+  difficulty: 3
+  prompt: "Increasing the running batch size on a serving engine generally:"
+  options:
+    - { text: "Raises aggregate throughput (tokens/sec) but can increase per-request latency such as time-per-output-token", correct: true }
+    - { text: "Raises throughput and lowers every request's latency simultaneously with no cost" }
+    - { text: "Lowers throughput while lowering latency" }
+    - { text: "Has no effect on either throughput or latency" }
+  explanation: "Bigger batches amortize weight loads across more requests (higher throughput) but each request shares the GPU with more peers, so TPOT and tail latency tend to rise — the core throughput-vs-latency tension."
+
+- id: mc-goodput-def
+  type: multiple_choice
+  tags: [throughput]
+  difficulty: 4
+  prompt: "Goodput, as used in LLM serving, measures:"
+  options:
+    - { text: "The rate of requests (or tokens) completed while still meeting their latency SLO", correct: true }
+    - { text: "Total tokens generated per second regardless of latency" }
+    - { text: "The fraction of GPU cycles spent on matrix multiplies" }
+    - { text: "The number of requests in the queue at any instant" }
+  explanation: "Raw throughput counts all completed work; goodput counts only work delivered within its SLO. Pushing batch size up can raise throughput while lowering goodput if too many requests miss their latency target."

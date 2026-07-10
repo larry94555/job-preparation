@@ -1,0 +1,18 @@
+sections:
+  - id: sec-foundations
+    title: "Foundations: cost drivers & attribution"
+    lessons: [lesson-drivers, lesson-attribution, lesson-expert-context]
+    assessment:
+      title: "Section 1 — Drivers & attribution"
+      from_tags: [drivers, attribution]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-economics
+    title: "Unit economics & hidden costs"
+    lessons: [lesson-economics, lesson-build-cost-aggregator, lesson-deep-dive]
+    assessment:
+      title: "Section 2 — Unit economics & hidden costs"
+      from_tags: [economics, hidden]
+      count: 5
+      pass_threshold: 0.8

@@ -1,0 +1,82 @@
+# Missing term (cloze) + parameterized numeric
+- id: cloze-kv-cache
+  type: text_input
+  tags: [memory]
+  difficulty: 1
+  prompt: "The per-token key and value tensors stored so attention need not recompute the past is the ____ cache. (two-letter abbreviation)"
+  answer:
+    regex: '^kv$'
+    normalize: true
+
+- id: cloze-fragmentation
+  type: text_input
+  tags: [paging]
+  difficulty: 2
+  prompt: "Reserving a contiguous max-length KV slab per sequence wastes memory between reserved and used length; this waste is called ____."
+  answer:
+    regex: '^(internal )?fragmentation$'
+    normalize: true
+
+- id: cloze-paged-attention
+  type: text_input
+  tags: [paging]
+  difficulty: 2
+  prompt: "Splitting the KV cache into fixed-size blocks tracked by a block table, so memory need not be contiguous, is called ____ attention. (one word)"
+  answer:
+    regex: '^paged$'
+    normalize: true
+
+- id: cloze-block-table
+  type: text_input
+  tags: [paging]
+  difficulty: 2
+  prompt: "The per-sequence map from logical KV positions to physical blocks — the analog of an OS page table — is the ____ table. (one word)"
+  answer:
+    regex: '^block$'
+    normalize: true
+
+- id: cloze-preemption
+  type: text_input
+  tags: [eviction]
+  difficulty: 2
+  prompt: "Pausing a running sequence and reclaiming its KV memory when the server is under pressure is called ____. (one word)"
+  answer:
+    regex: '^(preemption|preempting|eviction)$'
+    normalize: true
+
+# Parameterized numeric — KV size is linear in sequence length.
+- id: num-kv-linear-seq
+  type: text_input
+  tags: [sizing]
+  difficulty: 2
+  parameters:
+    seq: { random_int: [128, 4096] }
+  prompt: "A given config uses exactly 1 KB of KV cache per token. Holding everything else fixed, how many KB of KV cache does a sequence of {{seq}} tokens need?"
+  answer:
+    equals: "{{seq}}"
+    numeric_tolerance: 0
+
+# Parameterized numeric — doubling context doubles KV (linear scaling).
+- id: num-kv-double-context
+  type: text_input
+  tags: [sizing]
+  difficulty: 3
+  parameters:
+    tokens: { random_int: [500, 8000] }
+  prompt: "KV memory is linear in sequence length. If a sequence of {{tokens}} tokens fills the cache, how many tokens' worth of KV must you free to make room for one more request of the same size? (KV is symmetric, so the answer equals the sequence length.)"
+  answer:
+    equals: "{{tokens}}"
+    numeric_tolerance: 0
+
+# Fixed numeric — full KV byte estimate from layers/heads/head_dim/seq/dtype.
+# KV bytes = 2 (K and V) * layers * heads * head_dim * seq * bytes_per_elem
+#          = 2 * 32 * 32 * 128 * 1024 * 2 = 549,755,813,888? recompute below.
+# 2 * 32 * 32 = 2048; * 128 = 262,144; * 1024 = 268,435,456; * 2 = 536,870,912 bytes.
+- id: num-kv-formula-bytes
+  type: text_input
+  tags: [sizing, memory]
+  difficulty: 4
+  prompt: "Estimate the KV cache size in BYTES for one sequence. Formula: bytes = 2 (K and V) x layers x heads x head_dim x seq_len x bytes_per_element. Use layers=32, heads=32, head_dim=128, seq_len=1024, and FP16 (2 bytes/element). Enter the total number of bytes."
+  answer:
+    equals: "536870912"
+    numeric_tolerance: 0

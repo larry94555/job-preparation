@@ -1,0 +1,20 @@
+# Coding exercise — engine type: code (graded by tests + concept skill)
+- id: code-slo-selector
+  type: code
+  language: typescript
+  tags: [slos]
+  difficulty: 3
+  prompt: >-
+    Implement `selectConfig(configs, slo)`. Each config is `{ name, latency, cost, quality }`; slo is
+    `{ maxLatency, maxCost, minQuality }`. Keep only configs meeting ALL SLOs (latency <= maxLatency,
+    cost <= maxCost, quality >= minQuality). Among survivors return the highest-quality config, breaking
+    ties by lowest cost, then lowest latency. Return null if none meet the SLOs.
+  starter_file: exercises/slo-selector/starter.ts
+  test_file: exercises/slo-selector/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-tradeoffs-code
+  concept_checks:
+    must_use: ["filter on all three SLOs", "rank survivors by quality (tie-break cost/latency)", "return null when none feasible"]
+    avoid_antipattern: ["ranking without filtering out SLO violations", "checking only one of the three constraints"]

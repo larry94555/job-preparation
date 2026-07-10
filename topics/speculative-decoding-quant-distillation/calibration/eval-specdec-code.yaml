@@ -1,0 +1,22 @@
+skill: eval-specdec-code
+cases:
+  - answer: >-
+      tests_passed=true. Iterates draftMatches, increments a counter while the value is true, breaks at
+      the first false, then returns counter + 1.
+    expect:
+      verdict: pass
+      checks: { stops_at_first_reject: true, counts_leading_matches: true, adds_one_bonus: true }
+
+  - answer: >-
+      tests_passed=true, but counts ALL true values in the list (filter(Boolean).length) rather than
+      only the leading run, so it counts matches that occur after a reject. Adds one at the end.
+    expect:
+      verdict: fail
+      checks: { stops_at_first_reject: false, counts_leading_matches: true, adds_one_bonus: true }
+
+  - answer: >-
+      tests_passed=true. Correctly counts the leading run and stops at the first reject, but returns the
+      count without the +1 bonus token, so a fully-rejected draft returns 0.
+    expect:
+      verdict: borderline
+      checks: { stops_at_first_reject: true, counts_leading_matches: true, adds_one_bonus: false }

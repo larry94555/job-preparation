@@ -1,0 +1,45 @@
+# Missing term (cloze)
+- id: cloze-quantization
+  type: text_input
+  tags: [formats]
+  difficulty: 1
+  prompt: "Storing a model's weights in fewer bits (e.g. INT4 instead of FP16) to shrink its footprint is called ____."
+  answer:
+    regex: '^quantization$'
+    normalize: true
+
+- id: cloze-scale
+  type: text_input
+  tags: [formats]
+  difficulty: 2
+  prompt: "The floating-point multiplier that maps a stored integer back to an approximate real value during dequantization is the ____."
+  answer:
+    regex: '^scale$'
+    normalize: true
+
+- id: cloze-outliers
+  type: text_input
+  tags: [quality]
+  difficulty: 3
+  prompt: "The few very large activation values that make activations hard to quantize at low bit-width are called ____."
+  answer:
+    regex: '^outliers?$'
+    normalize: true
+
+- id: cloze-perplexity
+  type: text_input
+  tags: [quality]
+  difficulty: 2
+  prompt: "The averaged language-modeling loss metric that can look fine even when a quantized model has degraded on real tasks is ____."
+  answer:
+    regex: '^perplexity$'
+    normalize: true
+
+- id: cloze-smoothquant
+  type: text_input
+  tags: [methods]
+  difficulty: 3
+  prompt: "The method that migrates activation-outlier difficulty into the weights via per-channel scaling so both can be quantized is ____."
+  answer:
+    regex: '^smoothquant$'
+    normalize: true

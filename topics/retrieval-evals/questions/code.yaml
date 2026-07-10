@@ -1,0 +1,20 @@
+# Coding exercise — engine type: code (graded by tests + concept skill)
+- id: code-retrieval-metrics
+  type: code
+  language: typescript
+  tags: [metrics]
+  difficulty: 3
+  prompt: >-
+    Implement `retrievalMetrics(relevant, retrieved, k)` returning `{ recallAtK, precisionAtK, mrr }`.
+    recall@k = (# of relevant ids in the top-k) / (total relevant); precision@k = (# of relevant ids
+    in the top-k) / k; mrr = 1 / (1-based rank of the FIRST relevant id in `retrieved`), or 0 if none.
+    Guard against division by zero when there are no relevant items.
+  starter_file: exercises/retrieval-metrics/starter.ts
+  test_file: exercises/retrieval-metrics/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-retrievalevals-code
+  concept_checks:
+    must_use: ["Set membership for hits", "recall and precision use different denominators", "mrr uses the first relevant rank"]
+    avoid_antipattern: ["unguarded division by zero", "sharing one denominator for recall and precision"]

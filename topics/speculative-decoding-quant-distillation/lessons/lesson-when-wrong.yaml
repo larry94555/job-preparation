@@ -1,0 +1,7 @@
+id: lesson-when-wrong
+title: "When each lever is the wrong tool"
+material: when-wrong.md
+segments:
+  - present: matching-the-lever-to-the-goal
+  - check: mc-wrong-tool-latency
+  - apply: essay-wrong-tool

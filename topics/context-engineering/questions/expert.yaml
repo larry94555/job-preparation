@@ -1,0 +1,58 @@
+# Literature/canon (WS1) + interview (WS2) — tags [canon]/[interview] are NOT in any section's
+# from_tags, so these don't enter the deterministic section-assessment pools.
+- id: mc-canon-context-lost-in-middle
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Which finding named the tendency of models to under-use facts placed in the middle of a long context?"
+  options:
+    - { text: "Lost in the Middle (Liu et al.)", correct: true }
+    - { text: "RULER" }
+    - { text: "Needle-in-a-Haystack" }
+    - { text: "ColBERT" }
+  explanation: "Lost in the Middle (Liu et al., Stanford) described the U-shaped position effect; RULER and Needle-in-a-Haystack are long-context stress tests, and ColBERT is a retrieval method."
+
+- id: mc-interview-context-signal
+  type: multiple_choice
+  tags: [interview]
+  difficulty: 3
+  prompt: "In an interview, the strongest signal that a candidate really understands context engineering is that they:"
+  options:
+    - { text: "Treat the window as a ranked token budget and reason about position and dilution", correct: true }
+    - { text: "Paste every available document into the prompt to be safe" }
+    - { text: "Assume more context always improves quality" }
+    - { text: "Rely on the advertised context length as the effective one" }
+  explanation: "Ranking to a budget and reasoning about position/dilution is the senior instinct; dump-everything, 'more is better', and trusting the advertised window are the classic red flags."
+
+- id: essay-context-literature
+  type: essay
+  length: long
+  tags: [canon]
+  difficulty: 4
+  prompt: >-
+    Summarize the influential work on context engineering — the "Lost in the Middle" position finding
+    and the long-context stress tests (Needle-in-a-Haystack, RULER). For each, say what it contributed,
+    then describe the current SOTA (retrieval + compaction) and the open problems experts still argue
+    about.
+  eval_skill: eval-context-essay
+  reference_points:
+    - "Lost in the Middle (Liu et al., Stanford): models under-use mid-context facts; U-shaped accuracy over position (strong at start/end, weak in the middle)."
+    - "Needle-in-a-Haystack and RULER (NVIDIA): long-context stress tests exposing the gap between advertised and effective context length."
+    - "SOTA now: retrieval + compaction pipelines; the effective-vs-advertised context gap is a live concern."
+    - "Open problems: principled compaction without information loss; making long context actually usable."
+
+- id: essay-context-interview
+  type: essay
+  length: long
+  tags: [interview]
+  difficulty: 4
+  prompt: >-
+    You're in a senior AI-engineering interview and asked how you build the context for an agent.
+    Explain the signals a strong answer shows (ranked budget, position/dilution reasoning, measuring
+    effective context) and the red flags to avoid, and outline how you'd design the context step.
+  eval_skill: eval-context-essay
+  reference_points:
+    - "Treat the window as a ranked token budget: rank candidates by relevance, fit the top ones, drop the rest."
+    - "Reason about position/dilution: cite Lost in the Middle's U-shaped curve; place key evidence near the top or end, not the middle."
+    - "Distinguish advertised from effective context; measure with RULER / needle-in-a-haystack."
+    - "Red flags: dump-everything prompts, ignoring context rot, 'more context is always better'. Design: ranked selection to budget, deliberate ordering, then compaction."

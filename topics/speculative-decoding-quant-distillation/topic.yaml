@@ -1,0 +1,9 @@
+id: speculative-decoding-quant-distillation
+title: "Speculative Decoding, Quantization & Distillation"
+description: "Three distinct levers to make inference faster or cheaper — speculative decoding cuts latency losslessly, quantization shrinks memory and cost at a quality risk, and distillation trains a permanently smaller model. The skill is matching each lever to the right goal."
+pass_threshold: 0.8
+tag_weights:
+  speculative: 1.2
+  quantization: 1.0
+  distillation: 1.0
+  tradeoffs: 1.2

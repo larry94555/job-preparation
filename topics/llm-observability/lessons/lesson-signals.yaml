@@ -1,0 +1,13 @@
+id: lesson-signals
+title: "The core signals: tokens, latency, errors, cost"
+material: signals.md
+segments:
+  - present: tokens-latency-errors-cost
+  - check: mc-core-signals
+  - present: latency-breakdown-ttft-and-tpot
+  - check: mc-ttft-tpot
+  - check: cloze-ttft
+  - check: fe-latency-metric
+  - present: rolling-signals-up-the-trace
+  - check: mc-cost-rollup
+  - apply: essay-signals

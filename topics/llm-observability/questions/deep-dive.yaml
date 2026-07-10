@@ -1,0 +1,73 @@
+# Deep-dive — architecture judgment (code-review MCs + an L4 essay)
+
+- id: mc-review-obs-request-only
+  type: multiple_choice
+  tags: [drift, review]
+  difficulty: 4
+  prompt: >-
+    A design doc for a new multi-step agent says: "We already emit request-level latency and error-rate
+    metrics from the gateway, so observability is covered." Reviewing it, what is the most important
+    problem?
+  options:
+    - { text: "Request-only metrics collapse the whole fan-out (planning, tool calls, retries, sub-model calls) into one number, so you can see that a turn was slow but never which step — you need span-level traces over the call graph", correct: true }
+    - { text: "Latency and error rate are the wrong metrics; only cost should be tracked at the gateway" }
+    - { text: "Gateway metrics are fine as-is; agents do not fan out into multiple calls" }
+    - { text: "The problem is sampling rate, which should always be 100% at the gateway" }
+  explanation: >-
+    An agent turn expands into a tree of steps. A single request timer hides where the time, tokens,
+    errors, and cost actually went. The fix is span-per-step tracing (OpenTelemetry GenAI conventions)
+    with correlation IDs, not a different aggregate gateway metric.
+
+- id: mc-review-obs-raw-capture
+  type: multiple_choice
+  tags: [capture, review]
+  difficulty: 4
+  prompt: >-
+    A PR adds capture/replay by logging every prompt and completion verbatim into the trace store at
+    100% sampling, "so we can always reproduce any failure." Rate this and pick the best fix.
+  options:
+    - { text: "Prototype-grade: capturing 100% of raw payloads blows up storage and logs PII verbatim; redact/tokenize at capture time and keep full payloads only via tail sampling (errored/slow/interesting traces)", correct: true }
+    - { text: "Production-ready: keeping every raw payload guarantees any failure is reproducible, which outweighs any other concern" }
+    - { text: "Fine as-is, but move the payloads to a public bucket so more engineers can read them" }
+    - { text: "The only issue is latency; make the capture write synchronous so nothing is lost" }
+  explanation: >-
+    Payloads dominate storage and raw prompts carry PII, so verbatim 100% capture is the classic
+    antipattern. Redaction/tokenization at capture time plus tail sampling keeps traces debuggable
+    without hoarding sensitive data. A synchronous write would make it worse by adding request-path latency.
+
+- id: mc-review-obs-no-version-drift
+  type: multiple_choice
+  tags: [drift, review]
+  difficulty: 4
+  prompt: >-
+    An observability plan alerts on error rate and p99 latency but does not tag spans with prompt or
+    model version and does not trend eval scores. The provider silently updates the base model and
+    quality slips. What is the strongest objection?
+  options:
+    - { text: "The plan only catches loud errors; a silent quality drift with green error counters is invisible without version tags, a canary path, and eval-score trends to correlate the regression to a change", correct: true }
+    - { text: "Error rate and p99 latency are sufficient; quality drift always shows up as a spike in HTTP 500s" }
+    - { text: "The fix is to raise the p99 latency alert threshold so it fires more often" }
+    - { text: "Version tagging is only useful for cost attribution, not for detecting regressions" }
+  explanation: >-
+    Drift is a gradual change in output quality or input distribution even when your code never
+    changed; error counters stay green throughout. Detecting it requires version-tagged spans, canary
+    comparisons, and trending eval/quality and distribution stats — not tighter error/latency alerts.
+
+- id: essay-obs-deep-dive
+  type: essay
+  length: long
+  tags: [drift, review]
+  difficulty: 4
+  prompt: >-
+    You are the reviewer on an observability design for a multi-step, multi-tenant LLM agent running in
+    production. Write a design review: walk the levers (trace granularity, signal richness, sampling,
+    payload capture, change safety), give an explicit tradeoff for each, and state what would move the
+    design from demo-ready to production-ready. Call out at least two antipatterns and the privacy and
+    drift-detection controls you would require before accepting it.
+  eval_skill: eval-observability-essay
+  reference_points:
+    - "Trace granularity: request-only metrics collapse an agent's fan-out into one number; span-per-step traces (OpenTelemetry GenAI semantic conventions) with correlation IDs let you pinpoint the slow/failing step at the cost of instrumentation and cardinality."
+    - "Signal richness: capture tokens (in/out), latency split into TTFT/TPOT, errors/retries, and derived cost per span so rollups answer speed and spend; richer signals cost storage and cardinality."
+    - "Sampling and capture: tail sampling (always keep errored/slow/expensive traces, sample the rest) controls volume; full payload capture buys deterministic replay but must be redacted/tokenized at capture time with access controls to avoid logging raw PII."
+    - "Change safety: version-tag every span (prompt/model version), run canaries on a small traffic slice, and trend eval scores plus input/output distribution to catch silent drift that error counters miss."
+    - "Antipatterns to flag: request-only metrics for an agent, raw-PII payload logging, no version tags, and alerting only on loud errors while quality drifts; production-ready adds redaction, version tags, tail sampling, canaries, and drift trends, and keeps export async (Google SRE) so instrumentation adds no request-path latency."

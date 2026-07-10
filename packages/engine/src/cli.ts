@@ -26,8 +26,10 @@ function cmdValidate(topicsDir: string): number {
   for (const t of topics) {
     const name = t.topic?.id ?? t.dir;
     if (t.issues.length === 0) {
+      const lessonBits =
+        t.sections.length > 0 ? `, ${t.lessons.length} lessons, ${t.sections.length} sections` : "";
       console.log(
-        `✓ ${name}  (${t.questions.length} questions, ${t.skills.length} skills, ${t.calibration.length} calibration sets)`,
+        `✓ ${name}  (${t.questions.length} questions, ${t.skills.length} skills, ${t.calibration.length} calibration sets${lessonBits})`,
       );
       continue;
     }

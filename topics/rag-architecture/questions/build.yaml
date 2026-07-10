@@ -1,0 +1,42 @@
+# Deeper checks + the project (long-form design) for the RRF build lesson.
+- id: mc-rrf-formula
+  type: multiple_choice
+  tags: [retrieval]
+  difficulty: 2
+  prompt: "In Reciprocal Rank Fusion, a document at 1-based rank r in a list contributes what to its score?"
+  options:
+    - { text: "1 / (k + r)", correct: true }
+    - { text: "1 / r" }
+    - { text: "r" }
+    - { text: "1 / (k × r)" }
+  explanation: "Each list contributes 1/(k + rank); scores are summed across lists, then sorted descending."
+
+- id: mc-rrf-k-role
+  type: multiple_choice
+  tags: [retrieval]
+  difficulty: 3
+  prompt: "The constant k (commonly 60) in RRF exists to:"
+  options:
+    - { text: "Dampen the influence of very high ranks so no single list dominates", correct: true }
+    - { text: "Normalize the dense and sparse raw scores" }
+    - { text: "Limit results to the top k documents" }
+    - { text: "Convert cosine similarity into a probability" }
+  explanation: "The +k flattens the reciprocal curve; RRF deliberately ignores raw scores, so it isn't normalizing them."
+
+- id: essay-hybrid-pipeline
+  type: essay
+  length: long
+  tags: [retrieval]
+  difficulty: 4
+  prompt: >-
+    Project: design a hybrid retrieval pipeline for a frequently-updated knowledge base. Cover
+    chunking, dense + sparse retrieval, fusion (RRF), reranking, and freshness/indexing. Justify each
+    stage and its main tradeoff (recall vs. precision, quality vs. latency, freshness vs. cost), and
+    include a short test plan for evaluating it.
+  eval_skill: eval-rag-essay
+  reference_points:
+    - "Chunking: structure-aware, size/overlap tradeoff; metadata for filtering."
+    - "Retrieval: dense (semantic) + sparse (BM25) capture different matches; fuse with RRF (no score normalization)."
+    - "Reranking: a cross-encoder over top-k lifts precision at a latency cost."
+    - "Freshness: incremental indexing / TTL / invalidation for changing docs."
+    - "Test plan: recall@k / precision@k / nDCG on a labeled set, plus grounding checks; gate regressions."

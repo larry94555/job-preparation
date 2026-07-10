@@ -1,0 +1,18 @@
+sections:
+  - id: sec-formats
+    title: "Formats & what to quantize"
+    lessons: [lesson-formats, lesson-what-to-quantize, lesson-expert-context]
+    assessment:
+      title: "Section 1 — Formats, footprint & targets"
+      from_tags: [formats, quality]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-methods
+    title: "Methods & quality"
+    lessons: [lesson-methods-quality, lesson-build-int8-quant, lesson-deep-dive]
+    assessment:
+      title: "Section 2 — Methods & when quantization hurts"
+      from_tags: [methods, quality]
+      count: 5
+      pass_threshold: 0.8

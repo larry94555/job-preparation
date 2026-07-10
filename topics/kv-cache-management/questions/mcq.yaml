@@ -1,0 +1,120 @@
+# Multiple choice
+- id: mc-kv-what
+  type: multiple_choice
+  tags: [memory]
+  difficulty: 2
+  prompt: "What does the KV cache actually store during autoregressive decoding?"
+  options:
+    - { text: "The key and value tensors for every past token, at every layer, so attention need not recompute them each step", correct: true }
+    - { text: "The model's weights, copied per request for isolation" }
+    - { text: "The raw input text of the prompt as a string" }
+    - { text: "The output logits for every vocabulary token" }
+  explanation: "Attention at step t needs the keys and values of all previous tokens. Caching them per layer avoids recomputing every past token's K and V on each new step."
+
+- id: mc-kv-why-cache
+  type: multiple_choice
+  tags: [memory]
+  difficulty: 2
+  prompt: "Why is caching keys and values worth the memory it costs?"
+  options:
+    - { text: "Without it, each decode step would recompute K and V for all prior tokens, making generation quadratic in sequence length", correct: true }
+    - { text: "It lets the model skip loading its weights from disk" }
+    - { text: "It removes the need for an attention mechanism entirely" }
+    - { text: "It makes the model deterministic across runs" }
+  explanation: "Recomputing K/V for every past token at every step is O(n^2) work over a sequence; the cache trades memory to keep per-step decode roughly linear."
+
+- id: mc-kv-memory-driver
+  type: multiple_choice
+  tags: [memory, sizing]
+  difficulty: 3
+  prompt: "In production serving, the KV cache — not the weights — is usually what caps how many requests you can run concurrently because:"
+  options:
+    - { text: "Weights are a fixed one-time cost, but KV grows with every token of every active sequence", correct: true }
+    - { text: "Weights must be re-downloaded per request while KV is shared" }
+    - { text: "KV is stored on disk and disk is slow" }
+    - { text: "The KV cache is always larger than the model on a single token" }
+  explanation: "Weights are loaded once and shared across all requests; KV memory is per-request and scales with batch size times sequence length, so it is what runs you out of memory at scale."
+
+- id: mc-kv-scaling
+  type: multiple_choice
+  tags: [sizing]
+  difficulty: 3
+  prompt: "Holding the model fixed, KV cache memory for one request scales with:"
+  options:
+    - { text: "Sequence length (linearly) — more tokens means proportionally more cached K/V", correct: true }
+    - { text: "The square of the sequence length" }
+    - { text: "Nothing about the request; it is a constant per model" }
+    - { text: "Only the number of output tokens, not the prompt" }
+  explanation: "For a fixed architecture and dtype, per-request KV bytes are proportional to the number of cached tokens (prompt + generated so far)."
+
+- id: mc-kv-dtype
+  type: multiple_choice
+  tags: [sizing]
+  difficulty: 2
+  prompt: "Switching the KV cache from FP16 to an 8-bit quantized representation primarily:"
+  options:
+    - { text: "Halves KV bytes per element, roughly doubling how much context or concurrency fits, at some quality risk", correct: true }
+    - { text: "Doubles KV memory but improves accuracy" }
+    - { text: "Has no effect on KV memory, only on weights" }
+    - { text: "Eliminates the need for paging" }
+  explanation: "KV bytes scale with bytes-per-element; going from 2 bytes (FP16) to 1 byte (INT8) roughly halves KV memory, trading some numerical fidelity for capacity."
+
+- id: mc-fragmentation
+  type: multiple_choice
+  tags: [paging]
+  difficulty: 3
+  prompt: "Allocating each sequence's KV cache as one contiguous block sized to the max possible length causes:"
+  options:
+    - { text: "Internal fragmentation and reserved-but-unused memory, wasting capacity that could serve more requests", correct: true }
+    - { text: "Faster attention because memory is contiguous, with no downside" }
+    - { text: "Lower latency and higher concurrency simultaneously" }
+    - { text: "The KV cache to shrink automatically as tokens are generated" }
+  explanation: "Reserving max-length contiguous slabs wastes the gap between reserved and actually-used length (internal fragmentation) and strands memory between freed blocks (external fragmentation), throttling concurrency."
+
+- id: mc-paged-attention
+  type: multiple_choice
+  tags: [paging]
+  difficulty: 3
+  prompt: "Paged attention (vLLM-style) fights KV fragmentation by:"
+  options:
+    - { text: "Splitting the KV cache into fixed-size blocks tracked by a per-sequence block table, so physical memory need not be contiguous", correct: true }
+    - { text: "Compressing every token's K and V with a lossy codec" }
+    - { text: "Storing the KV cache entirely on the host CPU" }
+    - { text: "Recomputing the whole cache on every decode step" }
+  explanation: "Like OS virtual memory, paged attention allocates KV in fixed blocks and maps them through a block table, so a sequence's KV can live in non-contiguous physical blocks and grow block-by-block."
+
+- id: mc-prefix-sharing
+  type: multiple_choice
+  tags: [paging]
+  difficulty: 3
+  prompt: "Because paged attention indexes KV blocks through a block table, it can also enable:"
+  options:
+    - { text: "Prefix sharing — multiple sequences with a common prompt prefix point at the same physical KV blocks", correct: true }
+    - { text: "Sharing model weights across GPUs" }
+    - { text: "Skipping attention for shared tokens entirely" }
+    - { text: "Storing two different prompts in one block" }
+  explanation: "If sequences share a prefix (e.g. a common system prompt), their block tables can map that prefix to the same physical blocks, computing and storing it once."
+
+- id: mc-eviction-recompute-swap
+  type: multiple_choice
+  tags: [eviction]
+  difficulty: 4
+  prompt: "When a server is out of KV memory and must preempt a running sequence, the two standard recovery strategies are:"
+  options:
+    - { text: "Recompute (drop the KV and rebuild it from the tokens later) or swap (move the KV to host memory and copy it back)", correct: true }
+    - { text: "Delete the request permanently or restart the whole server" }
+    - { text: "Fine-tune the model or increase its context window" }
+    - { text: "Lower the temperature or raise top-p" }
+  explanation: "Under KV pressure a sequence can be preempted: its cache is either recomputed from the prompt/tokens when resumed, or swapped out to CPU/host memory and swapped back in."
+
+- id: mc-recompute-vs-swap-tradeoff
+  type: multiple_choice
+  tags: [eviction]
+  difficulty: 4
+  prompt: "The core tradeoff between recompute and swap for preempted sequences is:"
+  options:
+    - { text: "Recompute spends GPU compute to rebuild KV; swap spends PCIe/host bandwidth to move it — you pick whichever is cheaper for the sequence length and hardware", correct: true }
+    - { text: "Recompute is always faster than swap in every case" }
+    - { text: "Swap changes the model's output; recompute does not" }
+    - { text: "Recompute needs more memory than swap" }
+  explanation: "Recompute is compute-bound and cheap for short prefixes; swap is bandwidth-bound and avoids redoing work but is limited by the interconnect. Neither dominates universally."

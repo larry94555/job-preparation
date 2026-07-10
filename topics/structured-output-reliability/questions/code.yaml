@@ -10,6 +10,7 @@
     validation error back to the model up to `opts.maxRepairs` times, and (4) if still invalid,
     returns `opts.fallback`. It must never loop unboundedly.
   starter_file: exercises/get-structured/starter.ts
+  test_file: exercises/get-structured/solution.test.ts
   test_command: "npm test"
   runner_image: "quiz-runner-node:20"
   timeout_sec: 30
@@ -29,6 +30,7 @@
     return 'malformed_json'; if it parses but fails `schema`, return 'schema_violation'; otherwise
     'valid'.
   starter_file: exercises/classify-failure/starter.ts
+  test_file: exercises/classify-failure/solution.test.ts
   test_command: "npm test"
   runner_image: "quiz-runner-node:20"
   timeout_sec: 30

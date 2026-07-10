@@ -1,0 +1,54 @@
+# Free entry (short answer)
+- id: fe-prefill-bottleneck
+  type: text_input
+  tags: [phases]
+  difficulty: 3
+  prompt: "What is the hardware bottleneck of the prefill phase? (one word)"
+  answer:
+    regex: '^(compute|flops|flop|arithmetic)$'
+    normalize: true
+
+- id: fe-decode-bottleneck
+  type: text_input
+  tags: [phases]
+  difficulty: 3
+  prompt: "What is the hardware bottleneck of the decode phase? (one or two words)"
+  answer:
+    regex: '^(memory bandwidth|bandwidth|memory-bandwidth|memory)$'
+    normalize: true
+
+- id: fe-ttft-metric
+  type: text_input
+  tags: [metrics]
+  difficulty: 2
+  prompt: "Which latency metric does a long prompt most directly increase? (abbreviation)"
+  answer:
+    regex: '^(ttft|time to first token)$'
+    normalize: true
+
+- id: fe-batching-phase
+  type: text_input
+  tags: [optimization]
+  difficulty: 3
+  prompt: "Batching many concurrent requests mainly boosts throughput in which phase? (one word)"
+  answer:
+    regex: '^(decode|decoding|generation)$'
+    normalize: true
+
+- id: fe-chunked-prefill
+  type: text_input
+  tags: [optimization]
+  difficulty: 4
+  prompt: "Splitting a long prompt into pieces that interleave with ongoing decode is called ____ prefill. (one word)"
+  answer:
+    regex: '^chunked$'
+    normalize: true
+
+- id: fe-disaggregation
+  type: text_input
+  tags: [optimization]
+  difficulty: 4
+  prompt: "Running prefill and decode on separate hardware pools so they cannot interfere is called prefill/decode ____. (one word)"
+  answer:
+    regex: '^(disaggregation|disaggregating|separation)$'
+    normalize: true

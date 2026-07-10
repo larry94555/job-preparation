@@ -1,0 +1,21 @@
+# Coding exercise — engine type: code (graded by tests + concept skill)
+- id: code-paged-allocator
+  type: code
+  language: typescript
+  tags: [paging]
+  difficulty: 4
+  prompt: >-
+    Implement a `PagedKVAllocator` class. `constructor(blockSize, numBlocks)` starts with all blocks
+    free. `freeBlocks()` returns the number of free blocks. `allocate(numTokens)` reserves
+    ceil(numTokens / blockSize) blocks from the free pool and returns their indices, or null if there
+    aren't enough free blocks (do NOT over-allocate). `free(blockIds)` returns blocks to the pool.
+    Live allocations must never share a block.
+  starter_file: exercises/paged-allocator/starter.ts
+  test_file: exercises/paged-allocator/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-kvcache-code
+  concept_checks:
+    must_use: ["ceil(numTokens/blockSize) blocks", "null when insufficient free blocks", "free returns blocks to the pool"]
+    avoid_antipattern: ["over-allocating past capacity", "handing out the same block to two live allocations"]

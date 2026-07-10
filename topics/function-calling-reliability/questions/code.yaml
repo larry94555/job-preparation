@@ -1,0 +1,22 @@
+# Coding exercise — engine type: code (graded by tests + concept skill)
+- id: code-tool-dispatcher
+  type: code
+  language: typescript
+  tags: [idempotency]
+  difficulty: 4
+  prompt: >-
+    Implement a `ToolDispatcher`. `register(name, tool)` where tool is `{ handler, validate?, mutating? }`.
+    `call(name, args, opts?)` returns `{ ok: true, value }` or `{ ok: false, error }`. Rules: unknown
+    tool → `{ ok:false, error:"unknown_tool" }` (do NOT throw); if `validate` is present and
+    `validate(args)` is false → `{ ok:false, error:"invalid_args" }` (handler not run); for a mutating
+    tool whose `opts.idempotencyKey` was already used, return the cached prior result (handler not
+    run again); otherwise run the handler and, for mutating tools with a key, cache the result.
+  starter_file: exercises/tool-dispatcher/starter.ts
+  test_file: exercises/tool-dispatcher/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-funccall-code
+  concept_checks:
+    must_use: ["validate args before executing", "structured error for unknown tool", "idempotency-key dedupe for mutating tools"]
+    avoid_antipattern: ["throwing on unknown tool", "re-running a mutating handler for a duplicate key"]

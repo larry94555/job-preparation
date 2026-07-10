@@ -1,0 +1,36 @@
+# Missing term (cloze)
+- id: cloze-harness
+  type: text_input
+  tags: [boundary]
+  difficulty: 1
+  prompt: "The code around the model that owns tools, state, safety, and verification is the ____."
+  answer:
+    regex: '^harness$'
+    normalize: true
+
+- id: cloze-loop
+  type: text_input
+  tags: [loop]
+  difficulty: 1
+  prompt: "The agent loop is: think → act → ____."
+  answer:
+    regex: '^observe$'
+    normalize: true
+
+- id: cloze-idempotency
+  type: text_input
+  tags: [control]
+  difficulty: 3
+  prompt: "An operation that is safe to retry because repeating it has no extra effect is called ____."
+  answer:
+    regex: '^idempotent$'
+    normalize: true
+
+- id: cloze-plan
+  type: text_input
+  tags: [control]
+  difficulty: 2
+  prompt: "Separating planning from doing so steps can be verified independently is the ____-then-execute pattern."
+  answer:
+    regex: '^plan$'
+    normalize: true

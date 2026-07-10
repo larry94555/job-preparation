@@ -1,0 +1,16 @@
+id: lesson-two-caches
+title: "Two caches, two hit conditions"
+material: two-caches.md
+segments:
+  - present: two-caches-and-two-hit-conditions
+  - check: mc-two-caches
+  - check: mc-prefix-hit-condition
+  - check: mc-semantic-hit-condition
+  - check: cloze-prefix
+  - check: cloze-threshold
+  - present: what-each-one-saves
+  - check: mc-prefix-savings
+  - check: mc-semantic-savings
+  - check: cloze-prefill
+  - check: fe-prefix-saves
+  - apply: essay-two-caches

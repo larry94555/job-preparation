@@ -1,0 +1,32 @@
+# Calibration for eval-specdec-essay (exemplars target essay-wrong-tool).
+skill: eval-specdec-essay
+cases:
+  - answer: >-
+      Speculative decoding is the wrong tool here. It targets latency, not cost — it adds a small draft
+      model that proposes tokens and has the target model verify them, so the footprint does not shrink.
+      If inference is too expensive because the model barely fits in memory, use quantization (store
+      weights in INT8/INT4 to cut memory) or distillation (train a smaller student model that is
+      permanently cheaper to serve). Speculative decoding is lossless and great for latency, but only
+      pays off when the draft's acceptance rate is high.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  - answer: "Just add speculative decoding — it always makes everything cheaper and smaller."
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  - answer: >-
+      Speculative decoding is about speed, not cost, so it probably won't help. You'd want something
+      that makes the model smaller instead.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
+
+  - answer: >-
+      Speculative decoding shrinks the model's memory footprint by quantizing the draft model to INT4,
+      which is why it lowers serving cost more than distillation ever could.
+    expect:
+      verdict: fail
+      checks: { technically_correct: false }

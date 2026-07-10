@@ -1,0 +1,23 @@
+skill: eval-caching-code
+cases:
+  - answer: >-
+      tests_passed=true. set() pushes {embedding,value,storedAt}. get() skips entries where
+      now-storedAt>ttlMs, computes cosine (dot/(‖a‖‖b‖)) to each, keeps the best, and returns its value
+      only if bestSim>=threshold else null.
+    expect:
+      verdict: pass
+      checks: { threshold_gate: true, cosine_similarity: true, ttl_expiry: true, nearest_entry: true }
+
+  - answer: >-
+      tests_passed=true, but returns the nearest entry's value regardless of the threshold (no gate),
+      though it uses cosine and respects TTL.
+    expect:
+      verdict: fail
+      checks: { threshold_gate: false, cosine_similarity: true, ttl_expiry: true, nearest_entry: true }
+
+  - answer: >-
+      tests_passed=true. Gates on threshold and picks the nearest with cosine, but never checks TTL, so
+      stale entries can be served.
+    expect:
+      verdict: borderline
+      checks: { threshold_gate: true, cosine_similarity: true, ttl_expiry: false, nearest_entry: true }

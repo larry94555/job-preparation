@@ -1,0 +1,36 @@
+# Free entry (short answer)
+- id: fe-batching-cost
+  type: text_input
+  tags: [levers]
+  difficulty: 2
+  prompt: "Larger batches raise throughput but what do they cost you? (one word)"
+  answer:
+    regex: '^(latency|slower|slowness|delay|tail|wait|queueing|queuing)$'
+    normalize: true
+
+- id: fe-quant-risk
+  type: text_input
+  tags: [levers]
+  difficulty: 2
+  prompt: "Quantization lowers cost and memory but puts which axis most at risk? (one word)"
+  answer:
+    regex: '^(quality|accuracy|precision)$'
+    normalize: true
+
+- id: fe-fallback-axis
+  type: text_input
+  tags: [levers]
+  difficulty: 3
+  prompt: "A fallback or backup model path mainly buys you which axis? (one word)"
+  answer:
+    regex: '^(reliability|availability|resilience|robustness|uptime)$'
+    normalize: true
+
+- id: fe-slo-role
+  type: text_input
+  tags: [slos]
+  difficulty: 3
+  prompt: "What should you anchor the whole stack's design on, rather than a single metric? (one term / acronym)"
+  answer:
+    regex: '^(slos?|service-?level objectives?|budgets?|latency budget)$'
+    normalize: true

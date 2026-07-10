@@ -1,0 +1,108 @@
+# Multiple choice
+- id: mc-why-route
+  type: multiple_choice
+  tags: [routing]
+  difficulty: 2
+  prompt: "The main reason to route requests across models instead of sending everything to one strong model is to:"
+  options:
+    - { text: "Match each request to the cheapest model that can handle it, saving cost and latency without losing quality on hard cases", correct: true }
+    - { text: "Guarantee that every answer is identical regardless of load" }
+    - { text: "Make the strongest model's context window larger" }
+    - { text: "Remove the need for any prompt engineering" }
+  explanation: "Routing sends easy requests to a cheap, fast model and reserves the expensive strong model for the hard ones, cutting cost and latency while preserving quality where it matters."
+
+- id: mc-routing-signals
+  type: multiple_choice
+  tags: [routing]
+  difficulty: 3
+  prompt: "Which of these is a legitimate routing signal for deciding which model handles a request?"
+  options:
+    - { text: "Predicted task difficulty, prompt length, required capabilities, and per-request budget", correct: true }
+    - { text: "The alphabetical order of the user's name" }
+    - { text: "Whichever model was used for the previous unrelated user" }
+    - { text: "A random coin flip on every request regardless of task" }
+  explanation: "Routers decide using signals about the request itself — estimated difficulty, length, needed capabilities (tools, vision), latency and cost budgets — not arbitrary facts unrelated to the task."
+
+- id: mc-cascade-direction
+  type: multiple_choice
+  tags: [routing]
+  difficulty: 2
+  prompt: "In a model cascade, the intended order is:"
+  options:
+    - { text: "Try the cheap/fast model first, and escalate to a stronger model only when a quality gate fails", correct: true }
+    - { text: "Always start with the most expensive model and downgrade" }
+    - { text: "Call all models at once and pick the longest answer" }
+    - { text: "Skip cheap models entirely for consistency" }
+  explanation: "A cascade runs cheap→strong: the small model answers first, and only if a quality gate (confidence, verifier, or self-check) rejects the answer does the request escalate to a stronger, costlier model."
+
+- id: mc-fallback-trigger
+  type: multiple_choice
+  tags: [fallback]
+  difficulty: 2
+  prompt: "Which condition should trigger a fallback to an alternate model or provider?"
+  options:
+    - { text: "The primary provider is timing out, returning 5xx/429 errors, or is rate-limited", correct: true }
+    - { text: "The user asked a slightly long question" }
+    - { text: "The primary model returned a correct answer quickly" }
+    - { text: "It is a weekday afternoon" }
+  explanation: "Fallback exists for failure conditions: timeouts, server errors, rate limits (429), or the provider being down — not for normal successful responses."
+
+- id: mc-circuit-breaker
+  type: multiple_choice
+  tags: [resilience]
+  difficulty: 3
+  prompt: "A circuit breaker in front of a flaky model provider works by:"
+  options:
+    - { text: "Tripping open after repeated failures so calls fail fast to the fallback instead of piling onto a struggling provider", correct: true }
+    - { text: "Retrying the same provider forever until it responds" }
+    - { text: "Sending twice as many requests when errors rise, to force a response" }
+    - { text: "Permanently deleting the provider after one error" }
+  explanation: "When failures cross a threshold the breaker opens, so requests fail fast (or divert to fallback) for a cooldown, protecting a struggling provider from a retry storm; it later half-opens to test recovery."
+
+- id: mc-hedged-request
+  type: multiple_choice
+  tags: [resilience]
+  difficulty: 4
+  prompt: "A hedged request reduces tail latency by:"
+  options:
+    - { text: "Sending a duplicate request to a second model after a short delay and using whichever responds first, then cancelling the other", correct: true }
+    - { text: "Waiting for both models and averaging their token outputs" }
+    - { text: "Retrying only after the first request fully times out" }
+    - { text: "Routing every request to the slowest model on purpose" }
+  explanation: "Hedging fires a backup request once the first is slow past a threshold and takes the first response back, trading extra spend for lower p99 latency. It is not the same as waiting for a full timeout."
+
+- id: mc-backoff-jitter
+  type: multiple_choice
+  tags: [resilience]
+  difficulty: 3
+  prompt: "Why add jitter to exponential backoff when retrying a failed provider call?"
+  options:
+    - { text: "To spread retries randomly in time so many clients don't retry in lockstep and re-overload the provider", correct: true }
+    - { text: "To make each retry happen sooner than the last" }
+    - { text: "To guarantee retries are perfectly synchronized" }
+    - { text: "To remove the need for a circuit breaker" }
+  explanation: "Plain exponential backoff still lets synchronized clients retry at the same instants (a thundering herd); random jitter desynchronizes them so the recovering provider isn't hit by a coordinated spike."
+
+- id: mc-silent-swap
+  type: multiple_choice
+  tags: [degraded]
+  difficulty: 3
+  prompt: "Why is silently substituting a weaker model on fallback considered an antipattern?"
+  options:
+    - { text: "Users and downstream systems get quietly-lower-quality or inconsistent answers with no signal, breaking trust and making incidents hard to diagnose", correct: true }
+    - { text: "It always makes responses slower" }
+    - { text: "It is technically impossible to swap models at runtime" }
+    - { text: "Weaker models cost more than strong ones" }
+  explanation: "A silent swap hides a real quality change: the answer may be worse or inconsistent with prior ones, users can't calibrate trust, and operators can't tell degraded output from a bug. Honest degraded-mode UX signals the change."
+
+- id: mc-degraded-honest
+  type: multiple_choice
+  tags: [degraded]
+  difficulty: 2
+  prompt: "An honest degraded-mode UX during a fallback does which of the following?"
+  options:
+    - { text: "Signals reduced capability (a notice, disabled features, or lower confidence) so the user knows the answer came from a limited path", correct: true }
+    - { text: "Pretends nothing changed and returns the weaker answer as if it were normal" }
+    - { text: "Blocks the user entirely so they never get any answer" }
+    - { text: "Hides all error states from operators and dashboards" }
+  explanation: "Honest degradation keeps the product usable while being transparent — a banner, a disabled feature, or a lowered-confidence indicator — rather than passing off degraded output as full quality."

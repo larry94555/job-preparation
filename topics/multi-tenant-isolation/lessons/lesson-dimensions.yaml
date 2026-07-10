@@ -1,0 +1,10 @@
+id: lesson-dimensions
+title: "Isolation dimensions & the threat"
+material: dimensions.md
+segments:
+  - present: isolation-dimensions-and-the-threat
+  - check: mc-isolation-goal
+  - check: mc-isolation-dimensions
+  - present: the-sharing-versus-isolation-tradeoff
+  - check: mc-noisy-neighbor
+  - check: fe-isolation-tradeoff

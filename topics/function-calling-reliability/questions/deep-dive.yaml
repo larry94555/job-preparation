@@ -1,0 +1,98 @@
+# Deep-dive — architecture judgment (code-review MCs + an L4 design-review essay)
+
+- id: mc-review-fc-untyped-args
+  type: multiple_choice
+  tags: [contract, review]
+  difficulty: 4
+  prompt: >-
+    A design exposes each tool with a single free-form string argument and a note "the model will
+    format the arguments correctly." Reviewing it, what is the most important problem?
+  options:
+    - { text: "There is no typed contract, so malformed calls can't be machine-checked and fail at runtime with undefined behavior instead of a rejectable error", correct: true }
+    - { text: "String arguments are always slower to parse than integers, so it will not scale" }
+    - { text: "Free-form arguments use too many context tokens and should be base64-encoded" }
+    - { text: "Nothing — trusting the model to format arguments is the modern, schema-free best practice" }
+  explanation: >-
+    A tool is an API with a contract, and a typed schema (JSON Schema / Zod / Pydantic) is what makes
+    arguments machine-checkable before any side effect. Free-form untyped args push failure into
+    runtime as undefined behavior. The other options are not the core reliability issue.
+
+- id: mc-review-fc-coerce-unknown
+  type: multiple_choice
+  tags: [contract, review]
+  difficulty: 4
+  prompt: >-
+    A dispatcher, on an unknown tool name, runs the "closest" registered tool, and on a missing
+    required field it fills in a default so the call "never fails." Rate this design and pick the
+    best fix.
+  options:
+    - { text: "Toy-grade: it executes unvalidated input by guessing tools and coercing args; validate-and-reject with a structured, model-facing error so the loop self-corrects", correct: true }
+    - { text: "Production-ready: never failing a call maximizes success rate and resilience" }
+    - { text: "Fine as-is, but log the coercions so they can be audited later" }
+    - { text: "The real fix is to retry the coerced call several times until it succeeds" }
+  explanation: >-
+    Running the closest tool for a hallucinated name is trusting the tool name blindly, and defaulting
+    a missing field is executing unvalidated arguments — both classic red flags. The dispatcher should
+    reject and return a structured model-facing error so the model retries with a corrected call, not
+    silently guess or coerce.
+
+- id: mc-review-fc-retry-nonidempotent
+  type: multiple_choice
+  tags: [contract, review]
+  difficulty: 4
+  prompt: >-
+    An agent loop retries any tool call whose response is not received, including a `refundOrder`
+    mutation, and reports "retries make us more reliable." What is the strongest objection?
+  options:
+    - { text: "A mutation retried after a lost response can apply the effect twice; make it idempotent with an idempotency key and separate reads from writes before enabling retries", correct: true }
+    - { text: "Retries are never acceptable for any tool call, read or write" }
+    - { text: "The only issue is latency; batch the retries to fix it" }
+    - { text: "Refunds should be a read-only tool so retrying is automatically safe" }
+  explanation: >-
+    The duplicate-effect risk is the defining hazard of non-idempotent mutations: the effect can land,
+    the response is lost, the retry applies it again (a double refund). Reads can retry freely, but a
+    write needs an idempotency key and read/write separation before it is safe to retry — not a ban on
+    all retries.
+
+- id: essay-fc-deep-dive
+  type: essay
+  length: long
+  tags: [contract, review]
+  difficulty: 4
+  prompt: >-
+    You are the reviewer on a function-calling layer for a multi-tool agent that both reads data and
+    performs mutations (charges, refunds, deletes). Write a design review: walk the levers (contract
+    typing, validation strictness, read/write separation, idempotency, tool-boundary standardization),
+    give an explicit tradeoff for each, and state what would move the design from demo-ready to
+    production-ready. Call out at least two antipatterns and name how you would evaluate the layer's
+    tool-calling ability.
+  eval_skill: eval-funccall-essay
+  reference_points:
+    - "Contract typing: each tool is an API with a typed schema (JSON Schema / Zod / Pydantic) so arguments are machine-checked before any side effect; untyped args fail at runtime."
+    - "Validation strictness: validate-and-reject unknown tools and invalid arguments with a structured, model-facing error so the loop self-corrects — never trust the tool name or coerce blindly."
+    - "Read/write separation: reads auto-run and retry freely; writes get confirmation gates, stricter validation, and idempotency."
+    - "Idempotency: mutating tools carry idempotency keys so a retry after a lost response doesn't double-apply the effect; exactly-once at scale remains an open problem."
+    - "Tool-boundary standardization: MCP lets a tool be built once and reused with one validation/observability seam; evaluate tool-calling against Gorilla / the Berkeley Function-Calling Leaderboard rather than vibes."
+    - "Antipatterns to call out: executing unvalidated arguments, trusting tool names blindly, and non-idempotent mutations."
+
+- id: debug-fc-idempotent
+  type: code
+  language: typescript
+  tags: [contract, review]
+  difficulty: 4
+  prompt: >-
+    DEBUGGING: the provided `ToolDispatcher` is meant to be idempotent — a tool must run at most once
+    per idempotency key, and any retry with the same key must return the cached result without
+    re-executing the tool. Instead, a retried write (same idempotency key) re-runs the side effect
+    every time, so a lost-response retry applies the mutation twice. There is exactly one bug in
+    `dispatch()`. Fix it so the first call for a key runs the tool and remembers its result, and
+    repeats of that key return the cached result without re-executing (make the minimal change).
+  starter_file: exercises/idempotent-dispatch-debug/starter.ts
+  test_file: exercises/idempotent-dispatch-debug/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-funccall-code
+  concept_checks:
+    must_use: ["store the tool result under the idempotencyKey after the first run", "repeats of the same key return the cached result without re-executing", "different keys each execute the tool once"]
+    avoid_antipattern: ["checking the cache but never populating it", "keying the cache by tool name instead of the idempotency key"]

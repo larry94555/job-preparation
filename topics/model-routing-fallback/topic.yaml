@@ -1,0 +1,9 @@
+id: model-routing-fallback
+title: "Model Routing & Fallback"
+description: "Pick the right model per request and degrade gracefully when a provider is slow, down, rate-limited, or over budget — routing signals, cheap→strong cascades, circuit breakers, hedged requests, backoff, and an honest degraded-mode UX that never silently swaps models."
+pass_threshold: 0.8
+tag_weights:
+  routing: 1.2
+  fallback: 1.2
+  resilience: 1.0
+  degraded: 1.0

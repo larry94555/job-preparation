@@ -1,0 +1,23 @@
+skill: eval-kvcache-code
+cases:
+  - answer: >-
+      tests_passed=true. Keeps a pool of free indices; allocate computes need=ceil(numTokens/blockSize),
+      returns null if need>pool.length, else shifts `need` indices out and returns them; free pushes
+      indices back. Live allocations don't overlap because blocks leave the pool.
+    expect:
+      verdict: pass
+      checks: { null_when_insufficient: true, ceil_blocks: true, no_overlap: true, free_returns: true }
+
+  - answer: >-
+      tests_passed=true, but when need>free it still returns `need` indices (some out of range / reused)
+      instead of null — it over-allocates past capacity. ceil and free are otherwise fine.
+    expect:
+      verdict: fail
+      checks: { null_when_insufficient: false, ceil_blocks: true, no_overlap: true, free_returns: true }
+
+  - answer: >-
+      tests_passed=true. Returns null when insufficient and frees correctly, but uses
+      floor(numTokens/blockSize) so it under-allocates by a block for non-multiple sizes.
+    expect:
+      verdict: borderline
+      checks: { null_when_insufficient: true, ceil_blocks: false, no_overlap: true, free_returns: true }

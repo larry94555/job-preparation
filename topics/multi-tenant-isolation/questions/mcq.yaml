@@ -1,0 +1,145 @@
+# Multiple choice
+- id: mc-isolation-goal
+  type: multiple_choice
+  tags: [isolation]
+  difficulty: 2
+  prompt: "The core goal of multi-tenant isolation in an LLM system is to ensure that:"
+  options:
+    - { text: "One tenant's or user's data never surfaces in another tenant's session or answer", correct: true }
+    - { text: "Every tenant is served by a separate copy of the model weights" }
+    - { text: "The model never caches anything, for any tenant" }
+    - { text: "Latency is identical for all tenants at all times" }
+  explanation: "Isolation is about keeping tenants' data separated across every shared surface — cache, index, memory, logs — so nothing bleeds from one to another. Separate weights and zero caching are not required to achieve it."
+
+- id: mc-isolation-dimensions
+  type: multiple_choice
+  tags: [isolation]
+  difficulty: 3
+  prompt: "Which of these is a dimension where cross-tenant leakage can occur and must be isolated?"
+  options:
+    - { text: "Caches, the retrieval index, conversation memory, and logs", correct: true }
+    - { text: "Only the vector index; the other surfaces are inherently safe" }
+    - { text: "Only the network layer; application state cannot leak" }
+    - { text: "Only the model weights, since everything else is stateless" }
+  explanation: "Leakage can happen anywhere tenants share state: caches, the shared index, per-session memory, and even logs. Treating any one surface as the only risk leaves the others open."
+
+- id: mc-noisy-neighbor
+  type: multiple_choice
+  tags: [isolation]
+  difficulty: 3
+  prompt: "The 'noisy neighbor' problem in a multi-tenant system refers to:"
+  options:
+    - { text: "One tenant's heavy load degrading latency or throughput for others sharing the resource", correct: true }
+    - { text: "A tenant reading another tenant's cached response" }
+    - { text: "Logs from one tenant overwriting another's logs" }
+    - { text: "Two tenants having identical embeddings" }
+  explanation: "Noisy neighbor is a resource-contention (availability) issue: shared capacity means one tenant's spike can starve others. It is distinct from a data-leak, which is a confidentiality issue."
+
+- id: mc-cache-key-scope
+  type: multiple_choice
+  tags: [cache-safety]
+  difficulty: 2
+  prompt: "To make a shared cache safe in a multi-tenant system, the cache key must include:"
+  options:
+    - { text: "The tenant (or user) scope, so identical requests from different tenants never collide", correct: true }
+    - { text: "Only a hash of the prompt text" }
+    - { text: "The current timestamp, so keys are always unique" }
+    - { text: "The model's temperature setting only" }
+  explanation: "A tenant-blind key (just the prompt hash) lets Tenant A's cached answer be served to Tenant B when their inputs match. Namespacing the key by tenant scope prevents cross-tenant hits."
+
+- id: mc-semantic-cache-leak
+  type: multiple_choice
+  tags: [cache-safety]
+  difficulty: 4
+  prompt: "Why is a shared semantic cache especially dangerous for isolation compared with an exact-match cache?"
+  options:
+    - { text: "It returns a stored answer when a query is merely similar, so Tenant B can hit Tenant A's entry without an identical request", correct: true }
+    - { text: "It stores answers in plaintext, unlike exact-match caches" }
+    - { text: "It never expires entries, so leaks are permanent" }
+    - { text: "It requires a GPU, which exact-match caches do not" }
+  explanation: "A semantic cache matches on embedding similarity, so a paraphrased or merely-similar query from another tenant can retrieve a stored answer — widening the leak surface beyond identical requests. It must still be namespaced per tenant."
+
+- id: mc-cache-poisoning
+  type: multiple_choice
+  tags: [cache-safety]
+  difficulty: 3
+  prompt: "Cache poisoning in a multi-tenant cache is when:"
+  options:
+    - { text: "An attacker writes a chosen entry under a key that a victim tenant will later read", correct: true }
+    - { text: "The cache runs out of memory and evicts entries" }
+    - { text: "Two tenants happen to compute the same embedding" }
+    - { text: "The cache TTL is set too long" }
+  explanation: "Poisoning exploits a shared/collidable key namespace: the attacker seeds a malicious response under a key the victim's request will hit, so the victim is served attacker-controlled content. Scoping keys per tenant is the defense."
+
+- id: mc-cache-key-components
+  type: multiple_choice
+  tags: [cache-safety]
+  difficulty: 3
+  prompt: "A robust cache key for a per-tenant LLM cache typically combines:"
+  options:
+    - { text: "Tenant/user scope + normalized request + model/version", correct: true }
+    - { text: "Just the raw prompt string" }
+    - { text: "A random UUID generated per request" }
+    - { text: "The server hostname only" }
+  explanation: "Including tenant scope prevents cross-tenant collisions; the normalized request makes matching correct; the model/version prevents stale answers from a different model. A per-request UUID would never hit; a raw prompt is tenant-blind."
+
+- id: mc-retrieval-scoping
+  type: multiple_choice
+  tags: [retrieval-scoping]
+  difficulty: 2
+  prompt: "In a shared vector index holding many tenants' documents, the correct way to scope retrieval is to:"
+  options:
+    - { text: "Apply an authorization filter (e.g. tenant_id metadata) so search only returns the caller's documents", correct: true }
+    - { text: "Retrieve top-k across all tenants, then hope the reranker drops the others" }
+    - { text: "Trust the embedding space to keep tenants' vectors apart" }
+    - { text: "Filter the results only in the UI layer" }
+  explanation: "Isolation must be enforced at query time by an authorization filter on tenant metadata (or a per-tenant namespace), not left to reranking, embedding geometry, or the UI — any of which can leak another tenant's chunks into context."
+
+- id: mc-retrieval-filter-timing
+  type: multiple_choice
+  tags: [retrieval-scoping]
+  difficulty: 4
+  prompt: "Filtering retrieved chunks by tenant AFTER the vector search (post-filtering) rather than during it is risky because:"
+  options:
+    - { text: "The unfiltered top-k may be entirely another tenant's chunks, so the caller gets too few (or zero) valid results and other tenants' data has already been fetched", correct: true }
+    - { text: "Post-filtering is always slower than the network round-trip" }
+    - { text: "It changes the embedding model's weights" }
+    - { text: "Vector databases cannot store metadata at all" }
+  explanation: "If the filter is applied only after top-k selection, another tenant's more-similar chunks can crowd out the caller's, and their data has already been read into the process. Pre-filtering (filtered ANN search or per-tenant namespaces) enforces scope inside the search."
+
+- id: mc-shared-vs-pertenant-index
+  type: multiple_choice
+  tags: [retrieval-scoping]
+  difficulty: 3
+  prompt: "Choosing a per-tenant index instead of a filtered shared index mainly trades:"
+  options:
+    - { text: "Stronger isolation and simpler scoping against higher resource cost and operational overhead", correct: true }
+    - { text: "Better answer quality against worse embeddings" }
+    - { text: "Lower latency against higher cache hit rate" }
+    - { text: "More tenants against fewer documents per tenant" }
+  explanation: "Per-tenant (silo) indexes give hard isolation and trivial scoping but cost more to run and operate; a filtered shared (pooled) index is efficient but relies on the filter being correct everywhere."
+
+- id: mc-context-contamination
+  type: multiple_choice
+  tags: [contamination]
+  difficulty: 3
+  prompt: "A common cross-user context contamination vector is:"
+  options:
+    - { text: "Reusing a conversation/session object across users so one user's history leaks into another's prompt", correct: true }
+    - { text: "Embedding each document exactly once" }
+    - { text: "Using a cross-encoder reranker" }
+    - { text: "Storing chunks with source metadata" }
+  explanation: "If session state, memory, or a system-prompt buffer is reused across users instead of being scoped per user, prior context bleeds into the next user's request. Reranking and metadata are unrelated to this leak."
+
+- id: mc-log-leak
+  type: multiple_choice
+  tags: [contamination]
+  difficulty: 3
+  prompt: "Why are logs and traces an isolation risk in a multi-tenant LLM system?"
+  options:
+    - { text: "They can capture one tenant's prompts/outputs and expose them to operators or tools serving other tenants if not scoped and access-controlled", correct: true }
+    - { text: "They make the model hallucinate other tenants' data" }
+    - { text: "They increase embedding dimensionality" }
+    - { text: "They are always encrypted, so they can never leak" }
+    - { text: "They only ever store numbers, never text" }
+  explanation: "Prompts and completions often contain tenant data; if logs/traces are pooled without tenant scoping and access controls, that data is exposed across tenant boundaries. Logs are a real leakage dimension, not a safe one."

@@ -1,0 +1,22 @@
+skill: eval-context-code
+cases:
+  - answer: >-
+      tests_passed=true. Sorts a copy by priority desc, walks it with a running total, pushes an id when
+      total+tokens<=budget else skips but continues, and returns the included ids.
+    expect:
+      verdict: pass
+      checks: { respects_budget: true, sorts_by_priority: true, keeps_scanning: true, returns_included_ids: true }
+
+  - answer: >-
+      tests_passed happens to pass small cases, but concatenates all section ids sorted by priority
+      without ever checking the token budget — it can exceed the budget.
+    expect:
+      verdict: fail
+      checks: { respects_budget: false, sorts_by_priority: true, keeps_scanning: true, returns_included_ids: true }
+
+  - answer: >-
+      tests_passed=true. Sorts by priority and respects the budget, but breaks out of the loop at the
+      first section that doesn't fit, so a smaller lower-priority section that would fit is missed.
+    expect:
+      verdict: borderline
+      checks: { respects_budget: true, sorts_by_priority: true, keeps_scanning: false, returns_included_ids: true }

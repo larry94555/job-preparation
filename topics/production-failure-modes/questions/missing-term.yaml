@@ -1,0 +1,45 @@
+# Missing term (cloze)
+- id: cloze-silent
+  type: text_input
+  tags: [failures]
+  difficulty: 2
+  prompt: "A failure that returns a confident, well-formed but wrong answer without throwing any error is called a ____ failure."
+  answer:
+    regex: '^silent$'
+    normalize: true
+
+- id: cloze-hallucinated
+  type: text_input
+  tags: [failures]
+  difficulty: 2
+  prompt: "When a model invents a tool or arguments that do not exist in the schema, that is a ____ tool call."
+  answer:
+    regex: '^hallucinated$'
+    normalize: true
+
+- id: cloze-ttl
+  type: text_input
+  tags: [detection]
+  difficulty: 2
+  prompt: "The freshness threshold that marks retrieved data as too old to trust is commonly abbreviated ____."
+  answer:
+    regex: '^ttl$'
+    normalize: true
+
+- id: cloze-budget
+  type: text_input
+  tags: [mitigation]
+  difficulty: 2
+  prompt: "The hard limit on steps, tokens, or dollars that halts a runaway agent is called a ____."
+  answer:
+    regex: '^budget$'
+    normalize: true
+
+- id: cloze-canary
+  type: text_input
+  tags: [prevention]
+  difficulty: 3
+  prompt: "Routing a small slice of live traffic to a new version to watch its metrics before full rollout is a ____ deployment."
+  answer:
+    regex: '^canary$'
+    normalize: true

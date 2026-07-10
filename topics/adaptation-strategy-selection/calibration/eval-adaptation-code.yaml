@@ -1,0 +1,22 @@
+skill: eval-adaptation-code
+cases:
+  - answer: >-
+      tests_passed=true. Returns "rag" when freshness||attribution, else "fine-tuning" for
+      behaviorChange, else "distillation" for lowLatency, else "in-context" — checked in that order.
+    expect:
+      verdict: pass
+      checks: { freshness_first_rag: true, behavior_finetune: true, latency_distill: true, default_incontext: true }
+
+  - answer: >-
+      tests_passed for most cases, but checks behaviorChange before freshness, so a request that is both
+      fresh and a format change returns "fine-tuning" — recommending the wrong tool for volatile facts.
+    expect:
+      verdict: fail
+      checks: { freshness_first_rag: false, behavior_finetune: true, latency_distill: true, default_incontext: true }
+
+  - answer: >-
+      tests_passed=true. Handles freshness→rag and behavior→fine-tuning, but falls through to
+      "distillation" as the default instead of "in-context".
+    expect:
+      verdict: borderline
+      checks: { freshness_first_rag: true, behavior_finetune: true, latency_distill: true, default_incontext: false }

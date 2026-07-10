@@ -1,0 +1,37 @@
+# Essay
+- id: essay-cache-leak
+  type: essay
+  length: short
+  tags: [cache-safety]
+  difficulty: 3
+  prompt: "A teammate added a shared response cache keyed on a hash of the prompt text to cut costs. Explain how this can leak data across tenants and how to fix the key."
+  eval_skill: eval-isolation-essay
+  reference_points:
+    - "A prompt-only key is tenant-blind: when two tenants send identical (or, with a semantic cache, similar) requests, Tenant B is served Tenant A's cached answer — a cross-tenant confidentiality leak."
+    - "It also enables cache poisoning: an attacker can seed a chosen entry under a key a victim tenant will later read."
+    - "The fix is to namespace the key by tenant/user scope (e.g. tenant_id + normalized request + model/version) so identical requests from different tenants never collide."
+
+- id: essay-retrieval-scoping
+  type: essay
+  length: short
+  tags: [retrieval-scoping]
+  difficulty: 3
+  prompt: "You run one shared vector index holding many tenants' documents. Explain how to scope retrieval so a query only ever returns the caller's data, and why post-filtering is not enough."
+  eval_skill: eval-isolation-essay
+  reference_points:
+    - "Enforce isolation at query time with an authorization filter on tenant metadata (tenant_id), or give each tenant its own namespace/partition, so the search itself only considers the caller's chunks."
+    - "Post-filtering (filter after top-k) is unsafe: another tenant's more-similar chunks can crowd out the caller's, leaving too few valid results, and their data has already been fetched into the process."
+    - "Pre-filtering (filtered ANN search or per-tenant namespaces) keeps the scope inside the search; per-tenant indexes trade higher cost for stronger isolation."
+
+- id: essay-contamination
+  type: essay
+  length: long
+  tags: [contamination, isolation]
+  difficulty: 4
+  prompt: "Enumerate the main vectors by which one user's context can contaminate another user's session in an LLM application, and describe how to prevent contamination across each."
+  eval_skill: eval-isolation-essay
+  reference_points:
+    - "Reused session/conversation objects: history from a prior user bleeds into the next prompt — scope session and memory per user and reset state between users."
+    - "Shared caches: a tenant-blind (especially semantic) cache serves one user's answer to another — namespace cache keys by tenant/user scope."
+    - "Unscoped retrieval: a shared index returns another tenant's chunks into context — apply authorization/metadata filters or per-tenant namespaces."
+    - "Logs and traces: pooled logs capture one tenant's prompts/outputs and expose them to others — scope and access-control logs, and consider isolation/leak tests (target zero cross-tenant leak rate) to verify all of the above."

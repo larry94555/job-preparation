@@ -1,0 +1,10 @@
+id: lesson-build-int8-quant
+title: "Build it: int8 quantization"
+material: build-int8-quant.md
+segments:
+  - present: scale-and-zero-point
+  - check: mc-scale-formula
+  - present: the-pitfalls
+  - check: mc-why-clamp
+  - apply: code-int8-quant
+  - apply: essay-quant-safety

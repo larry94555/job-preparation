@@ -1,0 +1,23 @@
+skill: eval-routing-code
+cases:
+  - answer: >-
+      tests_passed=true. Iterates providers in order, skips any with fails>=threshold, try/catch around
+      call(): on success resets fails and returns {ok,provider,value}, on throw increments fails and
+      continues; returns {ok:false,error:"all_failed"} if none succeed.
+    expect:
+      verdict: pass
+      checks: { fallback_on_error: true, tries_in_order: true, breaker_skips_open: true, returns_all_failed: true }
+
+  - answer: >-
+      tests_passed=true, but only calls the first provider and rethrows if it fails — no fallback to the
+      next provider at all.
+    expect:
+      verdict: fail
+      checks: { fallback_on_error: false, tries_in_order: true, breaker_skips_open: false, returns_all_failed: false }
+
+  - answer: >-
+      tests_passed=true. Tries providers in order, falls through on error, and returns all_failed, but
+      never tracks failures, so a dead provider is retried on every request (no breaker).
+    expect:
+      verdict: borderline
+      checks: { fallback_on_error: true, tries_in_order: true, breaker_skips_open: false, returns_all_failed: true }

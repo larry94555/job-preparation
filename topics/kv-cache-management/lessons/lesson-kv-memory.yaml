@@ -1,0 +1,18 @@
+id: lesson-kv-memory
+title: "What the KV cache is & sizing it"
+material: kv-memory.md
+segments:
+  - present: what-the-kv-cache-is
+  - check: mc-kv-what
+  - check: mc-kv-why-cache
+  - check: mc-kv-memory-driver
+  - check: cloze-kv-cache
+  - check: fe-memory-consumers
+  - present: sizing-the-kv-cache
+  - check: mc-kv-scaling
+  - check: mc-kv-dtype
+  - check: num-kv-linear-seq
+  - check: num-kv-double-context
+  - check: num-kv-formula-bytes
+  - check: fe-kv-scales-with
+  - apply: essay-why-kv-dominates

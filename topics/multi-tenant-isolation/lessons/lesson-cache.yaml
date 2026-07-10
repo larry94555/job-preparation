@@ -1,0 +1,14 @@
+id: lesson-cache
+title: "Cache-key safety & poisoning"
+material: cache-safety.md
+segments:
+  - present: cache-key-safety-and-cross-tenant-hits
+  - check: mc-cache-key-scope
+  - check: mc-cache-key-components
+  - check: cloze-tenant-scope
+  - check: fe-cache-key-field
+  - present: semantic-caches-and-cache-poisoning
+  - check: mc-semantic-cache-leak
+  - check: mc-cache-poisoning
+  - check: cloze-poisoning
+  - apply: essay-cache-leak

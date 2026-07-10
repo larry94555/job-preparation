@@ -1,0 +1,70 @@
+# Literature/canon (WS1) + interview (WS2) — tags [canon]/[interview] are NOT in any section's
+# from_tags, so these don't enter the deterministic section-assessment pools.
+- id: mc-canon-quant-awq-idea
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Activation-aware weight quantization — scaling and protecting the weight channels tied to large activations — is the key idea of which method?"
+  options:
+    - { text: "AWQ (Lin et al.)", correct: true }
+    - { text: "GPTQ (Frantar et al.)" }
+    - { text: "SmoothQuant (Xiao et al.)" }
+    - { text: "LLM.int8() (Dettmers et al.)" }
+  explanation: "AWQ is activation-aware weight quantization: it protects the salient weight channels tied to large activations. GPTQ is calibration-based layerwise weight quantization (Hessian-guided); SmoothQuant migrates activation-outlier difficulty into weights for INT8; LLM.int8() keeps outlier features in higher precision."
+
+- id: mc-canon-quant-gptq-idea
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Calibration-based, layerwise weight quantization that minimizes output reconstruction error using approximate second-order (Hessian) information is the signature of which method?"
+  options:
+    - { text: "GPTQ (Frantar et al.)", correct: true }
+    - { text: "AWQ (Lin et al.)" }
+    - { text: "SmoothQuant (Xiao et al.)" }
+    - { text: "LLM.int8() (Dettmers et al.)" }
+  explanation: "GPTQ quantizes weights layer by layer, minimizing reconstruction error with approximate Hessian information. AWQ is activation-aware weight quantization; SmoothQuant handles activation outliers by migrating them into weights; LLM.int8() is outlier-aware INT8."
+
+- id: mc-interview-quant-perplexity
+  type: multiple_choice
+  tags: [interview]
+  difficulty: 3
+  prompt: "In a quantization interview, the strongest reason not to ship an INT4 model just because perplexity barely moved is:"
+  options:
+    - { text: "Perplexity is an averaged next-token loss that can stay flat while reasoning, code, and long-context quality drop", correct: true }
+    - { text: "Perplexity can only be measured on the training set" }
+    - { text: "INT4 quantization is lossless, so perplexity is irrelevant" }
+    - { text: "Perplexity always rises sharply under any quantization" }
+  explanation: "Perplexity averages generic next-token loss and can hide task-specific degradation; low-bit quantization tends to hurt multi-step reasoning, code, and long-context tasks first, so you verify with real task evals against the FP16 baseline."
+
+- id: essay-quant-literature
+  type: essay
+  length: long
+  tags: [canon]
+  difficulty: 4
+  prompt: >-
+    Summarize the influential work on quantization formats and quality — GPTQ, AWQ, SmoothQuant, and
+    LLM.int8(). For each, say what its key idea is and what problem it solves, and name the tools that
+    implement these ideas today.
+  eval_skill: eval-quant-essay
+  reference_points:
+    - "GPTQ (Frantar et al., 2022): calibration-based layerwise weight quantization minimizing reconstruction error with approximate second-order (Hessian) information; made accurate 4-bit weight quant practical post-training."
+    - "AWQ (Lin et al., 2023): activation-aware weight quantization that protects the salient weight channels tied to large activations to cut error there."
+    - "SmoothQuant (Xiao et al.): migrates activation-outlier difficulty into weights via per-channel scaling, making INT8 activation quantization feasible."
+    - "LLM.int8() (Dettmers et al., 2022): outlier-aware INT8 that keeps a few outlier features in higher precision while running the rest in INT8."
+    - "Tools that implement these: AutoGPTQ, AutoAWQ, bitsandbytes, llama.cpp/GGUF (k-quants), TensorRT-LLM."
+
+- id: essay-quant-interview
+  type: essay
+  length: long
+  tags: [interview]
+  difficulty: 4
+  prompt: >-
+    You're in a senior inference/model-optimization interview. Explain how you'd choose a quantization
+    approach and verify quality: contrast AWQ vs. GPTQ, say why weight-only is a safer default than
+    weight+activation, and explain why perplexity alone is not enough. Show the depth that reads as senior.
+  eval_skill: eval-quant-essay
+  reference_points:
+    - "AWQ = activation-aware weight quant (protect salient channels tied to large activations); GPTQ = calibration-based layerwise reconstruction using approximate Hessian info; both give accurate 4-bit weight quant."
+    - "Weight-only 4-bit (AWQ/GPTQ) is the safe default; activations are harder (runtime outliers), so reach for SmoothQuant / LLM.int8() only when you must quantize activations."
+    - "Perplexity is an averaged next-token loss that can stay flat while reasoning, code, and long-context quality drop; verify with real task evals against the FP16 baseline, not perplexity alone."
+    - "Red flags: INT4 for reasoning-heavy tasks unchecked, trusting perplexity alone, quantizing sensitive layers blindly; mitigations include higher bit-width, per-channel/group scales, or protecting sensitive layers."

@@ -1,0 +1,10 @@
+id: lesson-expert-context
+title: "Expert context: papers, frontier & interview"
+material: expert-context.md
+segments:
+  - present: papers-people-and-the-frontier
+  - check: mc-canon-route-cascades
+  - present: interviewing-on-model-routing-and-fallback
+  - check: mc-interview-route-signal
+  - apply: essay-route-literature
+  - apply: essay-route-interview

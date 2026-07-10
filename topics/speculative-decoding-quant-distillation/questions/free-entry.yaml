@@ -1,0 +1,36 @@
+# Free entry (short answer)
+- id: fe-latency-lever
+  type: text_input
+  tags: [speculative, tradeoffs]
+  difficulty: 2
+  prompt: "Which lever cuts latency without changing outputs? (one word)"
+  answer:
+    regex: '^(speculative|speculative decoding|spec-?dec)$'
+    normalize: true
+
+- id: fe-memory-lever
+  type: text_input
+  tags: [quantization, tradeoffs]
+  difficulty: 2
+  prompt: "Which lever shrinks memory footprint by lowering weight precision? (one word)"
+  answer:
+    regex: '^(quantization|quantisation|quantize|quant)$'
+    normalize: true
+
+- id: fe-teacher-student
+  type: text_input
+  tags: [distillation]
+  difficulty: 2
+  prompt: "In distillation, the large model the student learns from is called the ____ (one word)."
+  answer:
+    regex: '^teacher$'
+    normalize: true
+
+- id: fe-specdec-cost
+  type: text_input
+  tags: [speculative, tradeoffs]
+  difficulty: 3
+  prompt: "What draft-model quality metric determines whether speculative decoding actually speeds things up? (a few words)"
+  answer:
+    regex: '^(acceptance( rate)?|acceptance-rate|token acceptance( rate)?)$'
+    normalize: true

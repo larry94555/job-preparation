@@ -1,0 +1,22 @@
+skill: eval-failuremodes-code
+cases:
+  - answer: >-
+      tests_passed=true. for i in 0..maxAttempts-1: v=produce(); if guards.every(g=>g(v)) return
+      {ok:true,value:v,attempts:i+1}; after the loop returns {ok:false,value:fallback,attempts:maxAttempts}.
+    expect:
+      verdict: pass
+      checks: { bounded_attempts: true, all_guards_pass: true, returns_fallback: true, reports_outcome: true }
+
+  - answer: >-
+      tests_passed happens to pass, but uses `while(true)` calling produce() until a guard passes, with
+      no maxAttempts cap — an unbounded retry loop.
+    expect:
+      verdict: fail
+      checks: { bounded_attempts: false, all_guards_pass: true, returns_fallback: false, reports_outcome: true }
+
+  - answer: >-
+      tests_passed=true. Bounded by maxAttempts and returns the fallback, but accepts an output if it
+      passes ANY guard (guards.some) rather than requiring all of them.
+    expect:
+      verdict: borderline
+      checks: { bounded_attempts: true, all_guards_pass: false, returns_fallback: true, reports_outcome: true }

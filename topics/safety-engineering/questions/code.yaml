@@ -1,0 +1,20 @@
+# Coding exercise — engine type: code (graded by tests + concept skill)
+- id: code-authz
+  type: code
+  language: typescript
+  tags: [permission]
+  difficulty: 3
+  prompt: >-
+    Implement `authorize(action, policy)`. action = `{ tool, provenance, confirmed? }` where provenance
+    is "trusted" | "untrusted"; policy = `{ highRisk }` (a list of high-risk tool names). Return
+    `{ allowed, reason? }`. Block (`{ allowed:false, reason:"untrusted_high_risk" }`) when the tool is
+    in highRisk AND provenance is "untrusted" AND not confirmed. Otherwise allow (`{ allowed:true }`).
+  starter_file: exercises/authz/starter.ts
+  test_file: exercises/authz/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-safety-code
+  concept_checks:
+    must_use: ["block untrusted + high-risk + unconfirmed", "allow trusted actions", "confirmation overrides the block"]
+    avoid_antipattern: ["blocking all high-risk regardless of provenance", "allowing untrusted high-risk actions"]

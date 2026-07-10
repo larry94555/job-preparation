@@ -1,0 +1,24 @@
+# Calibration for eval-retrievalevals-code. 'answer' summarizes the approach + evidence the grader sees.
+skill: eval-retrievalevals-code
+cases:
+  - answer: >-
+      tests_passed=true. Builds a Set from relevant, counts hits in retrieved.slice(0,k), returns
+      recall=hits/relevant.length (0 when empty), precision=hits/k, and mrr by scanning retrieved for
+      the first relevant id and returning 1/(index+1) else 0.
+    expect:
+      verdict: pass
+      checks: { correct_denominators: true, mrr_first_relevant: true, guards_zero_division: true, uses_membership: true }
+
+  - answer: >-
+      tests_passed=true, but divides both recall and precision by k (same denominator), so recall is
+      wrong; mrr and the zero-guard are fine.
+    expect:
+      verdict: fail
+      checks: { correct_denominators: false, mrr_first_relevant: true, guards_zero_division: true, uses_membership: true }
+
+  - answer: >-
+      tests_passed=true. Correct denominators and mrr, uses a Set, but returns NaN when relevant is
+      empty (no zero-guard).
+    expect:
+      verdict: borderline
+      checks: { correct_denominators: true, mrr_first_relevant: true, guards_zero_division: false, uses_membership: true }

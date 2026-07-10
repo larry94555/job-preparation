@@ -1,0 +1,15 @@
+id: lesson-batching
+title: "Static, dynamic & continuous batching"
+material: batching.md
+segments:
+  - present: static-and-dynamic-batching
+  - check: mc-static-batching-flaw
+  - check: mc-dynamic-batching
+  - check: fe-static-waste
+  - present: continuous-batching
+  - check: mc-continuous-batching-def
+  - check: mc-head-of-line
+  - check: cloze-continuous
+  - check: cloze-head-of-line
+  - check: fe-hol-name
+  - apply: essay-continuous-vs-static

@@ -1,0 +1,75 @@
+# Deep-dive — architecture judgment (code-review MCs + an L4 essay)
+
+- id: mc-review-quant-int4-activations
+  type: multiple_choice
+  tags: [methods, review]
+  difficulty: 4
+  prompt: >-
+    A PR quantizes both weights and activations to INT4 with a single per-tensor scale "to save the
+    most memory," round-to-nearest, no outlier handling. Reviewing it, what is the most important
+    problem?
+  options:
+    - { text: "Activations are dynamic and carry large outlier features that a fixed low-bit per-tensor range cannot represent; without SmoothQuant/LLM.int8()-style outlier handling (or at least higher bit-width / per-channel scales) quality collapses", correct: true }
+    - { text: "INT4 weights are the problem; weights should stay FP16 and only activations be quantized" }
+    - { text: "Nothing — quantizing everything to INT4 is the standard production default" }
+    - { text: "The only issue is speed; INT4 activations are slower than FP16 on all hardware" }
+  explanation: >-
+    Weights are static and tolerate INT4 well, but activations are computed per input and contain
+    outlier features that a coarse per-tensor low-bit range crushes. Weight-only is the forgiving
+    default; if you must quantize activations, migrate the outliers (SmoothQuant) or keep them in
+    higher precision (LLM.int8()), and use per-channel/group scales — not naive per-tensor INT4.
+
+- id: mc-review-quant-perplexity-gate
+  type: multiple_choice
+  tags: [methods, review]
+  difficulty: 4
+  prompt: >-
+    An INT4 quantization PR reports "perplexity barely moved on WikiText, shipping it." The model
+    serves reasoning and code workloads. What is the strongest objection?
+  options:
+    - { text: "Perplexity is an averaged next-token loss that can stay flat while multi-step reasoning, code, and long-context quality drop; gate the change behind real task evals (GSM8K, code, long-context) against the FP16 baseline", correct: true }
+    - { text: "Perplexity always rises sharply under INT4, so the number must be wrong" }
+    - { text: "INT4 quantization is lossless, so no eval of any kind is needed" }
+    - { text: "WikiText is fine; the only fix is to also report training-set perplexity" }
+  explanation: >-
+    Perplexity averages generic next-token loss and smooths over exactly the capabilities low-bit
+    quantization hurts first — reasoning, code, and long context. Verification means real task evals
+    against the FP16 baseline, not a single perplexity number.
+
+- id: mc-review-quant-per-tensor-int4
+  type: multiple_choice
+  tags: [methods, review]
+  difficulty: 4
+  prompt: >-
+    A design quantizes weights to INT4 with round-to-nearest and a single per-tensor scale, and quality
+    is unacceptable. Rate it and pick the best first fix.
+  options:
+    - { text: "Prototype-grade: a single per-tensor scale lets one wide-ranging channel force a coarse scale on everything; move to per-channel/per-group scales and a calibration method (GPTQ/AWQ) before raising bits", correct: true }
+    - { text: "Production-ready: per-tensor round-to-nearest is the strongest INT4 scheme available" }
+    - { text: "The only fix is to abandon INT4 entirely and serve in FP16" }
+    - { text: "Switch to quantizing activations instead of weights; that always restores quality" }
+  explanation: >-
+    Per-tensor round-to-nearest near INT4 is fragile because one outlier channel forces a coarse scale
+    on the whole tensor. Per-channel/group scales plus a calibration-based method (GPTQ's Hessian-guided
+    reconstruction or AWQ's salient-channel protection) recover most of the loss before you need to
+    spend more bits.
+
+- id: essay-quant-deep-dive
+  type: essay
+  length: long
+  tags: [methods, review]
+  difficulty: 4
+  prompt: >-
+    You are the reviewer on a quantization design for a footprint-bound serving deployment that runs
+    reasoning and long-context workloads. Write a design review: walk the levers (bit-width, what you
+    quantize, method, granularity, verification), give an explicit tradeoff for each, and state what
+    would move the design from demo-ready to production-ready. Call out at least two antipatterns and
+    the eval you would require before accepting a precision change.
+  eval_skill: eval-quant-essay
+  reference_points:
+    - "Bit-width: FP16→INT8 is ~2x and INT4 ~4x weight memory/bandwidth (decode is weight-streaming-bound), but error grows and low-bit hurts reasoning/code/long-context first."
+    - "What you quantize: weights are static and tolerate INT4; activations are dynamic with outlier features and are far harder; KV cache trades long-context quality for capacity. Weight-only is the forgiving default."
+    - "Method: GPTQ (Hessian-guided layerwise reconstruction) and AWQ (protect salient channels tied to large activations) for weights; SmoothQuant (migrate activation outliers into weights) or LLM.int8() (keep outlier features in higher precision) if activations must be quantized."
+    - "Granularity: per-tensor is cheap but one wide-ranging channel forces a coarse scale on everything; per-channel/per-group scales cost metadata but rescue outlier-heavy channels, especially near INT4."
+    - "Verification / production-readiness: gate any precision change behind real task evals (MMLU/GSM8K, code, long-context, domain) against the FP16 baseline, not perplexity alone; protect sensitive layers; name a mitigation (higher bits, per-group scales, weight-only) if it regresses."
+    - "Antipatterns: INT4 on reasoning-heavy tasks unchecked; trusting perplexity alone; per-tensor INT4 / naive activation quant with no outlier handling; quantizing sensitive layers blindly."

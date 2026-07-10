@@ -1,0 +1,45 @@
+# Missing term (cloze)
+- id: cloze-injection
+  type: text_input
+  tags: [injection]
+  difficulty: 1
+  prompt: "An attack where untrusted input smuggles instructions the model follows as if authoritative is prompt ____."
+  answer:
+    regex: '^injection$'
+    normalize: true
+
+- id: cloze-indirect
+  type: text_input
+  tags: [injection]
+  difficulty: 2
+  prompt: "Injection delivered through content the model retrieves or a tool returns, rather than typed by the user, is called ____ injection."
+  answer:
+    regex: '^indirect$'
+    normalize: true
+
+- id: cloze-boundary
+  type: text_input
+  tags: [boundary]
+  difficulty: 2
+  prompt: "The point where data crosses from a less-trusted source into a more-trusted context is a ____ boundary."
+  answer:
+    regex: '^trust$'
+    normalize: true
+
+- id: cloze-exfiltration
+  type: text_input
+  tags: [leakage]
+  difficulty: 3
+  prompt: "The unauthorized outflow of sensitive data to a destination it should never reach is data ____."
+  answer:
+    regex: '^(exfiltration|leakage)$'
+    normalize: true
+
+- id: cloze-least-privilege
+  type: text_input
+  tags: [permission]
+  difficulty: 2
+  prompt: "Granting each tool only the minimum access it needs is the principle of least ____."
+  answer:
+    regex: '^privilege$'
+    normalize: true

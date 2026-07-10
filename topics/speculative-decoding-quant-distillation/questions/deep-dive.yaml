@@ -1,0 +1,77 @@
+# Deep-dive — architecture judgment (code-review MCs + an L4 essay)
+
+- id: mc-review-spec-wrong-lever
+  type: multiple_choice
+  tags: [tradeoffs, review]
+  difficulty: 4
+  prompt: >-
+    A design doc says: "Serving cost per token is too high because the 70B model barely fits in GPU
+    memory, so we'll add speculative decoding with a small draft model." Reviewing it, what is the
+    most important problem?
+  options:
+    - { text: "It reaches for the wrong lever: speculative decoding targets latency and adds a draft model to serve, but does not shrink footprint — a memory/cost problem calls for quantization or distillation", correct: true }
+    - { text: "Speculative decoding is lossy, so it will also hurt output quality on top of the cost problem" }
+    - { text: "The draft model should be larger than the target model to raise the acceptance rate" }
+    - { text: "Nothing — speculative decoding is the standard fix for a model that barely fits in memory" }
+  explanation: >-
+    The stated goal is memory/cost, but speculative decoding attacks latency and actually adds a second
+    (draft) model to serve — it shrinks nothing. This is the classic wrong-lever antipattern; a
+    memory/cost problem calls for quantization (lower precision) or distillation (a smaller student).
+    Speculative decoding is also lossless, so the "lossy" objection is wrong.
+
+- id: mc-review-spec-acceptance
+  type: multiple_choice
+  tags: [tradeoffs, review]
+  difficulty: 4
+  prompt: >-
+    A PR enables speculative decoding and reports "the draft model is 12x smaller than the target, so
+    expect a big latency win — shipping it." No acceptance rate is reported. Rate this and pick the
+    best objection.
+  options:
+    - { text: "Demo-grade at best: the speedup is acceptance-bound, not draft-size-bound — a fast draft with low acceptance advances only a token or two per verify and can even slow things down; require an acceptance measurement on the served workload", correct: true }
+    - { text: "Production-ready: a 12x smaller draft model guarantees a proportional speedup" }
+    - { text: "The real risk is that speculative decoding changes the target model's output distribution, so it needs a quality eval" }
+    - { text: "The fix is to quantize the draft model to INT4 so it drafts faster" }
+  explanation: >-
+    Speculative-decoding speedup rides on the acceptance rate — how many drafted tokens survive
+    verification — not on how small the draft is. A fast but frequently-rejected draft wastes verify
+    passes and can be a net slowdown, and acceptance is domain-dependent, so it must be measured on the
+    real workload. Speculative decoding is lossless, so no output-quality eval is needed; a faster draft
+    does not fix low acceptance.
+
+- id: mc-review-spec-stack-noeval
+  type: multiple_choice
+  tags: [tradeoffs, review]
+  difficulty: 4
+  prompt: >-
+    A team stacks the levers as distill -> quantize (INT4) -> speculate and reports "perplexity looks
+    fine end to end, shipping the whole stack at once." What is the strongest objection?
+  options:
+    - { text: "Two of the three stages are lossy and their errors compound, so a single end-to-end perplexity check can hide a real task regression — gate each lossy stage behind a task eval so a regression is attributable", correct: true }
+    - { text: "The stacking order is wrong; speculative decoding must always run before quantization" }
+    - { text: "Speculative decoding makes the stack lossy overall, so no eval can ever validate it" }
+    - { text: "Distillation and quantization cannot be combined on the same model" }
+  explanation: >-
+    Distillation and INT4 quantization are both lossy and their errors compound, while speculative
+    decoding is lossless. A single end-to-end perplexity check can mask a task-quality drop and cannot
+    attribute it to a stage; the fix is a task eval gating each lossy stage. The distill -> quantize ->
+    speculate order shown is the standard one, and the levers do compose.
+
+- id: essay-spec-deep-dive
+  type: essay
+  length: long
+  tags: [tradeoffs, review]
+  difficulty: 4
+  prompt: >-
+    You are the reviewer on an inference-optimization design for a latency- and cost-constrained
+    serving deployment. Write a design review: walk the levers (speculative decoding, self-speculative
+    heads, quantization, distillation), give an explicit tradeoff for each, name which are lossless vs.
+    lossy, and state what would move the design from demo-ready to production-ready. Call out at least
+    two antipatterns and the measurement or eval you would require before accepting each lossy change
+    and before trusting a speculative-decoding speedup claim.
+  eval_skill: eval-specdec-essay
+  reference_points:
+    - "Speculative decoding (and self-speculative heads like Medusa/EAGLE) targets latency and is lossless; its speedup is bounded by the acceptance rate, which is domain-dependent and must be measured on the served workload."
+    - "Quantization targets memory/cost and distillation gives a permanently smaller student; both are lossy and must be validated with a task eval, not perplexity or a short-prompt smoke test alone."
+    - "The wrong-lever antipatterns: speculative decoding for a memory problem, quantizing to 'fix' latency, distilling volatile knowledge that goes stale, or shipping speculative decoding with poor acceptance."
+    - "Production-ready means matching each lever to its goal, stacking in the distill -> quantize -> speculate order with an eval gate between lossy stages so a regression is attributable, and reporting acceptance across the domains actually served."

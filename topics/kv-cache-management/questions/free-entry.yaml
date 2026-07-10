@@ -1,0 +1,36 @@
+# Free entry (short answer)
+- id: fe-kv-scales-with
+  type: text_input
+  tags: [sizing]
+  difficulty: 2
+  prompt: "Holding the model fixed, KV cache size for a request grows with what property of the request? (one term)"
+  answer:
+    regex: '^(sequence length|seq(uence)? len(gth)?|context length|number of tokens|token count|tokens|length)$'
+    normalize: true
+
+- id: fe-memory-consumers
+  type: text_input
+  tags: [memory]
+  difficulty: 3
+  prompt: "Besides the KV cache, name one of the other major consumers of GPU memory during serving. (one term)"
+  answer:
+    regex: '^(weights|model weights|parameters|params|activations|activation memory)$'
+    normalize: true
+
+- id: fe-paging-analogy
+  type: text_input
+  tags: [paging]
+  difficulty: 3
+  prompt: "Paged attention borrows which classic operating-systems idea for managing memory in fixed blocks? (one or two words)"
+  answer:
+    regex: '^(paging|virtual memory|pages|page table|demand paging)$'
+    normalize: true
+
+- id: fe-eviction-strategies
+  type: text_input
+  tags: [eviction]
+  difficulty: 3
+  prompt: "Name one of the two standard ways to reclaim a preempted sequence's KV. (one word)"
+  answer:
+    regex: '^(recompute|recomputation|swap|swapping|offload)$'
+    normalize: true

@@ -1,0 +1,40 @@
+- id: mc-confused-deputy-build
+  type: multiple_choice
+  tags: [permission]
+  difficulty: 3
+  prompt: "The confused-deputy risk in an agent is:"
+  options:
+    - { text: "Untrusted content tricking the agent into a high-risk action using the agent's privileges", correct: true }
+    - { text: "The model running out of context tokens" }
+    - { text: "Two users sharing one cache entry" }
+    - { text: "A tool call with slightly wrong arguments" }
+  explanation: "Indirect injection: an instruction hidden in untrusted content makes the privileged agent act — the confused deputy."
+
+- id: mc-authz-rule
+  type: multiple_choice
+  tags: [permission]
+  difficulty: 3
+  prompt: "A provenance-aware authorization layer blocks an action when:"
+  options:
+    - { text: "The tool is high-risk AND the request came from untrusted content AND isn't independently confirmed", correct: true }
+    - { text: "The tool is read-only" }
+    - { text: "The action came from a trusted user request" }
+    - { text: "Any tool is used more than once" }
+  explanation: "Only untrusted + high-risk + unconfirmed is blocked; trusted high-risk and untrusted low-risk are allowed, and confirmation overrides."
+
+- id: essay-defense-in-depth
+  type: essay
+  length: long
+  tags: [permission]
+  difficulty: 4
+  prompt: >-
+    Project: design defense-in-depth for an agent that reads untrusted web content and can send email.
+    Cover prompt-injection defenses, provenance/trust boundaries, permissioning and least privilege,
+    egress control, and the confused-deputy problem. Include a short test plan.
+  eval_skill: eval-safety-essay
+  reference_points:
+    - "Direct vs. indirect injection; input fencing/provenance tags; no single mitigation suffices."
+    - "Trust boundaries: track provenance; block untrusted-origin high-risk actions."
+    - "Least privilege for tools; confirmation gates for destructive actions; egress control."
+    - "Confused deputy: untrusted content must not trigger privileged actions unconfirmed."
+    - "Test plan: an indirect-injection attempt is blocked; a legitimate trusted call is allowed."

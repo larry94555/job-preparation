@@ -1,0 +1,19 @@
+id: lesson-metrics
+title: "Retrieval metrics: recall@k, precision@k, MRR"
+material: metrics.md
+segments:
+  - present: why-measure-retrieval-on-its-own
+  - check: mc-why-retrieval-evals
+  - present: recallk-precisionk-and-mrr
+  - check: mc-recall-at-k-def
+  - check: mc-precision-at-k-def
+  - check: mc-recall-precision-tradeoff
+  - check: mc-mrr-def
+  - check: cloze-recall
+  - check: cloze-precision
+  - check: cloze-mrr
+  - check: num-recall-at-k-decimal
+  - check: num-recall-numerator
+  - check: fe-metric-first-hit
+  - check: fe-low-recall-fix
+  - apply: essay-metrics-choice

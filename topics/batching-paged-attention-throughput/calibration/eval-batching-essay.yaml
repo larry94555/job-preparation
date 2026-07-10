@@ -1,0 +1,33 @@
+# Calibration for eval-batching-essay (exemplars target essay-continuous-vs-static).
+skill: eval-batching-essay
+cases:
+  - answer: >-
+      Continuous batching fixes this. With static batching the whole batch runs until the longest
+      request finishes, so a short request is stuck behind a long one — head-of-line blocking that
+      leaves the GPU slot idle. Continuous (in-flight) batching schedules at the iteration level:
+      the moment a request emits its end-of-sequence token it leaves the batch and a queued request
+      takes its slot on the next step. Slots free up per token step instead of per batch, so short
+      requests stop waiting for the longest one, occupancy stays high, and both short-request latency
+      and overall throughput improve.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  - answer: "Just buy a bigger GPU and everything gets faster."
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  - answer: >-
+      Continuous batching is better because it doesn't make the short requests wait as long for the
+      long ones, so things run more smoothly.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
+
+  - answer: >-
+      Continuous batching waits until every request in the batch has finished and then starts a new
+      batch all at once, which is why the short requests come back faster.
+    expect:
+      verdict: fail
+      checks: { technically_correct: false }

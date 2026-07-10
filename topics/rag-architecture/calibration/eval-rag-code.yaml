@@ -1,0 +1,23 @@
+skill: eval-rag-code
+cases:
+  - answer: >-
+      tests_passed=true. For each list, adds 1/(k + (index+1)) to a Map keyed by id, summing across
+      all lists; returns entries sorted by score desc with id-asc tie-break. Items in only one list
+      still appear.
+    expect:
+      verdict: pass
+      checks: { rrf_formula: true, sums_across_lists: true, includes_partial: true, sorted_descending: true }
+
+  - answer: >-
+      tests_passed=true, but uses 1/rank (ignores k) as the contribution, though it sums across lists
+      and sorts descending correctly.
+    expect:
+      verdict: fail
+      checks: { rrf_formula: false, sums_across_lists: true, includes_partial: true, sorted_descending: true }
+
+  - answer: >-
+      tests_passed=true. Correct 1/(k+rank) and descending sort, but only keeps ids that appear in the
+      FIRST list, dropping items unique to later lists.
+    expect:
+      verdict: borderline
+      checks: { rrf_formula: true, sums_across_lists: true, includes_partial: false, sorted_descending: true }

@@ -1,0 +1,16 @@
+id: lesson-golden
+title: "Golden sets & regression gates"
+material: golden-and-regression.md
+segments:
+  - present: why-evals-are-the-core-discipline
+  - check: mc-why-evals
+  - check: mc-antipattern-vibes
+  - present: golden-sets-and-regression-gates
+  - check: mc-golden-set
+  - check: cloze-golden-set
+  - check: mc-regression-gate
+  - check: cloze-regression
+  - check: mc-overfit-eval
+  - check: fe-golden-source
+  - check: fe-regression-frequency
+  - apply: essay-why-evals

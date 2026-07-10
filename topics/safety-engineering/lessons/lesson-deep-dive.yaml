@@ -1,0 +1,13 @@
+id: lesson-deep-dive
+title: "Architecture & tradeoffs: reviewing a safety-engineering design"
+material: deep-dive.md
+segments:
+  - present: the-safety-engineering-design-space
+  - present: a-tradeoff-table-for-safety-engineering
+  - check: mc-review-safety-single-filter
+  - check: mc-review-safety-tool-content
+  - present: common-sota-and-antipattern
+  - check: mc-review-safety-egress
+  - present: scaling-performance-and-the-token-budget
+  - present: reviewing-a-safety-engineering-design
+  - apply: essay-safety-deep-dive

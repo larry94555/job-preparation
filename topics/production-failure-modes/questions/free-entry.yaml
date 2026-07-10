@@ -1,0 +1,36 @@
+# Free entry (short answer)
+- id: fe-name-failure
+  type: text_input
+  tags: [failures]
+  difficulty: 2
+  prompt: "Name one classic LLM-system production failure mode. (a few words)"
+  answer:
+    regex: '^(hallucinated tool calls?|malformed (json|output)|stale retrieval|runaway agents?|silent (eval )?regressions?|hallucination|silent failures?)$'
+    normalize: true
+
+- id: fe-repair-pattern
+  type: text_input
+  tags: [mitigation]
+  difficulty: 3
+  prompt: "The three-step pattern for handling malformed model output is validate, ____, fallback. (one word)"
+  answer:
+    regex: '^(repair|re-?ask|retry|reprompt|re-?prompt)$'
+    normalize: true
+
+- id: fe-agent-control
+  type: text_input
+  tags: [mitigation]
+  difficulty: 3
+  prompt: "Besides a budget, name the control that halts an agent stuck repeating the same states. (a few words)"
+  answer:
+    regex: '^(loop detection|cycle detection|loop( |-)?guard|repeat detection)$'
+    normalize: true
+
+- id: fe-ci-gate
+  type: text_input
+  tags: [prevention]
+  difficulty: 3
+  prompt: "What CI mechanism blocks a merge when scores on a fixed set drop below a threshold? (a few words)"
+  answer:
+    regex: '^(eval gate|ci eval gate|evaluation gate|eval gates)$'
+    normalize: true

@@ -1,0 +1,18 @@
+sections:
+  - id: sec-prefix
+    title: "Prefix caching: mechanics & prompt structuring"
+    lessons: [lesson-two-caches, lesson-prefix-mechanics, lesson-expert-context]
+    assessment:
+      title: "Section 1 — Prefix caching"
+      from_tags: [prefix]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-semantic
+    title: "Semantic caching: thresholds & tradeoffs"
+    lessons: [lesson-semantic-thresholds, lesson-build-semantic-cache, lesson-deep-dive]
+    assessment:
+      title: "Section 2 — Semantic caching & tradeoffs"
+      from_tags: [semantic, tradeoffs]
+      count: 5
+      pass_threshold: 0.8

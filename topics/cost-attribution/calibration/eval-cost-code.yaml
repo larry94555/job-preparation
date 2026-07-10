@@ -1,0 +1,22 @@
+skill: eval-cost-code
+cases:
+  - answer: >-
+      tests_passed=true. Groups records into byFeature, sums cost and counts success===true per
+      feature, sets costPerSuccess = successes>0 ? cost/successes : null, and total = sum of all costs.
+    expect:
+      verdict: pass
+      checks: { per_success_uses_successes: true, zero_guard: true, groups_by_feature: true, total_correct: true }
+
+  - answer: >-
+      tests_passed=true, but computes costPerSuccess as cost/records.length (per request) instead of
+      per success; grouping and total are correct.
+    expect:
+      verdict: fail
+      checks: { per_success_uses_successes: false, zero_guard: true, groups_by_feature: true, total_correct: true }
+
+  - answer: >-
+      tests_passed=true. Divides by successes and groups correctly, but returns NaN when a feature has
+      zero successes (no guard).
+    expect:
+      verdict: borderline
+      checks: { per_success_uses_successes: true, zero_guard: false, groups_by_feature: true, total_correct: true }

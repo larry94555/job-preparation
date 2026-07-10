@@ -1,0 +1,14 @@
+id: lesson-deep-dive
+title: "Architecture & tradeoffs: reviewing a caching design"
+material: deep-dive.md
+segments:
+  - present: the-prompt-vs-semantic-caching-design-space
+  - present: a-tradeoff-table-for-prompt-vs-semantic-caching
+  - check: mc-review-cache-timestamp-prefix
+  - present: common-sota-and-antipattern
+  - check: mc-review-cache-semantic-highstakes
+  - present: scaling-performance-and-the-token-budget
+  - check: mc-review-cache-threshold-noeval
+  - present: reviewing-a-prompt-vs-semantic-caching-design
+  - apply: essay-cache-deep-dive
+  - apply: debug-cache-semantic

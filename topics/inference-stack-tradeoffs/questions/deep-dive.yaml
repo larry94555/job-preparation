@@ -1,0 +1,78 @@
+# Deep-dive — architecture judgment (code-review MCs + an L4 essay)
+
+- id: mc-review-ist-free-lunch
+  type: multiple_choice
+  tags: [tradeoffs, review]
+  difficulty: 4
+  prompt: >-
+    A design doc says: "We turned on aggressive continuous batching, so serving is now just faster and
+    cheaper across the board." Reviewing it, what is the most important problem?
+  options:
+    - { text: "It is a 'free lunch' claim: continuous batching buys throughput and lower cost-per-token but requests wait for the batch to fill, so tail (p99) latency rises — an unnamed, unmeasured axis is paying for the win", correct: true }
+    - { text: "Continuous batching cannot lower cost-per-token, so the doc is simply wrong about the cost claim" }
+    - { text: "The real issue is quality: batching always degrades output quality" }
+    - { text: "Nothing — amortizing fixed GPU work across requests genuinely improves every axis at once" }
+  explanation: >-
+    The axes are coupled and there is no free lunch. Continuous batching amortizes fixed GPU work, so
+    throughput and cost-per-token improve, but a request may wait for the batch to fill, pushing
+    per-request and especially tail latency up. "Faster and cheaper across the board" is the classic
+    single-metric / free-lunch red flag: the latency axis is unmeasured and may breach its SLO.
+
+- id: mc-review-ist-single-metric
+  type: multiple_choice
+  tags: [tradeoffs, review]
+  difficulty: 4
+  prompt: >-
+    A stack was tuned to minimize cost-per-token: the team picked the cheapest config that maxed GPU
+    utilization, with no TTFT/TPOT/p99, availability, or quality targets written down. Rate this
+    approach and pick the best fix.
+  options:
+    - { text: "Prototype-grade: it optimizes a single metric before any SLOs exist, so an unmeasured axis (latency or quality) can silently blow its limit — set SLOs first, then minimize cost within that acceptable region", correct: true }
+    - { text: "Production-ready: minimizing cost-per-token is the correct primary objective for any serving stack" }
+    - { text: "Fine as-is, but also minimize latency separately so both numbers are as low as possible" }
+    - { text: "The problem is only hardware; move to a bigger GPU and the cost objective becomes safe" }
+  explanation: >-
+    Optimizing one metric before SLOs are set is premature single-metric optimization: the cheapest,
+    highest-utilization config can quietly miss a latency SLO or degrade quality. The discipline is
+    SLO-anchored — fix the latency/quality/cost/reliability targets first, then choose the cheapest
+    config that still satisfies all of them. Minimizing latency "as well" just chases two numbers in a
+    vacuum; a bigger GPU changes cost but not the missing constraints.
+
+- id: mc-review-ist-quant-noeval
+  type: multiple_choice
+  tags: [tradeoffs, review]
+  difficulty: 4
+  prompt: >-
+    A PR quantizes the served model to INT4 to cut cost and adds a FrugalGPT-style cascade that routes
+    easy requests to a small model, reporting "cost dropped 40%, shipping it" with no quality
+    measurement. What is the strongest objection?
+  options:
+    - { text: "Both levers trade cost against quality — INT4 by reduced precision and the cascade by routing accuracy — so the cost win must be gated behind a quality eval on the real workload, not shipped on the cost number alone", correct: true }
+    - { text: "INT4 quantization is never acceptable in production; only FP16 preserves quality" }
+    - { text: "A cost cascade cannot reduce cost, so the reported 40% must be a measurement error" }
+    - { text: "The only problem is latency; quality is unaffected by quantization or routing" }
+  explanation: >-
+    The cost win is real but it is a trade, not a free lunch: INT4 can degrade quality by an amount you
+    must measure, and a difficulty-based cascade degrades quality whenever it misroutes a hard request
+    to the cheap model. Shipping on the cost number with no quality eval is exactly where a silent
+    regression slips through. The fix is a quality-floor eval gate on the real workload, not banning the
+    levers.
+
+- id: essay-ist-deep-dive
+  type: essay
+  length: long
+  tags: [tradeoffs, review]
+  difficulty: 4
+  prompt: >-
+    You are the reviewer on an inference-stack design for a multi-tenant LLM feature on fixed hardware.
+    Write a design review: anchor on SLOs and decompose the latency budget, walk the levers (batching,
+    KV/paging, phase scheduling, precision, routing/fallback), give an explicit tradeoff for each
+    against the four axes (latency, quality, cost, reliability), and state what would move the design
+    from demo-ready to production-ready. Call out at least two antipatterns and the eval you would
+    require before accepting a precision or routing change.
+  eval_skill: eval-tradeoffs-essay
+  reference_points:
+    - "Anchor on SLOs first (TTFT/TPOT/p99, availability, quality floor) and decompose the end-to-end latency budget into additive per-stage sub-budgets (network + queue + retrieval + prefill + decode), so each stage has a concrete target and you optimize within the acceptable region."
+    - "Each lever has a dominant axis and a bill: continuous batching (Orca) buys throughput/cost at tail latency; paged KV (vLLM) buys concurrency at allocator complexity and is still KV-capped on long contexts; chunked prefill (Sarathi) balances prefill/decode to meet separate TTFT/TPOT SLOs; quantization buys cost/memory/latency at a quality risk; a FrugalGPT cascade and fallback buy cost/reliability at routing-accuracy and redundancy cost."
+    - "Antipatterns to call out: single-metric optimization, 'free lunch' claims with no named tradeoff, premature optimization before SLOs exist, and ignoring the reliability cost of added levers."
+    - "Demo-ready → production-ready: name every lever's bill, gate any precision (INT8/INT4) or routing (cascade) change behind a quality eval on the real workload, and treat reliability as a first-class SLO with a stated degraded-mode/fallback path — optimizing all four axes jointly rather than one in isolation."

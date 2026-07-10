@@ -1,0 +1,10 @@
+id: lesson-expert-context
+title: "Expert context: papers, frontier & interview"
+material: expert-context.md
+segments:
+  - present: papers-people-and-the-frontier
+  - check: mc-canon-paged-attention
+  - present: interviewing-on-kv-cache-management
+  - check: mc-interview-kv-signal
+  - apply: essay-kv-literature
+  - apply: essay-kv-interview

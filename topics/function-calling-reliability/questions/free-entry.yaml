@@ -1,0 +1,36 @@
+# Free entry (short answer)
+- id: fe-unknown-tool
+  type: text_input
+  tags: [validation]
+  difficulty: 2
+  prompt: "When the model calls a tool that does not exist in the registry, what should the harness do with the call? (one word)"
+  answer:
+    regex: '^(reject|refuse|deny|error|drop)$'
+    normalize: true
+
+- id: fe-invalid-args-feedback
+  type: text_input
+  tags: [validation]
+  difficulty: 3
+  prompt: "After rejecting a call with invalid arguments, what should the harness return so the model can fix it?"
+  answer:
+    regex: '^(a )?(structured |model-facing |validation )?error( message)?$'
+    normalize: true
+
+- id: fe-retry-risk
+  type: text_input
+  tags: [idempotency]
+  difficulty: 3
+  prompt: "Retrying a non-idempotent charge tool after a timeout risks what to the customer? (one word or short phrase)"
+  answer:
+    regex: '^(a )?(double|duplicate)([ -](charge|charging|payment|effect|call))?$'
+    normalize: true
+
+- id: fe-safe-retry
+  type: text_input
+  tags: [idempotency]
+  difficulty: 2
+  prompt: "Name the property a mutating tool needs so a repeated call has no extra effect."
+  answer:
+    regex: '^idempoten(t|cy)$'
+    normalize: true

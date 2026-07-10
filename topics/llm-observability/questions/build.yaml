@@ -1,0 +1,40 @@
+- id: mc-rollup-total
+  type: multiple_choice
+  tags: [signals]
+  difficulty: 2
+  prompt: "The total tokens for a span subtree equals:"
+  options:
+    - { text: "The span's own tokens plus the rolled-up totals of all its children (recursively)", correct: true }
+    - { text: "Only the span's own tokens" }
+    - { text: "Only the children's tokens" }
+    - { text: "The number of child spans" }
+  explanation: "Rollup is recursive: own tokens + each child's rollup. A leaf totals just its own tokens."
+
+- id: mc-why-span-tree
+  type: multiple_choice
+  tags: [signals]
+  difficulty: 3
+  prompt: "Why trace multi-step calls as a span tree instead of one request-level counter?"
+  options:
+    - { text: "To attribute tokens/latency/cost to each step, not just the whole request", correct: true }
+    - { text: "Because a counter can't store integers" }
+    - { text: "To make the trace smaller" }
+    - { text: "Because spans are required by JSON" }
+  explanation: "A flat counter hides where cost went; the span tree attributes it per step (which tool, which sub-agent), then rolls up."
+
+- id: essay-observability-design
+  type: essay
+  length: long
+  tags: [signals]
+  difficulty: 4
+  prompt: >-
+    Project: design observability for a multi-step agent. Cover traces and spans (with correlation
+    ids), the core signals (tokens, latency TTFT/TPOT, errors/retries, cost), drift detection, and
+    capture/replay with privacy/redaction. Include a short test plan.
+  eval_skill: eval-observability-essay
+  reference_points:
+    - "Traces/spans over the call graph with correlation ids; roll up tokens/latency/cost per step."
+    - "Core signals: tokens, latency (TTFT/TPOT), errors/retries, cost."
+    - "Drift detection: eval-score/distribution trends and canary comparisons."
+    - "Capture/replay with sampling and PII redaction."
+    - "Test plan: verify parent/child rollups, correlation, and redaction."

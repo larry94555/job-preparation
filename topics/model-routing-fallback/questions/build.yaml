@@ -1,0 +1,40 @@
+- id: mc-fallback-returns
+  type: multiple_choice
+  tags: [fallback]
+  difficulty: 2
+  prompt: "In a fallback chain, the router returns:"
+  options:
+    - { text: "The result of the first provider that succeeds, trying them in order", correct: true }
+    - { text: "The result of the last provider in the list" }
+    - { text: "A merge of every provider's output" }
+    - { text: "Whichever provider is cheapest, regardless of success" }
+  explanation: "Try providers in order; return the first success; if all fail, return a structured all_failed rather than crashing."
+
+- id: mc-breaker-opens
+  type: multiple_choice
+  tags: [fallback]
+  difficulty: 3
+  prompt: "A circuit breaker opens (starts skipping a provider) when:"
+  options:
+    - { text: "The provider fails a threshold number of consecutive times", correct: true }
+    - { text: "The provider succeeds too often" }
+    - { text: "The request is larger than a token limit" }
+    - { text: "A different provider is cheaper" }
+  explanation: "Consecutive failures reaching the threshold open the breaker so the router skips the dead provider until it recovers; a success resets it."
+
+- id: essay-routing-policy
+  type: essay
+  length: long
+  tags: [fallback]
+  difficulty: 4
+  prompt: >-
+    Project: design a model-routing and fallback policy for a production assistant. Cover routing
+    signals (difficulty / cost / latency), the fallback cascade, circuit breakers + hedged requests +
+    backoff, and an honest degraded-mode UX (no silent model substitution). Include a short test plan.
+  eval_skill: eval-routing-essay
+  reference_points:
+    - "Routing signals: task difficulty, cost/latency budget, quality need, context length."
+    - "Fallback cascade: cheap→strong or primary→backup; return which provider served the request."
+    - "Resilience: circuit breakers, hedged requests, retries with backoff/jitter."
+    - "Degraded-mode UX: honest messaging, partial functionality — never a silent swap."
+    - "Test plan: timeout/error/breaker-open paths, and a check that the served provider is reported."

@@ -1,0 +1,14 @@
+id: lesson-scheduling-paging
+title: "Iteration-level scheduling & paged attention"
+material: scheduling-paging.md
+segments:
+  - present: iteration-level-scheduling
+  - check: mc-iteration-scheduling
+  - check: cloze-iteration
+  - present: paged-attention-as-the-enabler
+  - check: mc-paged-attention-what
+  - check: mc-paged-attention-why
+  - check: mc-paged-enables-continuous
+  - check: cloze-paged
+  - check: fe-paged-benefit
+  - apply: essay-paged-enabler

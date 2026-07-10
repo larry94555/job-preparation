@@ -1,0 +1,14 @@
+id: lesson-deep-dive
+title: "Architecture & tradeoffs: reviewing a KV design"
+material: deep-dive.md
+segments:
+  - present: the-kv-cache-design-space
+  - present: a-tradeoff-table-for-kv-strategies
+  - check: mc-review-kv-capacity
+  - check: mc-review-kv-contiguous
+  - present: common-sota-and-antipattern
+  - check: mc-review-kv-quant-noeval
+  - present: scaling-performance-and-the-token-budget
+  - present: reviewing-a-kv-design-in-an-interview
+  - apply: debug-kv-allocator
+  - apply: essay-kv-deep-dive

@@ -1,0 +1,37 @@
+# Essay
+- id: essay-when-rag
+  type: essay
+  length: short
+  tags: [pipeline]
+  difficulty: 3
+  prompt: "A teammate wants to fine-tune the model so it 'knows' the company's constantly-changing policy docs. Explain when RAG is the better choice and why."
+  eval_skill: eval-rag-essay
+  reference_points:
+    - "RAG retrieves relevant docs at query time and grounds generation in them, so it handles private and frequently-changing data without retraining."
+    - "Fine-tuning bakes knowledge into weights; updating it means re-training, and it teaches behavior more than facts."
+    - "Because the policy docs change constantly and must be current and citable, retrieval keeps answers fresh and lets you point to sources."
+
+- id: essay-chunking
+  type: essay
+  length: short
+  tags: [chunking]
+  difficulty: 3
+  prompt: "Explain the chunk-size tradeoff and describe a chunking strategy that avoids the common pitfalls of naive fixed-size splitting."
+  eval_skill: eval-rag-essay
+  reference_points:
+    - "Larger chunks carry more context but dilute embedding precision; smaller chunks are precise but can strand a fact from its surrounding context."
+    - "Naive fixed-size splitting cuts through sentences, tables, and structure, producing incoherent chunks."
+    - "Structure-aware chunking on headings/paragraphs, with a small overlap and useful metadata, keeps chunks coherent and boundary facts recoverable."
+
+- id: essay-hybrid-rerank
+  type: essay
+  length: long
+  tags: [retrieval, reranking]
+  difficulty: 4
+  prompt: "Design a retrieval stage that combines dense and sparse search with reranking. Explain what each part contributes and how you manage the latency of reranking."
+  eval_skill: eval-rag-essay
+  reference_points:
+    - "Dense (embedding) retrieval captures semantic/paraphrase similarity; sparse (BM25) retrieval catches exact keywords, IDs, and rare terms."
+    - "Hybrid search fuses both result lists — e.g. Reciprocal Rank Fusion (RRF) combining by rank position rather than incomparable raw scores."
+    - "A cross-encoder reranker jointly scores query–document pairs for higher-precision ordering than single-vector comparison."
+    - "Manage latency by reranking only a small first-stage candidate set (e.g. top-k retrieved cheaply), not the whole corpus, trading a little recall breadth for precision."

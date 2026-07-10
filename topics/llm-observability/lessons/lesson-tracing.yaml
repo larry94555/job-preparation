@@ -1,0 +1,13 @@
+id: lesson-tracing
+title: "Traces & spans for multi-step LLM calls"
+material: tracing.md
+segments:
+  - present: why-request-metrics-are-not-enough
+  - check: mc-why-trace
+  - present: traces-spans-and-correlation-ids
+  - check: mc-trace-vs-span
+  - check: mc-correlation-id
+  - check: cloze-span
+  - check: cloze-correlation
+  - check: fe-trace-unit
+  - apply: essay-why-traces

@@ -1,0 +1,45 @@
+# Missing term (cloze)
+- id: cloze-prefill
+  type: text_input
+  tags: [phases]
+  difficulty: 1
+  prompt: "The phase that processes the entire prompt in one parallel forward pass to build the KV cache is called ____."
+  answer:
+    regex: '^prefill$'
+    normalize: true
+
+- id: cloze-decode
+  type: text_input
+  tags: [phases]
+  difficulty: 1
+  prompt: "The phase that generates output tokens one at a time, autoregressively, is called ____."
+  answer:
+    regex: '^decode$'
+    normalize: true
+
+- id: cloze-ttft
+  type: text_input
+  tags: [metrics]
+  difficulty: 2
+  prompt: "The metric for how long until the model emits its first output token is abbreviated ____."
+  answer:
+    regex: '^ttft$'
+    normalize: true
+
+- id: cloze-tpot
+  type: text_input
+  tags: [metrics]
+  difficulty: 2
+  prompt: "The steady-state time between successive output tokens is abbreviated ____ (the metric set by the decode phase)."
+  answer:
+    regex: '^tpot$'
+    normalize: true
+
+- id: cloze-bandwidth
+  type: text_input
+  tags: [phases]
+  difficulty: 3
+  prompt: "Because decode reads the full weights to produce a single token, it is limited by memory ____ rather than compute."
+  answer:
+    regex: '^bandwidth$'
+    normalize: true

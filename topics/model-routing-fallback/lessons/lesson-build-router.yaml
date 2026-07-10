@@ -1,0 +1,10 @@
+id: lesson-build-router
+title: "Build it: a router with fallback & a breaker"
+material: build-router.md
+segments:
+  - present: the-fallback-chain
+  - check: mc-fallback-returns
+  - present: circuit-breaker
+  - check: mc-breaker-opens
+  - apply: code-router
+  - apply: essay-routing-policy

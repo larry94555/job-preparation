@@ -1,0 +1,36 @@
+# Free entry (short answer)
+- id: fe-int4-savings
+  type: text_input
+  tags: [formats]
+  difficulty: 2
+  prompt: "Going from FP16 to INT4 weights cuts the weight footprint by roughly what factor? (a number, e.g. 4)"
+  answer:
+    equals: "4"
+    numeric_tolerance: 0
+
+- id: fe-harder-to-quant
+  type: text_input
+  tags: [quality]
+  difficulty: 3
+  prompt: "Weights or activations — which is generally harder to quantize at low bit-width? (one word)"
+  answer:
+    regex: '^activations?$'
+    normalize: true
+
+- id: fe-name-a-method
+  type: text_input
+  tags: [methods]
+  difficulty: 2
+  prompt: "Name a post-training weight-quantization method for LLMs (one term)."
+  answer:
+    regex: '^(gptq|awq|smoothquant|llm\.?int8|bitsandbytes|k-?quants?|gguf)$'
+    normalize: true
+
+- id: fe-verify-metric
+  type: text_input
+  tags: [quality]
+  difficulty: 3
+  prompt: "Perplexity can hide quality loss, so you should also confirm quality with real task ____. (one word)"
+  answer:
+    regex: '^(evals?|evaluations?|benchmarks?|tasks?)$'
+    normalize: true

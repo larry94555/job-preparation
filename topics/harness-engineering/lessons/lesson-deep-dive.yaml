@@ -1,0 +1,13 @@
+id: lesson-deep-dive
+title: "Architecture & tradeoffs: reviewing a harness-engineering design"
+material: deep-dive.md
+segments:
+  - present: the-harness-engineering-design-space
+  - present: a-tradeoff-table-for-harness-engineering
+  - check: mc-review-harness-prompt-fix
+  - check: mc-review-harness-unbounded-loop
+  - present: common-sota-and-antipattern
+  - check: mc-review-harness-noverify
+  - present: scaling-performance-and-the-token-budget
+  - present: reviewing-a-harness-engineering-design
+  - apply: essay-harness-deep-dive

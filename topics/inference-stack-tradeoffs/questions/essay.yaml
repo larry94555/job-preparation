@@ -1,0 +1,38 @@
+# Essay
+- id: essay-no-free-lunch
+  type: essay
+  length: short
+  tags: [tradeoffs]
+  difficulty: 3
+  prompt: "A teammate proposes turning on aggressive continuous batching to 'just make serving faster and cheaper.' Explain the four-way tradeoff and why there is no free lunch here."
+  eval_skill: eval-tradeoffs-essay
+  reference_points:
+    - "Every serving lever trades among four axes — latency, quality, cost, and reliability — so a change rarely improves all of them at once."
+    - "Batching raises throughput and lowers cost-per-token by amortizing GPU work, but it raises per-request and especially tail (p99) latency because requests wait for the batch to fill."
+    - "So it is not simply 'faster and cheaper': it is cheaper and higher-throughput at the cost of latency, and may breach a latency SLO — the gain is traded, not free."
+
+- id: essay-per-layer-levers
+  type: essay
+  length: long
+  tags: [levers]
+  difficulty: 4
+  prompt: "Walk through the dominant axis for four serving levers — batching, quantization, caching, and fallback — and explain what each one gives up to get its win."
+  eval_skill: eval-tradeoffs-essay
+  reference_points:
+    - "Batching → throughput/cost win, paid for in higher per-request and tail latency (requests wait for the batch)."
+    - "Quantization → cost and memory (and often latency) win, paid for in risk to output quality from reduced precision."
+    - "Caching → latency and cost win on hits, paid for in possible staleness and invalidation/hit-rate management complexity."
+    - "Fallback (retry / backup model / second provider) → reliability and availability win, paid for in extra cost from redundancy and sometimes added latency on the retry path."
+
+- id: essay-slo-budget
+  type: essay
+  length: long
+  tags: [slos]
+  difficulty: 4
+  prompt: "You are given a 900 ms p99 end-to-end latency SLO and a 99.9% availability SLO for an LLM feature. Explain how you would anchor the design on these SLOs and decompose the latency budget across the stack."
+  eval_skill: eval-tradeoffs-essay
+  reference_points:
+    - "SLOs are the fixed constraints: you first make the design meet the p99 latency and availability targets, then minimize cost or maximize quality within that acceptable region."
+    - "Decompose the 900 ms into additive per-stage sub-budgets — e.g. network + queue/wait + retrieval + prefill (TTFT) + decode — that sum to the SLO, giving each layer a concrete target."
+    - "The availability SLO is met with reliability levers (fallback/redundancy, timeouts, retries), which cost extra and can add latency, so they must fit inside the same budgets."
+    - "Then measure per-stage p99s against their sub-budgets, find the stage that blows its budget, and apply the lever whose dominant axis fixes it while respecting the other SLOs."

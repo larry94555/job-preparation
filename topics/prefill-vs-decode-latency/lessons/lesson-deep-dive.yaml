@@ -1,0 +1,13 @@
+id: lesson-deep-dive
+title: "Architecture & tradeoffs: reviewing a prefill/decode design"
+material: deep-dive.md
+segments:
+  - present: the-prefill-vs-decode-latency-design-space
+  - present: a-tradeoff-table-for-prefill-vs-decode-latency
+  - check: mc-review-pd-single-number
+  - check: mc-review-pd-wrong-phase
+  - present: common-sota-and-antipattern
+  - check: mc-review-pd-monolithic-prefill
+  - present: scaling-performance-and-the-token-budget
+  - present: reviewing-a-prefill-vs-decode-latency-design
+  - apply: essay-pd-deep-dive

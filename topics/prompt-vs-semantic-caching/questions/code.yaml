@@ -1,0 +1,20 @@
+# Coding exercise — engine type: code (graded by tests + concept skill)
+- id: code-semantic-cache
+  type: code
+  language: typescript
+  tags: [semantic]
+  difficulty: 4
+  prompt: >-
+    Implement a `SemanticCache` class. `constructor(threshold, ttlMs)`; `set(embedding, value, now)`
+    stores an entry with timestamp `now`; `get(embedding, now)` returns the value of the most-similar
+    NON-expired entry whose COSINE similarity to `embedding` is >= threshold, else null. An entry is
+    expired when `now - storedAt > ttlMs`.
+  starter_file: exercises/semantic-cache/starter.ts
+  test_file: exercises/semantic-cache/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-caching-code
+  concept_checks:
+    must_use: ["cosine similarity (normalized dot product)", "threshold gate on the best match", "TTL expiry as a miss"]
+    avoid_antipattern: ["returning a near-miss below threshold", "serving expired entries"]

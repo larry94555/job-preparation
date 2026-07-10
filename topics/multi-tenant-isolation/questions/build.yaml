@@ -1,0 +1,40 @@
+- id: mc-tenant-blind-leak
+  type: multiple_choice
+  tags: [cache-safety]
+  difficulty: 2
+  prompt: "A cache keyed only by the request (not the tenant) will:"
+  options:
+    - { text: "Return one tenant's cached answer to another tenant on the same request — a data leak", correct: true }
+    - { text: "Simply be slower than a scoped cache" }
+    - { text: "Never produce any cache hits" }
+    - { text: "Automatically isolate tenants anyway" }
+  explanation: "Identical requests from different tenants collide on the same key, so B receives A's cached answer — a silent cross-user leak."
+
+- id: mc-isolation-fix
+  type: multiple_choice
+  tags: [cache-safety]
+  difficulty: 2
+  prompt: "The fix for cross-tenant cache leakage is to:"
+  options:
+    - { text: "Include the tenant scope in the cache key", correct: true }
+    - { text: "Lower the cache TTL" }
+    - { text: "Use a larger embedding model" }
+    - { text: "Disable caching for read-only requests" }
+  explanation: "Namespacing the key by tenant means identical keys from different tenants never collide."
+
+- id: essay-isolation-design
+  type: essay
+  length: long
+  tags: [cache-safety]
+  difficulty: 4
+  prompt: >-
+    Project: design multi-tenant isolation across caching, retrieval, and memory for a hosted LLM app.
+    Cover tenant-scoped cache keys, retrieval authorization filters / per-tenant namespaces, semantic-
+    cache leakage risks, and a test that proves no cross-tenant bleed. Include a short test plan.
+  eval_skill: eval-isolation-essay
+  reference_points:
+    - "Every cache key (prompt and semantic) includes the tenant/authz scope."
+    - "Retrieval applies an authorization filter / per-tenant partition so search can't cross tenants."
+    - "Memory and sessions are never reused across users; logs are scoped/redacted."
+    - "Cross-tenant leak test: a second tenant with an identical query gets a miss and can't retrieve tenant-1 data."
+    - "Test plan includes adversarial cross-tenant probes as a gating check."

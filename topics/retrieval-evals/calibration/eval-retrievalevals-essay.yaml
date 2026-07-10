@@ -1,0 +1,33 @@
+# Calibration for eval-retrievalevals-essay (exemplars target essay-metrics-choice).
+skill: eval-retrievalevals-essay
+cases:
+  - answer: >-
+      Track MRR (mean reciprocal rank). It averages 1/(rank of the first relevant result), so when the
+      right passage sits at rank 4 instead of rank 1 the score drops from 1.0 to 0.25 — exactly the
+      "buried but present" symptom. recall@k can't catch this: it only asks whether the relevant doc is
+      somewhere in the top-k, treating rank 1 and rank k identically, so it stays flat even as position
+      degrades. Because the problem is ordering, an order-sensitive metric is the diagnostic, and the fix
+      is usually a reranker.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  - answer: "Just use recall@k for everything, since it already measures where the result ranks in the list."
+    expect:
+      verdict: fail
+      checks: { addresses_question: true, covers_key_points: false, technically_correct: false, concrete: false }
+
+  - answer: >-
+      I'd look at MRR because it cares about how high the first good result is, whereas recall@k only
+      checks if it showed up at all.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
+
+  - answer: >-
+      Use MRR. It rewards getting the first relevant result to the top, and it's better than recall@k
+      because recall@k counts every relevant doc in the top-k twice, which is why precision goes up as
+      you add more results.
+    expect:
+      verdict: fail
+      checks: { technically_correct: false }

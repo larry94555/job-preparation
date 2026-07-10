@@ -1,0 +1,20 @@
+# Coding exercise — engine type: code (graded by tests + concept skill)
+- id: code-latency-model
+  type: code
+  language: typescript
+  tags: [optimization]
+  difficulty: 2
+  prompt: >-
+    Implement `estimateLatency(promptTokens, outputTokens, prefillRate, tpot)` returning
+    `{ ttft, decode, total }`. ttft = promptTokens / prefillRate (the prefill phase); decode =
+    outputTokens * tpot (the decode phase); total = ttft + decode. Keep the phases separate — TTFT
+    must depend only on the prompt, decode only on the output.
+  starter_file: exercises/latency-model/starter.ts
+  test_file: exercises/latency-model/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-prefill-code
+  concept_checks:
+    must_use: ["ttft from prompt/prefillRate", "decode from output*tpot", "total = ttft + decode"]
+    avoid_antipattern: ["mixing prompt and output into one rate", "TTFT depending on output length"]

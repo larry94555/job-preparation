@@ -1,0 +1,23 @@
+skill: eval-quant-code
+cases:
+  - answer: >-
+      tests_passed=true. Computes range=max-min, scale=range===0?1:range/255,
+      zeroPoint=clamp(round(-min/scale),0,255), q[i]=clamp(round(v/scale)+zeroPoint,0,255) as integers;
+      dequantize returns (q-zeroPoint)*scale.
+    expect:
+      verdict: pass
+      checks: { clamps_uint8: true, computes_scale: true, zero_range_guard: true, dequant_inverts: true }
+
+  - answer: >-
+      tests_passed=true, but does not clamp q to [0,255] — a value beyond the range yields a code like
+      300 or -5, corrupting the tensor. scale and dequant are otherwise correct.
+    expect:
+      verdict: fail
+      checks: { clamps_uint8: false, computes_scale: true, zero_range_guard: true, dequant_inverts: true }
+
+  - answer: >-
+      tests_passed=true. Clamps codes and computes scale/dequant correctly, but doesn't special-case a
+      constant tensor, so max===min gives scale 0 and NaN reconstructions.
+    expect:
+      verdict: borderline
+      checks: { clamps_uint8: true, computes_scale: true, zero_range_guard: false, dequant_inverts: true }

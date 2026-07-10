@@ -1,0 +1,13 @@
+id: lesson-metrics
+title: "TTFT vs. TPOT: mapping metrics to phases"
+material: metrics.md
+segments:
+  - present: two-metrics-one-per-phase
+  - check: mc-ttft-phase
+  - check: mc-tpot-phase
+  - check: cloze-ttft
+  - check: cloze-tpot
+  - present: how-prompt-and-output-length-move-the-metrics
+  - check: mc-longer-prompt
+  - check: fe-ttft-metric
+  - apply: essay-metrics-slo

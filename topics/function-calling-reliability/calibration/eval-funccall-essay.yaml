@@ -1,0 +1,31 @@
+# Calibration for eval-funccall-essay (exemplars target essay-idempotency-retry).
+skill: eval-funccall-essay
+cases:
+  - answer: >-
+      The danger is a duplicate effect: if the first chargeCard succeeds but the response is lost, a
+      naive retry charges the customer twice. Make the charge idempotent — the client sends an
+      idempotency key, the server records the outcome under that key on first use, and any identical
+      retry returns the stored result instead of charging again. Reads can retry freely; only writes
+      like this need the key, plus a confirmation gate for such a side-effecting tool.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  - answer: "Retries are good, so just retry the call until it works."
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, concrete: false }
+
+  - answer: >-
+      Retrying a charge can be risky, so you should make it safe to repeat and dedupe on the server
+      side somehow.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
+
+  - answer: >-
+      chargeCard is always idempotent by default, so retrying never charges twice and no key or
+      dedupe is ever needed.
+    expect:
+      verdict: fail
+      checks: { technically_correct: false }

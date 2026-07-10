@@ -1,0 +1,40 @@
+- id: mc-rank-then-fit-build
+  type: multiple_choice
+  tags: [selection]
+  difficulty: 2
+  prompt: "A budget-aware context assembler should:"
+  options:
+    - { text: "Rank sections by priority, then include them while they fit the token budget", correct: true }
+    - { text: "Concatenate every section in arrival order" }
+    - { text: "Include only the single highest-priority section" }
+    - { text: "Truncate the middle of every section to a fixed size" }
+  explanation: "Rank-then-fit spends a scarce budget on the most important tokens; blind concatenation overflows and dilutes."
+
+- id: mc-context-rot-build
+  type: multiple_choice
+  tags: [selection]
+  difficulty: 2
+  prompt: "Including every section regardless of the budget causes:"
+  options:
+    - { text: "Budget overflow and context dilution (rot) that degrades accuracy", correct: true }
+    - { text: "Faster inference with no downside" }
+    - { text: "Better attention to every token" }
+    - { text: "A larger context window" }
+  explanation: "Padding the window with low-value tokens dilutes the important ones — more context is not free."
+
+- id: essay-context-policy
+  type: essay
+  length: long
+  tags: [selection]
+  difficulty: 4
+  prompt: >-
+    Project: design a context-assembly policy for a long-running agent with tools, memory, and
+    retrieved documents. Cover ranking/selection into the budget, compression (summaries/scratchpads),
+    position effects (lost-in-the-middle), and eviction under budget pressure. Include a test plan.
+  eval_skill: eval-context-essay
+  reference_points:
+    - "Treat the window as a ranked token budget; rank then fit, don't dump everything."
+    - "Compression: summaries / rolling scratchpads to fit more signal in fewer tokens."
+    - "Position effects: place key instructions where they're attended (avoid lost-in-the-middle)."
+    - "Eviction: drop the lowest-priority content first; guard against context rot."
+    - "Test plan: budget adherence, priority ordering, and behavior when over budget."

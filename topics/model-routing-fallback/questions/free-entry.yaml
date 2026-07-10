@@ -1,0 +1,36 @@
+# Free entry (short answer)
+- id: fe-routing-signal
+  type: text_input
+  tags: [routing]
+  difficulty: 2
+  prompt: "Name one signal a router can use to decide which model handles a request. (a few words)"
+  answer:
+    regex: '^(difficulty|task difficulty|complexity|prompt length|input length|length|budget|cost budget|latency budget|required capabilit(y|ies)|capabilit(y|ies)|tool use|needs tools|vision|context (size|length))$'
+    normalize: true
+
+- id: fe-fallback-trigger
+  type: text_input
+  tags: [fallback]
+  difficulty: 2
+  prompt: "Name one condition that should trigger a fallback to another model or provider. (a few words)"
+  answer:
+    regex: '^(timeout|timeouts|time out|rate limit|rate-?limited|429|5xx|server error|5xx errors|error|errors|outage|provider down|down|unavailable|over budget|overloaded)$'
+    normalize: true
+
+- id: fe-hedge-cost
+  type: text_input
+  tags: [resilience]
+  difficulty: 3
+  prompt: "What is the main cost of hedging a request to a second model? (a few words)"
+  answer:
+    regex: '^(extra (cost|spend|tokens|compute|requests)|duplicate (cost|work|requests)|more cost|higher cost|cost|wasted (compute|tokens|work)|double (cost|spend|work))$'
+    normalize: true
+
+- id: fe-honest-degrade
+  type: text_input
+  tags: [degraded]
+  difficulty: 3
+  prompt: "Name one honest way to signal to the user that a fallback/degraded path was used. (a few words)"
+  answer:
+    regex: '^(banner|notice|notification|warning|message|disclaimer|lower(ed)? confidence|confidence indicator|disable(d)? (a )?feature|disabled features|status indicator|badge|label)$'
+    normalize: true

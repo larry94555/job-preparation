@@ -1,0 +1,18 @@
+sections:
+  - id: sec-contract
+    title: "Contracts & validation"
+    lessons: [lesson-contract, lesson-validation, lesson-expert-context, lesson-deep-dive]
+    assessment:
+      title: "Section 1 — Contracts & validation"
+      from_tags: [contract, validation]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-idempotency
+    title: "Idempotency & safe retries"
+    lessons: [lesson-idempotency, lesson-build-dispatcher]
+    assessment:
+      title: "Section 2 — Idempotency & safe retries"
+      from_tags: [idempotency]
+      count: 5
+      pass_threshold: 0.8

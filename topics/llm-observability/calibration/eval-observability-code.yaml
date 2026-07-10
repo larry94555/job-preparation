@@ -1,0 +1,22 @@
+skill: eval-observability-code
+cases:
+  - answer: >-
+      tests_passed=true. Returns span.tokens + span.children.reduce((s,c)=>s+rollupTokens(c),0) —
+      recursive, includes own tokens, base case for leaves.
+    expect:
+      verdict: pass
+      checks: { recurses_children: true, includes_own_tokens: true, sums_all_depths: true, handles_leaf: true }
+
+  - answer: >-
+      tests_passed on shallow cases, but only sums the direct children (span.tokens +
+      sum(child.tokens)) without recursing, so grandchildren are ignored.
+    expect:
+      verdict: fail
+      checks: { recurses_children: false, includes_own_tokens: true, sums_all_depths: false, handles_leaf: true }
+
+  - answer: >-
+      tests_passed for subtrees, but forgets to add the span's own tokens — it returns only the sum of
+      the children's rollups.
+    expect:
+      verdict: borderline
+      checks: { recurses_children: true, includes_own_tokens: false, sums_all_depths: true, handles_leaf: true }

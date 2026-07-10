@@ -1,0 +1,13 @@
+id: lesson-injection
+title: "Prompt injection: direct & indirect"
+material: injection.md
+segments:
+  - present: prompt-injection-direct-and-indirect
+  - check: mc-injection-def
+  - check: mc-direct-vs-indirect
+  - check: cloze-injection
+  - check: cloze-indirect
+  - present: why-filtering-alone-fails
+  - check: mc-filtering-fails
+  - check: fe-defense-depth
+  - apply: essay-injection-defense

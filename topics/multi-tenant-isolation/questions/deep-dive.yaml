@@ -1,0 +1,99 @@
+# Deep-dive — architecture judgment (code-review MCs + an L4 essay)
+
+- id: mc-review-mti-cache-key
+  type: multiple_choice
+  tags: [isolation, review]
+  difficulty: 4
+  prompt: >-
+    A design doc adds a shared response cache keyed on `sha256(prompt_text)` to cut cost across all
+    tenants, noting "identical prompts are rare, so collisions are unlikely." Reviewing it, what is
+    the most important problem?
+  options:
+    - { text: "The key is tenant-blind: when two tenants send the same (or, on a semantic cache, similar) request, one is served the other's cached answer — a cross-tenant leak and a poisoning vector; fold tenant/user into the key", correct: true }
+    - { text: "SHA-256 is too slow for a cache key; use a faster non-cryptographic hash" }
+    - { text: "Nothing — because identical prompts are rare, cross-tenant hits effectively never happen" }
+    - { text: "The cache should be removed entirely; caching is incompatible with multi-tenancy" }
+  explanation: >-
+    A prompt-only key ignores tenant identity, so identical requests from different tenants collide and
+    B is served A's answer — and an attacker can seed an entry a victim will later read. The fix is to
+    namespace the key by tenant (and user) scope, not to drop caching or change the hash function.
+
+- id: mc-review-mti-postfilter
+  type: multiple_choice
+  tags: [isolation, review]
+  difficulty: 4
+  prompt: >-
+    A shared vector index holds many tenants' documents. The retrieval code runs an unscoped top-k
+    search, then drops rows whose `tenant_id` != caller. Rate this design and pick the best fix.
+  options:
+    - { text: "Prototype-grade: post-filtering an unscoped search fetches other tenants' data and can leave too few valid rows once they're stripped; pre-filter the search to the tenant's namespace/authorized set", correct: true }
+    - { text: "Production-ready: filtering out the wrong tenant_id after the search fully guarantees isolation" }
+    - { text: "Fine as-is, but raise top-k so enough of the caller's rows survive the filter" }
+    - { text: "The problem is the embedding model; switch models so tenants separate in vector space" }
+  explanation: >-
+    Post-filtering runs the search over everyone's chunks, so another tenant's more-similar rows crowd
+    out the caller's (leaving too few results) and their data has already entered the process. Raising
+    top-k and changing embeddings don't fix the boundary. Pre-filtering (filtered-ANN or per-tenant
+    namespace) keeps the scope inside the search.
+
+- id: mc-review-mti-rls-backstop
+  type: multiple_choice
+  tags: [isolation, review]
+  difficulty: 4
+  prompt: >-
+    An isolation design relies entirely on every query including `WHERE tenant_id = :caller`, enforced
+    by code review. A reviewer asks what happens when one query forgets it. What is the strongest
+    objection to the design?
+  options:
+    - { text: "The tenant boundary lives only in app code, so a single forgotten predicate leaks every tenant's rows; enforce it in the engine with row-level security (or per-tenant partitions) as a backstop", correct: true }
+    - { text: "There is no objection — code review reliably catches every missing WHERE clause" }
+    - { text: "The column should be named `tenant` not `tenant_id`; the naming is the real risk" }
+    - { text: "Add an index on tenant_id; the concern is purely query performance, not isolation" }
+  explanation: >-
+    App-layer predicates are one missed clause from a cross-tenant leak, and review is not a guarantee.
+    Row-level security enforces the tenant predicate in the database engine so a forgotten WHERE cannot
+    leak, and per-tenant partitions give a similar backstop. Naming and indexing don't address the
+    boundary.
+
+- id: essay-mti-deep-dive
+  type: essay
+  length: long
+  tags: [isolation, review]
+  difficulty: 4
+  prompt: >-
+    You are the reviewer on a multi-tenant isolation design for an LLM application that shares a vector
+    index, a response cache, and a Postgres store across many tenants. Write a design review: walk the
+    levers (data partitioning, boundary enforcement, retrieval scoping, cache keying, session/state
+    scope), give an explicit tradeoff for each, and state what would move the design from demo-ready to
+    production-ready. Call out at least two antipatterns and the verification you would require before
+    accepting it.
+  eval_skill: eval-isolation-essay
+  reference_points:
+    - "Data partitioning: shared-table-with-tenant-column (cheap, scales to many small tenants) vs. per-tenant namespaces vs. database/index-per-tenant (strongest isolation, highest cost) — match the grain to tenant-size distribution."
+    - "Boundary enforcement: app-layer WHERE clauses are one missed predicate from a leak; row-level security (RLS) enforces the tenant predicate in the engine as a backstop."
+    - "Retrieval scoping: pre-filter the ANN search to the tenant's namespace/authorized set; post-filtering an unscoped top-k fetches other tenants' data and can crowd out the caller's valid rows."
+    - "Cache keying: fold tenant (and user) into the key; a tenant-blind key — especially on a semantic cache — serves one tenant's answer to another and enables poisoning, trading a hit-rate loss for confidentiality."
+    - "Session/state scope: reset per-user conversation memory and sessions and scope logs; reused sessions and pooled logs are quiet contamination channels."
+    - "Antipatterns to call out: tenant-blind (or shared semantic) cache keys, post-filtering an unscoped search, app-only predicates with no RLS backstop, reused sessions/pooled logs."
+    - "Production-ready = tenant-scoped cache keys + authz-filtered retrieval + per-tenant partitions + RLS at the DB boundary, verified by an isolation/leak test asserting a zero cross-tenant leak rate; be honest it's a security tradition, not a single seminal paper."
+
+- id: debug-mti-tenant-cache
+  type: code
+  language: typescript
+  tags: [isolation, review]
+  difficulty: 4
+  prompt: >-
+    DEBUGGING: the provided `TenantCache` leaks data across tenants — after one tenant caches a value
+    under some key, a different tenant reading the same key is handed the first tenant's value instead
+    of a miss. There is exactly one bug in how the internal cache key is built. Fix it (make the minimal
+    change) so entries are isolated per tenant, same-tenant set/get still round-trips, and distinct keys
+    within a tenant do not collide.
+  starter_file: exercises/tenant-cache-debug/starter.ts
+  test_file: exercises/tenant-cache-debug/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-isolation-code
+  concept_checks:
+    must_use: ["namespace the internal cache key by tenantId", "same-tenant set/get round-trips", "distinct keys within a tenant do not collide"]
+    avoid_antipattern: ["building the cache key from key alone (tenant-blind)", "serving one tenant's cached value to another"]

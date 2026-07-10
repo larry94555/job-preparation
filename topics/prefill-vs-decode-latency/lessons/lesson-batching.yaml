@@ -1,0 +1,12 @@
+id: lesson-batching
+title: "Why batching helps decode but not prefill"
+material: batching.md
+segments:
+  - present: batching-amortizes-a-bandwidth-cost
+  - check: mc-batching-decode
+  - check: fe-batching-phase
+  - present: keeping-decode-smooth-under-load-chunked-prefill
+  - check: mc-chunked-prefill
+  - check: fe-chunked-prefill
+  - check: fe-disaggregation
+  - apply: essay-batching

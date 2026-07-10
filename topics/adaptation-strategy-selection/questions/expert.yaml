@@ -1,0 +1,73 @@
+# Literature/canon (WS1) + interview (WS2) — tags [canon]/[interview] are NOT in any section's
+# from_tags, so these don't enter the deterministic section-assessment pools.
+- id: mc-canon-adapt-lora
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Parameter-efficient fine-tuning via small low-rank adapter matrices is which method?"
+  options:
+    - { text: "LoRA (Hu et al.)", correct: true }
+    - { text: "RAG (Lewis et al.)" }
+    - { text: "Knowledge distillation (Hinton et al.)" }
+    - { text: "ColBERT (Khattab & Zaharia)" }
+  explanation: "LoRA (Hu et al., Microsoft, 2021) trains low-rank adapters instead of all weights — the canonical PEFT method. RAG adds retrieved knowledge without touching weights; distillation trains a student from a teacher; ColBERT is a retrieval method."
+
+- id: mc-canon-adapt-distillation
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Training a smaller student model to reproduce a larger teacher's behavior — knowledge distillation — was formalized by?"
+  options:
+    - { text: "Hinton et al.", correct: true }
+    - { text: "Lewis et al." }
+    - { text: "Hu et al." }
+    - { text: "Kwon et al." }
+  explanation: "Knowledge distillation was formalized by Hinton et al. (2015). Lewis et al. gave us RAG, Hu et al. gave us LoRA, and Kwon et al. gave us PagedAttention/vLLM."
+
+- id: mc-interview-adapt-wrong-tool
+  type: multiple_choice
+  tags: [interview]
+  difficulty: 3
+  prompt: "An interviewer asks you to spot the wrong tool: a team wants the model to always know today's constantly-changing prices. The clearest red-flag proposal is:"
+  options:
+    - { text: "Fine-tune the model on the price list so it 'just knows' current prices", correct: true }
+    - { text: "Retrieve the current price list at query time and place it in context (RAG)" }
+    - { text: "Put the current prices in the prompt as context" }
+    - { text: "Query a live pricing service and cite the returned figures" }
+  explanation: "Fine-tuning bakes facts into weights, so volatile prices go stale immediately and every update needs another training run. Freshness is a retrieval problem — RAG (or feeding prices into context) keeps answers current and citable."
+
+- id: essay-adapt-literature
+  type: essay
+  length: long
+  tags: [canon]
+  difficulty: 4
+  prompt: >-
+    Summarize the influential work behind the main adaptation levers — RAG (Lewis et al.),
+    parameter-efficient fine-tuning via LoRA (Hu et al.), and knowledge distillation (Hinton et al.).
+    For each, say what it changes about the model, what need it serves, and name the tooling you'd
+    reach for. Then describe how today's systems combine them.
+  eval_skill: eval-adaptation-essay
+  reference_points:
+    - "RAG (Lewis et al., 2020): fetches knowledge at query time into context; adds fresh/private/citable facts without changing weights — the lever for volatile knowledge."
+    - "LoRA (Hu et al., Microsoft, 2021): parameter-efficient fine-tuning via small low-rank adapter matrices; durably changes behavior/style/format cheaply — made fine-tuning practical (PEFT)."
+    - "Knowledge distillation (Hinton et al., 2015): trains a smaller student to reproduce a teacher's behavior, cutting deployment cost and latency."
+    - "Tools: PEFT/LoRA libraries, RAG frameworks, distillation tooling; open vs. frontier models."
+    - "SOTA is a hybrid: RAG for volatile facts + PEFT for durable behavior + distillation for cheap deploy, often stacked."
+
+- id: essay-adapt-interview
+  type: essay
+  length: long
+  tags: [interview]
+  difficulty: 4
+  prompt: >-
+    You're in a senior AI-engineering interview and asked to choose an adaptation strategy for a
+    product. Walk the interviewer through how you decide, name the wrong tool for a volatile-facts
+    scenario, and defend a combination of methods. Show the judgment (and the canon) that reads as
+    senior.
+  eval_skill: eval-adaptation-essay
+  reference_points:
+    - "Decide by decision axes: freshness, behavior change, cost, latency, attribution — map each need to a lever."
+    - "Name the wrong tool: fine-tuning for volatile/constantly-changing facts, because weights go stale and every update needs a new training run; freshness is a retrieval (RAG) problem."
+    - "RAG to fix formatting/style is also wrong — that's a behavior problem best served by fine-tuning."
+    - "Defend a combination/sequencing: start with prompting/ICL, add RAG for knowledge, reserve fine-tuning (then distillation) for behavior the lighter methods can't deliver; avoid premature fine-tuning/distillation."
+    - "Name the canon: RAG (Lewis et al.), LoRA/PEFT (Hu et al.), distillation (Hinton et al.)."

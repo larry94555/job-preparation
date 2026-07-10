@@ -1,0 +1,40 @@
+- id: mc-head-of-line-static
+  type: multiple_choice
+  tags: [throughput]
+  difficulty: 2
+  prompt: "Static batching suffers head-of-line blocking because:"
+  options:
+    - { text: "The batch isn't done until the slowest request finishes, so short requests wait", correct: true }
+    - { text: "It can only process one request at a time" }
+    - { text: "It never reuses the KV cache" }
+    - { text: "It requires more memory than continuous batching" }
+  explanation: "A static batch is held until its longest member finishes; finished short requests waste GPU time waiting."
+
+- id: mc-continuous-admits
+  type: multiple_choice
+  tags: [throughput]
+  difficulty: 3
+  prompt: "Continuous (in-flight) batching improves throughput by:"
+  options:
+    - { text: "Admitting a waiting request the moment an active one finishes, scheduling per iteration", correct: true }
+    - { text: "Making the batch size as large as possible regardless of latency" }
+    - { text: "Waiting for the whole batch to finish before admitting anyone" }
+    - { text: "Disabling the KV cache to save memory" }
+  explanation: "Iteration-level scheduling frees a finished request's slot immediately and admits the next, keeping the GPU full."
+
+- id: essay-scheduler-design
+  type: essay
+  length: long
+  tags: [throughput]
+  difficulty: 4
+  prompt: >-
+    Project: design an SLO-aware serving scheduler that shares one GPU between latency-sensitive chat
+    traffic and high-throughput batch jobs. Cover continuous batching, paged attention as the memory
+    substrate, the throughput-vs-latency tradeoff, and fairness/starvation. Include a short test plan.
+  eval_skill: eval-batching-essay
+  reference_points:
+    - "Continuous/iteration-level batching keeps the GPU full; paged attention makes it practical."
+    - "Throughput vs latency: larger batches raise tokens/sec but raise per-token latency (TPOT)."
+    - "SLO-aware scheduling: prioritize latency-sensitive requests; bound batch traffic's impact."
+    - "Fairness/starvation: prevent long/batch jobs from starving interactive ones."
+    - "Metrics + test plan: goodput under SLO, p95 latency, utilization; simulate mixed traffic."

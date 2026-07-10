@@ -1,0 +1,90 @@
+# Deep-dive — architecture judgment (code-review MCs + an L4 essay)
+
+- id: mc-review-eval-vibes-gate
+  type: multiple_choice
+  tags: [regression, review]
+  difficulty: 4
+  prompt: >-
+    An eval doc says: "Before each release, two engineers read through ~20 recent outputs and agree
+    they look good; if they're happy, we ship." Reviewing it, what is the most important problem?
+  options:
+    - { text: "It's vibes-only with no fixed, versioned dataset or gate, so it isn't repeatable and can't catch silent regressions", correct: true }
+    - { text: "Twenty outputs is too many to read; sample five instead" }
+    - { text: "Two engineers is too few; you need at least five reviewers" }
+    - { text: "Nothing — human eyeballing is the gold standard for LLM quality" }
+  explanation: >-
+    The core discipline is a fixed, versioned dataset scored the same way on every change. Eyeballing
+    a fresh handful each release is the classic vibes-only antipattern: it isn't repeatable, can't
+    compare changes, and hides regressions. The fix is a golden set wired into a regression gate, not
+    more reviewers.
+
+- id: mc-review-eval-judge-uncalibrated
+  type: multiple_choice
+  tags: [regression, review]
+  difficulty: 4
+  prompt: >-
+    A PR adds a CI gate that fails the build when a GPT-graded quality score drops below 0.85. The
+    judge prompt was written last week and never compared to human labels. Rate this design and pick
+    the best fix.
+  options:
+    - { text: "Prototype-grade: an uncalibrated judge is an opinion, not an instrument; measure judge-vs-human agreement on a labeled set before gating on it", correct: true }
+    - { text: "Production-ready: an LLM judge is more consistent than humans, so calibration is unnecessary" }
+    - { text: "Fine as-is, but raise the threshold to 0.95 so only clearly-good changes pass" }
+    - { text: "The problem is the model; swap GPT for a larger judge and the gate becomes trustworthy" }
+  explanation: >-
+    Gating on a judge you haven't calibrated bakes its biases (position, verbosity, self-preference)
+    straight into your release process. Trust requires measuring agreement against human labels
+    (e.g. κ) on a calibration set first. Raising the threshold or swapping in a bigger model doesn't
+    make an uncalibrated verdict trustworthy.
+
+- id: mc-review-eval-overfit-static
+  type: multiple_choice
+  tags: [regression, review]
+  difficulty: 4
+  prompt: >-
+    A team tunes prompts against the same 50-case golden set until it passes at 100%, with no
+    held-out split, and reports the eval as green. What is the strongest objection?
+  options:
+    - { text: "With nothing held out, tuning against the visible cases optimizes the score, not the capability — you're teaching to the test; rotate in fresh, unseen cases", correct: true }
+    - { text: "Fifty cases is far too many; a golden set should have under ten" }
+    - { text: "100% is impossible on a real golden set, so the numbers must be fabricated" }
+    - { text: "Golden sets are obsolete; only an LLM judge should decide pass/fail" }
+  explanation: >-
+    Repeatedly tuning against the same visible cases overfits the eval: the score climbs while true
+    capability may not. The guard is a held-out or rotating split the tuner never sees, plus feeding
+    real production failures back in. Set size isn't the issue, and a perfect score on a small static
+    set is exactly the symptom of teaching to the test.
+
+- id: essay-eval-deep-dive
+  type: essay
+  length: long
+  tags: [regression, review]
+  difficulty: 4
+  prompt: >-
+    You are the reviewer on an eval-methodology design for a long-lived, open-ended LLM feature. Write
+    a design review: walk the levers (scoring method, dataset composition, gate placement, judge
+    calibration, freshness), give an explicit tradeoff for each, and state what would move the design
+    from demo-ready to production-ready. Call out at least two antipatterns and the calibration you
+    would require before gating on an LLM judge.
+  eval_skill: eval-evals-essay
+
+- id: debug-eval-gate
+  type: code
+  language: typescript
+  tags: [regression, review]
+  difficulty: 4
+  prompt: >-
+    DEBUGGING: the provided `passesGate` is meant to pass a release gate only when the pass RATE
+    (passed / total) is at least `threshold`, but the gate is green on every release — even batches
+    where many cases fail sail through, so it never catches a regression. There is exactly one bug.
+    Fix it (make the minimal change) so a below-threshold batch fails, an exactly-at-threshold batch
+    passes, and an all-pass batch passes.
+  starter_file: exercises/eval-gate-debug/starter.ts
+  test_file: exercises/eval-gate-debug/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-evals-code
+  concept_checks:
+    must_use: ["divide the passed count by the total number of results", "compare the rate with >= so an exactly-at-threshold batch passes", "a below-threshold batch fails the gate"]
+    avoid_antipattern: ["computing the rate over only the passed items so the denominator excludes failures", "using > so an exactly-at-threshold rate wrongly fails"]

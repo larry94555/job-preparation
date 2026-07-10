@@ -1,0 +1,168 @@
+# Multiple choice
+- id: mc-icl-what
+  type: multiple_choice
+  tags: [approaches]
+  difficulty: 2
+  prompt: "In-context learning (ICL) adapts the model's behavior by:"
+  options:
+    - { text: "Putting instructions and few-shot examples in the prompt at inference time, leaving weights unchanged", correct: true }
+    - { text: "Updating the model weights with gradient descent on your examples" }
+    - { text: "Retraining a smaller student model to copy a teacher" }
+    - { text: "Storing your documents in a vector index for retrieval" }
+  explanation: "ICL steers the model purely through the prompt (instructions + few-shot examples) at inference time; nothing about the weights or the corpus changes."
+
+- id: mc-rag-what
+  type: multiple_choice
+  tags: [approaches]
+  difficulty: 2
+  prompt: "RAG (retrieval-augmented generation) primarily adds:"
+  options:
+    - { text: "Fresh, private, or attributable knowledge fetched at query time and placed in context", correct: true }
+    - { text: "A permanent change to the model's tone and output format" }
+    - { text: "A cheaper, smaller model for deployment" }
+    - { text: "Lower per-token inference latency than the base model" }
+  explanation: "RAG grounds generation in documents retrieved at query time, so it supplies knowledge — especially fresh, private, and citable knowledge — rather than changing the model's behavior."
+
+- id: mc-ft-what
+  type: multiple_choice
+  tags: [approaches]
+  difficulty: 2
+  prompt: "Fine-tuning (including LoRA/PEFT) is the strongest fit when you need to change the model's:"
+  options:
+    - { text: "Behavior, format, style, or reliability on a task — baked into the weights", correct: true }
+    - { text: "Access to facts that change every day" }
+    - { text: "Ability to cite the specific source of each answer" }
+    - { text: "Knowledge of a document it can simply be shown in context" }
+  explanation: "Fine-tuning updates weights, so it durably changes behavior/format/style and can improve task reliability. It is a poor way to inject volatile facts, which belong in retrieval or context."
+
+- id: mc-distill-what
+  type: multiple_choice
+  tags: [approaches]
+  difficulty: 3
+  prompt: "Distillation is mainly used to:"
+  options:
+    - { text: "Train a smaller/cheaper student to reproduce a known-good teacher's behavior for cheaper deployment", correct: true }
+    - { text: "Keep a knowledge base fresh as documents change" }
+    - { text: "Add citations to every generated answer" }
+    - { text: "Increase the number of parameters in the deployed model" }
+  explanation: "Distillation transfers a capable teacher's behavior into a smaller student, cutting inference cost/latency once you already have behavior worth copying."
+
+- id: mc-freshness-axis
+  type: multiple_choice
+  tags: [decision]
+  difficulty: 3
+  prompt: "For knowledge that changes frequently and must stay current, the decision axis points to:"
+  options:
+    - { text: "Retrieval (RAG), because context is updated without retraining", correct: true }
+    - { text: "Fine-tuning, because weights hold facts permanently" }
+    - { text: "Distillation, because a smaller model refreshes itself" }
+    - { text: "In-context learning with static examples only" }
+  explanation: "Freshness favors RAG: you update the index, not the weights, so answers stay current. Baking volatile facts into weights would require constant retraining."
+
+- id: mc-behavior-axis
+  type: multiple_choice
+  tags: [decision]
+  difficulty: 3
+  prompt: "You need the model to consistently follow a house style and output a strict format it keeps getting wrong even with good prompts. The right axis to optimize is:"
+  options:
+    - { text: "Behavior change, which favors fine-tuning", correct: true }
+    - { text: "Freshness, which favors RAG" }
+    - { text: "Attribution, which favors citations" }
+    - { text: "Deployment cost, which favors distillation" }
+  explanation: "Persistent behavior/format that prompting cannot reliably enforce is a behavior-change problem, and fine-tuning bakes that behavior into the weights."
+
+- id: mc-cost-latency-axis
+  type: multiple_choice
+  tags: [decision]
+  difficulty: 3
+  prompt: "How do fine-tuning and RAG differ on the cost axis?"
+  options:
+    - { text: "Fine-tuning front-loads training cost then serves cheaply; RAG avoids training but pays retrieval + larger context at every query", correct: true }
+    - { text: "Both eliminate all inference cost once set up" }
+    - { text: "RAG has a large training cost and no inference cost" }
+    - { text: "Fine-tuning adds retrieval latency to every request" }
+  explanation: "Fine-tuning pays once up front and then serves without extra retrieval overhead; RAG skips training but adds retrieval work and longer prompts (more tokens/latency) on every query."
+
+- id: mc-attribution-axis
+  type: multiple_choice
+  tags: [decision]
+  difficulty: 2
+  prompt: "A requirement that every answer point back to the exact source document most directly favors:"
+  options:
+    - { text: "RAG, because retrieved chunks carry citable source metadata", correct: true }
+    - { text: "Fine-tuning, because weights record where facts came from" }
+    - { text: "Distillation, because the student inherits the teacher's sources" }
+    - { text: "In-context learning, because few-shot examples are self-citing" }
+  explanation: "Attribution favors RAG: the retrieved chunks come with source metadata you can cite. Weights blend everything together and cannot point back at a specific source."
+
+- id: mc-start-simple
+  type: multiple_choice
+  tags: [decision]
+  difficulty: 3
+  prompt: "As a default sequencing heuristic when adapting a model, you should usually:"
+  options:
+    - { text: "Try prompting / in-context learning first, add RAG for knowledge, and reserve fine-tuning for behavior the cheaper methods can't deliver", correct: true }
+    - { text: "Fine-tune first because it is the most powerful option" }
+    - { text: "Distill the model before you know what behavior you want" }
+    - { text: "Always combine all four methods regardless of the problem" }
+  explanation: "Cheaper, faster-to-iterate methods (prompting, then RAG) should be exhausted before committing to training. Fine-tuning is reserved for behavior the lighter methods cannot achieve."
+
+- id: mc-ft-volatile-antipattern
+  type: multiple_choice
+  tags: [antipatterns]
+  difficulty: 3
+  prompt: "Fine-tuning a model on this week's constantly-changing prices and inventory is an antipattern because:"
+  options:
+    - { text: "Volatile facts go stale in the weights and each update needs another training run — retrieval keeps them fresh instead", correct: true }
+    - { text: "Fine-tuning cannot change model behavior at all" }
+    - { text: "Weights can never store any factual information" }
+    - { text: "RAG is unable to handle private data" }
+  explanation: "Weights are a bad place for facts that change; you'd retrain constantly and still serve stale answers. Freshness is a retrieval problem, not a training one."
+
+- id: mc-rag-format-antipattern
+  type: multiple_choice
+  tags: [antipatterns]
+  difficulty: 3
+  prompt: "Reaching for RAG to fix a model that won't follow your required output format is an antipattern because:"
+  options:
+    - { text: "Formatting is a behavior problem; retrieval adds context but does not change how the model writes", correct: true }
+    - { text: "RAG makes the model slower, which fixes formatting" }
+    - { text: "Retrieval always overrides the system prompt" }
+    - { text: "Formatting can only be solved by distillation" }
+  explanation: "RAG supplies knowledge, not behavior. A formatting/style problem calls for better prompting or fine-tuning, not stuffing more documents into context."
+
+- id: mc-over-adapting
+  type: multiple_choice
+  tags: [antipatterns]
+  difficulty: 4
+  prompt: "'Over-adapting' most accurately describes:"
+  options:
+    - { text: "Investing in a heavier method (e.g. fine-tuning) when a lighter one (prompting/RAG) already meets the requirement", correct: true }
+    - { text: "Using RAG when the data is genuinely private and changing" }
+    - { text: "Writing a few-shot prompt before trying anything else" }
+    - { text: "Choosing distillation only after behavior is validated" }
+  explanation: "Over-adapting is paying the cost and rigidity of a stronger adaptation method when a simpler, cheaper one would have satisfied the actual requirement."
+
+- id: mc-premature-ft
+  type: multiple_choice
+  tags: [antipatterns]
+  difficulty: 3
+  prompt: "Why is fine-tuning before you have a validated, stable target behavior usually premature?"
+  options:
+    - { text: "You freeze cost and effort into weights before knowing what 'good' looks like, and each iteration needs data collection + a retraining loop", correct: true }
+    - { text: "Fine-tuning is technically impossible on modern models" }
+    - { text: "Prompting can never reach production quality" }
+    - { text: "You must always distill before you fine-tune" }
+  explanation: "Premature fine-tuning locks in a slow, expensive iteration loop before the desired behavior is even pinned down; prompting/RAG let you discover the target far more cheaply first."
+
+- id: mc-distill-premature-antipattern
+  type: multiple_choice
+  tags: [antipatterns]
+  difficulty: 4
+  prompt: "Distilling a model before its behavior is validated is risky because:"
+  options:
+    - { text: "The student faithfully copies the teacher — including any flaws — so you cheaply mass-produce unvalidated behavior", correct: true }
+    - { text: "Distillation increases inference latency" }
+    - { text: "The student can only ever be larger than the teacher" }
+    - { text: "Distillation makes retrieval impossible" }
+  explanation: "Distillation transfers whatever the teacher does; if that behavior isn't known-good, you've just made a cheaper way to be wrong. Validate first, then distill."

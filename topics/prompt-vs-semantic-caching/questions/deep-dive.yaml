@@ -1,0 +1,99 @@
+# Deep-dive — architecture judgment (code-review MCs + an L4 design-review essay)
+
+- id: mc-review-cache-semantic-highstakes
+  type: multiple_choice
+  tags: [tradeoffs, review]
+  difficulty: 4
+  prompt: >-
+    A PR puts a semantic cache in front of a medical-dosing assistant: it embeds each question and, on
+    an embedding-similarity hit, returns the stored answer without calling the model, "to cut cost."
+    Reviewing it, what is the most important problem?
+  options:
+    - { text: "A false-positive semantic hit returns a plausible-but-wrong answer on a high-stakes query — semantic caching is unsafe here; restrict it to repeated, stable, low-personalization queries and keep dosing on a live model call", correct: true }
+    - { text: "The embedding model is too small; a larger one would make the cache correct" }
+    - { text: "Nothing — returning stored answers is always safe as long as the threshold is above zero" }
+    - { text: "The real issue is cost; semantic caching should be replaced with a bigger GPU" }
+  explanation: >-
+    Semantic caching trades on approximate matches, so a near-miss returns a confident wrong answer.
+    That is exactly the antipattern on high-stakes or personalized answers. The fix is scope, not a
+    bigger embedder: keep the semantic layer on safe, repeated FAQ-style queries and never let it short
+    a dosing decision.
+
+- id: mc-review-cache-timestamp-prefix
+  type: multiple_choice
+  tags: [tradeoffs, review]
+  difficulty: 4
+  prompt: >-
+    A team reports their prefix-cache hit rate is near zero even though every request shares the same
+    2,000-token system prompt. The prompt template prepends a per-request `"[{timestamp}] request
+    {uuid}"` line before the system prompt. Rate this design and pick the best fix.
+  options:
+    - { text: "Prototype-grade: the per-request timestamp/UUID at the very top changes the leading tokens on every call, destroying the exact-prefix match; move all per-request variability to the end so the shared prefix leads", correct: true }
+    - { text: "Production-ready: the hit rate is low because prefix caching only works with semantic similarity, which timestamps don't affect" }
+    - { text: "Fine as-is; raise the semantic-cache threshold to recover the hits" }
+    - { text: "The fix is to shorten the system prompt so the whole request fits in one cache block" }
+  explanation: >-
+    Prefix caching matches from the start of the token stream and stops at the first differing token. A
+    timestamp or UUID prepended before the system prompt changes the first tokens every call, so nothing
+    downstream is reusable. The fix is prompt structure — stable prefix first, variable suffix last —
+    not the semantic threshold (a different cache) and not shortening the prompt.
+
+- id: mc-review-cache-threshold-noeval
+  type: multiple_choice
+  tags: [tradeoffs, review]
+  difficulty: 4
+  prompt: >-
+    A PR lowers the semantic-cache similarity threshold to push the hit rate from 20% to 55% and reports
+    "answers looked fine on the ten prompts I tried, shipping it." What is the strongest objection?
+  options:
+    - { text: "Loosening the threshold raises hit rate and false positives together, and a ten-prompt spot check can hide wrong-but-close matches — gate the change behind a cache-correctness eval over a realistic query mix", correct: true }
+    - { text: "Semantic thresholds must always be 1.0; any lower value is never acceptable" }
+    - { text: "A 55% hit rate is impossible for a semantic cache, so the numbers are wrong" }
+    - { text: "The threshold is irrelevant; only per-tenant cache keys affect correctness" }
+  explanation: >-
+    The extra hit rate is real, but a permissive threshold lets loosely-related requests match and serve
+    a stored answer to a genuinely different question. A handful of prompts is exactly where those silent
+    false positives slip through. The fix is a cache-correctness eval that measures how often a hit was
+    actually the right answer, not banning low thresholds.
+
+- id: essay-cache-deep-dive
+  type: essay
+  length: long
+  tags: [tradeoffs, review]
+  difficulty: 4
+  prompt: >-
+    You are the reviewer on a caching design for a multi-tenant LLM assistant that mixes a shared system
+    prompt with repeat user questions. Write a design review: walk the levers (which cache and prompt
+    structure, similarity threshold, cache keys and scope, invalidation/TTL, verification), give an
+    explicit tradeoff for each, and state what would move the design from demo-ready to production-ready.
+    Call out at least two antipatterns and the eval you would require before accepting a threshold change.
+  eval_skill: eval-caching-essay
+  reference_points:
+    - "The two caches hit and save differently: a prefix (prompt) cache reuses prefill compute on identical leading tokens and is correctness-safe; a semantic cache returns a stored response on an embedding-similarity match and saves the full generation but can be wrong. The SOTA shape is layered — exact-prefix in front of semantic, with guards on what the semantic layer serves."
+    - "Prompt structure is the lever for prefix hits: stable prefix (system prompt, instructions, few-shot) first, variable suffix (user input) last; injecting a timestamp/UUID or reordering content at the top destroys the exact-prefix match."
+    - "The similarity threshold trades savings against correctness: too low invites false-positive hits (a confident wrong answer), too high collapses the hit rate; the operating point must be chosen with a cache-correctness eval over a realistic query mix, not a spot check."
+    - "Scope and safety: per-tenant / per-user keys prevent cross-user leakage, a TTL bounds staleness, and a verification step guards a semantic hit; semantic caching belongs on repeated, stable, low-personalization queries and not on high-stakes or personalized answers."
+    - "Antipatterns to call out: semantic cache on high-stakes/personalized answers, prompt reordering (or top-of-prompt variability) that kills prefix hits, tenant-blind keys, and shipping a semantic layer with no cache-correctness eval. Demo-ready adds a semantic layer with a threshold; production-ready also scopes it to safe queries, uses per-tenant keys and TTL, verifies hits, and gates threshold changes behind an eval."
+
+- id: debug-cache-semantic
+  type: code
+  language: typescript
+  tags: [tradeoffs, review]
+  difficulty: 4
+  prompt: >-
+    DEBUGGING: the provided `SemanticCache` serves UNRELATED answers — a query nothing like anything
+    stored comes back as a hit, while a near-duplicate of a stored key is reported as a miss. The class
+    stores entries with `put(vec, value)` and looks them up with `get(vec)`, and should return a stored
+    value only when the cosine similarity to a stored key is at least the constructor `threshold`,
+    picking the best-scoring candidate. There is exactly one bug in the hit test. Fix it (make the
+    minimal change) so a near-identical vector hits, a dissimilar vector misses, and the threshold
+    boundary behaves correctly.
+  starter_file: exercises/semantic-cache-debug/starter.ts
+  test_file: exercises/semantic-cache-debug/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-caching-code
+  concept_checks:
+    must_use: ["serve a hit only when best similarity >= threshold", "pick the best-scoring candidate", "cosine similarity as the match score"]
+    avoid_antipattern: ["inverted hit test that serves entries at or below the threshold", "serving a dissimilar entry as a match"]

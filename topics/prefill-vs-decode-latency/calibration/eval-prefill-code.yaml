@@ -1,0 +1,22 @@
+skill: eval-prefill-code
+cases:
+  - answer: >-
+      tests_passed=true. Returns ttft=promptTokens/prefillRate, decode=outputTokens*tpot,
+      total=ttft+decode. TTFT depends only on the prompt, decode only on the output.
+    expect:
+      verdict: pass
+      checks: { phases_not_mixed: true, ttft_from_prefill: true, decode_from_output: true, total_is_sum: true }
+
+  - answer: >-
+      tests_passed=true happens to pass, but computes total=(promptTokens+outputTokens)/prefillRate —
+      blending both phases into one rate, so TTFT/decode aren't modeled separately.
+    expect:
+      verdict: fail
+      checks: { phases_not_mixed: false, ttft_from_prefill: false, decode_from_output: false, total_is_sum: true }
+
+  - answer: >-
+      tests_passed=true. Keeps the phases separate and computes ttft and decode correctly, but returns
+      total as just the decode time (forgets to add ttft).
+    expect:
+      verdict: borderline
+      checks: { phases_not_mixed: true, ttft_from_prefill: true, decode_from_output: true, total_is_sum: false }

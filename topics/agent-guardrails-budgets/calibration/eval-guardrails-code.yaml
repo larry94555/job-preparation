@@ -1,0 +1,22 @@
+skill: eval-guardrails-code
+cases:
+  - answer: >-
+      tests_passed=true. Loops from initial, increments steps, checks done→complete, then
+      next===prev→no-progress, then steps>=maxSteps→budget, and returns { steps, stoppedBy, state }.
+    expect:
+      verdict: pass
+      checks: { enforces_budget: true, detects_no_progress: true, stops_on_done: true, returns_reason: true }
+
+  - answer: >-
+      tests_passed=true, but the loop only stops on done — there is no maxSteps cap, so a non-completing
+      step would run forever (the tests happen to complete). No budget backstop.
+    expect:
+      verdict: fail
+      checks: { enforces_budget: false, detects_no_progress: true, stops_on_done: true, returns_reason: true }
+
+  - answer: >-
+      tests_passed=true. Enforces the step budget and stops on done and returns the reason, but never
+      compares states, so it can't detect a stuck (no-progress) agent early.
+    expect:
+      verdict: borderline
+      checks: { enforces_budget: true, detects_no_progress: false, stops_on_done: true, returns_reason: true }

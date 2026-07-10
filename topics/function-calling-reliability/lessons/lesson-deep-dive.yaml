@@ -1,0 +1,14 @@
+id: lesson-deep-dive
+title: "Architecture & tradeoffs: reviewing a function-calling design"
+material: deep-dive.md
+segments:
+  - present: the-function-calling-reliability-design-space
+  - present: a-tradeoff-table-for-function-calling-reliability
+  - check: mc-review-fc-untyped-args
+  - check: mc-review-fc-coerce-unknown
+  - present: common-sota-and-antipattern
+  - check: mc-review-fc-retry-nonidempotent
+  - present: scaling-performance-and-the-token-budget
+  - present: reviewing-a-function-calling-reliability-design
+  - apply: essay-fc-deep-dive
+  - apply: debug-fc-idempotent

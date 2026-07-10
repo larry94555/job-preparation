@@ -1,0 +1,23 @@
+skill: eval-funccall-code
+cases:
+  - answer: >-
+      tests_passed=true. Looks up the tool (returns {ok:false,error:"unknown_tool"} if missing), runs
+      validate before the handler, and for mutating tools with an idempotencyKey returns the cached
+      result on repeat; read-only calls are never cached.
+    expect:
+      verdict: pass
+      checks: { idempotency_dedupe: true, validates_before_execute: true, rejects_unknown_tool: true, read_only_not_deduped: true }
+
+  - answer: >-
+      tests_passed=true, but ignores the idempotency key entirely — every mutating call re-runs the
+      handler (double effect). Validation and unknown-tool handling are correct.
+    expect:
+      verdict: fail
+      checks: { idempotency_dedupe: false, validates_before_execute: true, rejects_unknown_tool: true, read_only_not_deduped: true }
+
+  - answer: >-
+      tests_passed=true. Dedupes mutating calls by key and rejects unknown tools, but runs the handler
+      first and validates the args afterward, so an invalid call can still execute.
+    expect:
+      verdict: borderline
+      checks: { idempotency_dedupe: true, validates_before_execute: false, rejects_unknown_tool: true, read_only_not_deduped: true }

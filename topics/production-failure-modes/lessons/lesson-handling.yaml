@@ -1,0 +1,12 @@
+id: lesson-handling
+title: "Detection, mitigation & prevention"
+material: handling.md
+segments:
+  - present: detection-vs-mitigation-vs-prevention
+  - check: mc-detect-mitigate-prevent
+  - check: cloze-ttl
+  - present: handling-malformed-json-validate-repair-fallback
+  - check: mc-malformed-json-handling
+  - check: mc-stale-retrieval-detect
+  - check: fe-repair-pattern
+  - apply: essay-detect-mitigate-prevent

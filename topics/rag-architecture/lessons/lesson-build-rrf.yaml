@@ -1,0 +1,10 @@
+id: lesson-build-rrf
+title: "Build it: reciprocal rank fusion"
+material: build-rrf.md
+segments:
+  - present: why-fuse-and-how-rrf-works
+  - check: mc-rrf-formula
+  - present: details-and-tie-breaking
+  - check: mc-rrf-k-role
+  - apply: code-rrf
+  - apply: essay-hybrid-pipeline

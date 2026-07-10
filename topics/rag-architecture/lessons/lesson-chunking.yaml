@@ -1,0 +1,12 @@
+id: lesson-chunking
+title: "Chunking strategies & pitfalls"
+material: chunking.md
+segments:
+  - present: the-chunk-size-tradeoff
+  - check: mc-chunk-tradeoff
+  - check: fe-chunk-structure
+  - present: chunking-strategies-and-pitfalls
+  - check: mc-chunk-antipattern
+  - check: mc-overlap-why
+  - check: cloze-overlap
+  - apply: essay-chunking

@@ -1,0 +1,13 @@
+id: lesson-deep-dive
+title: "Architecture & tradeoffs: reviewing an inference-optimization design"
+material: deep-dive.md
+segments:
+  - present: the-speculative-decoding-quant-distillation-design-space
+  - present: a-tradeoff-table-for-speculative-decoding-quant-distillation
+  - check: mc-review-spec-wrong-lever
+  - check: mc-review-spec-acceptance
+  - present: common-sota-and-antipattern
+  - check: mc-review-spec-stack-noeval
+  - present: scaling-performance-and-the-token-budget
+  - present: reviewing-a-speculative-decoding-quant-distillation-design
+  - apply: essay-spec-deep-dive

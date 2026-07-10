@@ -1,0 +1,36 @@
+# Free entry (short answer)
+- id: fe-budget-dimension
+  type: text_input
+  tags: [budgets]
+  difficulty: 2
+  prompt: "Name one dimension an agent budget can cap. (one word or short term)"
+  answer:
+    regex: '^(steps?|iterations?|tool calls?|tools?|tokens?|cost|money|dollars?|wall-?clock|time|wall-?clock time|latency)$'
+    normalize: true
+
+- id: fe-termination-reason
+  type: text_input
+  tags: [termination]
+  difficulty: 3
+  prompt: "Besides reaching success, name one reason an agent loop should terminate. (a few words)"
+  answer:
+    regex: '^(budget( exhausted| exceeded)?|out of budget|exhausted budget|failure|failed|error|no progress|no-progress|loop|looping|stuck|oscillation|max steps|step limit|timeout|timed out|time limit)$'
+    normalize: true
+
+- id: fe-loop-signal
+  type: text_input
+  tags: [termination]
+  difficulty: 3
+  prompt: "What behavior signals that an agent is stuck rather than progressing? (a few words)"
+  answer:
+    regex: '^(repeat(s|ed|ing)?( actions?| states?| steps?)?|repeated action|repeated state|no progress|no-progress|same (action|state)( repeated| again)?|oscillation|oscillating|looping|loop|revisiting( the)? same state)$'
+    normalize: true
+
+- id: fe-risky-action-guard
+  type: text_input
+  tags: [guardrails]
+  difficulty: 3
+  prompt: "Name one guardrail for a high-risk or irreversible agent action. (a few words)"
+  answer:
+    regex: '^(human( |-)in( |-)the( |-)loop|hitl|human confirmation|confirmation|confirm|approval|human approval|allow-?list|allowlist|allow list|escalation|escalate to( a)? human|circuit breaker)$'
+    normalize: true

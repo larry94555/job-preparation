@@ -1,0 +1,108 @@
+# Multiple choice
+- id: mc-silent-vs-loud
+  type: multiple_choice
+  tags: [failures]
+  difficulty: 3
+  prompt: "Why is a silent failure often more dangerous in production than a loud one?"
+  options:
+    - { text: "It returns a plausible-looking wrong answer without throwing, so nothing alerts and users trust it", correct: true }
+    - { text: "It always crashes the whole service immediately" }
+    - { text: "It is easier to reproduce than a loud crash" }
+    - { text: "It fires a pager alert every time it happens" }
+  explanation: "A loud failure raises an exception you can catch and alert on. A silent failure — a hallucinated citation, a stale answer, a drifted eval — emits a confident, well-formed response that no exception or status code flags, so it corrodes trust before anyone notices."
+
+- id: mc-failure-catalog
+  type: multiple_choice
+  tags: [failures]
+  difficulty: 2
+  prompt: "Which of these is a classic LLM-system production failure mode?"
+  options:
+    - { text: "A hallucinated tool call — the model invents a function or arguments that don't exist", correct: true }
+    - { text: "The disk filling up because of log rotation settings" }
+    - { text: "A load balancer health check timing out on deploy" }
+    - { text: "A TLS certificate expiring on the API gateway" }
+  explanation: "Hallucinated tool calls, malformed JSON, stale retrieval, runaway agents, and silent eval regressions are LLM-specific failure modes. The others are generic infra failures, not properties of the model layer."
+
+- id: mc-detect-mitigate-prevent
+  type: multiple_choice
+  tags: [detection]
+  difficulty: 3
+  prompt: "In the detect → mitigate → prevent framing, what distinguishes *detection* from *mitigation*?"
+  options:
+    - { text: "Detection surfaces that a failure happened; mitigation limits its blast radius once detected", correct: true }
+    - { text: "Detection stops the failure from ever occurring; mitigation logs it" }
+    - { text: "They are the same thing described at different layers" }
+    - { text: "Mitigation runs offline in CI; detection only runs offline" }
+  explanation: "Detection is knowing a failure occurred (validators, freshness checks, eval monitors). Mitigation is containing the damage after detection (fallbacks, budgets, circuit breakers). Prevention reduces the likelihood up front (schemas, TTLs, CI gates)."
+
+- id: mc-malformed-json-handling
+  type: multiple_choice
+  tags: [mitigation]
+  difficulty: 3
+  prompt: "The standard pattern for handling a model that returns malformed JSON is:"
+  options:
+    - { text: "Validate against a schema, attempt a repair/re-ask, then fall back to a safe default", correct: true }
+    - { text: "Retry the identical prompt forever until it parses" }
+    - { text: "Ship the raw string downstream and let the consumer deal with it" }
+    - { text: "Silently swallow the error and return an empty object" }
+  explanation: "Validate-repair-fallback: parse and validate against the schema, and on failure re-ask (often with the error message) or repair, then degrade to a safe default rather than crashing or emitting garbage downstream."
+
+- id: mc-stale-retrieval-detect
+  type: multiple_choice
+  tags: [detection]
+  difficulty: 3
+  prompt: "How do you detect *stale retrieval* — a RAG answer grounded in out-of-date documents?"
+  options:
+    - { text: "Attach timestamps/versions to chunks and check freshness (TTL) at retrieval time", correct: true }
+    - { text: "Increase the temperature so the model paraphrases more" }
+    - { text: "Only measure end-to-end latency of the retrieval call" }
+    - { text: "Count the number of tokens in the retrieved context" }
+  explanation: "Stale retrieval is silent — the pipeline runs fine but returns old facts. You catch it by stamping chunks with a timestamp/version and enforcing a freshness threshold (TTL), flagging or refusing when the source is too old."
+
+- id: mc-runaway-agent
+  type: multiple_choice
+  tags: [mitigation]
+  difficulty: 3
+  prompt: "A *runaway agent* loops or spends without bound. Which pair of controls directly contains it?"
+  options:
+    - { text: "A step/token/cost budget plus loop detection that trips when the agent repeats states", correct: true }
+    - { text: "A larger context window and a bigger model" }
+    - { text: "Higher temperature and more tools" }
+    - { text: "Disabling logging to reduce overhead" }
+  explanation: "Runaway agents are contained by hard budgets (max steps, tokens, or dollars) and loop detection (spotting repeated actions/states), so an agent that gets stuck is halted instead of burning cost indefinitely."
+
+- id: mc-silent-regression
+  type: multiple_choice
+  tags: [prevention]
+  difficulty: 4
+  prompt: "A prompt tweak quietly drops answer quality but nothing errors. What primarily prevents shipping this *silent eval regression*?"
+  options:
+    - { text: "A CI eval gate that scores a fixed set and blocks merge when scores drop below a threshold", correct: true }
+    - { text: "Manual spot-checking of a few outputs by whoever is on call" }
+    - { text: "Raising the request timeout so slow answers still return" }
+    - { text: "Adding more retries around the model call" }
+  explanation: "Silent regressions don't throw, so runtime alerting misses them. A CI eval gate scores each change against a held-out set and fails the build when quality drops, catching the regression before it reaches production."
+
+- id: mc-canary
+  type: multiple_choice
+  tags: [prevention]
+  difficulty: 3
+  prompt: "What is the role of a *canary* deployment for an LLM change?"
+  options:
+    - { text: "Route a small slice of live traffic to the new version and watch metrics before full rollout", correct: true }
+    - { text: "Run the model at temperature 0 so it is deterministic" }
+    - { text: "Cache all responses so the new version is never actually called" }
+    - { text: "Replace the eval suite with production traffic entirely" }
+  explanation: "A canary exposes the change to a small percentage of real traffic and compares quality/latency/cost signals against the baseline, so a regression that offline evals missed shows up on a limited blast radius before a full rollout."
+
+- id: mc-runsafely-wrapper
+  type: multiple_choice
+  tags: [mitigation]
+  difficulty: 4
+  prompt: "A `runSafely` wrapper that composes guards (schema validation, freshness check, budget, fallback) around a model call mainly buys you:"
+  options:
+    - { text: "Layered defense — each guard catches a different failure mode and degrades gracefully instead of crashing", correct: true }
+    - { text: "A guarantee the model never produces a wrong answer" }
+    - { text: "Elimination of the need for any evals" }
+    - { text: "Lower token cost on every successful call" }
+  explanation: "Composing guards gives layered (defense-in-depth) coverage: validation catches malformed output, freshness catches stale retrieval, budgets catch runaway loops, and a fallback ensures a safe degraded response — no single guard has to catch everything."

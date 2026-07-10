@@ -1,0 +1,33 @@
+# Calibration for eval-observability-essay (exemplars target essay-why-traces).
+skill: eval-observability-essay
+cases:
+  - answer: >-
+      Request-level metrics aren't enough because one agent turn fans out into many steps — planning,
+      tool calls, retrieval, retries, and sub-model calls — so a single latency number hides where the
+      time, tokens, and errors actually go. A trace is the whole request and spans are the nested units
+      of work, forming a tree over the call graph, so you can pinpoint the slow or failing step. A
+      correlation ID propagated through every step and service stitches those spans into one trace even
+      across process boundaries, which also lets you roll token counts and cost up the trace.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  - answer: "Metrics are fine. Just watch the CPU temperature and the server's disk usage and you'll know everything about the agent."
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  - answer: >-
+      Traces are better than plain metrics because an agent does a lot of steps and you want to see
+      them, so tracing helps you understand what happened during the request.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
+
+  - answer: >-
+      You need spans because a span is the whole end-to-end request and the trace is just one small
+      step inside it, and the correlation ID encrypts the prompt so it can never be logged. That is why
+      request metrics are enough on their own.
+    expect:
+      verdict: fail
+      checks: { technically_correct: false }

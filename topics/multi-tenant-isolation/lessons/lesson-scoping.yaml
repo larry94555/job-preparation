@@ -1,0 +1,18 @@
+id: lesson-scoping
+title: "Retrieval scoping & contamination"
+material: retrieval-scoping.md
+segments:
+  - present: retrieval-scoping-and-authorization-filters
+  - check: mc-retrieval-scoping
+  - check: mc-retrieval-filter-timing
+  - check: mc-shared-vs-pertenant-index
+  - check: cloze-authz-filter
+  - check: cloze-namespace
+  - check: fe-retrieval-defense
+  - present: cross-user-context-contamination-vectors
+  - check: mc-context-contamination
+  - check: mc-log-leak
+  - check: cloze-context-bleed
+  - check: fe-contamination-vector
+  - apply: essay-retrieval-scoping
+  - apply: essay-contamination

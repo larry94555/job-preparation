@@ -1,0 +1,37 @@
+# Essay
+- id: essay-cascade-design
+  type: essay
+  length: short
+  tags: [routing]
+  difficulty: 3
+  prompt: "A teammate wants to send every request to your most powerful (and most expensive) model 'to be safe.' Explain how a cheap→strong model cascade with a quality gate would serve most requests better, and what could go wrong."
+  eval_skill: eval-routing-essay
+  reference_points:
+    - "Most requests are easy; a cheap, fast model handles them well, so routing everything to the strong model wastes cost and adds latency for no quality gain."
+    - "A cascade tries the cheap model first and escalates to the stronger model only when a quality gate (confidence, verifier, or self-check) rejects the cheap answer."
+    - "Risks: a mis-tuned quality gate either passes bad cheap answers or escalates too often (losing the savings), and the extra cascade hop adds latency to the hard cases."
+
+- id: essay-fallback-chain
+  type: essay
+  length: long
+  tags: [fallback, resilience]
+  difficulty: 4
+  prompt: "Design a fallback chain for a chat feature whose primary model provider is sometimes slow, rate-limited, or down. Explain how circuit breakers, retries with backoff, and hedged requests fit together, and what each contributes."
+  eval_skill: eval-routing-essay
+  reference_points:
+    - "On timeouts, 429s, or 5xx errors, fall back to an alternate provider/model rather than hard-failing the user."
+    - "A circuit breaker trips open after repeated failures so calls fail fast to the fallback instead of piling retries onto a struggling provider, then half-opens to test recovery."
+    - "Retries use exponential backoff with jitter so many clients don't retry in lockstep and re-overload the provider."
+    - "Hedged requests send a duplicate to a backup after a short delay and take the first response, cutting tail (p99) latency at the cost of extra spend."
+
+- id: essay-degraded-ux
+  type: essay
+  length: short
+  tags: [degraded]
+  difficulty: 3
+  prompt: "Your fallback path uses a weaker model. Explain why silently substituting it is an antipattern and describe an honest degraded-mode UX."
+  eval_skill: eval-routing-essay
+  reference_points:
+    - "Silent substitution hides a real quality change: answers may be worse or inconsistent with prior ones, users can't calibrate trust, and operators can't distinguish degraded output from a bug."
+    - "Honest degradation keeps the product usable but transparent — a notice/banner, lowered-confidence indicator, or disabling features that the weaker path can't support."
+    - "The system should also emit signals/metrics (fallback rate) so operators see the degradation on dashboards, not just users."

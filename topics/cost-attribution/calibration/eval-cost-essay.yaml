@@ -1,0 +1,32 @@
+# Calibration for eval-cost-essay (exemplars target essay-per-model-wrong).
+skill: eval-cost-essay
+cases:
+  - answer: >-
+      Cost per model is the wrong granularity because it aggregates every use of a model and hides
+      where the spend actually accrues — you can't tell which feature, workflow, or tenant is driving
+      the bill, so you don't know where to optimize. Instead attribute cost to the dimensions the
+      business cares about: feature, workflow, tenant, and user journey. You do that by attaching
+      attribution tags at the entry point and propagating them through the downstream retrieval,
+      tool, and generation calls, so every cost record rolls up by dimension.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  - answer: "Per-model cost is fine and the cheapest model is always the right choice, so just switch models."
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  - answer: >-
+      Per-model totals don't really tell you where the money is going, so you should break the cost
+      down by the parts of the product that are using it instead.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
+
+  - answer: >-
+      Cost per model is wrong because tagging spend by feature and tenant makes the provider charge
+      you less per token, and propagating tags removes retries so there is nothing left to attribute.
+    expect:
+      verdict: fail
+      checks: { technically_correct: false }

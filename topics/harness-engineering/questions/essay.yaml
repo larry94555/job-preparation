@@ -1,0 +1,38 @@
+# Essay
+- id: essay-boundary-explain
+  type: essay
+  length: short
+  tags: [boundary]
+  difficulty: 3
+  prompt: "A teammate says 'we just need better prompts.' Explain what lives in the harness (not the prompt) and why prompting alone plateaus."
+  eval_skill: eval-harness-essay
+  reference_points:
+    - "Harness owns tools, argument validation, retries/idempotency, verification, permissions, loop control."
+    - "Prompting shapes reasoning but cannot supply tools, validation, retries, or verification."
+    - "Tail/structural failures need harness code, not rewording — hence the plateau."
+
+- id: essay-verify-why
+  type: essay
+  length: short
+  tags: [verification]
+  difficulty: 3
+  prompt: "Why is verification the harness's job rather than trusting the model to check its own work?"
+  eval_skill: eval-harness-essay
+  reference_points:
+    - "A model's claim ('I fixed it') is not a fact; it must be checked against the real world."
+    - "Self-review is unreliable — the same reasoning that erred tends to miss the error."
+    - "Verification uses deterministic checks (tests / diff / run), which are a harness responsibility."
+
+- id: essay-design-harness
+  type: essay
+  length: long
+  tags: [control]
+  difficulty: 4
+  prompt: "Design the harness responsibilities for a code-editing agent: tools, verification, permissions, loop control, and recovery."
+  eval_skill: eval-harness-essay
+  reference_points:
+    - "Tools: read/write file, run tests/commands, with a typed contract and argument validation."
+    - "Permissions: read vs. write separation; confirmation for destructive actions."
+    - "Loop control: think→act→observe with step/tool budgets, duplicate-call and no-progress guards, termination."
+    - "Verification: run tests / git diff after edits; don't trust, check."
+    - "Recovery: turn failures into next actions; idempotent mutations; escalate when stuck."

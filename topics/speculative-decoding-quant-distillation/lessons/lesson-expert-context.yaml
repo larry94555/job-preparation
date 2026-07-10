@@ -1,0 +1,10 @@
+id: lesson-expert-context
+title: "Expert context: papers, frontier & interview"
+material: expert-context.md
+segments:
+  - present: papers-people-and-the-frontier
+  - check: mc-canon-spec-drafts
+  - present: interviewing-on-speculative-decoding-quantization-distillation
+  - check: mc-interview-spec-lever
+  - apply: essay-spec-literature
+  - apply: essay-spec-interview

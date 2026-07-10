@@ -1,0 +1,75 @@
+# Deep-dive — architecture judgment (code-review MCs + an L4 essay)
+
+- id: mc-review-batch-static-variable
+  type: multiple_choice
+  tags: [paged-attention, review]
+  difficulty: 4
+  prompt: >-
+    A serving design doc says: "We use static batching with a batch size of 32. Requests have output
+    lengths ranging from 20 to 2000 tokens." Reviewing it, what is the most important problem?
+  options:
+    - { text: "Static batching under highly variable output lengths causes head-of-line blocking: the whole batch waits for the longest request while short ones idle their slots — switch to continuous batching", correct: true }
+    - { text: "A batch size of 32 is too small; raising it to 256 fixes the latency" }
+    - { text: "The output lengths should be padded to 2000 tokens so the batch is rectangular" }
+    - { text: "Nothing is wrong; static batching is optimal whenever the batch size is fixed" }
+  explanation: >-
+    With output lengths spanning 20–2000 tokens, a static batch runs until its single longest request
+    finishes, so short requests sit in completed slots wasting GPU cycles — classic head-of-line
+    blocking. Continuous (iteration-level) batching evicts finished requests and admits queued ones
+    per decoding step, keeping the batch full. Raising the batch size or padding does not address the
+    frozen-membership problem.
+
+- id: mc-review-batch-contiguous-kv
+  type: multiple_choice
+  tags: [paged-attention, review]
+  difficulty: 4
+  prompt: >-
+    A multi-tenant server enables continuous batching but still allocates one contiguous KV buffer of
+    `max_seq_len` per admitted sequence. Concurrency stays low and the GPU OOMs well below its
+    expected batch size. Rate this design and pick the best fix.
+  options:
+    - { text: "Prototype-grade: contiguous max-length reservation wastes most of HBM to fragmentation and over-reservation, capping occupancy — switch to paged fixed-size KV blocks allocated on demand", correct: true }
+    - { text: "Production-ready: pre-reserving max length guarantees no sequence ever runs out of KV cache" }
+    - { text: "The bug is continuous batching itself; revert to dynamic batching to save memory" }
+    - { text: "Lower max_seq_len so each contiguous buffer is smaller and more sequences fit" }
+  explanation: >-
+    Continuous batching mixes sequences of varying, still-growing lengths, but contiguous max-length
+    buffers reserve worst-case memory per sequence, so the pool fills with mostly-empty reservations
+    and occupancy stays low. Paged attention stores KV in fixed-size non-contiguous blocks allocated
+    on demand, nearly eliminating that waste — it is the enabler that makes continuous batching pack
+    the GPU. Lowering max_seq_len just truncates long requests; reverting the scheduler abandons the
+    throughput win.
+
+- id: mc-review-batch-slo-blind
+  type: multiple_choice
+  tags: [paged-attention, review]
+  difficulty: 4
+  prompt: >-
+    A PR raises the max running batch size until "aggregate tokens/sec stopped increasing," reports a
+    higher throughput number, and ships it. The product has a p95 TPOT SLO of 50 ms. What is the
+    strongest objection?
+  options:
+    - { text: "It optimizes raw throughput under a latency SLO (a batch-blind SLO): past the goodput knee, extra throughput comes from requests that violate p95 TPOT — tune to the point where goodput, not throughput, stops improving", correct: true }
+    - { text: "Throughput can never increase with batch size, so the measurement is fabricated" }
+    - { text: "The SLO should be removed; p95 TPOT is not a meaningful serving metric" }
+    - { text: "Batch size has no effect on latency, so the SLO is irrelevant to this change" }
+  explanation: >-
+    Raising batch size lifts aggregate throughput but adds per-request contention, so TPOT and p95
+    rise. Optimizing raw throughput ignores the SLO: beyond the goodput knee the extra tokens/sec are
+    delivered by requests that miss their latency target, so throughput climbs while goodput falls.
+    The correct objective under an SLO is goodput — completed work that still meets the target — and
+    batch size should be pushed only until goodput stops improving.
+
+- id: essay-batch-deep-dive
+  type: essay
+  length: long
+  tags: [paged-attention, review]
+  difficulty: 4
+  prompt: >-
+    You are the reviewer on a batching-and-scheduling design for a multi-tenant, latency-SLO serving
+    deployment on fixed GPU memory. Write a design review: walk the levers (batch formation,
+    scheduling granularity, KV memory layout, operating batch size, SLO awareness), give an explicit
+    tradeoff for each, and state what would move the design from demo-ready to production-ready. Call
+    out at least two antipatterns and explain how you would choose the operating batch size under the
+    SLO.
+  eval_skill: eval-batching-essay

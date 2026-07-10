@@ -1,0 +1,9 @@
+id: safety-engineering
+title: "Safety Engineering"
+description: "Defend LLM systems against prompt injection and data exfiltration, and enforce permission boundaries so tools and context can't be abused via crafted input."
+pass_threshold: 0.8
+tag_weights:
+  injection: 1.2
+  boundary: 1.0
+  leakage: 1.2
+  permission: 1.2

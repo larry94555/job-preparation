@@ -1,0 +1,45 @@
+# Missing term (cloze)
+- id: cloze-span
+  type: text_input
+  tags: [tracing]
+  difficulty: 1
+  prompt: "One unit of work within a trace — a single model call, tool call, or retrieval — is called a ____."
+  answer:
+    regex: '^span$'
+    normalize: true
+
+- id: cloze-correlation
+  type: text_input
+  tags: [tracing]
+  difficulty: 2
+  prompt: "The identifier propagated through every step so their spans can be joined into one trace is the ____ ID (two words: adjective before 'ID')."
+  answer:
+    regex: '^correlation$'
+    normalize: true
+
+- id: cloze-ttft
+  type: text_input
+  tags: [signals]
+  difficulty: 2
+  prompt: "The latency metric for how long until the model streams its first token is abbreviated ____ (four letters)."
+  answer:
+    regex: '^ttft$'
+    normalize: true
+
+- id: cloze-canary
+  type: text_input
+  tags: [drift]
+  difficulty: 2
+  prompt: "Routing a small slice of live traffic to a new prompt or model version to compare signals before full rollout is called a ____ release."
+  answer:
+    regex: '^canary$'
+    normalize: true
+
+- id: cloze-redaction
+  type: text_input
+  tags: [capture]
+  difficulty: 3
+  prompt: "Removing or masking PII from prompts before they are written to the trace store is called ____."
+  answer:
+    regex: '^redaction$'
+    normalize: true

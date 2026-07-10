@@ -1,0 +1,10 @@
+id: lesson-expert-context
+title: "Expert context: papers, frontier & interview"
+material: expert-context.md
+segments:
+  - present: papers-people-and-the-frontier
+  - check: mc-canon-rev-ragas
+  - present: interviewing-on-retrieval-evals
+  - check: mc-interview-rev-localize
+  - apply: essay-rev-literature
+  - apply: essay-rev-interview

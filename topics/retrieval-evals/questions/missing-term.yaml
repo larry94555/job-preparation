@@ -1,0 +1,66 @@
+# Missing term (cloze) + parameterized numeric
+- id: cloze-recall
+  type: text_input
+  tags: [metrics]
+  difficulty: 1
+  prompt: "The fraction of all relevant documents that appear in the top-k results is called ____@k."
+  answer:
+    regex: '^recall$'
+    normalize: true
+
+- id: cloze-precision
+  type: text_input
+  tags: [metrics]
+  difficulty: 1
+  prompt: "The fraction of the top-k retrieved results that are relevant is called ____@k."
+  answer:
+    regex: '^precision$'
+    normalize: true
+
+- id: cloze-mrr
+  type: text_input
+  tags: [metrics]
+  difficulty: 2
+  prompt: "The metric that averages 1/(rank of the first relevant result) across queries is abbreviated ____ (three letters)."
+  answer:
+    regex: '^mrr$'
+    normalize: true
+
+- id: cloze-grounding
+  type: text_input
+  tags: [grounding]
+  difficulty: 2
+  prompt: "When the answer only makes claims the retrieved context actually supports, we say it is ____ in the context. (one word)"
+  answer:
+    regex: '^(grounded|faithful)$'
+    normalize: true
+
+# Parameterized numeric: compute recall@k as a decimal from relevant/retrieved counts.
+# The grader substitutes only bare {{name}} placeholders into `equals`, so the total
+# is fixed at 10 in the prompt and `found` is the number of the 10 relevant docs that
+# landed in the top-k. recall@k = found / 10, so the expected decimal is 0.{{found}}
+# when found < 10 (and 1.0 when found = 10). We keep found in [1,9] so the answer is
+# exactly the single-digit decimal 0.{{found}} — a bare-parameter substitution.
+- id: num-recall-at-k-decimal
+  type: text_input
+  tags: [metrics]
+  difficulty: 3
+  parameters:
+    found: { random_int: [1, 9] }
+  prompt: "A query has 10 relevant documents in the corpus. Of those, {{found}} appear in the top-k retrieved results. Compute recall@k as a decimal (e.g. 0.3)."
+  answer:
+    equals: "0.{{found}}"
+    numeric_tolerance: 0.001
+
+# Parameterized numeric: identify the recall@k numerator from stated counts.
+- id: num-recall-numerator
+  type: text_input
+  tags: [metrics]
+  difficulty: 2
+  parameters:
+    found: { random_int: [1, 8] }
+    missed: { random_int: [1, 5] }
+  prompt: "recall@k = (relevant docs found in the top-k) / (total relevant docs). If {{found}} relevant docs appear in the top-k and {{missed}} relevant docs are missed, what number is the NUMERATOR of recall@k?"
+  answer:
+    equals: "{{found}}"
+    numeric_tolerance: 0

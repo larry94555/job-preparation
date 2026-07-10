@@ -1,0 +1,8 @@
+id: inference-stack-tradeoffs
+title: "Inference-Stack Tradeoffs"
+description: "A serving stack has no free lunch: every layer — batching, quantization, caching, speculative decoding, fallback — trades among latency, quality, cost, and reliability. You anchor the design on SLOs and decompose the budget, not on any single metric."
+pass_threshold: 0.8
+tag_weights:
+  tradeoffs: 1.2
+  levers: 1.2
+  slos: 1.0

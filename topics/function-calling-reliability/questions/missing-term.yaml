@@ -1,0 +1,45 @@
+# Missing term (cloze)
+- id: cloze-contract
+  type: text_input
+  tags: [contract]
+  difficulty: 1
+  prompt: "Treating a tool as an API means its schema is a ____ the caller must satisfy."
+  answer:
+    regex: '^contract$'
+    normalize: true
+
+- id: cloze-schema
+  type: text_input
+  tags: [contract]
+  difficulty: 2
+  prompt: "The typed description of a tool's arguments, types, and shape is its ____."
+  answer:
+    regex: '^(tool )?schema$'
+    normalize: true
+
+- id: cloze-idempotent
+  type: text_input
+  tags: [idempotency]
+  difficulty: 2
+  prompt: "An operation that is safe to retry because repeating it has no extra effect is ____."
+  answer:
+    regex: '^idempotent$'
+    normalize: true
+
+- id: cloze-idempotency-key
+  type: text_input
+  tags: [idempotency]
+  difficulty: 3
+  prompt: "A client-supplied ____ key lets a server dedupe retries and return the stored result."
+  answer:
+    regex: '^idempotency$'
+    normalize: true
+
+- id: cloze-validate
+  type: text_input
+  tags: [validation]
+  difficulty: 2
+  prompt: "Before executing a tool call, the harness must ____ the arguments against the schema."
+  answer:
+    regex: '^validate$'
+    normalize: true

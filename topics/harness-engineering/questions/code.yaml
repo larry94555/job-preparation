@@ -1,0 +1,20 @@
+# Coding exercise — engine type: code (graded by tests + concept skill)
+- id: code-harness-loop
+  type: code
+  language: typescript
+  tags: [loop]
+  difficulty: 3
+  prompt: >-
+    Implement `runHarnessLoop(step, opts)`. `step(i)` returns `{ action, done }` — the i-th proposed
+    action (a string) and whether the task is complete. `opts` is `{ maxSteps }`. Each iteration: stop
+    with `"complete"` if done; stop with `"duplicate-call"` if the action equals the previous action;
+    stop with `"budget"` when the step count reaches maxSteps. Return `{ steps, stoppedBy }`.
+  starter_file: exercises/harness-loop/starter.ts
+  test_file: exercises/harness-loop/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-harness-code
+  concept_checks:
+    must_use: ["duplicate-call guard (same action twice)", "max-steps budget", "returns the stop reason"]
+    avoid_antipattern: ["unbounded loop", "no duplicate detection"]

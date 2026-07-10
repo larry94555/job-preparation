@@ -1,0 +1,10 @@
+id: lesson-build-accepted-tokens
+title: "Build it: speculative-decoding acceptance"
+material: build-accepted-tokens.md
+segments:
+  - present: draft-verify-accept
+  - check: mc-lossless
+  - present: counting-accepted-tokens
+  - check: mc-tokens-per-step
+  - apply: code-accepted-tokens
+  - apply: essay-lever-choice

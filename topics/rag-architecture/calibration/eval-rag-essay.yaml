@@ -1,0 +1,30 @@
+# Calibration for eval-rag-essay (exemplars target essay-when-rag).
+skill: eval-rag-essay
+cases:
+  - answer: >-
+      RAG is the better choice here. The policy docs change constantly, and fine-tuning bakes
+      knowledge into the weights — every update would mean re-training, and fine-tuning teaches
+      behavior more than facts anyway. With RAG you retrieve the relevant policy chunks at query time
+      and put them in context, so answers stay current and you can cite the exact source document.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  - answer: "Fine-tuning is always better because a bigger model just knows more."
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  - answer: >-
+      RAG is probably better since the documents keep changing and you'd rather not keep retraining
+      the model.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
+
+  - answer: >-
+      Use RAG — it retrains the model on the policy docs on every query so the weights are always
+      current, which is why it's faster than fine-tuning.
+    expect:
+      verdict: fail
+      checks: { technically_correct: false }

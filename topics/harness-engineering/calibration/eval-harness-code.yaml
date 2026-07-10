@@ -1,0 +1,23 @@
+skill: eval-harness-code
+cases:
+  - answer: >-
+      tests_passed=true. Tracks prev action and step count; each iteration gets {action,done}, returns
+      "complete" on done, "duplicate-call" when action===prev, "budget" when steps>=maxSteps; returns
+      { steps, stoppedBy }.
+    expect:
+      verdict: pass
+      checks: { duplicate_call_guard: true, max_steps_budget: true, stops_on_done: true, returns_reason: true }
+
+  - answer: >-
+      tests_passed=true, but never compares to the previous action — no duplicate-call guard, so a
+      model repeating the same action just runs to the budget.
+    expect:
+      verdict: fail
+      checks: { duplicate_call_guard: false, max_steps_budget: true, stops_on_done: true, returns_reason: true }
+
+  - answer: >-
+      tests_passed=true. Detects duplicates and stops on done and reports the reason, but has no
+      maxSteps cap — a stream of distinct non-terminating actions would loop forever.
+    expect:
+      verdict: borderline
+      checks: { duplicate_call_guard: true, max_steps_budget: false, stops_on_done: true, returns_reason: true }

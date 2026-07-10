@@ -1,0 +1,18 @@
+sections:
+  - id: sec-injection-boundaries
+    title: "Injection & trust boundaries"
+    lessons: [lesson-injection, lesson-boundary, lesson-expert-context, lesson-deep-dive]
+    assessment:
+      title: "Section 1 — Injection & boundaries"
+      from_tags: [injection, boundary]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-leakage-permissions
+    title: "Data leakage & permission boundaries"
+    lessons: [lesson-permission, lesson-build-authz]
+    assessment:
+      title: "Section 2 — Leakage & permissions"
+      from_tags: [leakage, permission]
+      count: 5
+      pass_threshold: 0.8

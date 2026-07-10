@@ -1,0 +1,10 @@
+id: lesson-build-run-safely
+title: "Build it: a runSafely guard suite"
+material: build-run-safely.md
+segments:
+  - present: composing-guards
+  - check: mc-all-guards-pass
+  - present: bounding-and-falling-back
+  - check: mc-why-bounded
+  - apply: code-run-safely
+  - apply: essay-failure-playbook

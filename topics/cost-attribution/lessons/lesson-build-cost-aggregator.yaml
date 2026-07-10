@@ -1,0 +1,10 @@
+id: lesson-build-cost-aggregator
+title: "Build it: a cost aggregator"
+material: build-cost-aggregator.md
+segments:
+  - present: rolling-up-cost-by-feature
+  - check: mc-cost-per-success-denominator
+  - present: cost-per-successful-task
+  - check: mc-why-per-success-higher
+  - apply: code-cost-aggregator
+  - apply: essay-cost-attribution-system

@@ -1,0 +1,41 @@
+- id: mc-unknown-tool
+  type: multiple_choice
+  tags: [idempotency]
+  difficulty: 2
+  prompt: "When the model calls a tool that doesn't exist, the dispatcher should:"
+  options:
+    - { text: "Return a structured error the agent can recover from — not throw", correct: true }
+    - { text: "Throw an exception and end the turn" }
+    - { text: "Silently run the closest-named tool" }
+    - { text: "Execute it anyway with empty arguments" }
+  explanation: "Unknown/hallucinated tools are expected input; a structured error keeps the agent recoverable, an exception crashes it."
+
+- id: mc-idempotency-dedupe
+  type: multiple_choice
+  tags: [idempotency]
+  difficulty: 3
+  prompt: "An idempotency key on a mutating tool ensures that:"
+  options:
+    - { text: "A retried call with the same key doesn't apply the side effect twice", correct: true }
+    - { text: "The tool runs faster on the second call" }
+    - { text: "Read-only tools are cached forever" }
+    - { text: "Arguments are validated automatically" }
+  explanation: "The key lets the dispatcher dedupe: a repeat mutating call returns the stored result instead of re-running the handler."
+
+- id: essay-tool-layer
+  type: essay
+  length: long
+  tags: [idempotency]
+  difficulty: 4
+  prompt: >-
+    Project: design a tool-execution layer for an agent with mutating tools. Cover typed contracts and
+    argument validation, handling unknown/hallucinated tools, idempotency for safe retries,
+    permissioning/confirmation for destructive actions, and model-facing error design (errors the
+    model can act on). Include a short test plan.
+  eval_skill: eval-funccall-essay
+  reference_points:
+    - "Typed tool contracts: name, args schema, side-effect class; validate args before executing."
+    - "Unknown/hallucinated tools and invalid args return structured errors, never crash."
+    - "Idempotency keys make mutating tools safe to retry (exactly-once effect)."
+    - "Permissioning: read/write separation, confirmation gates for destructive actions, least privilege."
+    - "Model-facing errors are actionable; test plan covers invalid args, unknown tool, duplicate-call dedupe."

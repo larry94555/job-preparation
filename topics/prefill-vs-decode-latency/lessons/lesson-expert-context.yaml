@@ -1,0 +1,10 @@
+id: lesson-expert-context
+title: "Expert context: papers, frontier & interview"
+material: expert-context.md
+segments:
+  - present: papers-people-and-the-frontier
+  - check: mc-canon-pd-technique
+  - present: interviewing-on-prefill-vs-decode-latency
+  - check: mc-interview-pd-signal
+  - apply: essay-pd-literature
+  - apply: essay-pd-interview

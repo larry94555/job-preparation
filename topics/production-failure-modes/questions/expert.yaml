@@ -1,0 +1,74 @@
+# Literature/canon (WS1) + interview (WS2) — tags [canon]/[interview] are NOT in any section's
+# from_tags, so these don't enter the deterministic section-assessment pools.
+- id: mc-canon-fail-sre
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Postmortems and error budgets — the reliability vocabulary this topic borrows — come from which discipline/book?"
+  options:
+    - { text: "The Google SRE book (site reliability engineering)", correct: true }
+    - { text: "The OWASP LLM Top 10" }
+    - { text: "The vLLM/PagedAttention paper" }
+    - { text: "The RAGAS metrics paper" }
+  explanation: "Blameless postmortems and error budgets come from the reliability-engineering tradition captured in the Google SRE book; the OWASP LLM Top 10 is the LLM risk checklist, not the source of these practices."
+
+- id: mc-canon-fail-owasp
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Which resource is the field checklist of LLM-specific risks that this topic points to when enumerating what can go wrong?"
+  options:
+    - { text: "The OWASP LLM Top 10", correct: true }
+    - { text: "The Google SRE book" }
+    - { text: "The BEIR benchmark" }
+    - { text: "The HELM benchmark" }
+  explanation: "The OWASP LLM Top 10 is the LLM risk checklist; the SRE book supplies reliability practices (postmortems/error budgets), and BEIR/HELM are evaluation benchmarks."
+
+- id: mc-interview-fail-silent
+  type: multiple_choice
+  tags: [interview]
+  difficulty: 3
+  prompt: "In an interview, why are silent regressions considered more dangerous than loud errors?"
+  options:
+    - { text: "A loud error pages someone immediately, while a silent quality drop keeps returning successful responses and ships degraded answers to users unnoticed", correct: true }
+    - { text: "Silent regressions always cost more compute than loud errors" }
+    - { text: "Loud errors cannot be caught by observability tools" }
+    - { text: "Silent regressions only occur during canary deploys" }
+  explanation: "Loud errors (crashes, 500s) trigger alerts and get fixed fast; silent regressions still return 200s, so degraded quality reaches users for weeks unless you instrument quality — not just availability."
+
+- id: essay-fail-literature
+  type: essay
+  length: long
+  tags: [canon]
+  difficulty: 4
+  prompt: >-
+    Production failure modes is a synthesis topic with no single founding paper. Explain the
+    influences it draws on — the reliability tradition of the Google SRE book (postmortems, error
+    budgets), the OWASP LLM Top 10 risk checklist, and the guard patterns imported from the
+    structured-output, agent, and eval topics. Say what each contributes and name the tooling
+    (eval gates, guardrails, observability + alerting) that implements the current detect → mitigate
+    → prevent posture.
+  eval_skill: eval-failuremodes-essay
+  reference_points:
+    - "This topic synthesizes the reliability tradition plus guard patterns from earlier topics — it introduces no new papers of its own."
+    - "Google SRE book: blameless postmortems and error budgets (a quantified failure allowance trading reliability against velocity)."
+    - "OWASP LLM Top 10: the field checklist of LLM-specific risks."
+    - "Guard patterns imported from earlier topics: validate-repair-fallback (structured output), budgets + loop detection (agent guardrails), CI eval gates (eval methodology)."
+    - "Tooling: eval gates, guardrails frameworks, observability + alerting stacks. SOTA = detect → mitigate → prevent (validate-repair-fallback, freshness/TTL, budgets/loop-detection, CI eval-gates, canaries)."
+
+- id: essay-fail-interview
+  type: essay
+  length: long
+  tags: [interview]
+  difficulty: 4
+  prompt: >-
+    You're in a senior interview and asked how you'd make an LLM system reliable. Walk through a
+    detect → mitigate → prevent playbook, explain why silent regressions are more dangerous than
+    loud errors, and show the signals (and avoid the red flags) an interviewer is listening for.
+  eval_skill: eval-failuremodes-essay
+  reference_points:
+    - "Silent regressions are worse than loud errors: a crash pages someone, but quietly degraded quality still returns 200s and reaches users for weeks — instrument quality, not just availability."
+    - "Detect: evals, canaries, observability/alerting to surface both failures and quality drift."
+    - "Mitigate: validate-repair-fallback for malformed output, freshness/TTL for stale data, budgets + loop-detection for runaway agents, honest degraded-mode UX."
+    - "Prevent: CI eval-gates to block regressions before release, blameless postmortems that close the loop so incidents don't recur."
+    - "Red flags: focusing on loud errors while ignoring silent regressions, no guardrails, no postmortems."

@@ -1,0 +1,36 @@
+# Free entry (short answer)
+- id: fe-golden-source
+  type: text_input
+  tags: [golden]
+  difficulty: 2
+  prompt: "Who or what should decide the expected output in a golden set? (one word)"
+  answer:
+    regex: '^(humans?|human|expert|experts|reviewer|reviewers)$'
+    normalize: true
+
+- id: fe-judge-bias
+  type: text_input
+  tags: [judge]
+  difficulty: 3
+  prompt: "Name one documented bias of an LLM judge."
+  answer:
+    regex: '^(position|order|verbosity|length|self|self-?preference|self-?bias)( bias)?$'
+    normalize: true
+
+- id: fe-adversarial-target
+  type: text_input
+  tags: [adversarial]
+  difficulty: 3
+  prompt: "Name one thing an adversarial eval suite deliberately targets."
+  answer:
+    regex: '^(edge cases?|failure modes?|prompt injection|injection|jailbreaks?|ambiguity|ambiguous inputs?|corner cases?)$'
+    normalize: true
+
+- id: fe-regression-frequency
+  type: text_input
+  tags: [regression]
+  difficulty: 2
+  prompt: "How often should the regression eval run to catch quality drops early? (one word/phrase)"
+  answer:
+    regex: '^(every change|every commit|on every change|per commit|per change|continuously|in ci|each pr|every pr)$'
+    normalize: true

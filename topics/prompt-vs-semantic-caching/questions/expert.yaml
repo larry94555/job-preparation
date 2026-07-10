@@ -1,0 +1,59 @@
+# Literature/canon (WS1) + interview (WS2) — tags [canon]/[interview] are NOT in any section's
+# from_tags, so these don't enter the deterministic section-assessment pools.
+- id: mc-canon-cache-semantic-origin
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Which open-source project popularized semantic caching for LLMs — looking up queries by embedding similarity and returning a stored response?"
+  options:
+    - { text: "GPTCache", correct: true }
+    - { text: "Redis" }
+    - { text: "FlashAttention" }
+    - { text: "ColBERT" }
+  explanation: "GPTCache (Zilliz) popularized semantic caching for LLMs. Redis is a store used underneath, FlashAttention is an attention kernel, and ColBERT is retrieval — none is the semantic-cache project."
+
+- id: mc-interview-cache-tell-apart
+  type: multiple_choice
+  tags: [interview]
+  difficulty: 3
+  prompt: "In an interview, the signal that separates candidates on prompt vs semantic caching is being able to:"
+  options:
+    - { text: "Tell the two caches apart — prefix caching reuses prefill on identical leading tokens, while semantic caching returns a stored response on an embedding-similarity match", correct: true }
+    - { text: "Recite the exact release year of each provider's caching feature" }
+    - { text: "Name the embedding model's parameter count" }
+    - { text: "List every vector database on the market" }
+  explanation: "The distinguishing signal is understanding the two caches' different mechanisms and risks: prefix caching only saves compute on an exact-prefix hit, while a semantic false-positive can return a wrong answer."
+
+- id: essay-cache-literature
+  type: essay
+  length: long
+  tags: [canon]
+  difficulty: 4
+  prompt: >-
+    Summarize the canon of prompt vs semantic caching. Explain semantic caching for LLMs (GPTCache)
+    and provider prompt/prefix caching, what each contributed, the tools that implement them, what
+    "layered caching" means today, and the open problems experts still argue about.
+  eval_skill: eval-caching-essay
+  reference_points:
+    - "Semantic caching for LLMs popularized by GPTCache (Zilliz, 2023): embedding-similarity lookup returning a stored response, backed by Redis/vector stores."
+    - "Provider prompt/prefix caching (Anthropic, OpenAI): matches exact leading tokens and reuses prefill compute — does not return a stored answer."
+    - "Tools: GPTCache, Redis/vector stores for the semantic side; provider prefix caching for the exact-prefix side."
+    - "SOTA is layered caching: an exact leading-token prefix cache in front of an embedding-similarity semantic cache, with safety guards."
+    - "Open problems: safe similarity thresholds, invalidation for semantic caches, and evaluating cache correctness."
+
+- id: essay-cache-interview
+  type: essay
+  length: long
+  tags: [interview]
+  difficulty: 4
+  prompt: >-
+    You're in a senior interview and asked to design a caching layer for an LLM application. Explain
+    how you'd tell prefix caching and semantic caching apart, reason about each one's risks and
+    savings, and describe the design — including the red flags you'd avoid.
+  eval_skill: eval-caching-essay
+  reference_points:
+    - "Prefix caching reuses prefill compute on identical leading tokens; semantic caching returns a stored response on an embedding-similarity match."
+    - "Risks/savings: a prefix hit only ever saves compute and can't return a wrong answer; a semantic false-positive can return a close-but-wrong answer."
+    - "Design: lead with an exact-prefix cache for compute savings, add a semantic cache with a safe threshold only where a slightly-off answer is acceptable; structure prompts as stable prefix + variable suffix."
+    - "Red flags: semantic cache on high-stakes answers, reordering that breaks prefix hits, tenant-blind cache keys."
+    - "Name GPTCache as prior art for the semantic side and provider prefix caching for the exact side."

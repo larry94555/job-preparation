@@ -1,0 +1,12 @@
+id: lesson-what-to-quantize
+title: "Weights vs. activations vs. KV cache"
+material: what-to-quantize.md
+segments:
+  - present: weights-vs-activations
+  - check: mc-activations-harder
+  - check: mc-weight-only-good
+  - check: cloze-outliers
+  - check: fe-harder-to-quant
+  - present: quantizing-the-kv-cache
+  - check: mc-kv-quant
+  - apply: essay-weight-vs-activation

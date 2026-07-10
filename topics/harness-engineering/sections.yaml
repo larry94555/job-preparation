@@ -1,0 +1,18 @@
+sections:
+  - id: sec-foundations
+    title: "Foundations: boundary & loop"
+    lessons: [lesson-boundary, lesson-loop, lesson-build-harness-loop, lesson-expert-context, lesson-deep-dive]
+    assessment:
+      title: "Section 1 — Boundary & loop"
+      from_tags: [boundary, loop]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-reliability
+    title: "Reliability: verification & control"
+    lessons: [lesson-verification]
+    assessment:
+      title: "Section 2 — Verification & control"
+      from_tags: [verification, control]
+      count: 5
+      pass_threshold: 0.8

@@ -1,0 +1,108 @@
+# Multiple choice
+- id: mc-why-evals
+  type: multiple_choice
+  tags: [golden]
+  difficulty: 2
+  prompt: "Why are evals — not prompt tweaks — the core discipline for improving an LLM system?"
+  options:
+    - { text: "They turn 'it feels better' into a measurable, repeatable signal you can act on", correct: true }
+    - { text: "They make the model larger" }
+    - { text: "They remove the need to write any prompts" }
+    - { text: "They guarantee the model never makes a mistake" }
+  explanation: "Without a measurement you're steering on vibes; an eval gives a repeatable number so a change is provably an improvement, not a lateral move."
+
+- id: mc-golden-set
+  type: multiple_choice
+  tags: [golden]
+  difficulty: 1
+  prompt: "What is a 'golden set'?"
+  options:
+    - { text: "A curated set of inputs with known-good expected outputs, used as ground truth", correct: true }
+    - { text: "The most expensive model available" }
+    - { text: "A cache of the model's previous answers" }
+    - { text: "The set of prompts that currently pass" }
+  explanation: "A golden set is human-curated ground truth: representative inputs paired with the outputs (or acceptance criteria) you consider correct."
+
+- id: mc-regression-gate
+  type: multiple_choice
+  tags: [regression]
+  difficulty: 2
+  prompt: "What does a regression gate in CI actually do?"
+  options:
+    - { text: "Blocks a change from shipping when the eval score drops below a threshold", correct: true }
+    - { text: "Automatically rewrites the prompt until it passes" }
+    - { text: "Deletes any failing test cases" }
+    - { text: "Increases the model's temperature until scores rise" }
+  explanation: "A regression gate runs the eval on every change and fails the build if quality regresses past the agreed threshold, so a fix for one case can't silently break others."
+
+- id: mc-overfit-eval
+  type: multiple_choice
+  tags: [regression]
+  difficulty: 3
+  prompt: "Which practice most directly causes 'teaching to the test' (overfitting to the eval)?"
+  options:
+    - { text: "Tuning prompts against a small static set until it passes, with nothing held out", correct: true }
+    - { text: "Rotating in fresh, unseen cases periodically" }
+    - { text: "Keeping a held-out set the tuner never sees" }
+    - { text: "Reviewing failures with a human before changing anything" }
+  explanation: "If every change is tuned against the same visible cases, you optimize the score, not the capability. A held-out/rotating set detects the gap."
+
+- id: mc-adversarial-purpose
+  type: multiple_choice
+  tags: [adversarial]
+  difficulty: 2
+  prompt: "What is the primary purpose of an adversarial / red-team eval suite?"
+  options:
+    - { text: "Probe edge cases and failure modes the happy-path golden set misses", correct: true }
+    - { text: "Measure average latency under normal load" }
+    - { text: "Confirm the model handles the most common input" }
+    - { text: "Replace the need for a golden set entirely" }
+  explanation: "Golden sets cover typical inputs; adversarial suites deliberately target injection, ambiguity, and edge cases where the system is most likely to fail."
+
+- id: mc-judge-when
+  type: multiple_choice
+  tags: [judge]
+  difficulty: 3
+  prompt: "When is LLM-as-judge an appropriate grading method?"
+  options:
+    - { text: "For open-ended outputs with no single string match, graded against a clear rubric", correct: true }
+    - { text: "Whenever an exact-match check would already work" }
+    - { text: "Only when you have no golden set at all" }
+    - { text: "Never — human review is the only valid method" }
+  explanation: "A judge model shines on open-ended text where exact match fails, provided you give it a decomposed rubric. Where deterministic checks work, use them — they're cheaper and unbiased."
+
+- id: mc-judge-bias
+  type: multiple_choice
+  tags: [judge]
+  difficulty: 3
+  prompt: "Which is a well-documented bias of LLM-as-judge that you must control for?"
+  options:
+    - { text: "Position bias — favoring whichever answer appears first in a pairwise comparison", correct: true }
+    - { text: "A tendency to always score every answer as failing" }
+    - { text: "Refusing to output JSON" }
+    - { text: "Grading faster than a human" }
+  explanation: "Known judge biases include position bias (order of options), verbosity bias (longer looks better), and self-preference (favoring its own family's style). Randomize order and use a rubric to mitigate."
+
+- id: mc-judge-calibration
+  type: multiple_choice
+  tags: [judge]
+  difficulty: 4
+  prompt: "How do you know a judge model is trustworthy enough to gate on?"
+  options:
+    - { text: "Its verdicts agree with human labels on a calibration set (e.g. measured by agreement/κ)", correct: true }
+    - { text: "It uses the largest available model" }
+    - { text: "It always agrees with the previous run" }
+    - { text: "It returns a confident answer quickly" }
+  explanation: "Calibration means checking the judge against human-labeled exemplars and measuring inter-rater agreement. An uncalibrated judge is just another opinion, not a gate."
+
+- id: mc-antipattern-vibes
+  type: multiple_choice
+  tags: [regression]
+  difficulty: 2
+  prompt: "Which is an eval antipattern?"
+  options:
+    - { text: "Shipping on 'vibes' — eyeballing a few outputs with no fixed dataset", correct: true }
+    - { text: "Running a golden set on every change in CI" }
+    - { text: "Keeping an adversarial suite alongside the golden set" }
+    - { text: "Calibrating the judge against human labels" }
+  explanation: "Vibes-only evaluation isn't repeatable and doesn't catch regressions; a fixed, versioned dataset plus a gate is the baseline discipline."

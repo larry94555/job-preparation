@@ -1,0 +1,31 @@
+# Calibration for eval-kvcache-essay (exemplars target essay-why-kv-dominates).
+skill: eval-kvcache-essay
+cases:
+  - answer: >-
+      Weights are a fixed one-time cost — you load them once and every request shares them, so they
+      don't grow with load. The KV cache is different: it's per request and grows linearly with
+      sequence length, and you pay it for every concurrent sequence in the batch. At load the sum of
+      all those per-request KV tensors dwarfs the weights, so KV is what runs you out of memory and
+      caps concurrency. You have to budget KV bytes per token, not just weights.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  - answer: "Just buy a bigger GPU. Memory is memory and the model is what uses it."
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  - answer: >-
+      The weights aren't really the problem at scale — it's the per-request cache that keeps growing
+      as you add more requests, so you run out of room even though the model fits.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
+
+  - answer: >-
+      The KV cache is a fixed constant per model that never changes with the request, and the weights
+      get re-copied for every concurrent request, which is why you OOM under load.
+    expect:
+      verdict: fail
+      checks: { technically_correct: false }

@@ -1,0 +1,14 @@
+id: lesson-paging
+title: "Fragmentation & paged attention"
+material: paging.md
+segments:
+  - present: why-contiguous-allocation-fragments-memory
+  - check: mc-fragmentation
+  - check: cloze-fragmentation
+  - present: paged-attention-and-block-tables
+  - check: mc-paged-attention
+  - check: mc-prefix-sharing
+  - check: cloze-paged-attention
+  - check: cloze-block-table
+  - check: fe-paging-analogy
+  - apply: essay-fragmentation-paging

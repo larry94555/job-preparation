@@ -1,0 +1,36 @@
+# Free entry (short answer)
+- id: fe-cache-key-field
+  type: text_input
+  tags: [cache-safety]
+  difficulty: 2
+  prompt: "Name the field you must add to a shared cache key to make it tenant-safe. (a word or two)"
+  answer:
+    regex: '^(tenant( ?id)?|tenant scope|user( ?id)?|tenant/user|org( ?id)?|account( ?id)?)$'
+    normalize: true
+
+- id: fe-retrieval-defense
+  type: text_input
+  tags: [retrieval-scoping]
+  difficulty: 3
+  prompt: "Name one mechanism that scopes retrieval to a single tenant in a shared index. (a few words)"
+  answer:
+    regex: '^(authorization filter|authz filter|metadata filter|tenant filter|row-?level security|rls|per-?tenant namespace|namespace|partition|filtered search|tenant scoping)$'
+    normalize: true
+
+- id: fe-contamination-vector
+  type: text_input
+  tags: [contamination]
+  difficulty: 3
+  prompt: "Name one surface where cross-user context can contaminate a request. (one term)"
+  answer:
+    regex: '^(session|memory|conversation( history)?|history|cache|logs?|system prompt|context)$'
+    normalize: true
+
+- id: fe-isolation-tradeoff
+  type: text_input
+  tags: [isolation]
+  difficulty: 3
+  prompt: "Sharing resources across tenants buys efficiency; what does per-tenant partitioning buy instead? (one word)"
+  answer:
+    regex: '^(isolation|safety|security)$'
+    normalize: true

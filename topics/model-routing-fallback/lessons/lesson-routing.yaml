@@ -1,0 +1,15 @@
+id: lesson-routing
+title: "Why route & model cascades"
+material: routing.md
+segments:
+  - present: why-route-and-when-to-fall-back
+  - check: mc-why-route
+  - check: mc-fallback-trigger
+  - check: cloze-router
+  - check: fe-routing-signal
+  - check: fe-fallback-trigger
+  - present: routing-signals-and-model-cascades
+  - check: mc-routing-signals
+  - check: mc-cascade-direction
+  - check: cloze-cascade
+  - apply: essay-cascade-design

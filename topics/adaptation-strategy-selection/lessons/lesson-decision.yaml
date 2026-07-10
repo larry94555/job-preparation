@@ -1,0 +1,16 @@
+id: lesson-decision
+title: "Decision axes: freshness, behavior, cost, latency, attribution"
+material: decision-axes.md
+segments:
+  - present: the-decision-axes
+  - check: mc-freshness-axis
+  - check: mc-behavior-axis
+  - check: mc-attribution-axis
+  - check: cloze-freshness
+  - check: cloze-attribution
+  - check: fe-fresh-method
+  - present: cost-latency-and-sequencing
+  - check: mc-cost-latency-axis
+  - check: mc-start-simple
+  - check: fe-cheap-deploy-method
+  - apply: essay-decision-axes

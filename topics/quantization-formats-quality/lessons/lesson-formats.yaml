@@ -1,0 +1,15 @@
+id: lesson-formats
+title: "Numeric formats & footprint"
+material: formats.md
+segments:
+  - present: what-quantization-is-and-why-footprint-matters
+  - check: mc-why-quantize
+  - check: mc-fp16-vs-int4-footprint
+  - check: cloze-quantization
+  - check: fe-int4-savings
+  - present: numeric-formats-fp16-bf16-fp8-int8-int4
+  - check: mc-bf16-vs-fp16
+  - present: scale-zero-point-and-granularity
+  - check: mc-scale-zeropoint
+  - check: mc-per-channel
+  - check: cloze-scale

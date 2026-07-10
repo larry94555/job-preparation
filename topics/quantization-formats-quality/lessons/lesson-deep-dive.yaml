@@ -1,0 +1,13 @@
+id: lesson-deep-dive
+title: "Architecture & tradeoffs: reviewing a quantization design"
+material: deep-dive.md
+segments:
+  - present: the-quantization-formats-quality-design-space
+  - present: a-tradeoff-table-for-quantization-formats-quality
+  - check: mc-review-quant-int4-activations
+  - check: mc-review-quant-perplexity-gate
+  - present: common-sota-and-antipattern
+  - check: mc-review-quant-per-tensor-int4
+  - present: scaling-performance-and-the-token-budget
+  - present: reviewing-a-quantization-formats-quality-design
+  - apply: essay-quant-deep-dive

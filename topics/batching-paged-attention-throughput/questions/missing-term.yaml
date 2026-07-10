@@ -1,0 +1,45 @@
+# Missing term (cloze)
+- id: cloze-continuous
+  type: text_input
+  tags: [batching]
+  difficulty: 2
+  prompt: "The batching strategy that swaps finished requests out and queued ones in at every decoding step, keeping the batch full, is called ____ batching."
+  answer:
+    regex: '^continuous$'
+    normalize: true
+
+- id: cloze-head-of-line
+  type: text_input
+  tags: [scheduling]
+  difficulty: 3
+  prompt: "When a short request must wait for a long one sharing its fixed batch to finish, that stall is called ____-of-line blocking."
+  answer:
+    regex: '^head$'
+    normalize: true
+
+- id: cloze-iteration
+  type: text_input
+  tags: [scheduling]
+  difficulty: 3
+  prompt: "Orca re-decides the running set once per forward pass; this is called ____-level scheduling."
+  answer:
+    regex: '^iteration$'
+    normalize: true
+
+- id: cloze-paged
+  type: text_input
+  tags: [paged-attention]
+  difficulty: 2
+  prompt: "vLLM's technique that stores the KV cache in fixed-size non-contiguous blocks, like OS virtual memory, is called ____ attention."
+  answer:
+    regex: '^paged$'
+    normalize: true
+
+- id: cloze-goodput
+  type: text_input
+  tags: [throughput]
+  difficulty: 3
+  prompt: "The throughput counting only requests completed within their latency SLO is called ____."
+  answer:
+    regex: '^goodput$'
+    normalize: true

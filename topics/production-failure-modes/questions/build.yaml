@@ -1,0 +1,40 @@
+- id: mc-all-guards-pass
+  type: multiple_choice
+  tags: [mitigation]
+  difficulty: 2
+  prompt: "In a guard suite, an output is accepted when:"
+  options:
+    - { text: "It passes ALL guards — any single failing guard rejects it", correct: true }
+    - { text: "It passes at least one guard" }
+    - { text: "It passes a majority of guards" }
+    - { text: "The first guard is skipped" }
+  explanation: "Guards compose with AND: schema-valid AND fresh AND non-empty, etc. One failure rejects the candidate."
+
+- id: mc-why-bounded
+  type: multiple_choice
+  tags: [mitigation]
+  difficulty: 2
+  prompt: "Why must the retry in a guard suite be bounded?"
+  options:
+    - { text: "An unbounded retry is itself a runaway/cost failure; cap it, then fall back", correct: true }
+    - { text: "Retries are always free, so bounding is optional" }
+    - { text: "Bounding makes each attempt faster" }
+    - { text: "Because guards can only run once" }
+  explanation: "An unbounded retry loop is the very runaway failure you're guarding against; bound it and return a safe fallback."
+
+- id: essay-failure-playbook
+  type: essay
+  length: long
+  tags: [mitigation]
+  difficulty: 4
+  prompt: >-
+    Project: build a failure-mode playbook (detect → mitigate → prevent) for a production agent that
+    uses tools and RAG. Cover hallucinated tool calls, malformed JSON, stale retrieval, runaway agents,
+    and silent eval regressions — the detection signal and mitigation for each. Include a test plan.
+  eval_skill: eval-failuremodes-essay
+  reference_points:
+    - "Malformed JSON: validate → bounded repair → fallback; hallucinated tools: contracts + validation."
+    - "Stale retrieval: freshness/TTL checks and index-lag detection."
+    - "Runaway agents: step/tool/token budgets + no-progress detection."
+    - "Silent eval regressions: CI eval gates + canaries + drift alerts (the dangerous quiet ones)."
+    - "Playbook framing: detect → mitigate → prevent per failure; test plan triggers each guard."

@@ -1,0 +1,45 @@
+# Missing term (cloze)
+- id: cloze-drivers
+  type: text_input
+  tags: [drivers]
+  difficulty: 1
+  prompt: "The two largest per-call cost drivers are the count of input and ____ tokens."
+  answer:
+    regex: '^output$'
+    normalize: true
+
+- id: cloze-attribution-tag
+  type: text_input
+  tags: [attribution]
+  difficulty: 2
+  prompt: "A label attached to a call so its cost can be rolled up by feature, tenant, or journey is an attribution ____."
+  answer:
+    regex: '^tag$'
+    normalize: true
+
+- id: cloze-propagation
+  type: text_input
+  tags: [attribution]
+  difficulty: 3
+  prompt: "Carrying the attribution context set at the entry point through every downstream call is called tag ____."
+  answer:
+    regex: '^propagation$'
+    normalize: true
+
+- id: cloze-unit-economics
+  type: text_input
+  tags: [economics]
+  difficulty: 2
+  prompt: "Cost per successful task, cost per tenant, and margin are all measures of a system's unit ____."
+  answer:
+    regex: '^economics$'
+    normalize: true
+
+- id: cloze-marginal
+  type: text_input
+  tags: [economics]
+  difficulty: 3
+  prompt: "The incremental cost a new feature adds per task, as opposed to the blended average, is its ____ cost."
+  answer:
+    regex: '^marginal$'
+    normalize: true

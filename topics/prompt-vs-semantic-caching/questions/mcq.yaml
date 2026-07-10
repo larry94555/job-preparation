@@ -1,0 +1,108 @@
+# Multiple choice
+- id: mc-two-caches
+  type: multiple_choice
+  tags: [prefix]
+  difficulty: 2
+  prompt: "Prompt (prefix) caching and semantic caching differ most fundamentally in:"
+  options:
+    - { text: "What they cache and when they hit — prefix reuses computed attention for identical leading tokens; semantic returns a stored response for a similar request", correct: true }
+    - { text: "Nothing — they are two names for the same technique" }
+    - { text: "Only the vendor that sells them" }
+    - { text: "The programming language they are implemented in" }
+  explanation: "Prefix caching reuses the model's computed attention state for identical leading tokens (an exact-prefix match), while semantic caching skips generation entirely by returning a previously stored response for a semantically similar request."
+
+- id: mc-prefix-hit-condition
+  type: multiple_choice
+  tags: [prefix]
+  difficulty: 2
+  prompt: "A prefix (prompt) cache hits when:"
+  options:
+    - { text: "The leading tokens of the new request are byte-for-byte identical to a previously processed prefix", correct: true }
+    - { text: "The new request means roughly the same thing as an old one" }
+    - { text: "The embedding of the request is within a similarity threshold" }
+    - { text: "Any two requests share the same length" }
+  explanation: "Prefix caching is an exact-match mechanism: it can only reuse computed attention if the leading tokens match exactly, because a single differing token changes every downstream attention computation."
+
+- id: mc-semantic-hit-condition
+  type: multiple_choice
+  tags: [semantic]
+  difficulty: 2
+  prompt: "A semantic cache hits when:"
+  options:
+    - { text: "The new request's embedding is within a similarity threshold of a stored request", correct: true }
+    - { text: "The new request's leading tokens match exactly" }
+    - { text: "The model temperature is set to zero" }
+    - { text: "The request is longer than the cached one" }
+  explanation: "A semantic cache embeds the incoming request and looks for a stored request whose embedding is close enough (above a similarity threshold); on a hit it returns the stored response without calling the model."
+
+- id: mc-prefix-savings
+  type: multiple_choice
+  tags: [prefix, tradeoffs]
+  difficulty: 3
+  prompt: "What does a prefix-cache hit actually save?"
+  options:
+    - { text: "The prefill compute for the shared leading tokens — the model still generates a fresh response", correct: true }
+    - { text: "The entire generation, returning a stored response verbatim" }
+    - { text: "The cost of embedding the query" }
+    - { text: "Storage in the vector database" }
+  explanation: "Prefix caching only reuses the prefill (attention) computation for the identical leading tokens; the model still decodes a new completion for the variable suffix, so it saves prefill compute, not the whole generation."
+
+- id: mc-semantic-savings
+  type: multiple_choice
+  tags: [semantic, tradeoffs]
+  difficulty: 3
+  prompt: "What does a semantic-cache hit save compared with a prefix-cache hit?"
+  options:
+    - { text: "The full generation — it returns a stored response and skips calling the model entirely", correct: true }
+    - { text: "Only the prefill of the shared leading tokens" }
+    - { text: "Nothing — both save exactly the same work" }
+    - { text: "Only network bandwidth, not compute" }
+  explanation: "A semantic-cache hit skips the model call altogether, saving the whole generation. A prefix-cache hit only reuses prefill for shared leading tokens and still generates the completion."
+
+- id: mc-prompt-structure
+  type: multiple_choice
+  tags: [prefix]
+  difficulty: 3
+  prompt: "To maximize prefix-cache hit rate, you should structure prompts so that:"
+  options:
+    - { text: "Stable, shared content (system prompt, instructions, few-shot examples) comes first and variable content comes last", correct: true }
+    - { text: "The user's unique question comes first and the shared system prompt comes last" }
+    - { text: "Every request is unique so the cache never collides" }
+    - { text: "The prompt is shuffled randomly on each call" }
+  explanation: "Because prefix caching matches from the start of the token stream, putting the stable prefix first (system prompt, instructions, examples) and the variable suffix (the user's specific input) last maximizes the length of the shared, reusable prefix."
+
+- id: mc-reorder-antipattern
+  type: multiple_choice
+  tags: [prefix]
+  difficulty: 3
+  prompt: "Which change would most likely DESTROY prefix-cache hits?"
+  options:
+    - { text: "Injecting a per-request timestamp or unique request ID at the very top of the prompt", correct: true }
+    - { text: "Keeping the system prompt identical across requests" }
+    - { text: "Appending the variable user input at the end" }
+    - { text: "Reusing the same few-shot examples in the same order" }
+  explanation: "Any variation in the leading tokens breaks the exact-prefix match. A timestamp or unique ID at the top changes the first tokens on every request, so nothing downstream can be reused."
+
+- id: mc-semantic-threshold
+  type: multiple_choice
+  tags: [semantic, tradeoffs]
+  difficulty: 3
+  prompt: "Setting the semantic-cache similarity threshold too LOW (too permissive) causes:"
+  options:
+    - { text: "False-positive hits — returning a stored answer for a request that is actually different, giving a wrong response", correct: true }
+    - { text: "The cache to never hit at all" }
+    - { text: "The model's weights to grow" }
+    - { text: "The prefix cache to be invalidated" }
+  explanation: "A permissive threshold lets loosely-related requests match, so the cache serves a stored answer to a genuinely different question — a false-positive hit and an incorrect response."
+
+- id: mc-semantic-highstakes
+  type: multiple_choice
+  tags: [semantic, tradeoffs]
+  difficulty: 4
+  prompt: "Semantic caching is the riskiest to apply to:"
+  options:
+    - { text: "High-stakes or highly personalized answers where a near-miss match returns a subtly wrong response", correct: true }
+    - { text: "Repeated identical FAQ-style questions with stable answers" }
+    - { text: "Idempotent lookups whose answer rarely changes" }
+    - { text: "Boilerplate greetings" }
+  explanation: "When answers are high-stakes or user-specific, a false-positive semantic hit returns a plausible-but-wrong response, so semantic caching is dangerous there; it is safest on repeated, stable, low-personalization queries."

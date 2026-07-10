@@ -1,0 +1,45 @@
+# Missing term (cloze)
+- id: cloze-termination
+  type: text_input
+  tags: [termination]
+  difficulty: 1
+  prompt: "The rule that decides when an agent loop should stop — on success, failure, or exhausted budget — is called a ____ condition."
+  answer:
+    regex: '^termination$'
+    normalize: true
+
+- id: cloze-loop-budget
+  type: text_input
+  tags: [budgets]
+  difficulty: 2
+  prompt: "A cap on the number of iterations an agent may run before it is forced to stop is called a loop, or step, ____."
+  answer:
+    regex: '^budget$'
+    normalize: true
+
+- id: cloze-wall-clock
+  type: text_input
+  tags: [budgets]
+  difficulty: 2
+  prompt: "A budget that limits total elapsed real time (guarding against a hung tool) is a ____-clock budget."
+  answer:
+    regex: '^wall$'
+    normalize: true
+
+- id: cloze-allow-list
+  type: text_input
+  tags: [guardrails]
+  difficulty: 2
+  prompt: "A deny-by-default guardrail that permits only an explicitly approved set of actions is an ____-list."
+  answer:
+    regex: '^allow$'
+    normalize: true
+
+- id: cloze-hitl
+  type: text_input
+  tags: [guardrails]
+  difficulty: 3
+  prompt: "Pausing an agent to get explicit human confirmation before a risky action is human-in-the-____."
+  answer:
+    regex: '^loop$'
+    normalize: true

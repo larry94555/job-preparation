@@ -1,0 +1,77 @@
+# Deep-dive — architecture judgment (code-review MCs + an L4 essay)
+
+- id: mc-review-adapt-volatile-ft
+  type: multiple_choice
+  tags: [decision, review]
+  difficulty: 4
+  prompt: >-
+    A design doc proposes fine-tuning the base model nightly on the company's current price list and
+    inventory so the assistant "just knows" today's numbers. Reviewing it, what is the most important
+    problem?
+  options:
+    - { text: "Volatile facts baked into weights go stale the moment training finishes and force a retraining loop forever — freshness is a retrieval problem, so move the price list to RAG", correct: true }
+    - { text: "Nightly is too frequent; fine-tuning weekly would keep the prices current enough" }
+    - { text: "The base model is too small; a larger model would memorize prices reliably" }
+    - { text: "Nothing — weights are the most durable place to store frequently-changing facts" }
+  explanation: >-
+    Fine-tuning changes behavior, not knowledge, and it is a poor place for facts that change. Baking
+    volatile numbers into weights serves stale answers and demands another training run on every
+    update. This is the canonical wrong tool; freshness belongs in retrieval (RAG), which updates the
+    index without retraining and can cite the source.
+
+- id: mc-review-adapt-rag-format
+  type: multiple_choice
+  tags: [decision, review]
+  difficulty: 4
+  prompt: >-
+    A team reports the model keeps breaking their required JSON output format, and their fix is to add
+    more example documents to the RAG index "so it sees the format more often." Rate this design and
+    pick the best fix.
+  options:
+    - { text: "Misclassified: formatting is a behavior problem, and retrieval supplies knowledge, not behavior — fix it with better prompting or fine-tuning, not more retrieved documents", correct: true }
+    - { text: "Production-ready: retrieving more format examples is exactly how you enforce output structure" }
+    - { text: "Fine as-is, but switch the vector index to a keyword index so formats match more precisely" }
+    - { text: "The problem is context length; retrieve fewer documents and the format will hold" }
+  explanation: >-
+    RAG adds knowledge the model can see; it does not change how the model writes. A persistent
+    format/style failure is a behavior problem, which prompting or fine-tuning addresses. Stuffing
+    more documents into context is reaching for the wrong lever — the classic "RAG to fix formatting"
+    antipattern.
+
+- id: mc-review-adapt-premature-distill
+  type: multiple_choice
+  tags: [decision, review]
+  difficulty: 4
+  prompt: >-
+    A proposal wants to distill the current prompt-engineered assistant into a small student model
+    immediately to cut serving cost, before any behavior eval has been run. What is the strongest
+    objection?
+  options:
+    - { text: "The student faithfully copies the teacher — including unvalidated flaws — so you cheaply mass-produce behavior nobody has confirmed is good; validate first, then distill", correct: true }
+    - { text: "Distillation always increases inference latency, so it cannot cut serving cost" }
+    - { text: "A student model can never be smaller than its teacher, so there are no savings" }
+    - { text: "Distillation is impossible unless the teacher was itself fine-tuned first" }
+  explanation: >-
+    Distillation transfers whatever the teacher does. If that behavior is not yet validated, you have
+    just built a cheaper way to be wrong. Distillation is a deployment move for behavior you already
+    trust — validate the target first, then distill for cheaper, lower-latency serving.
+
+- id: essay-adapt-deep-dive
+  type: essay
+  length: long
+  tags: [decision, review]
+  difficulty: 4
+  prompt: >-
+    You are the reviewer on an adaptation-strategy design for a multi-tenant domain assistant that
+    must answer over frequently-changing private documents, hold a strict house style, and serve
+    cheaply at scale. Write a design review: walk the levers (in-context learning, RAG, fine-tuning /
+    PEFT, distillation), give an explicit tradeoff for each, and state what would move the design from
+    demo-ready to production-ready. Call out at least two antipatterns and the eval you would require
+    before freezing behavior into weights or distilling.
+  eval_skill: eval-adaptation-essay
+  reference_points:
+    - "Knowledge vs behavior: the changing private documents are a knowledge/freshness problem (RAG, which updates the index not the weights and can cite sources); the strict house style is a behavior problem (fine-tuning / PEFT such as LoRA)."
+    - "In-context learning is the cheapest lever to discover the target behavior first, bounded by the context window and paying tokens per call; use it before freezing anything."
+    - "RAG buys fresh/citable knowledge at the cost of retrieval latency and larger contexts per query; fine-tuning front-loads training cost then serves cheaply but is wrong for volatile facts; distillation cuts serving cost/latency once behavior is validated."
+    - "Antipatterns to flag: fine-tuning the changing documents into weights (goes stale, retraining loop), RAG to fix the house style (formatting is behavior), over-adapting, and premature fine-tuning/distillation before the target is validated."
+    - "Production-ready means: lightest tool first, volatile facts in retrieval, behavior validated before it is frozen, distillation only after validation, and each lever gated behind its own eval; SOTA is the hybrid (RAG + PEFT [+ distill])."

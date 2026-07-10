@@ -1,0 +1,9 @@
+id: production-failure-modes
+title: "Production Failure Modes"
+description: "A capstone catalog of how LLM systems fail in production — hallucinated tool calls, malformed JSON, stale retrieval, runaway agents, silent eval regressions — and the detect → mitigate → prevent playbook for each, with special attention to the silent failures that never throw."
+pass_threshold: 0.8
+tag_weights:
+  failures: 1.2
+  detection: 1.0
+  mitigation: 1.2
+  prevention: 1.0

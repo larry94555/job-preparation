@@ -1,0 +1,10 @@
+id: lesson-expert-context
+title: "Expert context: papers, frontier & interview"
+material: expert-context.md
+segments:
+  - present: papers-people-and-the-frontier
+  - check: mc-canon-batch-continuous
+  - present: interviewing-on-batching-and-throughput
+  - check: mc-interview-batch-signal
+  - apply: essay-batch-literature
+  - apply: essay-batch-interview

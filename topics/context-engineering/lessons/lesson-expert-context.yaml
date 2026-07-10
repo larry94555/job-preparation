@@ -1,0 +1,10 @@
+id: lesson-expert-context
+title: "Expert context: papers, frontier & interview"
+material: expert-context.md
+segments:
+  - present: papers-people-and-the-frontier
+  - check: mc-canon-context-lost-in-middle
+  - present: interviewing-on-context-engineering
+  - check: mc-interview-context-signal
+  - apply: essay-context-literature
+  - apply: essay-context-interview

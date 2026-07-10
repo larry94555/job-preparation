@@ -1,0 +1,8 @@
+id: adaptation-strategy-selection
+title: "Adaptation Strategy Selection"
+description: "Choosing how to adapt a model — in-context learning, RAG, fine-tuning, or distillation — is a decision, not a default. The skill is matching the approach to the axis that actually matters (freshness, behavior, cost, latency, attribution) and recognizing when a popular choice is the wrong tool."
+pass_threshold: 0.8
+tag_weights:
+  approaches: 1.0
+  decision: 1.2
+  antipatterns: 1.2

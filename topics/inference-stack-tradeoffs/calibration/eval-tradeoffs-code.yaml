@@ -1,0 +1,23 @@
+skill: eval-tradeoffs-code
+cases:
+  - answer: >-
+      tests_passed=true. Filters configs where latency<=maxLatency && cost<=maxCost && quality>=minQuality;
+      returns null if none; else sorts survivors by quality desc, then cost asc, then latency asc, and
+      returns the first.
+    expect:
+      verdict: pass
+      checks: { filters_all_slos: true, ranks_by_quality: true, returns_null_none: true, checks_all_three: true }
+
+  - answer: >-
+      tests_passed happens to pass some cases, but skips the filter entirely and just returns the
+      highest-quality config — so it can return one that violates the latency budget.
+    expect:
+      verdict: fail
+      checks: { filters_all_slos: false, ranks_by_quality: true, returns_null_none: false, checks_all_three: false }
+
+  - answer: >-
+      tests_passed=true. Filters and returns null when empty and ranks by quality, but only checks
+      latency and quality — it ignores the cost SLO.
+    expect:
+      verdict: borderline
+      checks: { filters_all_slos: false, ranks_by_quality: true, returns_null_none: true, checks_all_three: false }

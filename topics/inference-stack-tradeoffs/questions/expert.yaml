@@ -1,0 +1,63 @@
+# Literature/canon (WS1) + interview (WS2) — tags [canon]/[interview] are NOT in any section's
+# from_tags, so these don't enter the deterministic section-assessment pools.
+- id: mc-canon-ist-cascades
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Which work framed cost/quality LLM cascades — routing easy requests to cheap models and escalating only the hard ones to cut cost while holding quality?"
+  options:
+    - { text: "FrugalGPT (Chen et al., 2023)", correct: true }
+    - { text: "Orca" }
+    - { text: "Sarathi" }
+    - { text: "vLLM (PagedAttention)" }
+  explanation: "FrugalGPT framed cost/quality cascades for LLMs. Orca is continuous batching, Sarathi is chunked prefill, and vLLM is paged KV memory — these are serving levers, not the cost-cascade idea."
+
+- id: mc-interview-ist-red-flag
+  type: multiple_choice
+  tags: [interview]
+  difficulty: 3
+  prompt: "Interviewing on inference-stack tradeoffs, which answer is the clearest red flag?"
+  options:
+    - { text: "Proposing a change as a pure win — faster and cheaper with no tradeoff named — and optimizing that single metric", correct: true }
+    - { text: "Starting from TTFT/TPOT/p99 and cost-per-task SLOs, then working back to the stack" }
+    - { text: "Naming the dominant axis each lever moves and its hidden cost" }
+    - { text: "Reasoning about a change's effect on latency, quality, cost, and reliability together" }
+  explanation: "Single-metric optimization and 'free lunch' claims are the red flags: every serving lever trades among latency, quality, cost, and reliability. The other options are exactly the SLO-anchored, all-four-axes reasoning interviewers reward."
+
+- id: essay-ist-literature
+  type: essay
+  length: long
+  tags: [canon]
+  difficulty: 4
+  prompt: >-
+    Inference-stack tradeoffs is an integrative topic with no single defining paper — it draws on the
+    serving systems named elsewhere. Summarize its canon: FrugalGPT's cost/quality cascades, and the
+    serving levers (vLLM, Orca, Sarathi) that this topic composes. For each, say what it contributes,
+    and describe the current SLO-anchored, joint-optimization frontier and its open problems.
+  eval_skill: eval-tradeoffs-essay
+  reference_points:
+    - "This is an integrative topic: no defining paper of its own; it stands on serving systems named in the other topics."
+    - "FrugalGPT (Chen et al., 2023): cost/quality cascades — route easy requests to cheap models, escalate hard ones; cost as a first-class axis."
+    - "Serving levers reused as knobs: vLLM (paged attention / KV memory), Orca (continuous/iteration-level batching / throughput), Sarathi (chunked prefill / prefill-decode balance)."
+    - "Roofline/serving analyses tell you whether a workload is compute- or memory-bandwidth-bound, i.e. which lever can move the needle."
+    - "SOTA: SLO-anchored stack design; joint latency/cost/quality/reliability optimization. Tools: vLLM/TensorRT-LLM/SGLang, load-testing harnesses, combined eval+cost+obs stacks."
+    - "Open problems: joint multi-objective optimization, predictable SLOs under load, interaction effects between levers."
+
+- id: essay-ist-interview
+  type: essay
+  length: long
+  tags: [interview]
+  difficulty: 4
+  prompt: >-
+    You're in a senior inference-infrastructure interview and asked to design a serving stack for a
+    given latency/cost/quality target. Show how you'd reason: anchor on SLOs, decompose the budget,
+    pick levers, and name the tradeoff each lever carries across all four axes. Call out the red flags
+    you'd avoid.
+  eval_skill: eval-tradeoffs-essay
+  reference_points:
+    - "Anchor on SLOs first: TTFT/TPOT/p99 latency and cost-per-successful-task, then work backward to the stack."
+    - "Decompose the budget across stages rather than optimizing one number in a vacuum."
+    - "Every lever trades among latency, quality, cost, reliability: batching buys throughput at tail-latency cost; quantization buys memory/speed at a quality risk; caching buys cost/latency at a staleness/correctness risk; fallback/cascade (FrugalGPT) cuts cost but adds reliability complexity."
+    - "Reason about a change's effect on all four axes, not just the one it targets."
+    - "Red flags to avoid: single-metric optimization, 'free lunch' claims, premature optimization before SLOs are set, ignoring the reliability cost of added levers."
+    - "Name the prior art: FrugalGPT for cost cascades; vLLM/Orca/Sarathi as the levers."

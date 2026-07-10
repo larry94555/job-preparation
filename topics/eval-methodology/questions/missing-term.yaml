@@ -1,0 +1,45 @@
+# Missing term (cloze)
+- id: cloze-golden-set
+  type: text_input
+  tags: [golden]
+  difficulty: 1
+  prompt: "A curated set of inputs with known-good expected outputs, used as ground truth, is a ____ set."
+  answer:
+    regex: '^golden$'
+    normalize: true
+
+- id: cloze-regression
+  type: text_input
+  tags: [regression]
+  difficulty: 2
+  prompt: "A CI check that blocks a change when the eval score drops below a threshold is a ____ gate."
+  answer:
+    regex: '^regression$'
+    normalize: true
+
+- id: cloze-adversarial
+  type: text_input
+  tags: [adversarial]
+  difficulty: 2
+  prompt: "Tests that deliberately probe edge cases and failure modes (a.k.a. red-team tests) are ____ tests."
+  answer:
+    regex: '^adversarial$'
+    normalize: true
+
+- id: cloze-judge
+  type: text_input
+  tags: [judge]
+  difficulty: 2
+  prompt: "Using a model to grade open-ended outputs against a rubric is the LLM-as-____ pattern."
+  answer:
+    regex: '^judge$'
+    normalize: true
+
+- id: cloze-calibration
+  type: text_input
+  tags: [judge]
+  difficulty: 3
+  prompt: "Checking a judge's verdicts against human labels and measuring their agreement is called ____."
+  answer:
+    regex: '^calibration$'
+    normalize: true

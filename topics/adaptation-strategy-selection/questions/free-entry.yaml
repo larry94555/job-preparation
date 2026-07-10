@@ -1,0 +1,36 @@
+# Free entry (short answer)
+- id: fe-behavior-method
+  type: text_input
+  tags: [approaches]
+  difficulty: 2
+  prompt: "Which adaptation method durably changes behavior/format by updating weights? (one word)"
+  answer:
+    regex: '^(fine-?tuning|finetuning|sft|lora|peft)$'
+    normalize: true
+
+- id: fe-fresh-method
+  type: text_input
+  tags: [decision]
+  difficulty: 2
+  prompt: "For knowledge that must stay current, which method updates context instead of retraining? (one term)"
+  answer:
+    regex: '^(rag|retrieval|retrieval-augmented generation|retrieval augmented generation)$'
+    normalize: true
+
+- id: fe-cheap-deploy-method
+  type: text_input
+  tags: [decision]
+  difficulty: 2
+  prompt: "Which method produces a smaller, cheaper model to cut deployment cost/latency? (one word)"
+  answer:
+    regex: '^(distillation|distilling|distill)$'
+    normalize: true
+
+- id: fe-wrong-tool-facts
+  type: text_input
+  tags: [antipatterns]
+  difficulty: 3
+  prompt: "Name the adaptation method that is the WRONG tool for constantly-changing facts. (one word)"
+  answer:
+    regex: '^(fine-?tuning|finetuning|distillation)$'
+    normalize: true

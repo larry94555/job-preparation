@@ -1,0 +1,8 @@
+id: prefill-vs-decode-latency
+title: "Prefill vs. Decode Latency"
+description: "LLM inference has two phases with opposite profiles: prefill is compute-bound and parallel over prompt tokens (sets TTFT), while decode is memory-bandwidth-bound and sequential (sets TPOT). Knowing which phase a change affects is what separates useful optimization from wasted effort."
+pass_threshold: 0.8
+tag_weights:
+  phases: 1.2
+  metrics: 1.2
+  optimization: 1.0

@@ -1,0 +1,45 @@
+# Missing term (cloze)
+- id: cloze-icl
+  type: text_input
+  tags: [approaches]
+  difficulty: 1
+  prompt: "Steering the model at inference time with instructions and few-shot examples in the prompt, without touching the weights, is called in-context ____."
+  answer:
+    regex: '^learning$'
+    normalize: true
+
+- id: cloze-distillation
+  type: text_input
+  tags: [approaches]
+  difficulty: 2
+  prompt: "Training a smaller student model to reproduce a larger teacher's behavior for cheaper deployment is called ____."
+  answer:
+    regex: '^distillation$'
+    normalize: true
+
+- id: cloze-freshness
+  type: text_input
+  tags: [decision]
+  difficulty: 2
+  prompt: "The decision axis about how current the model's knowledge must be — pointing toward RAG for fast-changing data — is knowledge ____."
+  answer:
+    regex: '^freshness$'
+    normalize: true
+
+- id: cloze-attribution
+  type: text_input
+  tags: [decision]
+  difficulty: 2
+  prompt: "The requirement that an answer be traceable to the exact source document it came from is called ____."
+  answer:
+    regex: '^attribution$'
+    normalize: true
+
+- id: cloze-volatile
+  type: text_input
+  tags: [antipatterns]
+  difficulty: 3
+  prompt: "Fine-tuning is the wrong tool for facts that change constantly because such ____ facts go stale in the weights."
+  answer:
+    regex: '^volatile$'
+    normalize: true

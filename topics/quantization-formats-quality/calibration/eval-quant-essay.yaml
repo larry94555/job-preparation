@@ -1,0 +1,31 @@
+# Calibration for eval-quant-essay (exemplars target essay-weight-vs-activation).
+skill: eval-quant-essay
+cases:
+  - answer: >-
+      Weights are static, so you can calibrate them once and they tolerate INT4 well. Activations are
+      computed at runtime and vary with each input, and they contain a few large outlier features that a
+      fixed low-bit range can't represent, so quantizing them to INT4 loses a lot of information. The
+      safer default is weight-only quantization — INT4 weights via GPTQ or AWQ with activations kept in
+      higher precision — which captures most of the memory and bandwidth win with little quality loss.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  - answer: "Just use INT4 everywhere, more compression is always better and quality is basically the same."
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  - answer: >-
+      Activations are trickier than weights because they change with the input, so quantizing them can
+      hurt more. I'd probably keep them in higher precision to be safe.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
+
+  - answer: >-
+      Activations are easier to quantize than weights because they're smaller, so quantize activations to
+      INT4 and leave the weights in FP16 to save the most memory.
+    expect:
+      verdict: fail
+      checks: { technically_correct: false }

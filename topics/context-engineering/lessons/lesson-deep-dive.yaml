@@ -1,0 +1,14 @@
+id: lesson-deep-dive
+title: "Architecture & tradeoffs: reviewing a context-engineering design"
+material: deep-dive.md
+segments:
+  - present: the-context-engineering-design-space
+  - present: a-tradeoff-table-for-context-engineering
+  - check: mc-review-context-unranked-dump
+  - check: mc-review-context-middle-placement
+  - present: common-sota-and-antipattern
+  - check: mc-review-context-advertised-window
+  - present: scaling-performance-and-the-token-budget
+  - present: reviewing-a-context-engineering-design
+  - apply: essay-context-deep-dive
+  - apply: debug-context-rank-fit

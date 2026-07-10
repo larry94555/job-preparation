@@ -1,0 +1,10 @@
+id: lesson-build-slo-selector
+title: "Build it: an SLO-aware config selector"
+material: build-slo-selector.md
+segments:
+  - present: filter-first-then-rank
+  - check: mc-filter-then-rank
+  - present: why-all-three-constraints
+  - check: mc-slo-is-a-gate
+  - apply: code-slo-selector
+  - apply: essay-architect-stack

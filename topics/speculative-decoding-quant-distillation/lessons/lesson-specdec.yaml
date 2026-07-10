@@ -1,0 +1,14 @@
+id: lesson-specdec
+title: "Speculative decoding: draft, verify, accept"
+material: specdec.md
+segments:
+  - present: draft-verify-accept
+  - check: mc-specdec-flow
+  - check: cloze-draft
+  - present: acceptance-rate-and-speedup
+  - check: mc-acceptance-rate
+  - check: mc-acceptance-speedup
+  - check: cloze-acceptance
+  - check: fe-latency-lever
+  - check: fe-specdec-cost
+  - apply: essay-specdec-flow

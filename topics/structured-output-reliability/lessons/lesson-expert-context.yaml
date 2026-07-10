@@ -1,0 +1,10 @@
+id: lesson-expert-context
+title: "Expert context: papers, frontier & interview"
+material: expert-context.md
+segments:
+  - present: papers-people-and-the-frontier
+  - check: mc-canon-so-constrained-decoding
+  - present: interviewing-on-structured-output-reliability
+  - check: mc-interview-so-signal
+  - apply: essay-so-literature
+  - apply: essay-so-interview

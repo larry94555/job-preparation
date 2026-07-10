@@ -1,0 +1,8 @@
+id: function-calling-reliability
+title: "Function-Calling Reliability"
+description: "Treat tools as APIs with contracts: validate the model's arguments, refuse hallucinated calls, and make mutations idempotent so a retried call can't corrupt state."
+pass_threshold: 0.8
+tag_weights:
+  contract: 1.0
+  validation: 1.2
+  idempotency: 1.2

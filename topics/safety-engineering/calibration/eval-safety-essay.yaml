@@ -1,0 +1,32 @@
+# Calibration for eval-safety-essay (exemplars target essay-injection-defense).
+skill: eval-safety-essay
+cases:
+  - answer: >-
+      Direct injection comes from the user's own input, while indirect injection is hidden in content
+      the system reads in later — a web page, a document, or a tool's output — and the model then
+      obeys it. A single filter is not enough because there's no robust general injection classifier:
+      attackers rephrase, encode, or split the payload to slip past any fixed pattern. So filtering
+      has to be one layer of defense-in-depth alongside fencing untrusted content, least-privilege
+      tools, and gating egress.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  - answer: "Prompt injection is bad and you should write safe prompts to avoid it."
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, concrete: false }
+
+  - answer: >-
+      Direct injection is from the user and indirect injection comes from other content the model
+      reads, and one filter isn't really enough on its own.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
+
+  - answer: >-
+      There's no real difference between direct and indirect injection, and a single well-tuned
+      output filter completely stops all prompt injection, so no other defenses are needed.
+    expect:
+      verdict: fail
+      checks: { technically_correct: false }

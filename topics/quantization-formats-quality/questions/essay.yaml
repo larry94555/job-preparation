@@ -1,0 +1,37 @@
+# Essay
+- id: essay-weight-vs-activation
+  type: essay
+  length: short
+  tags: [quality]
+  difficulty: 3
+  prompt: "A teammate proposes quantizing both weights and activations to INT4 to save the most memory. Explain why activations are harder to quantize than weights and what a safer default is."
+  eval_skill: eval-quant-essay
+  reference_points:
+    - "Weights are static and can be calibrated once, so they tolerate low bit-width; activations are computed per input and vary at runtime."
+    - "Activations contain large outlier features that a fixed low-bit range cannot represent, so naive activation quantization loses a lot of information."
+    - "A safer default is weight-only quantization (e.g. INT4 weights via GPTQ/AWQ) with activations kept in higher precision, which captures most of the memory/bandwidth win with little quality loss."
+
+- id: essay-gptq-vs-awq
+  type: essay
+  length: short
+  tags: [methods]
+  difficulty: 4
+  prompt: "Explain the difference between GPTQ and AWQ, and mention what problem SmoothQuant solves."
+  eval_skill: eval-quant-essay
+  reference_points:
+    - "GPTQ is a post-training method that quantizes weights layer by layer while minimizing output reconstruction error using approximate second-order (Hessian) information."
+    - "AWQ (activation-aware weight quantization) identifies the salient weight channels tied to large activations and scales/protects them so quantization error there is reduced."
+    - "SmoothQuant addresses activation outliers in weight+activation quantization by migrating their difficulty into the weights via per-channel scaling, making INT8 activation quantization feasible."
+
+- id: essay-when-quant-hurts
+  type: essay
+  length: long
+  tags: [quality]
+  difficulty: 4
+  prompt: "You quantized a model to INT4 and perplexity barely moved, so a teammate wants to ship it. Explain why perplexity alone is not enough and how you would actually verify quality before shipping."
+  eval_skill: eval-quant-essay
+  reference_points:
+    - "Perplexity is an averaged next-token loss over generic text and can stay low while task-specific quality drops."
+    - "Low-bit quantization tends to hurt harder capabilities first — multi-step reasoning (e.g. GSM8K), code generation, and long-context or long-reasoning tasks — which perplexity smooths over."
+    - "Verification should run real task evals (MMLU/GSM8K, code, domain suites) and specifically test long-context and reasoning cases, comparing against the FP16 baseline rather than trusting perplexity."
+    - "If quality regresses, mitigations include weight-only instead of weight+activation quant, higher bit-width or per-channel scales, protecting sensitive layers, or a better method (AWQ/GPTQ/SmoothQuant)."

@@ -1,0 +1,11 @@
+id: lesson-degraded
+title: "Degraded-mode UX done honestly"
+material: degraded.md
+segments:
+  - present: the-silent-swap-antipattern
+  - check: mc-silent-swap
+  - present: honest-degraded-mode
+  - check: mc-degraded-honest
+  - check: cloze-degraded
+  - check: fe-honest-degrade
+  - apply: essay-degraded-ux

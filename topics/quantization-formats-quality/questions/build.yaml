@@ -1,0 +1,41 @@
+- id: mc-scale-formula
+  type: multiple_choice
+  tags: [methods]
+  difficulty: 2
+  prompt: "In per-tensor uint8 quantization, the scale is:"
+  options:
+    - { text: "(max − min) / 255 — the size of one quantization step", correct: true }
+    - { text: "max − min" }
+    - { text: "255 / (max − min)" }
+    - { text: "the mean of the values" }
+  explanation: "The value range is spread over 255 gaps, so each step is (max − min) / 255; dequantized error is about half a step."
+
+- id: mc-why-clamp
+  type: multiple_choice
+  tags: [methods]
+  difficulty: 3
+  prompt: "Why must quantized codes be clamped to [0, 255]?"
+  options:
+    - { text: "An out-of-range code overflows/wraps and corrupts the value", correct: true }
+    - { text: "Clamping makes quantization faster" }
+    - { text: "It increases the number of levels" }
+    - { text: "It removes the need for a zero-point" }
+  explanation: "Values that round beyond the representable range must be clamped; an unclamped code wraps and silently corrupts the tensor."
+
+- id: essay-quant-safety
+  type: essay
+  length: long
+  tags: [methods]
+  difficulty: 4
+  prompt: >-
+    Project: decide whether a given INT4 / AWQ build of a model is production-safe. Design the
+    evaluation: which formats and methods you'd compare, task evals vs. perplexity, which components
+    (weights/activations/KV, which layers) are riskiest, and a clear go/no-go criterion. Include a
+    short test plan.
+  eval_skill: eval-quant-essay
+  reference_points:
+    - "Compare formats/methods (INT8/INT4, GPTQ/AWQ) against an FP16 baseline."
+    - "Measure task evals (MMLU/GSM8K/etc.), not just perplexity — perplexity can hide task-quality loss."
+    - "Activations are harder than weights; long-context/reasoning degrade first; watch sensitive layers."
+    - "Go/no-go: a quality-drop threshold on the task evals, plus latency/footprint targets."
+    - "Test plan: eval suite on a labeled set; per-layer sensitivity; regression gate before shipping."

@@ -1,0 +1,32 @@
+# Calibration for eval-tradeoffs-essay (exemplars target essay-no-free-lunch).
+skill: eval-tradeoffs-essay
+cases:
+  - answer: >-
+      There is no free lunch here. Every serving lever trades among four axes — latency, quality, cost,
+      and reliability — so nothing improves all four at once. Continuous batching amortizes GPU work
+      across many requests, which raises throughput and lowers cost-per-token, but each request now
+      waits for the batch to fill, so per-request and especially tail (p99) latency go up. So it is not
+      simply "faster and cheaper": it is cheaper and higher-throughput at the cost of latency, and it
+      may breach our latency SLO. The gain is traded, not free.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  - answer: "Batching is always a pure win because bigger batches make everything faster and cheaper."
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  - answer: >-
+      There's a tradeoff — batching helps some things but hurts others, so you don't get everything for
+      free and you should watch your targets.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
+
+  - answer: >-
+      Turn batching all the way up. Bigger batches lower latency for every request and also cut cost,
+      so it strictly improves latency, cost, and quality at the same time with no downside.
+    expect:
+      verdict: fail
+      checks: { technically_correct: false }

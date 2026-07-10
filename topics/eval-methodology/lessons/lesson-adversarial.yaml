@@ -1,0 +1,10 @@
+id: lesson-adversarial
+title: "Adversarial & edge-case tests"
+material: adversarial.md
+segments:
+  - present: adversarial-and-edge-case-tests
+  - check: mc-adversarial-purpose
+  - check: cloze-adversarial
+  - check: fe-adversarial-target
+  - present: building-and-gating-on-the-suite
+  - apply: essay-adversarial-design

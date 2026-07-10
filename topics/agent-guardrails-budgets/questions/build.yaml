@@ -1,0 +1,41 @@
+- id: mc-three-stop-conditions
+  type: multiple_choice
+  tags: [budgets]
+  difficulty: 2
+  prompt: "Which set of stop conditions should every agent loop have?"
+  options:
+    - { text: "Task complete, budget exhausted, and no-progress", correct: true }
+    - { text: "Only 'task complete'" }
+    - { text: "Only a step budget" }
+    - { text: "Complete and a random timeout" }
+  explanation: "Complete alone can run forever; budget alone wastes the whole budget spinning. You need complete + budget + no-progress."
+
+- id: mc-no-progress-signal
+  type: multiple_choice
+  tags: [budgets]
+  difficulty: 2
+  prompt: "A 'no-progress' stop should fire when:"
+  options:
+    - { text: "A step produces the same state it was given", correct: true }
+    - { text: "The first tool call succeeds" }
+    - { text: "The agent uses more than one tool" }
+    - { text: "The output is longer than the input" }
+  explanation: "Unchanged state means the agent is stuck/oscillating; stop early instead of burning the whole budget."
+
+- id: essay-guardrail-policy
+  type: essay
+  length: long
+  tags: [budgets]
+  difficulty: 4
+  prompt: >-
+    Project: design the full guardrail and termination policy for a customer-facing task agent that
+    has mutating tools. Cover budgets (steps / tools / tokens / cost / wall-clock), termination
+    conditions, no-progress and loop detection, confirmation for high-risk actions, and
+    human-in-the-loop escalation. Include a short test plan.
+  eval_skill: eval-guardrails-essay
+  reference_points:
+    - "Budgets: caps on steps, tool calls, tokens, cost, and wall-clock time."
+    - "Termination conditions: complete, budget-exhausted, no-progress; return the reason."
+    - "Loop/no-progress detection: repeated states/actions stop or escalate."
+    - "Guardrails: allow-list tools; confirmation for destructive/high-risk actions; least privilege."
+    - "HITL escalation + partial-result reporting; test plan that triggers each stop condition."

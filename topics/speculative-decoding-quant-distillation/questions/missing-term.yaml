@@ -1,0 +1,45 @@
+# Missing term (cloze)
+- id: cloze-lossless
+  type: text_input
+  tags: [speculative]
+  difficulty: 1
+  prompt: "Because it produces exactly the tokens the target model would have, speculative decoding is described as ____ (it does not change the output distribution)."
+  answer:
+    regex: '^lossless$'
+    normalize: true
+
+- id: cloze-draft
+  type: text_input
+  tags: [speculative]
+  difficulty: 2
+  prompt: "In speculative decoding, the small, cheap model that proposes candidate tokens is called the ____ model."
+  answer:
+    regex: '^draft$'
+    normalize: true
+
+- id: cloze-acceptance
+  type: text_input
+  tags: [speculative]
+  difficulty: 2
+  prompt: "The fraction of proposed tokens the target model accepts during verification is the ____ rate."
+  answer:
+    regex: '^acceptance$'
+    normalize: true
+
+- id: cloze-quantization
+  type: text_input
+  tags: [quantization]
+  difficulty: 2
+  prompt: "Storing a model's weights in a lower bit-width like INT8 or INT4 to cut memory is called ____."
+  answer:
+    regex: '^quantization$'
+    normalize: true
+
+- id: cloze-distillation
+  type: text_input
+  tags: [distillation]
+  difficulty: 2
+  prompt: "Training a smaller student model to mimic a larger teacher model is called ____."
+  answer:
+    regex: '^distillation$'
+    normalize: true

@@ -1,0 +1,13 @@
+id: lesson-resilience
+title: "Circuit breakers, hedging & backoff"
+material: resilience.md
+segments:
+  - present: circuit-breakers-and-backoff
+  - check: mc-circuit-breaker
+  - check: mc-backoff-jitter
+  - check: cloze-circuit-breaker
+  - check: cloze-backoff
+  - present: hedged-requests
+  - check: mc-hedged-request
+  - check: fe-hedge-cost
+  - apply: essay-fallback-chain

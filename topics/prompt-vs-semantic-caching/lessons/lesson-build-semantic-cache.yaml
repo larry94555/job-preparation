@@ -1,0 +1,11 @@
+id: lesson-build-semantic-cache
+title: "Build it: a semantic cache"
+material: build-semantic-cache.md
+segments:
+  - present: how-a-semantic-cache-decides-a-hit
+  - check: mc-cosine-hit
+  - present: thresholds-ttl-and-false-positives
+  - check: mc-threshold-too-low
+  - check: fe-expired-is-miss
+  - apply: code-semantic-cache
+  - apply: essay-layered-caching

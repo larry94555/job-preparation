@@ -1,0 +1,31 @@
+# Calibration for eval-adaptation-essay (exemplars target essay-wrong-tool).
+skill: eval-adaptation-essay
+cases:
+  - answer: >-
+      Fine-tuning is the wrong tool here. Prices change every day, and fine-tuning bakes facts into the
+      weights, so any answer goes stale immediately and every update means another training run.
+      Freshness is a retrieval problem: use RAG (or just feed the current price list into context) so
+      answers stay current without retraining, and you can cite the source row. Fine-tuning is for
+      behavior and format, not volatile facts — using it here is over-adapting.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  - answer: "Just fine-tune it, a bigger trained model always knows more so it will handle the prices fine."
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  - answer: >-
+      Fine-tuning probably isn't ideal since the prices keep changing, so you'd rather not retrain the
+      model all the time. Something that pulls in the current data would be better.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
+
+  - answer: >-
+      Fine-tuning is perfect here because RAG would retrain the weights on every query anyway, and
+      fine-tuning keeps the prices permanently fresh in the model without any extra work.
+    expect:
+      verdict: fail
+      checks: { technically_correct: false }

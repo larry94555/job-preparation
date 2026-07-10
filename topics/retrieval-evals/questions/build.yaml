@@ -1,0 +1,51 @@
+# Deeper checks + the project (long-form design) for the build lesson.
+- id: mc-recall-denominator
+  type: multiple_choice
+  tags: [metrics]
+  difficulty: 2
+  prompt: "recall@k = (relevant items found in the top k) divided by what?"
+  options:
+    - { text: "The total number of relevant items", correct: true }
+    - { text: "k" }
+    - { text: "The total number of retrieved items" }
+    - { text: "The number of items shown in the top k" }
+  explanation: "Recall's denominator is the whole relevant set; precision's denominator is k. Same numerator, different denominator."
+
+- id: mc-mrr-definition
+  type: multiple_choice
+  tags: [metrics]
+  difficulty: 2
+  prompt: "Mean Reciprocal Rank (per query) is:"
+  options:
+    - { text: "The reciprocal of the 1-based rank of the first relevant result", correct: true }
+    - { text: "The average of precision at every position" }
+    - { text: "The count of relevant results returned" }
+    - { text: "The reciprocal of k" }
+  explanation: "MRR only cares about where the FIRST relevant result lands: 1 / rank, or 0 if none appear."
+
+- id: fe-zero-relevant-guard
+  type: text_input
+  tags: [metrics]
+  difficulty: 2
+  prompt: "If the relevant set is empty, recall's denominator is zero. In one word, what must the code avoid doing?"
+  answer:
+    regex: '^(divide|dividing|division)$'
+    normalize: true
+
+- id: essay-retrieval-eval-harness
+  type: essay
+  length: long
+  tags: [metrics]
+  difficulty: 4
+  prompt: >-
+    Project: design a retrieval-eval harness for a production RAG system. Cover which metrics to
+    track (recall@k, precision@k, MRR/nDCG) and why; how to build and maintain labeled relevance
+    sets; how to separate retrieval failures from generation (grounding) failures; and how to gate
+    regressions in CI. Include a short test plan.
+  eval_skill: eval-retrievalevals-essay
+  reference_points:
+    - "Metrics: recall@k / precision@k / MRR (and nDCG for graded relevance) — what each captures and its blind spots."
+    - "Labeled sets: query–document relevance judgments; how they are built and kept fresh."
+    - "Isolate layers: measure grounding/faithfulness separately from retrieval recall so you know which failed."
+    - "CI gate: a golden set + a pass-rate threshold (+ canary) that fails the build on regression."
+    - "Test plan: metric unit tests on fixtures, labeled-set coverage, and human/agreement spot checks."

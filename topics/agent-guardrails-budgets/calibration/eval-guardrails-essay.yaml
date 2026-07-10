@@ -1,0 +1,31 @@
+# Calibration for eval-guardrails-essay (exemplars target essay-why-terminate).
+skill: eval-guardrails-essay
+cases:
+  - answer: >-
+      A success-only exit is unsafe because an agent that can never reach the goal just loops forever,
+      burning steps, tokens, and money with no natural stop. I'd add failure and no-progress
+      termination — detect when it repeats the same action or revisits the same state (oscillation) and
+      stop — plus budget-exhaustion exits on steps, tokens, cost, and wall-clock time. When any budget
+      trips, terminate gracefully and return the best partial result and state instead of crashing.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  - answer: "Just let it keep running until it solves the task; more attempts always means a better answer."
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  - answer: >-
+      It's risky because the agent might never finish, so I'd add some other ways to stop it if it gets
+      stuck or takes too long.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
+
+  - answer: >-
+      A success-only exit is fine on its own, and a step budget already caps wall-clock time, so you
+      don't need a separate timeout even if a tool call hangs.
+    expect:
+      verdict: fail
+      checks: { technically_correct: false }

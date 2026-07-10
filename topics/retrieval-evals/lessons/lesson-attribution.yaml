@@ -1,0 +1,11 @@
+id: lesson-attribution
+title: "Attribution & citation quality"
+material: attribution.md
+segments:
+  - present: what-a-fabricated-citation-is
+  - check: mc-fabricated-citation
+  - check: fe-attribution-problem
+  - present: checking-attribution-at-scale
+  - check: mc-attribution-check
+  - present: attribution-vs-grounding
+  - apply: essay-attribution-eval

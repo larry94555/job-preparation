@@ -1,0 +1,38 @@
+# Essay
+- id: essay-why-terminate
+  type: essay
+  length: short
+  tags: [termination]
+  difficulty: 3
+  prompt: "A teammate ships an agent whose only exit condition is 'stop when the task is solved.' Explain why this is unsafe and what termination conditions you would add."
+  eval_skill: eval-guardrails-essay
+  reference_points:
+    - "A success-only exit means an agent that can never reach the goal loops forever, spending unbounded steps, tokens, and money."
+    - "Add failure/no-progress termination — detect repeated actions or revisited states (oscillation) and stop instead of looping."
+    - "Add budget-exhaustion exits on steps, tokens, cost, and wall-clock time, and terminate gracefully by returning the best partial result and state."
+
+- id: essay-design-budgets
+  type: essay
+  length: short
+  tags: [budgets]
+  difficulty: 3
+  prompt: "Design the budget scheme for an autonomous agent runner. Which dimensions do you cap and why is each necessary?"
+  eval_skill: eval-guardrails-essay
+  reference_points:
+    - "Cap loop steps/iterations so the overall run is bounded, and per-tool call counts so one expensive or rate-limited tool can't be hammered in a loop."
+    - "Cap cumulative tokens and dollar cost so a long run can't blow the cost ceiling."
+    - "Keep a separate wall-clock timeout because a single step can hang on a slow tool or network call, which step and token caps do not bound."
+    - "When any budget is exhausted, terminate gracefully and return the partial result rather than crashing."
+
+- id: essay-highrisk-guardrails
+  type: essay
+  length: long
+  tags: [guardrails]
+  difficulty: 4
+  prompt: "An agent can call tools that delete data, spend money, or send external messages. Design the guardrails that keep high-risk actions safe, and explain the tradeoffs."
+  eval_skill: eval-guardrails-essay
+  reference_points:
+    - "Use an allow-list (deny-by-default): only explicitly approved tools/actions run, which fails safe unlike a deny-list that fails open on anything unforeseen."
+    - "Gate high-risk or irreversible actions (delete, payment, external send) behind human-in-the-loop confirmation before they execute, not just logging after."
+    - "Add a circuit breaker / escalation path that halts the run and escalates to a human when a failure or risk signal crosses a threshold."
+    - "Tradeoff: stricter guardrails reduce autonomy and add human latency/cost, while permissive guardrails increase throughput but risk irreversible harm — tune by the blast radius of each action."

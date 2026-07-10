@@ -1,0 +1,22 @@
+skill: eval-evals-code
+cases:
+  - answer: >-
+      tests_passed=true. Loops cases, counts passes where run(input)===expected, pushes failing names,
+      passRate=pass/cases.length, returns passed = passRate>=threshold and the failures list.
+    expect:
+      verdict: pass
+      checks: { gate_on_threshold: true, computes_pass_rate: true, matches_expected: true, reports_failures: true }
+
+  - answer: >-
+      tests_passed=true, but always returns passed:true regardless of threshold (never compares
+      passRate to threshold), though it computes passRate and failures correctly.
+    expect:
+      verdict: fail
+      checks: { gate_on_threshold: false, computes_pass_rate: true, matches_expected: true, reports_failures: true }
+
+  - answer: >-
+      tests_passed=true. Gates on threshold and computes passRate, but returns the failing inputs
+      instead of the case names, so failures aren't easily actionable.
+    expect:
+      verdict: borderline
+      checks: { gate_on_threshold: true, computes_pass_rate: true, matches_expected: true, reports_failures: false }

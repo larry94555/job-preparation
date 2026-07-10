@@ -1,0 +1,17 @@
+id: lesson-levers
+title: "Three levers, three goals"
+material: levers.md
+segments:
+  - present: the-three-levers-and-three-goals
+  - check: mc-three-levers
+  - check: mc-quant-goal
+  - check: mc-distill-cost
+  - check: cloze-quantization
+  - check: cloze-distillation
+  - check: fe-memory-lever
+  - check: fe-teacher-student
+  - present: lossless-vs-lossy
+  - check: mc-lossless-lever
+  - check: mc-quant-risk
+  - check: cloze-lossless
+  - apply: essay-match-levers

@@ -1,0 +1,11 @@
+id: lesson-eviction
+title: "Eviction: recompute vs. swap"
+material: eviction.md
+segments:
+  - present: preemption-recompute-vs-swap
+  - check: mc-eviction-recompute-swap
+  - check: mc-recompute-vs-swap-tradeoff
+  - check: cloze-preemption
+  - check: fe-eviction-strategies
+  - present: choosing-a-strategy
+  - apply: essay-recompute-vs-swap

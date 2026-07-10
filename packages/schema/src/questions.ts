@@ -71,6 +71,8 @@ export const CodeQuestion = z.object({
   language: z.string().min(1),
   prompt: z.string().min(1),
   starter_file: z.string().optional(),
+  /** Test file (relative to the topic dir) the runner executes against the submission. */
+  test_file: z.string().optional(),
   test_command: z.string().min(1),
   runner_image: z.string().min(1),
   timeout_sec: z.number().int().positive().default(30),

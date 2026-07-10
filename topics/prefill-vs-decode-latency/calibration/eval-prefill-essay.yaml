@@ -1,0 +1,33 @@
+# Calibration for eval-prefill-essay (exemplars target essay-two-phases).
+skill: eval-prefill-essay
+cases:
+  - answer: >-
+      Inference has two phases. Prefill processes the whole prompt in a single parallel forward pass,
+      building the KV cache; it does a lot of arithmetic per weight read, so it is compute-bound and
+      sets TTFT. Decode then generates output tokens one at a time — each step re-reads the full
+      weights to emit a single token, so it is memory-bandwidth-bound and sets TPOT. Prefill is
+      parallel because every prompt token is known up front, while decode is sequential because each
+      token depends on the one before it.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  - answer: "There's just one phase where the GPU predicts the next word until it's done."
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  - answer: >-
+      There are two phases: one that reads the prompt and one that writes the answer. The first is
+      faster and the second is slower, and they use the hardware differently.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
+
+  - answer: >-
+      Prefill is memory-bandwidth-bound because it streams weights for each prompt token, and decode
+      is compute-bound because it runs a huge parallel matmul every step. Prefill sets TPOT and decode
+      sets TTFT.
+    expect:
+      verdict: fail
+      checks: { technically_correct: false }

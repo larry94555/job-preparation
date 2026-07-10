@@ -1,0 +1,32 @@
+# Calibration for eval-failuremodes-essay (exemplars target essay-silent-danger).
+skill: eval-failuremodes-essay
+cases:
+  - answer: >-
+      A near-zero error rate only counts loud failures — exceptions and non-2xx responses. Silent
+      failures return HTTP 200 with well-formed but wrong text, so they never touch that metric. For
+      example, a hallucinated citation or a stale-retrieval answer looks perfectly healthy on the
+      dashboard while quietly misleading users. Because nothing alerts, trust erodes before anyone
+      notices, which is why you need eval monitoring and output validators, not just an error-rate
+      chart.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  - answer: "If the error rate is low the feature is fine — that's what monitoring is for."
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  - answer: >-
+      Error rate can miss problems because some bad answers don't throw an error, so the system looks
+      healthier than it is and you can't fully trust the number.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
+
+  - answer: >-
+      A near-zero error rate proves the outputs are correct, since any wrong answer would raise an
+      exception and show up in the error count, so silent failures cannot happen if monitoring is on.
+    expect:
+      verdict: fail
+      checks: { technically_correct: false }

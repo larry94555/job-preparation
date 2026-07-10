@@ -1,0 +1,19 @@
+# Coding exercise — engine type: code (graded by tests + concept skill)
+- id: code-token-rollup
+  type: code
+  language: typescript
+  tags: [signals]
+  difficulty: 2
+  prompt: >-
+    Implement `rollupTokens(span)` where a span is `{ name, tokens, children }` (children is an array
+    of spans). Return the total tokens in the subtree: the span's own tokens plus the rollup of each
+    child, recursively. A leaf (empty children) totals just its own tokens.
+  starter_file: exercises/token-rollup/starter.ts
+  test_file: exercises/token-rollup/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-observability-code
+  concept_checks:
+    must_use: ["recurse into children", "include the span's own tokens", "sum across all depths"]
+    avoid_antipattern: ["only summing direct children (one level)", "ignoring the span's own tokens"]

@@ -1,0 +1,16 @@
+id: lesson-validation
+title: "Validation: the contract and constrained decoding"
+material: 02-validation.md
+segments:
+  - present: parse-then-validate
+  - check: mc-parse-then-validate
+  - present: the-schema-is-the-contract
+  - check: mc-schema-as-contract
+  - check: cloze-schema-contract
+  - check: fe-ts-validator
+  - check: mc-strict-schema-effect
+  - present: constrained-decoding-and-its-limits
+  - check: mc-constrained-cannot-guarantee
+  - check: cloze-constrained-decoding
+  - check: mc-constrained-quality-cost
+  - apply: essay-why-validate

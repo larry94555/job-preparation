@@ -1,0 +1,39 @@
+# Essay
+- id: essay-four-approaches
+  type: essay
+  length: short
+  tags: [approaches]
+  difficulty: 3
+  prompt: "In a few sentences, contrast in-context learning, RAG, fine-tuning, and distillation by the primary thing each one changes."
+  eval_skill: eval-adaptation-essay
+  reference_points:
+    - "In-context learning steers behavior through the prompt (instructions + few-shot examples) at inference time, changing nothing permanent."
+    - "RAG adds fresh, private, or citable knowledge fetched at query time and placed in context, without changing the weights."
+    - "Fine-tuning updates the weights to durably change behavior, format, or style (and can improve task reliability), but is a poor place for volatile facts."
+    - "Distillation trains a smaller student to reproduce a known-good teacher's behavior, cutting deployment cost/latency."
+
+- id: essay-decision-axes
+  type: essay
+  length: long
+  tags: [decision]
+  difficulty: 4
+  prompt: "A team must adapt a model for a domain assistant. Walk through the decision axes (freshness, behavior change, cost, latency, attribution) and explain how each axis points toward a particular approach."
+  eval_skill: eval-adaptation-essay
+  reference_points:
+    - "Freshness: if knowledge changes often and must stay current, favor RAG because you update the index, not the weights."
+    - "Behavior change: if the model must adopt a persistent style/format prompting can't enforce, favor fine-tuning, which bakes behavior into weights."
+    - "Cost: fine-tuning front-loads training cost then serves cheaply; RAG avoids training but pays retrieval and larger contexts per query; distillation cuts deployment cost."
+    - "Latency / attribution: RAG adds retrieval latency but supplies citable sources; fine-tuning/distillation keep prompts short but cannot cite specific sources."
+    - "Sequencing: start with prompting/ICL, add RAG for knowledge, and reserve fine-tuning (then distillation) for behavior the lighter methods can't deliver."
+
+- id: essay-wrong-tool
+  type: essay
+  length: short
+  tags: [antipatterns]
+  difficulty: 4
+  prompt: "A teammate proposes fine-tuning the model on the company's daily-changing price list so it 'just knows' current prices. Explain why this is the wrong tool and what to do instead."
+  eval_skill: eval-adaptation-essay
+  reference_points:
+    - "Prices change daily, and fine-tuning bakes facts into weights, so answers go stale immediately and every update needs another training run."
+    - "Freshness is a retrieval problem: RAG (or feeding the current price list into context) keeps answers current without retraining and can cite the source."
+    - "Fine-tuning is for behavior/format/style, not volatile facts; using it here is over-adapting and premature."

@@ -1,0 +1,37 @@
+# Essay
+- id: essay-why-traces
+  type: essay
+  length: short
+  tags: [tracing]
+  difficulty: 3
+  prompt: "A teammate says request-level latency and error metrics are enough to observe your new LLM agent. Explain why traces and spans (with correlation IDs) are needed instead, and what they buy you."
+  eval_skill: eval-observability-essay
+  reference_points:
+    - "One agent request fans out into many steps — planning, tool calls, retrieval, retries, sub-model calls — so a single aggregate metric hides where time, tokens, errors, and cost actually go."
+    - "A trace is the whole request; spans are the nested units of work, forming a tree over the call graph so you can see the structure and pinpoint the slow or failing step."
+    - "A correlation/trace ID propagated through every step and service stitches those spans into one trace, even across process and network boundaries, enabling per-step debugging and token/cost rollups."
+
+- id: essay-signals
+  type: essay
+  length: short
+  tags: [signals]
+  difficulty: 3
+  prompt: "List the core signals you would capture on each LLM span and explain how they roll up to answer questions about speed and spend for a whole request."
+  eval_skill: eval-observability-essay
+  reference_points:
+    - "Capture tokens (input/output), latency broken into TTFT (time to first token) and TPOT (per-output-token decode time), errors and retries, and derived cost per span."
+    - "TTFT vs TPOT separates prefill/queueing from steady-state decode, explaining perceived streaming latency far better than one end-to-end number."
+    - "Cost is tokens times model prices per step; recording tokens on every span lets you sum span costs up the trace for per-request (and per-user/per-feature) spend, and roll latency up to see the critical path."
+
+- id: essay-drift-capture
+  type: essay
+  length: long
+  tags: [drift, capture]
+  difficulty: 4
+  prompt: "Design an observability plan for detecting drift when you ship a new prompt or model version, including a canary and capture/replay. Explain how you protect user privacy while still keeping traces useful for debugging."
+  eval_skill: eval-observability-essay
+  reference_points:
+    - "Drift is a gradual change in output quality or input distribution over time even without a code change; detect it by trending eval/quality scores and input/output distribution stats, not just error counters."
+    - "Use a canary release: route a small slice of live traffic to the candidate version and compare its signals (latency, cost, error rate, eval scores) against the current one before a full rollout."
+    - "Capture/replay stores prompts and completions so you can reproduce and debug failures deterministically; sample rather than capturing everything to control volume and cost."
+    - "Protect privacy by redacting or tokenizing PII at capture time before it hits the trace store, and by sampling and access controls, so traces stay debuggable without hoarding sensitive data."

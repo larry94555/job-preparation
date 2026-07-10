@@ -1,0 +1,12 @@
+id: lesson-slos
+title: "SLOs as the anchor & budget decomposition"
+material: slos-and-budgets.md
+segments:
+  - present: slos-anchor-the-whole-design
+  - check: mc-slo-anchor
+  - check: cloze-slo
+  - check: fe-slo-role
+  - present: decomposing-the-budget
+  - check: mc-budget-decomp
+  - check: cloze-budget
+  - apply: essay-slo-budget

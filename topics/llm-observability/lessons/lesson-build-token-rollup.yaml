@@ -1,0 +1,10 @@
+id: lesson-build-token-rollup
+title: "Build it: rolling up tokens over a trace"
+material: build-token-rollup.md
+segments:
+  - present: spans-form-a-tree
+  - check: mc-rollup-total
+  - present: why-request-level-counters-arent-enough
+  - check: mc-why-span-tree
+  - apply: code-token-rollup
+  - apply: essay-observability-design
