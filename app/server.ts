@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 import { spawn } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -16,6 +16,7 @@ import {
 } from "@job-prep/engine";
 import { gradeOpen } from "@job-prep/evaluator";
 import { runTypeScript } from "@job-prep/sandbox";
+import { readProgress, writeProgress } from "@job-prep/store";
 import {
   BANDS,
   buildPlaythrough,
@@ -89,22 +90,19 @@ if (lessons.length === 0) {
 }
 
 // ---- per-topic progress + sessions --------------------------------------
+// Progress persists through the shared @job-prep/store file helpers. Single
+// local user → a fixed base dir keeps the historical .progress/<id>.json layout.
 const progressDir = join(process.cwd(), ".progress");
-const progressFile = (id: string) => join(progressDir, `${id}.json`);
 function loadProgress(id: string): Progress {
   const seed = seedFromString(id);
-  if (existsSync(progressFile(id))) {
-    try {
-      return { ...freshProgress(seed), ...JSON.parse(readFileSync(progressFile(id), "utf8")) };
-    } catch {
-      /* fall through */
-    }
+  const saved = readProgress(progressDir, id);
+  if (saved && typeof saved === "object") {
+    return { ...freshProgress(seed), ...(saved as Partial<Progress>) };
   }
   return freshProgress(seed);
 }
 function saveProgress(id: string, p: Progress): void {
-  if (!existsSync(progressDir)) mkdirSync(progressDir, { recursive: true });
-  writeFileSync(progressFile(id), JSON.stringify(p, null, 2));
+  writeProgress(progressDir, id, p);
 }
 
 interface Session {

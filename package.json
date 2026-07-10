@@ -19,11 +19,17 @@
     "eval-gate": "tsx packages/evaluator/src/cli.ts meta-eval topics --threshold 0.7",
     "mastery": "tsx scripts/mastery-index.ts",
     "certify": "npm run validate && npm run selfcheck && npm run typecheck && npm run test && npm run eval-gate",
-    "test": "tsx --test packages/engine/src/grade.test.ts packages/evaluator/src/aggregate.test.ts packages/lesson/src/review.test.ts",
-    "typecheck": "tsc --noEmit -p packages/schema/tsconfig.json && tsc --noEmit -p packages/engine/tsconfig.json && tsc --noEmit -p packages/lesson/tsconfig.json && tsc --noEmit -p packages/evaluator/tsconfig.json && tsc --noEmit -p packages/sandbox/tsconfig.json"
+    "test": "tsx --test packages/engine/src/grade.test.ts packages/evaluator/src/aggregate.test.ts packages/lesson/src/review.test.ts packages/store/src/file.test.ts",
+    "typecheck": "tsc --noEmit -p packages/schema/tsconfig.json && tsc --noEmit -p packages/engine/tsconfig.json && tsc --noEmit -p packages/lesson/tsconfig.json && tsc --noEmit -p packages/evaluator/tsconfig.json && tsc --noEmit -p packages/sandbox/tsconfig.json && tsc --noEmit -p packages/store/tsconfig.json",
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose down",
+    "db:push": "drizzle-kit push",
+    "db:generate": "drizzle-kit generate"
   },
   "devDependencies": {
     "@types/node": "^22.5.4",
+    "@types/pg": "^8.11.10",
+    "drizzle-kit": "^0.28.1",
     "tsx": "^4.19.1",
     "typescript": "^5.6.2"
   }
