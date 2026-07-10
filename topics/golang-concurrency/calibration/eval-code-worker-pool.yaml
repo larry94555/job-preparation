@@ -1,36 +1,49 @@
+# Calibration for eval-code-worker-pool.
+# 'answer' summarizes the submitted approach + provided signals (the grader sees extracted evidence,
+# not raw code). Exemplars target a bounded worker pool over a jobs channel with ordered results.
 skill: eval-code-worker-pool
 cases:
   - answer: >-
-      tests_passed=true. Starts exactly `workers` goroutines that range over a jobs channel; a
-      sync.WaitGroup waits for them to finish. Each worker writes its result into results[index]
-      by the job's index, so output order matches input order. No busy-wait — it blocks on the
-      channel. signals.must_use: goroutine, channel, sync.WaitGroup. signals.avoid_antipattern: none.
+      tests_passed=true. bounded_concurrency: starts exactly `workers` goroutines that range over a
+      shared jobs channel, so concurrency is fixed and there is no one-goroutine-per-job spawn.
+      uses_primitives: coordinates with channels and a sync.WaitGroup that joins every worker.
+      no_busywait: workers block on the channel and the pool is joined via WaitGroup.Wait, no spin
+      loop. order_preserved: each result is written to results[job.index], so output order matches
+      input order. signals.must_use=[goroutine, channel, sync.WaitGroup]; avoid=[].
     expect:
       verdict: pass
       checks: { bounded_concurrency: true, uses_primitives: true, no_busywait: true, order_preserved: true }
 
   - answer: >-
-      tests_passed=true, but it launches one goroutine per job (unbounded spawn) instead of a fixed
-      pool of `workers`, and coordinates with a WaitGroup. Results are appended as each finishes, so
-      order is not preserved. signals.must_use: goroutine, channel, sync.WaitGroup.
-      signals.avoid_antipattern: unbounded goroutine spawn.
+      tests_passed=true. bounded_concurrency: a fixed pool of exactly `workers` goroutines drains a
+      buffered jobs channel, not one goroutine per job. uses_primitives: uses channels plus a
+      sync.WaitGroup to coordinate completion. no_busywait: workers block on the channel and the
+      pool is joined with WaitGroup.Wait, no spinning. order_preserved: results are appended to a
+      slice as each job finishes, so output order does not match input order. signals.must_use=[goroutine,
+      channel, sync.WaitGroup]; avoid=[append-as-done ordering].
     expect:
-      verdict: fail
-      checks: { bounded_concurrency: false, uses_primitives: true, no_busywait: false, order_preserved: false }
+      verdict: pass
+      checks: { bounded_concurrency: true, uses_primitives: true, no_busywait: true, order_preserved: false }
 
   - answer: >-
-      tests_passed=true. Uses exactly `workers` goroutines and channels, and writes results back by
-      index so order is preserved, but coordinates completion with a busy-wait loop that spins on an
-      atomic counter instead of a WaitGroup/channel close. signals.must_use: goroutine, channel.
-      signals.avoid_antipattern: busy-wait loop.
+      tests_passed=true. bounded_concurrency: uses exactly `workers` goroutines ranging over the jobs
+      channel, so the pool size is fixed. uses_primitives: relies only on channels and an atomic
+      counter, with no sync.WaitGroup or equivalent join primitive. no_busywait: the main goroutine
+      spins in a busy-wait loop on the atomic counter instead of blocking, so it fails the spin check.
+      order_preserved: each result is stored at results[job.index], so input order is kept.
+      signals.must_use=[goroutine, channel]; avoid=[busy-wait loop].
     expect:
       verdict: borderline
       checks: { bounded_concurrency: true, uses_primitives: false, no_busywait: false, order_preserved: true }
 
   - answer: >-
-      tests_passed=true. Fixed pool of `workers` goroutines draining a buffered jobs channel, a
-      WaitGroup to join, no spinning, and results stored at results[job.index] to keep input order.
-      signals.must_use: goroutine, channel, sync.WaitGroup. signals.avoid_antipattern: none.
+      tests_passed=true. bounded_concurrency: launches one goroutine per job (unbounded spawn) rather
+      than a fixed pool of `workers`, so concurrency is not bounded. uses_primitives: coordinates
+      completion only with a sync.WaitGroup and never sends work over a channel, so it does not use
+      channels and a WaitGroup together. no_busywait: the main goroutine spins in a busy-wait loop
+      polling a shared counter instead of blocking on Wait. order_preserved: results are appended in
+      completion order, so input order is not preserved. signals.must_use=[goroutine, sync.WaitGroup];
+      avoid=[unbounded goroutine spawn, busy-wait loop].
     expect:
-      verdict: pass
-      checks: { bounded_concurrency: true, uses_primitives: true, no_busywait: true, order_preserved: true }
+      verdict: fail
+      checks: { bounded_concurrency: false, uses_primitives: false, no_busywait: false, order_preserved: true }

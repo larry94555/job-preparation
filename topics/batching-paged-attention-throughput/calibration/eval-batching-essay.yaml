@@ -1,33 +1,56 @@
 # Calibration for eval-batching-essay (exemplars target essay-continuous-vs-static).
 skill: eval-batching-essay
 cases:
+  # PASS #1 — strong answer, every rubric check clearly satisfied, gate true.
   - answer: >-
-      Continuous batching fixes this. With static batching the whole batch runs until the longest
-      request finishes, so a short request is stuck behind a long one — head-of-line blocking that
-      leaves the GPU slot idle. Continuous (in-flight) batching schedules at the iteration level:
-      the moment a request emits its end-of-sequence token it leaves the batch and a queued request
-      takes its slot on the next step. Slots free up per token step instead of per batch, so short
-      requests stop waiting for the longest one, occupancy stays high, and both short-request latency
-      and overall throughput improve.
+      The problem is head-of-line blocking: with static batching every request in the batch runs until
+      the single longest one finishes its decode, so a short request that is already done sits idle in
+      its slot, wasting GPU cycles until the whole batch retires together. Continuous (in-flight)
+      batching changes the unit of scheduling from the batch to the iteration: the scheduler makes an
+      admission/eviction decision every token step. The moment a request emits its end-of-sequence
+      token it is evicted and its slot is immediately handed to a queued request on the very next step,
+      rather than everyone waiting for the batch to drain. Because slots free up per iteration instead
+      of per batch, short requests stop waiting behind long ones, GPU occupancy stays high, and both
+      short-request latency and aggregate throughput improve.
     expect:
       verdict: pass
       checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
 
-  - answer: "Just buy a bigger GPU and everything gets faster."
+  # PASS #2 — a second strong, differently-worded answer; all four checks true, gate true.
+  - answer: >-
+      With static batching the engine launches a fixed group and does not touch it again until the
+      longest sequence in it has generated its final token, so a two-token reply is trapped behind a
+      thousand-token generation — that idle slot is the head-of-line blocking your teammate is seeing.
+      Continuous batching schedules at the iteration/token-step level instead: after each decode step
+      the scheduler removes any sequence that just hit its end-of-sequence token and pulls a waiting
+      request into the freed slot, so the batch membership changes continuously rather than all at once.
+      Since capacity is reclaimed the instant a request finishes instead of at the end of the whole
+      batch, the GPU stays densely occupied, short requests are no longer gated by the longest one, and
+      throughput and short-request latency both go up.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — off-topic and wrong: misses the gate (technically_correct) plus covers_key_points and
+  # concrete. 1/4 = 0.25 -> base fail; gate false -> stays fail.
+  - answer: >-
+      Static versus continuous batching does not really matter for this; the short requests are slow
+      because the model weights are too big, so the fix is to shrink the batch to one request at a time
+      and run everything sequentially, which is what continuous batching actually means. Serving one
+      request at a time is how you make the short ones fast.
     expect:
       verdict: fail
-      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+      checks: { addresses_question: true, covers_key_points: false, technically_correct: false, concrete: false }
 
+  # BORDERLINE — correctly identifies iteration-level scheduling and eviction and is concrete, but
+  # contains a false claim (batch finishes together) that fails the gate. 3/4 = 0.75 -> base pass;
+  # technically_correct (gate) false -> capped down to borderline.
   - answer: >-
-      Continuous batching is better because it doesn't make the short requests wait as long for the
-      long ones, so things run more smoothly.
+      Continuous batching schedules at the iteration level and evicts a request the moment it emits its
+      end-of-sequence token, freeing its slot for a queued request so occupancy stays high — that is why
+      the short requests come back faster. The way it does this is that the batch still waits until every
+      request in it has finished and only then starts the next batch all at once, and paged attention
+      helps by making the attention matmul kernel itself run faster.
     expect:
       verdict: borderline
-      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
-
-  - answer: >-
-      Continuous batching waits until every request in the batch has finished and then starts a new
-      batch all at once, which is why the short requests come back faster.
-    expect:
-      verdict: fail
-      checks: { technically_correct: false }
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: false, concrete: true }

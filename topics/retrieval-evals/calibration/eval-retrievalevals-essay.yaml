@@ -1,33 +1,45 @@
 # Calibration for eval-retrievalevals-essay (exemplars target essay-metrics-choice).
 skill: eval-retrievalevals-essay
 cases:
+  # PASS — strong: all four checks true, gate (technically_correct) true.
   - answer: >-
-      Track MRR (mean reciprocal rank). It averages 1/(rank of the first relevant result), so when the
-      right passage sits at rank 4 instead of rank 1 the score drops from 1.0 to 0.25 — exactly the
-      "buried but present" symptom. recall@k can't catch this: it only asks whether the relevant doc is
-      somewhere in the top-k, treating rank 1 and rank k identically, so it stays flat even as position
-      degrades. Because the problem is ordering, an order-sensitive metric is the diagnostic, and the fix
-      is usually a reranker.
+      Track MRR (mean reciprocal rank). It averages 1/(rank of the first relevant passage), so when the
+      right passage lands at rank 4 instead of rank 1 the case score falls from 1.0 to 0.25 — precisely
+      the "present but buried" symptom you describe. recall@k cannot catch this: it only asks whether the
+      relevant doc appears anywhere in the top-k, so a passage at rank 1 and one at rank k score
+      identically and the number stays flat as position degrades. Because the complaint is about ordering
+      rather than presence, an order-sensitive metric (MRR, or nDCG) is the correct diagnostic, and the
+      fix is usually adding a reranker over the top-k.
     expect:
       verdict: pass
       checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
 
-  - answer: "Just use recall@k for everything, since it already measures where the result ranks in the list."
+  # PASS — strong: all four checks true, gate true.
+  - answer: >-
+      I would track MRR. Mean reciprocal rank scores each query as 1/(rank of the first relevant result),
+      so it directly rewards pushing the correct passage toward rank 1 and penalizes burying it several
+      positions down — exactly the inconsistency you are seeing. This differs from recall@k, which is
+      position-blind: recall@k only measures whether the relevant document is somewhere inside the top-k
+      window, treating rank 1 and rank k as equally good, so it stays high even when good passages sink.
+      Since the problem is order, not absence, I would use an order-sensitive metric like MRR (or nDCG)
+      and address the ranking with a cross-encoder reranker.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — weak/wrong: gate false (claims recall@k is order-sensitive) plus covers_key_points and concrete false.
+  - answer: "Just track recall@k for everything, since recall@k already measures how high up the ranking the right result lands."
     expect:
       verdict: fail
       checks: { addresses_question: true, covers_key_points: false, technically_correct: false, concrete: false }
 
+  # BORDERLINE — misses only the gate (technically_correct); the other three checks are true.
   - answer: >-
-      I'd look at MRR because it cares about how high the first good result is, whereas recall@k only
-      checks if it showed up at all.
+      I would track MRR to catch this. MRR looks at where the first relevant passage ranks, so burying
+      the right passage a few positions down lowers the score, whereas recall@k only checks whether the
+      passage made it into the top-k at all and is blind to its position — so the fix is a reranker. The
+      one difference to note is that recall@k is order-sensitive too, since it counts the same relevant
+      document once for every rank above it, which is why recall climbs as the passage moves up.
     expect:
       verdict: borderline
-      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
-
-  - answer: >-
-      Use MRR. It rewards getting the first relevant result to the top, and it's better than recall@k
-      because recall@k counts every relevant doc in the top-k twice, which is why precision goes up as
-      you add more results.
-    expect:
-      verdict: fail
-      checks: { technically_correct: false }
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: false, concrete: true }

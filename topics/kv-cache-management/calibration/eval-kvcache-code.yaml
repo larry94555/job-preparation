@@ -1,23 +1,55 @@
 skill: eval-kvcache-code
+# Calibration for eval-kvcache-code (paged KV-cache block allocator).
+# 'answer' summarizes the submitted approach; the grader sees extracted evidence, not raw code.
+# Checks: null_when_insufficient (gate), ceil_blocks, no_overlap, free_returns.
 cases:
   - answer: >-
-      tests_passed=true. Keeps a pool of free indices; allocate computes need=ceil(numTokens/blockSize),
-      returns null if need>pool.length, else shifts `need` indices out and returns them; free pushes
-      indices back. Live allocations don't overlap because blocks leave the pool.
+      tests_passed=true. null_when_insufficient holds: allocate computes the needed block count and
+      returns null with the pool left unchanged whenever that count exceeds the free blocks, so it
+      never over-allocates past capacity. ceil_blocks holds: it uses ceil(numTokens / blockSize), so
+      a partial final block still rounds up to a whole block. no_overlap holds: allocated indices are
+      shifted out of the free pool, so two live allocations can never share a block. free_returns
+      holds: free pushes the block indices back into the pool for reuse.
+      signals.must_use=[null on overflow, ceil block count, remove from pool, free returns blocks];
+      avoid=[over-allocation past capacity].
     expect:
       verdict: pass
       checks: { null_when_insufficient: true, ceil_blocks: true, no_overlap: true, free_returns: true }
 
   - answer: >-
-      tests_passed=true, but when need>free it still returns `need` indices (some out of range / reused)
-      instead of null — it over-allocates past capacity. ceil and free are otherwise fine.
+      tests_passed=true. null_when_insufficient holds: allocate returns null and leaves the pool
+      untouched when the requested block count is larger than the free blocks, so it never
+      over-allocates past capacity. ceil_blocks holds: it rounds up with ceil(numTokens / blockSize).
+      no_overlap holds: allocated blocks are removed from the free pool so live allocations can't
+      share a block. free_returns is false: free logs the returned indices but never pushes them back
+      into the pool, so freed blocks leak and cannot be reused.
+      signals.must_use=[null on overflow, ceil block count, remove from pool];
+      avoid=[leaking freed blocks].
     expect:
-      verdict: fail
-      checks: { null_when_insufficient: false, ceil_blocks: true, no_overlap: true, free_returns: true }
+      verdict: pass
+      checks: { null_when_insufficient: true, ceil_blocks: true, no_overlap: true, free_returns: false }
 
   - answer: >-
-      tests_passed=true. Returns null when insufficient and frees correctly, but uses
-      floor(numTokens/blockSize) so it under-allocates by a block for non-multiple sizes.
+      tests_passed=true. null_when_insufficient is false: when the requested block count exceeds the
+      free blocks, allocate still shifts out that many indices and returns them, over-allocating past
+      capacity instead of returning null. ceil_blocks is also false: it uses floor(numTokens /
+      blockSize), so it under-allocates a block for non-multiple sizes. no_overlap holds: whatever
+      indices it does hand out are removed from the pool, so live allocations don't share a block.
+      free_returns holds: free pushes freed indices back for reuse.
+      signals.must_use=[remove from pool, free returns blocks];
+      avoid=[over-allocation past capacity, floor rounding].
+    expect:
+      verdict: fail
+      checks: { null_when_insufficient: false, ceil_blocks: false, no_overlap: true, free_returns: true }
+
+  - answer: >-
+      tests_passed=true. null_when_insufficient is false: when the requested block count exceeds the
+      free blocks it wraps and reuses in-range indices rather than returning null, so it
+      over-allocates past capacity. ceil_blocks holds: it rounds up with ceil(numTokens / blockSize).
+      no_overlap holds: on a successful allocate the indices are removed from the free pool so two
+      live allocations can't share a block. free_returns holds: free pushes the indices back into the
+      pool for reuse. signals.must_use=[ceil block count, remove from pool, free returns blocks];
+      avoid=[over-allocation past capacity].
     expect:
       verdict: borderline
-      checks: { null_when_insufficient: true, ceil_blocks: false, no_overlap: true, free_returns: true }
+      checks: { null_when_insufficient: false, ceil_blocks: true, no_overlap: true, free_returns: true }

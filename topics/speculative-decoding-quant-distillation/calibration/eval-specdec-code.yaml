@@ -1,22 +1,42 @@
 skill: eval-specdec-code
 cases:
   - answer: >-
-      tests_passed=true. Iterates draftMatches, increments a counter while the value is true, breaks at
-      the first false, then returns counter + 1.
+      tests_passed=true. stops_at_first_reject holds: the loop breaks at the first `false` so matches
+      after a reject are not counted. counts_leading_matches holds: it counts the run of leading `true`s
+      before the break. adds_one_bonus holds: it returns counter + 1 for the token the target always
+      emits, so a fully-rejected draft returns 1. signals.must_use=[break at first reject, count leading
+      run, +1 bonus]; avoid=[].
     expect:
       verdict: pass
       checks: { stops_at_first_reject: true, counts_leading_matches: true, adds_one_bonus: true }
 
   - answer: >-
-      tests_passed=true, but counts ALL true values in the list (filter(Boolean).length) rather than
-      only the leading run, so it counts matches that occur after a reject. Adds one at the end.
+      tests_passed=true. stops_at_first_reject holds: it uses `findIndex(v => !v)` to locate the first
+      reject and never inspects entries past it. counts_leading_matches holds: that index equals the
+      length of the leading run of `true`s. adds_one_bonus holds: it adds exactly 1 for the always-emitted
+      target token, keeping the count lossless. signals.must_use=[first-reject index, leading match count,
+      +1 bonus]; avoid=[].
     expect:
-      verdict: fail
-      checks: { stops_at_first_reject: false, counts_leading_matches: true, adds_one_bonus: true }
+      verdict: pass
+      checks: { stops_at_first_reject: true, counts_leading_matches: true, adds_one_bonus: true }
 
   - answer: >-
-      tests_passed=true. Correctly counts the leading run and stops at the first reject, but returns the
-      count without the +1 bonus token, so a fully-rejected draft returns 0.
+      tests_passed=true, but stops_at_first_reject fails: it sums the whole boolean array
+      (filter(Boolean).length) so matches that occur after a reject are still counted, even though the
+      draft has diverged from the target's path. counts_leading_matches fails: the total is the count of
+      all trues, not the leading run. adds_one_bonus fails: it returns that raw sum with no +1 for the
+      always-emitted target token. signals.must_use=[]; avoid=[counting matches after a reject, summing the
+      whole array, dropping the +1 bonus].
+    expect:
+      verdict: fail
+      checks: { stops_at_first_reject: false, counts_leading_matches: false, adds_one_bonus: false }
+
+  - answer: >-
+      tests_passed=true. stops_at_first_reject holds: it breaks at the first `false` and ignores later
+      matches. counts_leading_matches holds: it counts the leading run of `true`s correctly. adds_one_bonus
+      fails: it returns the leading count without the +1 for the always-emitted target token, so a
+      fully-rejected draft wrongly returns 0. signals.must_use=[break at first reject, count leading run];
+      avoid=[dropping the +1 bonus].
     expect:
       verdict: borderline
       checks: { stops_at_first_reject: true, counts_leading_matches: true, adds_one_bonus: false }

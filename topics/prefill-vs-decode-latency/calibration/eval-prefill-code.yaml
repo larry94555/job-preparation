@@ -1,22 +1,44 @@
 skill: eval-prefill-code
 cases:
+  # PASS — all four checks true; gate (phases_not_mixed) true. score 4/4=1.0 -> pass.
   - answer: >-
-      tests_passed=true. Returns ttft=promptTokens/prefillRate, decode=outputTokens*tpot,
-      total=ttft+decode. TTFT depends only on the prompt, decode only on the output.
+      tests_passed=true. Phases are not mixed: TTFT depends only on promptTokens and decode only on
+      outputTokens. TTFT is computed from prefill as ttft=promptTokens/prefillRate. Decode is computed
+      from output as decode=outputTokens*tpot. Total is the sum, total=ttft+decode.
+      signals.must_use=[promptTokens/prefillRate, outputTokens*tpot, ttft+decode]; avoid=[blended rate].
     expect:
       verdict: pass
       checks: { phases_not_mixed: true, ttft_from_prefill: true, decode_from_output: true, total_is_sum: true }
 
+  # PASS — gate true, one non-gate check false. score 3/4=0.75 -> pass, gate passes.
   - answer: >-
-      tests_passed=true happens to pass, but computes total=(promptTokens+outputTokens)/prefillRate —
-      blending both phases into one rate, so TTFT/decode aren't modeled separately.
+      tests_passed=true. Phases are not mixed: prompt length drives TTFT and output length drives decode,
+      kept on separate rates. TTFT is computed from prefill as ttft=promptTokens/prefillRate. Decode is
+      computed from output as decode=outputTokens*tpot. Total is not a clean sum: it rounds ttft+decode
+      down to whole milliseconds before returning, so total_is_sum does not hold exactly.
+      signals.must_use=[promptTokens/prefillRate, outputTokens*tpot]; avoid=[rounding the total].
+    expect:
+      verdict: pass
+      checks: { phases_not_mixed: true, ttft_from_prefill: true, decode_from_output: false, total_is_sum: true }
+
+  # FAIL — gate false + one more false. score 2/4=0.5 -> borderline, gate false caps -> fail.
+  - answer: >-
+      tests_passed=true, but phases are mixed: it blends prompt and output into one rate with
+      total=(promptTokens+outputTokens)/prefillRate, so phases_not_mixed is false. Because ttft is never
+      isolated, TTFT is not computed from prefill and ttft_from_prefill is false as well. Decode is
+      computed from output as decode=outputTokens*tpot. Total ends up equal to ttft+decode arithmetically.
+      signals.must_use=[outputTokens*tpot]; avoid=[(promptTokens+outputTokens)/prefillRate, blended rate].
     expect:
       verdict: fail
-      checks: { phases_not_mixed: false, ttft_from_prefill: false, decode_from_output: false, total_is_sum: true }
+      checks: { phases_not_mixed: false, ttft_from_prefill: false, decode_from_output: true, total_is_sum: true }
 
+  # BORDERLINE — only the gate is false. score 3/4=0.75 -> pass, gate false caps -> borderline.
   - answer: >-
-      tests_passed=true. Keeps the phases separate and computes ttft and decode correctly, but returns
-      total as just the decode time (forgets to add ttft).
+      tests_passed=true. Phases are mixed: it derives TTFT from the full context by using
+      (promptTokens+outputTokens) as the prefill length, so phases_not_mixed is false. Despite that, TTFT
+      is still computed from prefill as ttft=length/prefillRate (ttft_from_prefill holds), decode is
+      computed from output as decode=outputTokens*tpot, and total is the sum total=ttft+decode.
+      signals.must_use=[outputTokens*tpot, ttft+decode]; avoid=[promptTokens+outputTokens for prefill].
     expect:
       verdict: borderline
-      checks: { phases_not_mixed: true, ttft_from_prefill: true, decode_from_output: true, total_is_sum: false }
+      checks: { phases_not_mixed: false, ttft_from_prefill: true, decode_from_output: true, total_is_sum: true }

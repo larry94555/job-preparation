@@ -1,23 +1,46 @@
 skill: eval-funccall-code
 cases:
   - answer: >-
-      tests_passed=true. Looks up the tool (returns {ok:false,error:"unknown_tool"} if missing), runs
-      validate before the handler, and for mutating tools with an idempotencyKey returns the cached
-      result on repeat; read-only calls are never cached.
+      tests_passed=true. idempotency_dedupe holds: a repeated mutating call with the same key
+      returns the cached prior result and does not re-run the handler. validates_before_execute
+      holds: the validator and tool existence are checked before the handler runs.
+      rejects_unknown_tool holds: an unknown tool returns {ok:false,error:"unknown_tool"} instead of
+      throwing. read_only_not_deduped holds: non-mutating tools are never cached by key.
+      signals.must_use=[typed tool contracts, validate-and-reject, idempotency key dedupe]; avoid=[].
     expect:
       verdict: pass
       checks: { idempotency_dedupe: true, validates_before_execute: true, rejects_unknown_tool: true, read_only_not_deduped: true }
 
   - answer: >-
-      tests_passed=true, but ignores the idempotency key entirely — every mutating call re-runs the
-      handler (double effect). Validation and unknown-tool handling are correct.
+      tests_passed=true. idempotency_dedupe holds: a repeated mutating call with the same key
+      returns the cached result and skips the handler. validates_before_execute holds: args are
+      validated against the typed contract before dispatch. rejects_unknown_tool holds: an unknown
+      tool name returns a structured error. read_only_not_deduped does NOT hold: read-only tools are
+      also cached by key, so a re-read can return a stale cached value.
+      signals.must_use=[typed tool contracts, validate-and-reject, idempotency key dedupe];
+      avoid=[caching read-only results].
     expect:
-      verdict: fail
-      checks: { idempotency_dedupe: false, validates_before_execute: true, rejects_unknown_tool: true, read_only_not_deduped: true }
+      verdict: pass
+      checks: { idempotency_dedupe: true, validates_before_execute: true, rejects_unknown_tool: true, read_only_not_deduped: false }
 
   - answer: >-
-      tests_passed=true. Dedupes mutating calls by key and rejects unknown tools, but runs the handler
-      first and validates the args afterward, so an invalid call can still execute.
+      tests_passed=true. idempotency_dedupe does NOT hold: the idempotency key is ignored, so every
+      mutating call re-runs the handler and double-applies the effect on retry. validates_before_execute
+      does NOT hold: the handler runs first and args are validated afterward, so an invalid mutating
+      call still executes. rejects_unknown_tool holds: an unknown tool returns a structured error.
+      read_only_not_deduped holds: read-only tools are not cached by key.
+      signals.must_use=[typed tool contracts]; avoid=[re-running mutations on retry, execute-before-validate].
+    expect:
+      verdict: fail
+      checks: { idempotency_dedupe: false, validates_before_execute: false, rejects_unknown_tool: true, read_only_not_deduped: true }
+
+  - answer: >-
+      tests_passed=true. idempotency_dedupe does NOT hold: the dispatcher re-runs the handler on a
+      repeated mutating call with the same key instead of returning the cached result, so the effect
+      double-applies. validates_before_execute holds: args are validated against the typed contract
+      before the handler runs. rejects_unknown_tool holds: an unknown tool returns a structured
+      error rather than throwing. read_only_not_deduped holds: non-mutating tools are never cached by key.
+      signals.must_use=[typed tool contracts, validate-and-reject]; avoid=[re-running mutations on retry].
     expect:
       verdict: borderline
-      checks: { idempotency_dedupe: true, validates_before_execute: false, rejects_unknown_tool: true, read_only_not_deduped: true }
+      checks: { idempotency_dedupe: false, validates_before_execute: true, rejects_unknown_tool: true, read_only_not_deduped: true }

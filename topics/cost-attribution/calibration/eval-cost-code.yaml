@@ -1,22 +1,55 @@
+# Calibration for eval-cost-code.
+# 'answer' summarizes the submitted approach + provided signals (the grader sees extracted evidence,
+# not raw code). Exemplars target the cost-aggregator exercise: cost per successful outcome +
+# token accounting. Checks: per_success_uses_successes (gate), zero_guard, groups_by_feature,
+# total_correct.
 skill: eval-cost-code
 cases:
+  # PASS — all four checks true (4/4 = 1.0 -> pass; gate true -> pass).
   - answer: >-
-      tests_passed=true. Groups records into byFeature, sums cost and counts success===true per
-      feature, sets costPerSuccess = successes>0 ? cost/successes : null, and total = sum of all costs.
+      tests_passed=true. per_success_uses_successes: costPerSuccess divides each feature's summed
+      cost by its success count (records where success===true), not by request or token count.
+      zero_guard: returns null instead of NaN when a feature has zero successes. groups_by_feature:
+      buckets records into byFeature and sums each bucket's cost. total_correct: total is the sum of
+      every record's cost. signals.must_use=[divide by successes, null on zero successes, group by
+      feature, sum all costs]; avoid=[divide by request count, divide by token count].
     expect:
       verdict: pass
       checks: { per_success_uses_successes: true, zero_guard: true, groups_by_feature: true, total_correct: true }
 
+  # PASS — all four checks true (4/4 = 1.0 -> pass; gate true -> pass).
   - answer: >-
-      tests_passed=true, but computes costPerSuccess as cost/records.length (per request) instead of
-      per success; grouping and total are correct.
+      tests_passed=true. per_success_uses_successes: computes cost/successCount per feature, where
+      successCount counts only outcomes with success===true. zero_guard: guards successCount>0 and
+      yields null (not NaN) for a feature with no successes. groups_by_feature: reduces records into
+      per-feature buckets and accumulates each bucket's cost. total_correct: total accumulates the
+      cost of every record across all features. signals.must_use=[cost per successful outcome, guard
+      zero successes, per-feature buckets, total over all records]; avoid=[per-request cost, per-token
+      cost].
+    expect:
+      verdict: pass
+      checks: { per_success_uses_successes: true, zero_guard: true, groups_by_feature: true, total_correct: true }
+
+  # FAIL — gate false + one more false (2/4 = 0.5 -> borderline; gate false -> capped down to fail).
+  - answer: >-
+      tests_passed=true. per_success_uses_successes: false — divides each feature's cost by
+      records.length (the request count) instead of the success count, so costPerSuccess is really a
+      per-request cost. zero_guard: false — no guard, so it emits NaN when a feature has zero
+      successes. groups_by_feature: true — correctly buckets records by feature and sums each bucket's
+      cost. total_correct: true — total is the sum of every record's cost. signals.must_use=[group by
+      feature, sum all costs]; avoid=[divide by request count, NaN on zero successes].
     expect:
       verdict: fail
-      checks: { per_success_uses_successes: false, zero_guard: true, groups_by_feature: true, total_correct: true }
+      checks: { per_success_uses_successes: false, zero_guard: false, groups_by_feature: true, total_correct: true }
 
+  # BORDERLINE — only the gate is false (3/4 = 0.75 -> pass; gate false -> capped down to borderline).
   - answer: >-
-      tests_passed=true. Divides by successes and groups correctly, but returns NaN when a feature has
-      zero successes (no guard).
+      tests_passed=true. per_success_uses_successes: false — divides each feature's cost by the total
+      token count for that feature instead of the success count, so it reports cost per token rather
+      than cost per successful outcome. zero_guard: true — returns null instead of NaN when the
+      divisor would be zero. groups_by_feature: true — buckets records by feature and sums each
+      bucket's cost. total_correct: true — total is the sum of every record's cost. signals.must_use=[
+      guard zero divisor, group by feature, sum all costs]; avoid=[divide by token count].
     expect:
       verdict: borderline
-      checks: { per_success_uses_successes: true, zero_guard: false, groups_by_feature: true, total_correct: true }
+      checks: { per_success_uses_successes: false, zero_guard: true, groups_by_feature: true, total_correct: true }

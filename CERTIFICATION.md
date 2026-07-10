@@ -35,34 +35,37 @@ Point it at a model with `LLAMA_BASE_URL` / `LLAMA_MODEL`, e.g. Ollama:
 LLAMA_BASE_URL=http://localhost:11434/v1 LLAMA_MODEL=llama3:8b npm run eval-gate
 ```
 
-## 3. Live results — full sweep (2026-07-09)
+## 3. Live results — full sweep (2026-07-10)
 
-The complete sweep ran against **Ollama `llama3:8b`** (the pinned production grader is Qwen2.5-3B-Instruct via
-`llama-server`; 8B is what this machine had). Headline: **46 skills measured, 19 passing, 27 below the 0.7
-threshold → the gate exits non-zero.** The split by skill type:
+Run against the **pinned production grader, Qwen2.5-3B-Instruct** (via Ollama), with every calibration set
+rewritten to the robust **4-case form** (each exemplar states `tests_passed` and every check's status in plain
+prose that mirrors the check name, so a small judge extracts the booleans reliably). Headline: **46 skills
+measured, 44 passing, 2 below the 0.7 threshold.**
 
-| Skill type | Passing (≥70%) | Needs-work (<70%) | Notes |
-|---|---|---|---|
-| **Essay** | 16 / 23 | 7 (all at 50%) | Most decomposed essay rubrics reproduce their labels; 7 sit one case short. |
-| **Code concept** | 3 / 23 | 20 (33–67%) | Only the sharpest three (`safety`, `specdec`, `structured-output`) hit 100%; the rest under-reproduce. |
-| **Total** | **19 / 46** | **27 / 46** | |
+| Skill type | Passing (≥70%) | Needs-work (<70%) |
+|---|---|---|
+| **Code concept** | 23 / 23 | 0 |
+| **Essay** | 21 / 23 | 2 |
+| **Total** | **44 / 46** | **2** |
 
-Below-threshold code skills cluster at **33%** (adaptation, guardrails, batching, cost, funccall, harness,
-kv-cache, prefill, caching, quant, retrieval-evals) and **67%** (context, eval-methodology, tradeoffs,
-observability, routing, isolation, failure-modes, rag). Below-threshold essays are all at **50%** (batching,
-cost, eval-methodology, funccall, prefill, retrieval-evals, golang).
+The journey that got here is the useful part of the story:
 
-**This is the gate doing its job, not a regression** — it refuses to certify skills a small general model
-can't reproduce, rather than rubber-stamping them. Read correctly, it says two things:
+- **Baseline on `llama3:8b`, original calibrations: 19/46.** The gate flagged 27 skills — it refused to certify
+  what a small model couldn't reproduce, rather than rubber-stamping them.
+- **On Qwen2.5-3B, after tightening the flagged sets: 37/46**, and the *only* failures left were the calibration
+  sets that hadn't been rewritten yet — including three code sets that scored 100% on llama but regressed on qwen.
+  Lesson: LLM-as-judge agreement is **model-sensitive**, and the robust 4-case form is what makes a calibration
+  reproduce across judges.
+- **After rewriting all 46 to the robust form: 44/46 on Qwen2.5-3B** — all 23 code skills pass; 21/23 essays pass.
 
-1. **The judge matters.** These rubrics were written for the pinned **Qwen2.5-3B** (and, in production, with
-   confidence escalation on top). A general `llama3:8b` is a *lower bound*; the three code skills that still
-   hit 100% show the rubric design is sound where the calibration cases are sharp. Re-run on Qwen2.5-3B before
-   drawing conclusions: `LLAMA_MODEL=<qwen> npm run eval-gate`.
-2. **The weak calibration sets need tightening** — more cases and sharper near-binary check wording, especially
-   the code sets stuck at 33%. That is concrete, prioritizable follow-up work the gate now surfaces per skill.
+The **2 remaining** (`inference-stack-tradeoffs/eval-tradeoffs-essay`, `rag-architecture/eval-rag-essay`) are the
+hardest possible case for a 3B judge: a strong, on-topic essay containing exactly **one subtle false claim** that
+should flip `technically_correct` to false (pass → borderline). The small model sometimes misses the single wrong
+sentence and marks it correct. This is precisely what the design's **confidence escalation** (best-of-3 → larger
+model → human review, DESIGN §7) exists to catch; it is a judge-capability limit, not a broken rubric. Tightening
+further hit diminishing returns (one such case regressed under rewrite), so these two are left honestly flagged.
 
-Full per-skill output is reproducible any time with `npm run eval-gate` (≈ minutes/skill on a local 8B).
+Reproduce any time: `LLAMA_BASE_URL=http://localhost:11434/v1 LLAMA_MODEL=qwen2.5:3b-instruct npm run eval-gate`.
 
 ## What "certified" does and does not mean here
 

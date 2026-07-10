@@ -1,33 +1,62 @@
 # Calibration for eval-prefill-essay (exemplars target essay-two-phases).
+# Gate (make-or-break) = technically_correct (default: any check name containing "correct").
+# Verdict math: score = trueChecks/4; >=0.75 pass, >=0.5 borderline, else fail;
+#               a false gate caps the verdict DOWN one level.
 skill: eval-prefill-essay
 cases:
+  # PASS #1 — all four checks true, gate true. 4/4 = 1.00 -> pass; gate ok -> pass.
   - answer: >-
-      Inference has two phases. Prefill processes the whole prompt in a single parallel forward pass,
-      building the KV cache; it does a lot of arithmetic per weight read, so it is compute-bound and
-      sets TTFT. Decode then generates output tokens one at a time — each step re-reads the full
-      weights to emit a single token, so it is memory-bandwidth-bound and sets TPOT. Prefill is
-      parallel because every prompt token is known up front, while decode is sequential because each
-      token depends on the one before it.
+      LLM inference runs in two phases. Prefill takes the entire prompt and runs it through the model
+      in a single parallel forward pass, populating the KV cache; because every prompt token is known
+      up front the tokens are processed together, and each weight that is read off HBM is reused for a
+      lot of arithmetic, so prefill is compute-bound (limited by FLOPs) and it is what sets TTFT (time
+      to first token). Decode then emits output tokens one at a time: each step must re-read the full
+      set of weights and the growing KV cache just to produce a single token, so very little math is
+      done per byte moved and the phase is memory-bandwidth-bound, setting TPOT (time per output token).
+      Decode is sequential because each new token depends on the token generated before it, whereas
+      prefill is parallel — that opposite data dependency is why the two phases stress opposite parts of
+      the hardware.
     expect:
       verdict: pass
       checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
 
-  - answer: "There's just one phase where the GPU predicts the next word until it's done."
+  # PASS #2 — all four checks true, gate true. 4/4 = 1.00 -> pass; gate ok -> pass.
+  - answer: >-
+      There are two phases with opposite hardware profiles. In prefill the whole prompt is consumed in
+      one parallel pass to build the KV cache; the GPU does a large matmul over all prompt tokens at
+      once, keeping its compute units busy, so prefill is compute-bound and its cost (which grows with
+      prompt length) shows up as TTFT. In decode the model generates tokens autoregressively, one per
+      step, and every step streams the entire weight matrix from memory to produce that one token, so the
+      arithmetic units sit mostly idle and the phase is bottlenecked on memory bandwidth — this is what
+      TPOT measures. The reason the profiles are opposite is arithmetic intensity: prefill amortizes each
+      weight read across many prompt tokens (high FLOPs per byte), while decode reads the same weights for
+      a single token (low FLOPs per byte), which is also why batching helps decode throughput but not
+      prefill.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — misses the gate AND more. addresses_question true only.
+  # 1/4 = 0.25 -> fail; gate false caps down (already at floor) -> fail.
+  - answer: >-
+      Inference has two phases, and the way it works is that decode is the compute-bound phase because it
+      runs one giant parallel matmul every step, while prefill is the slow memory-bound part that reads
+      the prompt token by token in sequence. Decode is what sets TTFT and prefill is what sets TPOT. Both
+      phases basically use the hardware the same way, so it does not really matter which is which.
     expect:
       verdict: fail
-      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+      checks: { addresses_question: true, covers_key_points: false, technically_correct: false, concrete: false }
 
+  # BORDERLINE — misses ONLY the gate. The other three checks are true.
+  # 3/4 = 0.75 -> base pass; gate (technically_correct) false caps DOWN one level -> borderline.
   - answer: >-
-      There are two phases: one that reads the prompt and one that writes the answer. The first is
-      faster and the second is slower, and they use the hardware differently.
+      There are two phases and they have opposite hardware profiles. Prefill reads the whole prompt in a
+      single parallel forward pass and builds the KV cache; because all the prompt tokens are known up
+      front it runs them together, and it is the phase that sets TTFT. Decode then produces the output
+      tokens one at a time, sequentially, with each token depending on the previous one, and it is the
+      phase that sets TPOT. The one thing I'll add is the hardware bottleneck: prefill is the
+      memory-bandwidth-bound phase and decode is the compute-bound phase, which is what makes their
+      profiles opposite.
     expect:
       verdict: borderline
-      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
-
-  - answer: >-
-      Prefill is memory-bandwidth-bound because it streams weights for each prompt token, and decode
-      is compute-bound because it runs a huge parallel matmul every step. Prefill sets TPOT and decode
-      sets TTFT.
-    expect:
-      verdict: fail
-      checks: { technically_correct: false }
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: false, concrete: true }

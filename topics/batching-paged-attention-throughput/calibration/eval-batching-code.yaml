@@ -1,23 +1,49 @@
 skill: eval-batching-code
+# 'answer' summarizes the submitted approach + provided signals (the grader sees extracted evidence,
+# not raw code). Exemplars target the continuous-batching exercise; concept checks apply because
+# tests_passed=true. refills_on_completion is the gate (mid-batch admission = continuous batching);
+# without it you have static batching that inflates makespan.
 cases:
   - answer: >-
-      tests_passed=true. Maintains active[] (≤batchSize) and a waiting queue; each step decrements every
-      active request, splices out those at 0, then refills from waiting up to batchSize; returns the
-      step count when active empties.
+      tests_passed=true. refills_on_completion: yes — as soon as a request hits 0 tokens its slot is
+      freed and a waiting request is admitted that same step, not after the batch clears.
+      one_token_per_step: yes — every active request emits exactly one token per step.
+      respects_batch_size: yes — active[] is never allowed to grow past batchSize. terminates_correctly:
+      yes — the loop stops once active and waiting are both empty and returns the step count.
+      signals.must_use=[mid-batch refill, one token per step, cap at batchSize]; avoid=[].
     expect:
       verdict: pass
       checks: { refills_on_completion: true, one_token_per_step: true, respects_batch_size: true, terminates_correctly: true }
 
   - answer: >-
-      tests_passed=true, but processes the batch statically: it runs a whole batch to completion (max of
-      the batch) before admitting any new request — no mid-batch refill.
+      tests_passed=true. refills_on_completion: yes — a finished request's slot is immediately backfilled
+      from the waiting queue so the batch stays full and makespan stays tight. one_token_per_step: yes —
+      each active request advances by a single token each step. respects_batch_size: yes — admission is
+      capped so the active set never exceeds batchSize. terminates_correctly: yes — returns the final
+      step count when nothing is active or waiting. signals.must_use=[continuous refill, single token per
+      step, batchSize cap, correct termination]; avoid=[static whole-batch draining].
     expect:
-      verdict: fail
-      checks: { refills_on_completion: false, one_token_per_step: true, respects_batch_size: true, terminates_correctly: true }
+      verdict: pass
+      checks: { refills_on_completion: true, one_token_per_step: true, respects_batch_size: true, terminates_correctly: true }
 
   - answer: >-
-      tests_passed=true. Refills on completion and terminates, but admits all waiting requests at once,
-      letting the active set exceed batchSize.
+      tests_passed=true. refills_on_completion: no — it drains the whole batch to the longest request
+      before admitting anyone, so this is static batching and makespan balloons. one_token_per_step: yes
+      — active requests each emit one token per step. respects_batch_size: no — when it finally refills it
+      dumps the entire waiting queue in at once, pushing the active set past batchSize.
+      terminates_correctly: yes — it still ends and returns the step count. signals.must_use=[mid-batch
+      refill, batchSize cap]; avoid=[static whole-batch draining, unbounded admission].
+    expect:
+      verdict: fail
+      checks: { refills_on_completion: false, one_token_per_step: true, respects_batch_size: false, terminates_correctly: true }
+
+  - answer: >-
+      tests_passed=true. refills_on_completion: no — new requests are only admitted after the current
+      batch fully clears, so it behaves as static batching rather than continuous. one_token_per_step:
+      yes — each active request emits exactly one token per step. respects_batch_size: yes — the active
+      set is held at or below batchSize. terminates_correctly: yes — the loop halts and returns the step
+      count once all requests finish. signals.must_use=[one token per step, batchSize cap, correct
+      termination]; avoid=[mid-batch refill missing].
     expect:
       verdict: borderline
-      checks: { refills_on_completion: true, one_token_per_step: true, respects_batch_size: false, terminates_correctly: true }
+      checks: { refills_on_completion: false, one_token_per_step: true, respects_batch_size: true, terminates_correctly: true }

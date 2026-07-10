@@ -1,31 +1,54 @@
 # Calibration for eval-structured-output-essay.
 # Exemplars are written against essay-why-validate ("why validate even with constrained decoding?").
+# Gate = technically_correct (default: any check name containing "correct").
+# Verdict math (aggregate.ts): score = trueChecks/4; >=0.75 pass, >=0.5 borderline, else fail;
+# a false gate caps the verdict down one level.
 skill: eval-structured-output-essay
 cases:
+  # PASS #1 — 4/4 true, gate true. score 1.0 -> pass; gate true -> pass.
   - answer: >-
-      Constrained decoding only guarantees the shape and syntax of the JSON, not that the values are
-      correct. The model can still return an out-of-range number, a wrong enum, or a value that
-      violates a business rule — all syntactically valid. Schema validation is defense in depth: it
-      catches those semantic errors before they reach downstream code.
+      Constrained (grammar) decoding forces the tokens to match the JSON grammar, so it guarantees
+      syntax and shape — every key is present and every field has the right type. It does not
+      guarantee the values are meaningful: the model can still emit an out-of-range integer, an enum
+      spelled correctly but wrong for the case, or two fields that violate a business invariant, all
+      of which parse cleanly. So you validate the parsed object against the schema (Zod/Pydantic) to
+      catch those semantic errors. On a validation failure you attempt one bounded repair — feed the
+      validator's error back and re-ask exactly once — and if it still fails you fall back to a safe
+      default and flag the record rather than letting a plausible-but-wrong object flow downstream.
     expect:
       verdict: pass
       checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
 
-  - answer: "Because you should always validate everything to be safe."
+  # PASS #2 — 4/4 true, gate true. score 1.0 -> pass; gate true -> pass.
+  - answer: >-
+      Grammar-constrained decoding only enforces the JSON schema's structure, not its semantics, and
+      it also assumes the decode ran to completion — a truncated response at the token limit can end
+      mid-object and never satisfy the grammar. Schema validation after parsing is the check that
+      actually holds: it rejects out-of-bounds numbers, invalid enum members, and cross-field rule
+      violations that are still syntactically valid. Wrap it in bounded repair (re-prompt once with
+      the specific validation error, no unbounded retry loop) and a deterministic fallback value so a
+      persistent failure degrades gracefully instead of crashing the pipeline or emitting bad data.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — gate false + covers_key_points false. trueCount 2 -> score 0.5 -> borderline;
+  # gate (technically_correct) false -> cap down -> fail.
+  - answer: >-
+      Constrained decoding already produces fully correct output, so schema validation is only there
+      for the rare case where the network truncates the JSON in transit. Just retry the request in a
+      loop until it parses and you never need a fallback.
     expect:
       verdict: fail
-      checks: { addresses_question: true, covers_key_points: false, concrete: false }
+      checks: { addresses_question: true, covers_key_points: false, technically_correct: false, concrete: false }
 
+  # BORDERLINE — misses only the gate check. trueCount 3 -> score 0.75 -> pass;
+  # gate (technically_correct) false -> cap down -> borderline.
   - answer: >-
-      Constrained decoding guarantees the output is completely correct, so validation is just an
-      extra safety net in case the network corrupts the JSON.
-    expect:
-      verdict: fail
-      checks: { technically_correct: false }
-
-  - answer: >-
-      Grammar decoding fixes syntax but the values can still be wrong, so you validate against the
-      schema to catch bad values.
+      Constrained decoding fixes the JSON shape but not the values, so you still validate the parsed
+      object against the schema, re-ask once with the validation error on failure, and drop to a safe
+      default if that fails. The one thing it also guarantees, though, is that every value is already
+      within its declared range, so range checks in the validator are redundant.
     expect:
       verdict: borderline
-      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: false, concrete: true }

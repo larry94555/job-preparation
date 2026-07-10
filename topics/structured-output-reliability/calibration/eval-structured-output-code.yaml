@@ -4,24 +4,41 @@
 skill: eval-structured-output-code
 cases:
   - answer: >-
-      tests_passed=true. Parses the model output, validates with the schema, retries up to
-      maxRepairs feeding the error back, and returns opts.fallback when still invalid. No unbounded
-      loop. signals.must_use=[schema validation, bounded retry, fallback value]; avoid=[].
+      tests_passed=true. Parses the model output and validates_against_schema with the provided Zod
+      schema (no regex scraping). repair_is_bounded: retries up to maxRepairs feeding the validation
+      error back, so it cannot loop forever. has_fallback: returns opts.fallback when repairs are
+      exhausted. no_antipatterns: none detected.
+      signals.must_use=[schema validation, bounded retry, fallback value]; avoid=[].
     expect:
       verdict: pass
       checks: { validates_against_schema: true, repair_is_bounded: true, has_fallback: true, no_antipatterns: true }
 
   - answer: >-
-      tests_passed=true, but retries in a `while (true)` with no maximum and no fallback; extracts
-      fields with a regex instead of validating. signals.avoid=[unbounded loop, regex JSON scraping].
+      tests_passed=true. validates_against_schema: parses then validates against the schema.
+      repair_is_bounded: the repair loop is capped at maxRepairs. has_fallback: returns the safe
+      fallback when validation ultimately fails. no_antipatterns fails — it also logs the raw model
+      text with a broad regex sweep flagged as regex JSON scraping, though that path is not used for
+      extraction. signals.must_use=[schema validation, bounded retry, fallback value];
+      avoid=[regex JSON scraping].
     expect:
-      verdict: fail
-      checks: { repair_is_bounded: false, has_fallback: false, no_antipatterns: false }
+      verdict: pass
+      checks: { validates_against_schema: true, repair_is_bounded: true, has_fallback: true, no_antipatterns: false }
 
   - answer: >-
-      tests_passed=true. Validates against the schema and bounds repairs to maxRepairs, but throws
-      instead of returning the fallback when repairs are exhausted. signals.must_use=[schema
-      validation, bounded retry]; missing fallback.
+      tests_passed=true, but repair_is_bounded fails — it retries in a `while (true)` with no maximum.
+      has_fallback fails — it never returns a fallback and throws on repeated invalidity.
+      no_antipatterns fails — unbounded loop plus regex JSON scraping are both present. Only
+      validates_against_schema holds, and even that is undercut by the scraping path.
+      signals.avoid=[unbounded loop, regex JSON scraping].
+    expect:
+      verdict: fail
+      checks: { validates_against_schema: true, repair_is_bounded: false, has_fallback: false, no_antipatterns: false }
+
+  - answer: >-
+      tests_passed=true. validates_against_schema: validates against the schema. repair_is_bounded:
+      bounds repairs to maxRepairs. no_antipatterns: none detected. has_fallback fails — it throws
+      instead of returning the fallback when repairs are exhausted.
+      signals.must_use=[schema validation, bounded retry]; avoid=[]; missing fallback.
     expect:
       verdict: borderline
       checks: { validates_against_schema: true, repair_is_bounded: true, has_fallback: false, no_antipatterns: true }

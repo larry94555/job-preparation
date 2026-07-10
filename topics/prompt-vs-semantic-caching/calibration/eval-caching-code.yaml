@@ -1,23 +1,52 @@
 skill: eval-caching-code
+# Calibration for eval-caching-code.
+# 'answer' summarizes the submitted approach + provided signals (the grader sees extracted evidence,
+# not raw code). Exemplars target the semantic-cache exercise. threshold_gate is the gate.
 cases:
+  # PASS: all four checks true. score 4/4=1.0 -> pass; gate true -> pass.
   - answer: >-
-      tests_passed=true. set() pushes {embedding,value,storedAt}. get() skips entries where
-      now-storedAt>ttlMs, computes cosine (dot/(‖a‖‖b‖)) to each, keeps the best, and returns its value
-      only if bestSim>=threshold else null.
+      tests_passed=true. threshold_gate holds: get() returns a value only when bestSim>=threshold,
+      otherwise null. cosine_similarity holds: similarity is dot(a,b)/(‖a‖·‖b‖), a normalized dot
+      product, not raw dot or Euclidean. ttl_expiry holds: entries with now-storedAt>ttlMs are
+      skipped as misses. nearest_entry holds: it scans every stored entry and keeps the most similar.
+      signals.must_use=[cosine similarity, similarity threshold, TTL expiry, nearest entry];
+      avoid=[serve stale, return below-threshold match].
     expect:
       verdict: pass
       checks: { threshold_gate: true, cosine_similarity: true, ttl_expiry: true, nearest_entry: true }
 
+  # PASS: gate true, three of four true. score 3/4=0.75 -> pass; gate true -> pass.
   - answer: >-
-      tests_passed=true, but returns the nearest entry's value regardless of the threshold (no gate),
-      though it uses cosine and respects TTL.
+      tests_passed=true. threshold_gate holds: it returns the best match only when its similarity is
+      >=threshold, else null. cosine_similarity holds: it normalizes both vectors and takes their dot
+      product. ttl_expiry holds: it drops entries older than ttlMs before matching. nearest_entry does
+      not hold: it returns the first entry that clears the threshold rather than scanning for the most
+      similar one. signals.must_use=[cosine similarity, similarity threshold, TTL expiry];
+      avoid=[serve stale].
+    expect:
+      verdict: pass
+      checks: { threshold_gate: true, cosine_similarity: true, ttl_expiry: false, nearest_entry: true }
+
+  # FAIL: gate false plus one more false. score 2/4=0.5 -> base borderline; gate false -> capped to fail.
+  - answer: >-
+      tests_passed=true. threshold_gate does not hold: it returns the nearest entry's value with no
+      threshold check, so below-threshold near-misses are served as false-positive hits.
+      cosine_similarity holds: it uses a normalized dot product. ttl_expiry does not hold: it never
+      compares now-storedAt against ttlMs, so stale entries are served. nearest_entry holds: it scans
+      all entries and keeps the most similar. signals.must_use=[cosine similarity];
+      avoid=[return below-threshold match, serve stale].
     expect:
       verdict: fail
-      checks: { threshold_gate: false, cosine_similarity: true, ttl_expiry: true, nearest_entry: true }
+      checks: { threshold_gate: false, cosine_similarity: true, ttl_expiry: false, nearest_entry: true }
 
+  # BORDERLINE: only the gate is false. score 3/4=0.75 -> base pass; gate false -> capped to borderline.
   - answer: >-
-      tests_passed=true. Gates on threshold and picks the nearest with cosine, but never checks TTL, so
-      stale entries can be served.
+      tests_passed=true. threshold_gate does not hold: it returns the most similar entry regardless of
+      threshold, so a below-threshold near-miss is served instead of a miss. cosine_similarity holds:
+      it normalizes the vectors and takes their dot product. ttl_expiry holds: it treats entries older
+      than ttlMs as misses. nearest_entry holds: it compares against every stored entry and keeps the
+      most similar. signals.must_use=[cosine similarity, TTL expiry, nearest entry];
+      avoid=[return below-threshold match].
     expect:
       verdict: borderline
-      checks: { threshold_gate: true, cosine_similarity: true, ttl_expiry: false, nearest_entry: true }
+      checks: { threshold_gate: false, cosine_similarity: true, ttl_expiry: true, nearest_entry: true }

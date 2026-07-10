@@ -1,30 +1,58 @@
 # Calibration for eval-evals-essay (exemplars target essay-why-evals).
 skill: eval-evals-essay
 cases:
+  # PASS — all four checks true, gate (technically_correct) true. score 4/4=1.0 -> pass.
   - answer: >-
-      "Looks better" isn't repeatable — you can't compare it across changes. An eval fixes that: a
-      golden set of curated inputs with known-good outputs is ground truth to score against, and a
-      regression gate runs that eval on every change and blocks the merge if the score drops. So a
-      fix for one case can't silently break others, and you steer on a real number instead of vibes.
+      "Looks better" is not repeatable, so it cannot be compared across changes. An eval fixes that:
+      a golden set of curated inputs paired with known-good outputs is the ground truth you score
+      against, and a regression gate re-runs that golden set on every change and blocks the merge if
+      the aggregate score drops. That keeps a fix for one case from silently breaking others. You also
+      add adversarial cases that target known failure modes so coverage is not just the happy path, and
+      when an LLM-as-judge does the scoring you calibrate it against a human-labelled set and track
+      agreement so a biased or drifting judge is caught. The result is that you steer on a real,
+      trustworthy number instead of vibes.
     expect:
       verdict: pass
       checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
 
-  - answer: "Evals are good and everyone should use them because quality matters."
+  # PASS — all four checks true, gate true. score 4/4=1.0 -> pass.
+  - answer: >-
+      Eyeballing outputs does not scale and is not reproducible, so you need a measurable target. The
+      mechanism is a golden set: a fixed collection of inputs with reference outputs that acts as ground
+      truth, scored by a rubric of independent true/false checks that aggregate into a score. A
+      regression gate wires that score into CI and fails the build when it regresses, so quality can
+      only move forward. Because real inputs are adversarial, you seed the set with hard and edge cases
+      to exercise failure modes rather than only easy ones. If a model grades the answers, you first
+      calibrate the judge against human labels and monitor inter-rater agreement, because an
+      uncalibrated judge can systematically misjudge. Together these give you a repeatable number you
+      can defend and act on.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — gate false plus one more false. score 1/4=0.25 -> base fail; gate false keeps it fail.
+  # Off-topic on the substance, no concrete mechanisms, and it asserts a false claim.
+  - answer: >-
+      Evals matter because quality is important and users deserve a good experience, and honestly if a
+      change makes the demo feel nicer then it is obviously working. You do not really need a golden set
+      or any regression gate — those just slow the team down, and a single passing example already
+      proves the whole system is correct. Shipping fast and trusting the team's taste is the reliable
+      way to keep quality high.
     expect:
       verdict: fail
-      checks: { addresses_question: false, covers_key_points: false, concrete: false }
+      checks: { addresses_question: true, covers_key_points: false, technically_correct: false, concrete: false }
 
+  # BORDERLINE — misses ONLY the gate check. score 3/4=0.75 -> base pass; gate false caps pass->borderline.
+  # On-topic, hits the substance, names concrete mechanisms, but contains one incorrect claim
+  # (that an LLM judge needs no calibration), which fails technically_correct.
   - answer: >-
-      A golden set gives you something to measure against instead of guessing, so changes can be
-      compared rather than eyeballed.
+      Without evals you are guessing, so you build a golden set: curated inputs with known-good outputs
+      that serve as ground truth to score against, plus a regression gate that runs on every change and
+      blocks the merge when the score drops so one fix cannot silently break other cases. You also add
+      adversarial cases aimed at known failure modes so you are not only testing the happy path. When an
+      LLM acts as the judge it needs no calibration against human labels — the model is inherently
+      objective, so its scores can be trusted as-is without checking agreement. That aside, the golden
+      set and the gate turn quality into a real number you can compare across changes.
     expect:
       verdict: borderline
-      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
-
-  - answer: >-
-      You don't really need a golden set or a gate — if the outputs look better to you then quality
-      has clearly improved, so eyeballing a few examples is the most reliable measure.
-    expect:
-      verdict: fail
-      checks: { technically_correct: false }
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: false, concrete: true }

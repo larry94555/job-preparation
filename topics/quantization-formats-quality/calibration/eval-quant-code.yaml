@@ -1,23 +1,52 @@
 skill: eval-quant-code
+# Calibration for eval-quant-code.
+# 'answer' summarizes the submitted approach + provided signals (the grader sees extracted evidence,
+# not raw code). tests_passed is already decided by the test run; judge only the int8 concepts.
 cases:
+  # PASS: all four checks true (4/4 = 1.0 -> pass; gate clamps_uint8 true).
   - answer: >-
-      tests_passed=true. Computes range=max-min, scale=range===0?1:range/255,
-      zeroPoint=clamp(round(-min/scale),0,255), q[i]=clamp(round(v/scale)+zeroPoint,0,255) as integers;
-      dequantize returns (q-zeroPoint)*scale.
+      tests_passed=true. clamps_uint8: codes are clamped to integers in [0,255] via
+      clamp(round(v/scale)+zeroPoint,0,255). computes_scale: scale=(max-min)/255. zero_range_guard:
+      when max===min it substitutes scale=1 so a constant tensor reconstructs without dividing by zero.
+      dequant_inverts: dequantize returns (q-zeroPoint)*scale, inverting the quantization.
+      signals.must_use=[clamp to [0,255], scale=(max-min)/255, zero-range guard, (q-zeroPoint)*scale];
+      avoid=[].
     expect:
       verdict: pass
       checks: { clamps_uint8: true, computes_scale: true, zero_range_guard: true, dequant_inverts: true }
 
+  # PASS: gate true, one non-gate check false (3/4 = 0.75 -> pass; gate clamps_uint8 true, not capped).
   - answer: >-
-      tests_passed=true, but does not clamp q to [0,255] — a value beyond the range yields a code like
-      300 or -5, corrupting the tensor. scale and dequant are otherwise correct.
+      tests_passed=true. clamps_uint8: codes are clamped to integers in [0,255] via
+      clamp(round(v/scale)+zeroPoint,0,255). computes_scale: scale=(max-min)/255. zero_range_guard: NOT
+      handled — max===min gives scale 0 and the reconstruction divides by zero, producing NaN for a
+      constant tensor. dequant_inverts: dequantize returns (q-zeroPoint)*scale, correctly inverting
+      quantization. signals.must_use=[clamp to [0,255], scale=(max-min)/255, (q-zeroPoint)*scale];
+      avoid=[unguarded max===min].
+    expect:
+      verdict: pass
+      checks: { clamps_uint8: true, computes_scale: true, zero_range_guard: false, dequant_inverts: true }
+
+  # FAIL: gate false + one more false (2/4 = 0.5 -> borderline, gate clamps_uint8 false caps down -> fail).
+  - answer: >-
+      tests_passed=true. clamps_uint8: NOT clamped — round(v/scale)+zeroPoint is stored directly, so an
+      out-of-range value yields a code like 300 or -5 that overflows and corrupts the tensor.
+      computes_scale: scale=(max-min)/255. zero_range_guard: handled — max===min substitutes scale=1.
+      dequant_inverts: NOT inverting — dequantize returns q*scale, dropping zeroPoint so it does not undo
+      the quantization offset. signals.must_use=[scale=(max-min)/255, zero-range guard];
+      avoid=[unclamped codes, dropping zeroPoint in dequant].
     expect:
       verdict: fail
-      checks: { clamps_uint8: false, computes_scale: true, zero_range_guard: true, dequant_inverts: true }
+      checks: { clamps_uint8: false, computes_scale: true, zero_range_guard: true, dequant_inverts: false }
 
+  # BORDERLINE: only the gate false (3/4 = 0.75 -> pass, gate clamps_uint8 false caps down -> borderline).
   - answer: >-
-      tests_passed=true. Clamps codes and computes scale/dequant correctly, but doesn't special-case a
-      constant tensor, so max===min gives scale 0 and NaN reconstructions.
+      tests_passed=true. clamps_uint8: NOT clamped — round(v/scale)+zeroPoint is returned without a
+      [0,255] clamp, so an outlier produces a code outside the byte range and corrupts the tensor.
+      computes_scale: scale=(max-min)/255. zero_range_guard: handled — max===min substitutes scale=1 so
+      a constant tensor reconstructs. dequant_inverts: dequantize returns (q-zeroPoint)*scale, inverting
+      the quantization. signals.must_use=[scale=(max-min)/255, zero-range guard, (q-zeroPoint)*scale];
+      avoid=[unclamped codes].
     expect:
       verdict: borderline
-      checks: { clamps_uint8: true, computes_scale: true, zero_range_guard: false, dequant_inverts: true }
+      checks: { clamps_uint8: false, computes_scale: true, zero_range_guard: true, dequant_inverts: true }

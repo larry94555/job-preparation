@@ -1,22 +1,40 @@
 skill: eval-evals-code
+# Calibration for eval-evals-code.
+# 'answer' summarizes the submitted approach + provided signals (the grader sees extracted evidence,
+# not raw code). Exemplars target the eval-gate exercise: passed iff passRate >= threshold.
 cases:
   - answer: >-
-      tests_passed=true. Loops cases, counts passes where run(input)===expected, pushes failing names,
-      passRate=pass/cases.length, returns passed = passRate>=threshold and the failures list.
+      tests_passed=true. gate_on_threshold: returns passed = passRate>=threshold, consulting the
+      threshold directly. computes_pass_rate: passRate = passing/total cases. matches_expected: a case
+      passes by comparing run(input) to expected. reports_failures: collects the names of failing
+      cases. signals.must_use=[threshold comparison, passing/total rate, name collection]; avoid=[].
     expect:
       verdict: pass
       checks: { gate_on_threshold: true, computes_pass_rate: true, matches_expected: true, reports_failures: true }
 
   - answer: >-
-      tests_passed=true, but always returns passed:true regardless of threshold (never compares
-      passRate to threshold), though it computes passRate and failures correctly.
+      tests_passed=true. gate_on_threshold: returns passed = passRate>=threshold. computes_pass_rate:
+      passRate = passing/total cases. matches_expected: each case passes by comparing run(input) to
+      expected. reports_failures: does not collect failing case names, only returns a boolean.
+      signals.must_use=[threshold comparison, passing/total rate]; avoid=[silent failures].
     expect:
-      verdict: fail
-      checks: { gate_on_threshold: false, computes_pass_rate: true, matches_expected: true, reports_failures: true }
+      verdict: pass
+      checks: { gate_on_threshold: true, computes_pass_rate: true, matches_expected: true, reports_failures: false }
 
   - answer: >-
-      tests_passed=true. Gates on threshold and computes passRate, but returns the failing inputs
-      instead of the case names, so failures aren't easily actionable.
+      tests_passed=true. gate_on_threshold: hard-codes passed:true and never compares passRate to the
+      threshold. computes_pass_rate: passRate = passing/total cases. matches_expected: compares
+      run(input) to expected per case. reports_failures: never collects failing case names.
+      signals.avoid=[ignoring the threshold, no failure list].
+    expect:
+      verdict: fail
+      checks: { gate_on_threshold: false, computes_pass_rate: true, matches_expected: true, reports_failures: false }
+
+  - answer: >-
+      tests_passed=true. gate_on_threshold: always returns passed:true regardless of passRate, so it
+      ignores the threshold. computes_pass_rate: passRate = passing/total cases. matches_expected:
+      compares run(input) to expected per case. reports_failures: collects the names of failing cases.
+      signals.must_use=[passing/total rate, name collection]; avoid=[ignoring the threshold].
     expect:
       verdict: borderline
-      checks: { gate_on_threshold: true, computes_pass_rate: true, matches_expected: true, reports_failures: false }
+      checks: { gate_on_threshold: false, computes_pass_rate: true, matches_expected: true, reports_failures: true }

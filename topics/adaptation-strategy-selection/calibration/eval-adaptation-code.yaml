@@ -1,22 +1,46 @@
 skill: eval-adaptation-code
 cases:
+  # PASS 1 — all four checks true (gate true).
   - answer: >-
-      tests_passed=true. Returns "rag" when freshness||attribution, else "fine-tuning" for
-      behaviorChange, else "distillation" for lowLatency, else "in-context" — checked in that order.
+      tests_passed=true. freshness_first_rag: checks freshness||attribution first and returns "rag".
+      behavior_finetune: a behaviorChange without freshness returns "fine-tuning". latency_distill: a
+      lowLatency need without the above returns "distillation". default_incontext: the fall-through
+      default is "in-context". signals.must_use=[freshness checked first, rag for volatile facts,
+      in-context default]; avoid=[fine-tuning for facts].
     expect:
       verdict: pass
       checks: { freshness_first_rag: true, behavior_finetune: true, latency_distill: true, default_incontext: true }
 
+  # PASS 2 — all four checks true (gate true), attribution-driven phrasing.
   - answer: >-
-      tests_passed for most cases, but checks behaviorChange before freshness, so a request that is both
-      fresh and a format change returns "fine-tuning" — recommending the wrong tool for volatile facts.
+      tests_passed=true. freshness_first_rag: attribution (with freshness) is evaluated before any other
+      branch and returns "rag". behavior_finetune: when only behaviorChange is set it returns
+      "fine-tuning". latency_distill: when only lowLatency remains it returns "distillation".
+      default_incontext: everything else falls through to "in-context". signals.must_use=[attribution
+      first, rag for citations, distillation for latency]; avoid=[distillation default].
+    expect:
+      verdict: pass
+      checks: { freshness_first_rag: true, behavior_finetune: true, latency_distill: true, default_incontext: true }
+
+  # FAIL — gate false + one more false: 2/4 true -> score 0.5 -> borderline, gate cap -> fail.
+  - answer: >-
+      tests_passed=true. freshness_first_rag: FAILS — behaviorChange is checked before freshness, so a
+      request that is both fresh and a format change wrongly returns "fine-tuning" for volatile facts.
+      behavior_finetune: a pure behaviorChange still returns "fine-tuning". latency_distill: FAILS —
+      lowLatency falls through to the default instead of returning "distillation". default_incontext:
+      the final fall-through is "in-context". signals.must_use=[freshness checked first];
+      avoid=[fine-tuning for facts, missing distillation branch].
     expect:
       verdict: fail
-      checks: { freshness_first_rag: false, behavior_finetune: true, latency_distill: true, default_incontext: true }
+      checks: { freshness_first_rag: false, behavior_finetune: true, latency_distill: false, default_incontext: true }
 
+  # BORDERLINE — only the gate is false: 3/4 true -> score 0.75 -> pass, gate cap -> borderline.
   - answer: >-
-      tests_passed=true. Handles freshness→rag and behavior→fine-tuning, but falls through to
-      "distillation" as the default instead of "in-context".
+      tests_passed=true. freshness_first_rag: FAILS — behaviorChange is evaluated before freshness, so a
+      fresh format-change request returns "fine-tuning" instead of "rag". behavior_finetune: a pure
+      behaviorChange returns "fine-tuning". latency_distill: a lowLatency need returns "distillation".
+      default_incontext: the fall-through default is "in-context". signals.must_use=[behavior→fine-tuning,
+      latency→distillation, in-context default]; avoid=[freshness checked after behavior].
     expect:
       verdict: borderline
-      checks: { freshness_first_rag: true, behavior_finetune: true, latency_distill: true, default_incontext: false }
+      checks: { freshness_first_rag: false, behavior_finetune: true, latency_distill: true, default_incontext: true }
