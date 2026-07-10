@@ -5,8 +5,13 @@ programming topic is added by dropping in configuration files and evaluation ski
 engine code changes. Open-ended answers are graded by a **small local LLM** driven by
 carefully engineered, individually-tested evaluation skills.
 
+- **▶ New here? Start with the [`Full Walkthrough`](WALKTHROUGH.md)** — run it in two commands, do the
+  first lesson, and flow through all 22 topics in the recommended order.
 - **Design & rationale:** [`DESIGN.md`](DESIGN.md)
 - **How to run it:** [`GettingStarted.md`](GettingStarted.md)
+- **Recommended learning order + all topics:** [`WALKTHROUGH.md`](WALKTHROUGH.md)
+- **Content coverage (Topic Mastery Index):** [`MASTERY_INDEX.md`](MASTERY_INDEX.md)
+- **Grader certification:** [`CERTIFICATION.md`](CERTIFICATION.md)
 - **What to build next:** [`NextSteps.md`](NextSteps.md)
 
 ## Status

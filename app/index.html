@@ -368,13 +368,21 @@ function renderAssessment(card, step) {
 }
 function renderDone(card) {
   const mastered = S.dashboard.filter((s) => s.band >= 3).length;
+  const nextBtn = el("button", { text: "Next lesson →", onclick: async () => { await api("/api/continue", {}); refresh(); } });
   card.append(el("div", { class: "done" }, el("div", { class: "big", text: "🎉" }), el("h2", { text: "You reached the end of this lesson" }),
     el("p", { text: `${mastered} of ${S.dashboard.length} sections at proficient or above. Retry any assessment to push toward bright green.` }),
     el("div", { class: "row", style: "justify-content:center; flex-wrap:wrap" },
-      el("button", { text: "Back to all lessons", onclick: async () => { await api("/api/home", {}); refresh(); } }),
+      nextBtn,
+      el("button", { class: "ghost", text: "All lessons", onclick: async () => { await api("/api/home", {}); refresh(); } }),
       el("button", { class: "ghost", text: "Mock interview", onclick: () => startPractice("mock", S.topic.id) }),
       el("button", { class: "ghost", text: "Cumulative assessment", onclick: () => startPractice("cumulative", S.topic.id) }),
       el("button", { class: "ghost", text: "Restart this lesson", onclick: async () => { await api("/api/reset", {}); refresh(); } }))));
+  // Label the primary button with the next recommended topic (curated order).
+  api("/api/home").then((h) => {
+    const nt = (h.items || []).find((i) => i.id === h.continueTopic);
+    if (nt && nt.id !== S.topic.id) nextBtn.textContent = `Next: ${nt.title} →`;
+    else nextBtn.textContent = "Review next due →";
+  }).catch(() => {});
 }
 refresh();
 </script>
