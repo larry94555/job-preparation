@@ -4,7 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "web"
   ],
   "engines": {
     "node": ">=20"
@@ -15,18 +16,29 @@
     "preview": "tsx packages/engine/src/cli.ts preview",
     "begin-lesson": "tsx app/server.ts",
     "resume-lesson": "tsx app/server.ts --continue",
+    "web:dev": "next dev web",
+    "web:build": "next build web",
+    "web:start": "next start web",
     "meta-eval": "tsx packages/evaluator/src/cli.ts meta-eval topics",
     "eval-gate": "tsx packages/evaluator/src/cli.ts meta-eval topics --threshold 0.7",
+    "eval-gate:escalate": "tsx packages/evaluator/src/cli.ts meta-eval topics --threshold 0.7 --samples 3",
     "mastery": "tsx scripts/mastery-index.ts",
     "certify": "npm run validate && npm run selfcheck && npm run typecheck && npm run test && npm run eval-gate",
-    "test": "tsx --test packages/engine/src/grade.test.ts packages/evaluator/src/aggregate.test.ts packages/lesson/src/review.test.ts packages/store/src/file.test.ts",
-    "typecheck": "tsc --noEmit -p packages/schema/tsconfig.json && tsc --noEmit -p packages/engine/tsconfig.json && tsc --noEmit -p packages/lesson/tsconfig.json && tsc --noEmit -p packages/evaluator/tsconfig.json && tsc --noEmit -p packages/sandbox/tsconfig.json && tsc --noEmit -p packages/store/tsconfig.json",
+    "test": "tsx --test packages/engine/src/grade.test.ts packages/engine/src/randomize.test.ts packages/evaluator/src/aggregate.test.ts packages/evaluator/src/routing.test.ts packages/evaluator/src/model-config.test.ts packages/evaluator/src/gradeopen.test.ts packages/lesson/src/review.test.ts packages/sandbox/src/runner.test.ts packages/store/src/file.test.ts packages/store/src/content.test.ts packages/store/src/pglite.test.ts packages/store/src/queue.test.ts packages/store/src/factories.test.ts packages/grading/src/worker.test.ts",
+    "test:coverage": "node --import tsx --test --experimental-test-coverage \"packages/**/*.test.ts\"",
+    "test:coverage:ci": "node --import tsx --test --experimental-test-coverage --test-coverage-lines=88 --test-coverage-branches=78 --test-coverage-functions=82 \"packages/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit -p packages/schema/tsconfig.json && tsc --noEmit -p packages/engine/tsconfig.json && tsc --noEmit -p packages/lesson/tsconfig.json && tsc --noEmit -p packages/evaluator/tsconfig.json && tsc --noEmit -p packages/sandbox/tsconfig.json && tsc --noEmit -p packages/store/tsconfig.json && tsc --noEmit -p packages/grading/tsconfig.json",
+    "worker": "tsx packages/grading/bin/worker.ts",
+    "sandbox-service": "tsx services/sandbox/server.ts",
     "db:up": "docker compose up -d db",
     "db:down": "docker compose down",
     "db:push": "drizzle-kit push",
-    "db:generate": "drizzle-kit generate"
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:import": "tsx scripts/import-content.ts"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.2.17",
     "@types/node": "^22.5.4",
     "@types/pg": "^8.11.10",
     "drizzle-kit": "^0.28.1",

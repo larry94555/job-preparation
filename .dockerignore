@@ -1,0 +1,16 @@
+# Keep the build context small and out of the image. Deps are installed inside
+# the image (npm ci); build artifacts and local state never belong in a context.
+node_modules
+**/node_modules
+.next
+web/.next
+.progress
+.sandbox
+.git
+.github
+*.log
+.env
+.env.local
+coverage
+dist
+build

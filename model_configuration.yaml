@@ -1,0 +1,188 @@
+# model_configuration.yaml
+#
+# Catalog of local open-source LLMs the grader may use, and which model currently
+# fills each tier. Human-editable and validated on load (see @job-prep/schema).
+#
+# Two tiers:
+#   primary   — faster, less reliable; the default judge for every skill.
+#   secondary — slower, more reliable; used by skills that opt into the stronger
+#               judge and as the escalation tiebreaker.
+#
+# The /models UI (linked from the home page) changes ONLY `selection`, and only
+# among `status: allowed` models whose `roles` include that tier. Everything else
+# here — the catalog, each model's status/roles/requirements, and the master
+# `secondary_model_allowed` switch — is edited in this file by the deploy owner.
+#
+# `id` is the runtime model tag (what Ollama serves at LLAMA_BASE_URL). Pull it
+# with `ollama pull <id>` or import the GGUF from the listed `huggingface` repo.
+# The base URL itself is NOT here — it stays in env (LLAMA_BASE_URL).
+
+# Master switch. false ⇒ the secondary tier is disabled and EVERY skill is graded
+# by the primary model only.
+secondary_model_allowed: true
+
+# Currently selected model per tier (this is what the UI writes).
+selection:
+  primary: qwen2.5:3b-instruct
+  secondary: llama3:8b
+
+# ---- Backends: WHERE the model(s) are served -----------------------------
+#
+# Every backend exposes an OpenAI-compatible endpoint (Ollama and llama.cpp's
+# `llama-server` both do). `environments` gates where a backend may run:
+#   local  — a dev machine (multiple backends can be offered; pick one below).
+#   hosted — the deployed app. When the app runs with DEPLOY_ENV=hosted, the
+#            hosted-eligible backend is FORCED and is the only choice.
+#
+# `single_model: true` means the server hosts exactly one loaded GGUF (llama.cpp),
+# so only the PRIMARY tier applies — the secondary tier is disabled for it.
+# LLAMA_BASE_URL, if set, overrides a backend's base_url at runtime.
+
+# Active backend for LOCAL/dev use (ignored under DEPLOY_ENV=hosted).
+backend: ollama-local
+
+backends:
+  - id: ollama-local
+    name: Ollama (local)
+    kind: ollama
+    base_url: http://localhost:11434/v1
+    environments: [ local ]
+    single_model: false
+    notes: "Default local dev host; serves any pulled model (supports two tiers)."
+
+  - id: llamacpp-local
+    name: llama.cpp server (local)
+    kind: llamacpp
+    base_url: http://localhost:8080/v1
+    environments: [ local ]
+    single_model: true
+    notes: >-
+      Test the hosted setup locally. Start it with: llama-server -m <model>.gguf
+      --host 0.0.0.0 --port 8080 -c 4096 (from a llama.cpp build). Serves ONE
+      model = the selected primary.
+
+  - id: oracle-llamacpp
+    name: Oracle Cloud (llama.cpp)
+    kind: llamacpp
+    provider: oracle
+    base_url: http://ORACLE_HOST:8080/v1
+    environments: [ hosted ]
+    single_model: true
+    notes: >-
+      llama-server on an Oracle Cloud compute instance (single model). Set
+      base_url to the instance address, or inject it at deploy time via
+      LLAMA_BASE_URL. This is the ONLY backend used when DEPLOY_ENV=hosted. Fits
+      an Always-Free/Standard (12 GB RAM) or PAYG (24 GB RAM) shape, CPU-only,
+      per the selected model's requirements below.
+
+models:
+  # ---- Currently installed / in use ----
+  - id: qwen2.5:3b-instruct
+    name: Qwen2.5-3B-Instruct-Q4_K_M
+    huggingface: Qwen/Qwen2.5-3B-Instruct-GGUF
+    roles: [ primary, secondary ]
+    status: allowed
+    requirements:
+      ram_gb: 3.5
+      gpu_required: false
+      cpu_only: true
+      disk_gb: 1.9
+      notes: "Standard (12GB) & PAYG (24GB). Pinned default grader."
+
+  - id: llama3:8b
+    name: Llama-3-8B-Instruct
+    huggingface: meta-llama/Meta-Llama-3-8B-Instruct
+    roles: [ primary, secondary ]
+    status: allowed
+    requirements:
+      ram_gb: 8.0
+      gpu_required: false
+      cpu_only: true
+      disk_gb: 4.7
+      notes: "Current stronger judge (secondary tier)."
+
+  - id: mixtral:8x7b-instruct-v0.1-q5_K_M
+    name: Mixtral-8x7B-Instruct-v0.1-Q5_K_M
+    huggingface: TheBloke/Mixtral-8x7B-Instruct-v0.1-GGUF
+    roles: [ secondary ]
+    status: disallowed
+    requirements:
+      ram_gb: 32.0
+      gpu_required: false
+      cpu_only: true
+      disk_gb: 32.0
+      notes: "Disallowed: broken/incomplete local Ollama registration (will not
+        load)."
+
+  # ---- Added catalog (allowed; pull into Ollama before selecting) ----
+  - id: qwen2.5:1.5b-instruct
+    name: Qwen2.5-1.5B-Instruct-Q4_K_M
+    huggingface: Qwen/Qwen2.5-1.5B-Instruct-GGUF
+    roles: [ primary, secondary ]
+    status: allowed
+    requirements:
+      ram_gb: 2.5
+      gpu_required: false
+      cpu_only: true
+      disk_gb: 1.2
+      notes: "Standard (12GB) & PAYG (24GB)"
+
+  - id: llama3.2:3b-instruct-q4_K_M
+    name: Llama-3.2-3B-Instruct-Q4_K_M
+    huggingface: bartowski/Llama-3.2-3B-Instruct-GGUF
+    roles: [ primary, secondary ]
+    status: allowed
+    requirements:
+      ram_gb: 3.5
+      gpu_required: false
+      cpu_only: true
+      disk_gb: 2.0
+      notes: "Standard (12GB) & PAYG (24GB)"
+
+  - id: qwen2.5-coder:7b-instruct
+    name: Qwen2.5-Coder-7B-Instruct-Q4_K_M
+    huggingface: Qwen/Qwen2.5-Coder-7B-Instruct-GGUF
+    roles: [ primary, secondary ]
+    status: allowed
+    requirements:
+      ram_gb: 6.5
+      gpu_required: false
+      cpu_only: true
+      disk_gb: 4.7
+      notes: "Standard (12GB) & PAYG (24GB). Strong on code-grading."
+
+  - id: llama3.1:8b-instruct-q4_K_M
+    name: Llama-3.1-8B-Instruct-Q4_K_M
+    huggingface: bartowski/Meta-Llama-3.1-8B-Instruct-GGUF
+    roles: [ primary, secondary ]
+    status: allowed
+    requirements:
+      ram_gb: 7.5
+      gpu_required: false
+      cpu_only: true
+      disk_gb: 4.9
+      notes: "Standard (12GB) & PAYG (24GB)"
+
+  - id: deepseek-r1:7b
+    name: DeepSeek-R1-Distill-Qwen-7B
+    huggingface: bartowski/DeepSeek-R1-Distill-Qwen-7B-GGUF
+    roles: [ primary, secondary ]
+    status: allowed
+    requirements:
+      ram_gb: 7.5
+      gpu_required: false
+      cpu_only: true
+      disk_gb: 4.7
+      notes: "Standard (12GB) & PAYG (24GB). Reasoning-distilled."
+
+  - id: phi3:14b
+    name: Phi-3-Medium-14B-Instruct-Q4_K_M
+    huggingface: microsoft/Phi-3-medium-4k-instruct-gguf
+    roles: [ primary, secondary ]
+    status: allowed
+    requirements:
+      ram_gb: 13.0
+      gpu_required: false
+      cpu_only: true
+      disk_gb: 8.9
+      notes: "PAYG (24GB RAM) only."

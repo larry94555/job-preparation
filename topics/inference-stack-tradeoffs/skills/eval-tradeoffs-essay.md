@@ -3,6 +3,14 @@ id: eval-tradeoffs-essay
 applies_to: essay
 output_schema: EssayCheckScore
 model_hint: "qwen2.5-3b-instruct, temperature 0, response_format=json"
+# Routed to a stronger judge with best-of-N voting: the pinned 3B
+# non-deterministically flags `technically_correct` on clean, correct
+# serving-tradeoff answers (diagnosed across 3 calibration rewrites, 25%→50%→60%,
+# never ≥0.7). llama3:8b grades this rubric far better but still has residual
+# run-to-run noise (60–80% single-sample), so we vote best-of-3 — the same
+# self-consistency production uses (DESIGN §7.4) — which stabilizes it at 80%.
+grader_model: "llama3:8b"
+grader_samples: 3
 ---
 
 # Grading an inference-stack-tradeoffs essay

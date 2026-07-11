@@ -33,10 +33,18 @@ export function runTypeScript(opts: {
   writeFileSync(join(dir, "solution.ts"), opts.solutionCode);
   writeFileSync(join(dir, "solution.test.ts"), opts.testCode);
 
+  // Run the child in a clean copy of the environment with the parent's
+  // node:test context stripped: the submission itself uses `node --test`, and an
+  // inherited NODE_TEST_CONTEXT would make that nested runner report to the
+  // parent over IPC instead of exiting non-zero — corrupting the pass/fail result
+  // whenever grading is invoked from within a test harness.
+  const childEnv = { ...process.env };
+  delete childEnv.NODE_TEST_CONTEXT;
+
   return new Promise((resolve) => {
     const child = spawn(process.execPath, ["--import", "tsx", "--test", "solution.test.ts"], {
       cwd: dir,
-      env: process.env,
+      env: childEnv,
     });
     let out = "";
     let timedOut = false;

@@ -15,6 +15,24 @@ export const EvalSkillFrontmatter = z.object({
   output_schema: z.string().min(1),
   model_hint: z.string().optional(),
   /**
+   * Optional per-skill judge override. When set, this skill is graded by the
+   * named model instead of the pinned default grader (LLAMA_MODEL). Use it to
+   * route a rubric the small pinned judge can't reproduce to a stronger judge
+   * (the "stronger judge tier", DESIGN §7). The model must be served by the same
+   * LLAMA_BASE_URL (e.g. another Ollama model). The gate measures the skill
+   * against whichever judge grades it, so a routed skill must still meet the bar.
+   */
+  grader_model: z.string().optional(),
+  /**
+   * Optional per-skill self-consistency sample count for the gate. Production
+   * always grades best-of-N via escalation (DESIGN §7.4); the meta-eval gate
+   * defaults to 1 sample for speed. Set this (e.g. 3) for a skill whose judge is
+   * near the threshold, so the gate measures it the way production grades it —
+   * majority vote over N samples instead of a single flaky call. Defaults to the
+   * gate's `--samples` value (1).
+   */
+  grader_samples: z.number().int().min(1).optional(),
+  /**
    * Check names that act as scoring gates: if a gate check is false, the verdict
    * is capped one level down (pass→borderline, borderline→fail). Defaults to any
    * check whose name contains "correct".

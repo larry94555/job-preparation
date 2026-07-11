@@ -2,6 +2,46 @@ import type { LoadedSkill } from "@job-prep/engine";
 import type { CalibrationSet } from "@job-prep/schema";
 import { type Aggregated, aggregateChecks } from "./aggregate.js";
 import { type ChatMessage, LlamaClient } from "./llama.js";
+import { getModelConfig, resolveGrader } from "./model-config.js";
+
+/**
+ * Pick the judge client for a skill.
+ *
+ * A skill that declares `grader_model` is opting into the STRONGER (secondary)
+ * judge tier. When `model_configuration.yaml` is present it is the source of
+ * truth: such a skill grades with the configured `secondary` model (or the
+ * `primary` if the secondary tier is disabled), and every other skill grades
+ * with the configured `primary`. When no config file exists we fall back to the
+ * legacy behavior — the skill's literal `grader_model`, else the env default
+ * (`LLAMA_MODEL`). Base URL always comes from env (`LLAMA_BASE_URL`).
+ *
+ * Clients are cached by model name so a sweep reuses one connection per judge.
+ */
+const judgeCache = new Map<string, LlamaClient>();
+export function clientForSkill(skill: { frontmatter?: { grader_model?: string } }): LlamaClient {
+  const wantsSecondary = Boolean(skill.frontmatter?.grader_model);
+  const cfg = getModelConfig();
+  let model: string | undefined;
+  let baseUrl: string | undefined;
+  if (cfg) {
+    // Resolve the active backend + tiers. A single-model backend (e.g. Oracle
+    // llama-server) reports secondary=null, so every skill uses the one model.
+    const g = resolveGrader(cfg);
+    model = wantsSecondary && g.secondary ? g.secondary : g.primary;
+    baseUrl = g.baseUrl;
+  } else {
+    // Legacy (no config): literal grader_model, else env default.
+    model = skill.frontmatter?.grader_model;
+  }
+  // Cache per (baseUrl, model): the backend can differ between environments.
+  const key = `${baseUrl ?? ""}::${model ?? "__default__"}`;
+  let c = judgeCache.get(key);
+  if (!c) {
+    c = new LlamaClient({ ...(model ? { model } : {}), ...(baseUrl ? { baseUrl } : {}) });
+    judgeCache.set(key, c);
+  }
+  return c;
+}
 
 export interface GradeInput {
   skill: LoadedSkill;

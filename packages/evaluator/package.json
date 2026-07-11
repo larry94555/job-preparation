@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@job-prep/engine": "*",
-    "@job-prep/schema": "*"
+    "@job-prep/schema": "*",
+    "yaml": "^2.5.1"
   }
 }
