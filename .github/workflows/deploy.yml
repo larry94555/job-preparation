@@ -1,0 +1,144 @@
+name: deploy
+
+# TEMPLATE — hosted deploy pipeline (Phase 6, DESIGN §§6/8/9/13).
+#
+# Flow: config -> PR -> eval-gate -> deploy -> re-import. This workflow is the
+# "deploy" leg: it (re)builds & pushes the three service images, applies DB
+# migrations, projects content into the DB, and rolls out the four tiers.
+#
+# GATING: every real step is guarded on repository secrets, so the workflow is a
+# safe no-op until an operator wires them. Fill these in Settings -> Secrets:
+#   REGISTRY / REGISTRY_USERNAME / REGISTRY_PASSWORD  — image registry creds
+#   DATABASE_URL                                      — managed Postgres URL
+#   AUTH_SECRET                                       — session signing secret
+#   DEPLOY_HOST / DEPLOY_SSH_KEY                      — target host (or swap for
+#                                                       your platform's deploy API)
+# Do NOT commit real secret values.
+#
+# THE EVAL-GATE IS A DEPLOY GATE: `npm run eval-gate` MUST PASS against a live
+# grading model (Ollama / llama-server) before any image is pushed. In CI it
+# self-skips; here it is required — a failing eval-skill must not reach users.
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "deploy" to confirm a production rollout'
+        required: true
+        default: ""
+  push:
+    tags:
+      - "v*" # release tags, e.g. v1.2.0
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  IMAGE_WEB: ${{ secrets.REGISTRY }}/job-prep-web
+  IMAGE_WORKER: ${{ secrets.REGISTRY }}/job-prep-worker
+  IMAGE_SANDBOX: ${{ secrets.REGISTRY }}/job-prep-sandbox
+
+jobs:
+  # ---- 1. eval-gate as the deploy gate -----------------------------------
+  eval-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      # Must run against a REAL model here (unlike CI). Point LLAMA_BASE_URL at a
+      # reachable grading model; without it the gate self-skips and this job is a
+      # no-op — which is why it is documented as a required, not automatic, gate.
+      - name: Eval-gate (must pass against a live grading model)
+        env:
+          LLAMA_BASE_URL: ${{ secrets.LLAMA_BASE_URL }}
+          LLAMA_MODEL: ${{ secrets.LLAMA_MODEL }}
+        run: npm run eval-gate
+
+  # ---- 2. build & push the three images ----------------------------------
+  build-and-push:
+    needs: eval-gate
+    runs-on: ubuntu-latest
+    # NOTE: job-level `if:` cannot read the `secrets` context, so gating lives on
+    # each step below (`if: env.REGISTRY != ''`). Until REGISTRY is set every
+    # step is skipped and the job is a template no-op.
+    env:
+      REGISTRY: ${{ secrets.REGISTRY }}
+    steps:
+      - uses: actions/checkout@v4
+        if: ${{ env.REGISTRY != '' }}
+      - uses: docker/setup-buildx-action@v3
+        if: ${{ env.REGISTRY != '' }}
+      - name: Log in to registry
+        if: ${{ env.REGISTRY != '' }}
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+      - name: Build & push web
+        if: ${{ env.REGISTRY != '' }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: web/Dockerfile
+          push: true
+          tags: ${{ env.IMAGE_WEB }}:${{ github.sha }}
+      - name: Build & push worker
+        if: ${{ env.REGISTRY != '' }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.worker
+          push: true
+          tags: ${{ env.IMAGE_WORKER }}:${{ github.sha }}
+      - name: Build & push sandbox
+        if: ${{ env.REGISTRY != '' }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: services/sandbox/Dockerfile
+          push: true
+          tags: ${{ env.IMAGE_SANDBOX }}:${{ github.sha }}
+
+  # ---- 3. migrate DB, project content, roll out --------------------------
+  migrate-and-deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    # Step-level gating (see note above): skipped until DATABASE_URL is set.
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        if: ${{ env.DATABASE_URL != '' }}
+      - uses: actions/setup-node@v4
+        if: ${{ env.DATABASE_URL != '' }}
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+        if: ${{ env.DATABASE_URL != '' }}
+      # Apply committed migrations. Production path is db:migrate (NOT db:push).
+      - name: Apply DB migrations
+        if: ${{ env.DATABASE_URL != '' }}
+        run: npm run db:migrate
+      # Re-import: project the git-tracked topics/ content into content_topics.
+      - name: Import content projection
+        if: ${{ env.DATABASE_URL != '' }}
+        env:
+          CONTENT: db
+        run: npm run db:import
+      # Roll out the new images to the target (SSH pull+restart, or swap for your
+      # platform's deploy API — Fly/ECS/Nomad/k8s). Template placeholder.
+      - name: Deploy tiers (web + worker + sandbox)
+        if: ${{ env.DATABASE_URL != '' && env.DEPLOY_HOST != '' }}
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          echo "TODO: pull ${IMAGE_WEB}:${IMAGE_TAG}, ${IMAGE_WORKER}:${IMAGE_TAG}, ${IMAGE_SANDBOX}:${IMAGE_TAG}"
+          echo "TODO: restart web + worker + sandbox on ${DEPLOY_HOST} (compose/k8s/platform API)"

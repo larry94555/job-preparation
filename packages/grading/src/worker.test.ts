@@ -20,7 +20,7 @@ function cycling(seq: Verdict[]): (opts: GradeOpts) => Promise<EscalationGrade> 
   };
 }
 
-/** runTypeScript stub — never actually runs code. */
+/** CodeRunner.run stub — never actually runs code. */
 const stubRun =
   (passed: boolean) =>
   async (): Promise<RunResult> => ({ passed, timedOut: false, output: "stub tests" });
@@ -35,7 +35,7 @@ test("worker: essay job with a clear-majority stub → done/pass", async () => {
     payload: { answer: "an answer" },
   });
 
-  const deps: WorkerDeps = { grade: fixed("pass"), runTypeScript: stubRun(true) };
+  const deps: WorkerDeps = { grade: fixed("pass"), run: stubRun(true) };
   const n = await runWorker(queue, deps, {});
 
   assert.equal(n, 1, "one job processed");
@@ -60,7 +60,7 @@ test("worker: essay tie escalates to bigGrade → done with big model's verdict"
   const deps: WorkerDeps = {
     grade: cycling(["pass", "fail", "borderline"]),
     bigGrade: fixed("pass"),
-    runTypeScript: stubRun(true),
+    run: stubRun(true),
   };
   const n = await runWorker(queue, deps, {});
 
@@ -89,7 +89,7 @@ test("worker: essay tie with no bigGrade → flagged for human review", async ()
   // No majority and no bigGrade → needsReview → flagged.
   const deps: WorkerDeps = {
     grade: cycling(["pass", "fail", "borderline"]),
-    runTypeScript: stubRun(true),
+    run: stubRun(true),
   };
   const n = await runWorker(queue, deps, {});
 
@@ -111,7 +111,7 @@ test("worker: code job with failing tests → fail regardless of concept", async
   });
 
   // Concept would pass, but the tests fail → correctness gate caps to fail.
-  const deps: WorkerDeps = { grade: fixed("pass"), runTypeScript: stubRun(false) };
+  const deps: WorkerDeps = { grade: fixed("pass"), run: stubRun(false) };
   const n = await runWorker(queue, deps, {});
 
   assert.equal(n, 1);
@@ -133,7 +133,7 @@ test("worker: drains multiple jobs and returns the count", async () => {
       payload: { answer: `a${i}` },
     });
   }
-  const deps: WorkerDeps = { grade: fixed("pass"), runTypeScript: stubRun(true) };
+  const deps: WorkerDeps = { grade: fixed("pass"), run: stubRun(true) };
   const n = await runWorker(queue, deps, {});
   assert.equal(n, 3, "all queued jobs drained");
   assert.equal(await queue.claim(), null, "queue empty after drain");

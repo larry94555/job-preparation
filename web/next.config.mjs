@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Emit a self-contained server bundle (server.js + minimal node_modules) so the
+  // production Docker image can run the app without the full monorepo /
+  // node_modules tree. See web/Dockerfile. (Phase 6 hosting — deployment.)
+  output: "standalone",
   // Compile the raw-TS ESM workspace packages (they ship .ts, no build step).
   transpilePackages: [
     "@job-prep/schema",

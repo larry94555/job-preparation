@@ -8,7 +8,7 @@ import {
   LlamaClient,
   type Verdict,
 } from "@job-prep/evaluator";
-import { runTypeScript } from "@job-prep/sandbox";
+import { type CodeRunner, createCodeRunner } from "@job-prep/sandbox";
 import type { Job, JobQueue } from "@job-prep/store";
 
 /**
@@ -18,9 +18,12 @@ import type { Job, JobQueue } from "@job-prep/store";
  * review). Deterministic MC/text checks never reach here — they grade inline.
  *
  * Every model touch is injected via `deps` (`grade`, optional `bigGrade`,
- * `runTypeScript`), so the whole worker is exercised with STUB graders and no
- * live model. `wireDefaults()` builds the real deps from `@job-prep/evaluator`
- * (llama-server) + `@job-prep/sandbox` + env models.
+ * `run`), so the whole worker is exercised with STUB graders and no live model.
+ * Code execution goes through the `CodeRunner` seam (DESIGN §9): local dev runs
+ * the in-process subprocess, hosting runs an isolated HTTP sandbox service — the
+ * grading logic here is identical either way. `wireDefaults()` builds the real
+ * deps from `@job-prep/evaluator` (llama-server) + `createCodeRunner()` + env
+ * models.
  */
 
 /** The submission + everything a worker needs to grade it (job.payload). */
@@ -37,7 +40,8 @@ export interface GradingPayload {
 export interface WorkerDeps {
   grade: (opts: GradeOpts) => Promise<EscalationGrade>;
   bigGrade?: (opts: GradeOpts) => Promise<EscalationGrade>;
-  runTypeScript: typeof runTypeScript;
+  /** Executes code submissions via the isolated-execution seam (DESIGN §9). */
+  run: CodeRunner["run"];
 }
 
 /** The result the worker writes back onto the job. */
@@ -73,7 +77,7 @@ export async function gradeJob(job: Job, deps: WorkerDeps): Promise<JobResult> {
     let testsPassed: boolean | undefined;
     let testOutput = "";
     if (payload.testCode) {
-      const res = await deps.runTypeScript({
+      const res = await deps.run({
         solutionCode: payload.answer ?? "",
         testCode: payload.testCode,
         timeoutMs: 15000,
@@ -141,8 +145,9 @@ export async function runWorker(
 /**
  * Build the real production deps: `gradeOpen` (llama-server) wrapped so it fits
  * the escalation `grade` signature, an optional bigger-model tiebreaker
- * (LLAMA_BIG_MODEL), and the local `runTypeScript` sandbox. No model is contacted
- * until a job is actually graded.
+ * (LLAMA_BIG_MODEL), and the code runner from `createCodeRunner()` (in-process
+ * `LocalRunner` for local dev, isolated `HttpRunner` when SANDBOX=http). No model
+ * is contacted and no code is run until a job is actually graded.
  */
 export function wireDefaults(): WorkerDeps {
   const smallModel = process.env.LLAMA_MODEL;
@@ -165,5 +170,6 @@ export function wireDefaults(): WorkerDeps {
 
   const grade = wrap(new LlamaClient(smallModel ? { model: smallModel } : {}));
   const bigGrade = bigModel ? wrap(new LlamaClient({ model: bigModel })) : undefined;
-  return { grade, bigGrade, runTypeScript };
+  const runner = createCodeRunner();
+  return { grade, bigGrade, run: (opts) => runner.run(opts) };
 }

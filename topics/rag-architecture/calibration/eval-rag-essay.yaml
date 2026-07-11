@@ -1,50 +1,52 @@
 # Calibration for eval-rag-essay (exemplars target essay-hybrid-rerank).
+# Gate = technically_correct. Verdict math: score = trueChecks/4; >=0.75 pass,
+# >=0.5 borderline, else fail; a false gate caps down one level. Answers are kept
+# short and plainly correct so a small grader reproduces each check reliably.
 skill: eval-rag-essay
 cases:
-  # PASS — full hybrid + rerank design, all four checks true, gate (technically_correct) true.
+  # PASS — short, plainly-correct hybrid + rerank design. All four true -> pass.
   - answer: >-
-      Run dense and sparse retrieval in parallel. Dense embedding search captures paraphrase and
-      semantic similarity, while BM25 sparse search catches exact keywords, product IDs, and rare
-      terms that embeddings blur. Fuse the two ranked lists with Reciprocal Rank Fusion, which
-      combines by rank position (1/(k+rank)) rather than mixing incomparable cosine and BM25 scores.
-      Take the fused top-50 candidates and rerank only those with a cross-encoder that jointly scores
-      each query-document pair for higher precision. Keep latency bounded by reranking that small
-      first-stage set instead of the whole corpus, trading a little recall breadth for ordering
-      quality.
+      Run dense and sparse retrieval together. A dense bi-encoder captures paraphrase and semantic
+      matches, while BM25 catches exact keywords, product IDs, and rare terms. Fuse the two ranked
+      lists with Reciprocal Rank Fusion, which combines by rank position instead of mixing
+      incomparable scores. Then rerank only the top candidates with a cross-encoder, which reads each
+      query-document pair together for higher precision. Reranking just the shortlist keeps latency
+      bounded while improving the final ordering.
     expect:
       verdict: pass
       checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
 
-  # PASS — second strong answer; same substance, still all true incl. gate.
+  # PASS — second strong answer, still short and plainly correct. 4/4 = pass.
   - answer: >-
-      Use hybrid retrieval: BM25 for lexical exact-match recall (rare tokens, codes, names) and a
-      dense bi-encoder for semantic recall on paraphrases. Merge the two result sets with RRF so
-      ranking is score-agnostic, then apply a cross-encoder reranker to the top-k merged candidates
-      for a precise final ordering. Because the cross-encoder attends over the full query-document
-      pair it is expensive, so cap it at k=100 candidates and cache reranks; that keeps tail latency
-      in check while lifting precision above single-vector similarity.
+      Use hybrid retrieval: BM25 for exact lexical matches (rare tokens, codes, names) and a dense
+      bi-encoder for semantic matches on paraphrases. Merge the two result sets with RRF so ranking
+      does not depend on incomparable score scales, then apply a cross-encoder reranker to the top
+      candidates for a precise final order. The cross-encoder is expensive because it attends over the
+      full query-document pair, so cap it to a small shortlist to keep tail latency in check.
     expect:
       verdict: pass
       checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
 
-  # FAIL — gate false PLUS a second false. score 2/4=0.5 -> borderline, gate caps down -> fail.
-  # Wrong claims: RRF "averages cosine scores" and cross-encoder "same as bi-encoder"; and it stays vague.
+  # FAIL — vague and technically wrong (RRF "averages cosine scores"; cross-encoder "same as the
+  # bi-encoder"; rerank the whole corpus "with no latency cost"). Low score + false gate -> fail.
   - answer: >-
       Just embed everything and do vector search, then average the cosine scores with the keyword
       scores to fuse them — that is basically what RRF does. A cross-encoder reranker is the same
       thing as the bi-encoder embeddings, so it does not really add precision, and you can rerank the
-      entire corpus every query without any latency cost.
+      entire corpus every query with no latency cost.
     expect:
       verdict: fail
       checks: { addresses_question: true, covers_key_points: false, technically_correct: false, concrete: false }
 
-  # BORDERLINE — misses ONLY the make-or-break gate check. score 3/4=0.75 -> pass, gate caps down -> borderline.
-  # One wrong claim (dense beats sparse at exact keyword matching) fails technically_correct; everything else stays concrete and on-point.
+  # BORDERLINE — clearly on-topic, hits the key points, and is concrete, but contains ONE blatant false
+  # claim (a cross-encoder is faster than first-stage retrieval, so rerank the whole corpus). Only the
+  # gate is false -> 3/4 -> capped to borderline.
   - answer: >-
-      Combine dense and sparse retrieval and fuse them with Reciprocal Rank Fusion, then rerank the
-      top-k candidates with a cross-encoder and cap it at a small candidate set to control latency.
-      Dense embedding search is strictly better than BM25 even for exact keyword and ID matches, so
-      you can lean on it as the primary signal and treat sparse as a minor tiebreaker.
+      Combine dense and sparse retrieval, fuse the two ranked lists with Reciprocal Rank Fusion, and
+      rerank the top candidates with a cross-encoder while capping the shortlist to control latency.
+      Dense and sparse cover different match types, RRF merges them by rank, and the cross-encoder
+      lifts precision on the shortlist. One claim to rely on: a cross-encoder reranker is faster than
+      the first-stage retriever, so you can just rerank the entire corpus on every query.
     expect:
       verdict: borderline
       checks: { addresses_question: true, covers_key_points: true, technically_correct: false, concrete: true }

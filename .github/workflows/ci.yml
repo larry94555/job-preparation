@@ -28,7 +28,12 @@ jobs:
         run: npm run selfcheck
       - name: Typecheck (all packages)
         run: npm run typecheck
-      - name: Unit tests
+      - name: Unit tests (incl. in-process pglite store/queue/worker tests)
         run: npm run test
+      - name: Build the Next.js app (standalone output)
+        run: npm run web:build
+      # The eval-gate self-skips (passes as a no-op) when no grading model is
+      # reachable, so it is safe to run in CI. It becomes a real DEPLOY gate in
+      # deploy.yml, where it must PASS against a live model before images ship.
       - name: Eval-gate (meta-eval; self-skips without a grading model)
         run: npm run eval-gate

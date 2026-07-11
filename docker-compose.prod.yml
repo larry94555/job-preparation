@@ -1,0 +1,106 @@
+# Production stack (Phase 6 hosting) — the four tiers of DESIGN §§6/8/9 wired
+# together: db (Postgres), web (Next.js), worker (grading pool), sandbox
+# (isolated code execution). The dev docker-compose.yml (just `db`) is unchanged
+# and remains the local-first path; this file is the full hosted stack.
+#
+# Bring up:  docker compose -f docker-compose.prod.yml up -d
+# Env:       copy .env.example -> .env and set real DATABASE_URL / AUTH_SECRET /
+#            LLAMA_BASE_URL. Run `npm run db:migrate` (and `db:import`) before
+#            the web/worker tiers accept traffic — see DEPLOY.md.
+#
+# NOTE: authored for Phase 6; images are built/pushed by deploy.yml, not here.
+
+services:
+  # ---- data tier ----------------------------------------------------------
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-jobprep}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-jobprep}
+      POSTGRES_DB: ${POSTGRES_DB:-jobprep}
+    volumes:
+      - jobprep_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-jobprep} -d ${POSTGRES_DB:-jobprep}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---- web tier (Next.js app) --------------------------------------------
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    environment:
+      # Hosted stack: Postgres store, DB content projection, DB job queue, and the
+      # HTTP sandbox — never the local/file defaults.
+      DATABASE_URL: ${DATABASE_URL:-postgres://jobprep:jobprep@db:5432/jobprep}
+      AUTH_SECRET: ${AUTH_SECRET:?set AUTH_SECRET (openssl rand -base64 32)}
+      AUTH_ADMIN_EMAILS: ${AUTH_ADMIN_EMAILS:-}
+      STORE: pg
+      CONTENT: db
+      QUEUE: db
+      SANDBOX: http
+      SANDBOX_URL: http://sandbox:4500
+      PORT: "3000"
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      sandbox:
+        condition: service_healthy
+
+  # ---- worker tier (async grading pool) ----------------------------------
+  # Scale with:  docker compose -f docker-compose.prod.yml up -d --scale worker=N
+  # Each replica owns one llama-server slot; point LLAMA_BASE_URL at it.
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgres://jobprep:jobprep@db:5432/jobprep}
+      QUEUE: db
+      # The worker also runs code (essay grading may exec) via the same HTTP sandbox.
+      SANDBOX: http
+      SANDBOX_URL: http://sandbox:4500
+      LLAMA_BASE_URL: ${LLAMA_BASE_URL:-http://host.docker.internal:8080/v1}
+      LLAMA_MODEL: ${LLAMA_MODEL:-local}
+      LLAMA_BIG_MODEL: ${LLAMA_BIG_MODEL:-}
+      NODE_ENV: production
+    depends_on:
+      db:
+        condition: service_healthy
+      sandbox:
+        condition: service_healthy
+
+  # ---- sandbox tier (isolated code execution) ----------------------------
+  # The only tier facing untrusted code. In a real deploy this runs under
+  # gVisor/Firecracker with no egress, dropped caps, read-only+ephemeral FS, and
+  # resource limits (see services/sandbox/Dockerfile). No DB, no secrets.
+  sandbox:
+    build:
+      context: .
+      dockerfile: services/sandbox/Dockerfile
+    environment:
+      PORT: "4500"
+      NODE_ENV: production
+    # Defense-in-depth hints the orchestrator should enforce; gVisor/Firecracker
+    # + a no-egress network are applied at the runtime layer, not expressible here.
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test:
+        ["CMD", "node", "-e", "fetch('http://localhost:4500/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  jobprep_pgdata:

@@ -1,0 +1,39 @@
+# syntax=docker/dockerfile:1
+#
+# Worker tier (Phase 6 hosting) — the async grading worker pool (DESIGN §8).
+#
+# Long-running processes that drain the shared `grading_jobs` queue. Each replica
+# owns ONE llama-server model slot (the single-slot model can't grade multiple
+# requests concurrently), so horizontal scale = more worker replicas, each pinned
+# to its own LLAMA_BASE_URL. Runs `npm run worker` (packages/grading/bin/worker.ts)
+# with QUEUE=db so it reads the same Postgres queue the web tier enqueues into.
+#
+# The worker ships raw .ts and runs under tsx (no build step), so this is a
+# single-stage image: install the workspace, run the worker binary.
+#
+# NOTE: authored for Phase 6; NOT built in this environment (no registry egress).
+
+FROM node:20-bookworm-slim AS runtime
+WORKDIR /app
+ENV NODE_ENV=production
+
+# Workspace install (root + packages/*). The worker needs @job-prep/store,
+# @job-prep/grading, @job-prep/evaluator, @job-prep/sandbox, and runs under tsx
+# (a root devDependency), so this is a full install — not --omit=dev.
+COPY package.json package-lock.json ./
+COPY web/package.json ./web/package.json
+COPY packages ./packages
+RUN npm ci
+
+COPY tsconfig.base.json ./
+COPY topics ./topics
+
+# Unprivileged user.
+RUN groupadd --system --gid 1001 nodejs \
+ && useradd --system --uid 1001 --gid nodejs worker \
+ && chown -R worker:nodejs /app
+USER worker
+
+# QUEUE=db, DATABASE_URL, LLAMA_BASE_URL / LLAMA_MODEL / LLAMA_BIG_MODEL,
+# SANDBOX=http + SANDBOX_URL are injected by the orchestrator.
+CMD ["npm", "run", "worker"]

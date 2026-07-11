@@ -129,6 +129,62 @@ CPU/memory/PID/wall-clock caps, ephemeral) plus bounded concurrency and per-user
 limits. Grading stays **tests + extracted static signals fed into the code-review eval
 skill**, so the model judges design with mechanical facts already extracted.
 
+### Seam ✅ DONE
+
+Code execution now flows through a `CodeRunner` seam (`@job-prep/sandbox`), mirroring the
+`ProgressStore` / `ContentSource` / `JobQueue` pattern — grading logic is unchanged; only
+*where* the code runs is swapped by environment.
+
+- **`CodeRunner`** — `run({ solutionCode, testCode, language?, timeoutMs? }) → RunResult`.
+- **`LocalRunner`** (default) — wraps the in-process `runTypeScript` subprocess. Fine for
+  **single-user local dev**, but it is explicitly **NOT a security boundary**: it runs
+  learner code with this process's own privileges, filesystem, and network. It must
+  **NEVER face untrusted users**.
+- **`HttpRunner`** — `POST`s the run request to `${SANDBOX_URL}/run` on the dedicated
+  sandbox service and returns the parsed `RunResult`. This is the hosted path.
+- **`createCodeRunner()`** — reads `SANDBOX` (`local` default | `http`) and `SANDBOX_URL`
+  (required for `http`). `@job-prep/grading` `wireDefaults()` now injects
+  `run: (opts) => createCodeRunner().run(opts)` into the worker deps, so essay grading is
+  untouched and code grading (tests → correctness gate → concept escalation) is identical
+  whichever runner is selected.
+
+A **standalone reference sandbox service** ships at `services/sandbox/server.ts` (root
+script `npm run sandbox-service`, `PORT` default `4500`): a minimal dependency-free Node
+`http` server exposing `POST /run` (executes via `runTypeScript`) and `GET /health`. It
+touches **no database and no secrets** — it only runs code. This is the application-level
+process; the round-trip is verified locally as a plain Node service on localhost (no Docker
+required). The security comes from the deploy-time isolation below.
+
+### Deploy-time isolation (required for the HTTP service in production)
+
+The reference service above is the *seam*, not the *sandbox*. When it faces untrusted
+users it MUST be deployed under OS-level isolation — this is a deployment property, not
+something the Node process can grant itself:
+
+- **Dedicated service on its own network with NO egress** — the run network has no route
+  to the DB, secrets, internal services, or the public internet (`--network=none` per run,
+  or an isolated network namespace with no default route). It never holds a credential.
+- **Dropped Linux capabilities / non-root** — run as an unprivileged UID with
+  `--cap-drop=ALL`, `--security-opt=no-new-privileges`, and a strict seccomp profile.
+- **Read-only + ephemeral filesystem** — read-only root filesystem with only a small
+  ephemeral `tmpfs` scratch dir; the container/microVM is discarded after each run so no
+  state leaks between submissions or users.
+- **CPU / memory / PID / wall-clock limits** — hard caps on every axis (e.g. CPU quota,
+  memory + swap ceiling, PID limit, and the request-level `timeoutMs` wall-clock kill) so a
+  fork bomb or infinite loop cannot exhaust the host. Bounded concurrency and per-user
+  rate limits sit in front.
+- **Kernel isolation via gVisor (runsc) or Firecracker microVMs** — a shared-kernel
+  container alone is not sufficient for untrusted code; each run executes under a gVisor
+  sandbox (`runsc`) or in a Firecracker microVM, with **per-language runner images**
+  (a TypeScript/Node image today, more per language later).
+- **Managed provider is the first option** — Judge0, E2B, or Firecracker-as-a-service give
+  this hardening out of the box; self-hosted gVisor / Firecracker is the later, more-work
+  alternative.
+
+The `LocalRunner` subprocess is the recommended zero-setup path for local, single-user
+authoring and dev only, and must never be exposed to untrusted users; hosting always uses
+`SANDBOX=http` against a service deployed under the isolation above.
+
 ## Phase 6 — Deploy / CI
 
 Ships the hosted deployment and continuous integration: build/containerize the Next.js
