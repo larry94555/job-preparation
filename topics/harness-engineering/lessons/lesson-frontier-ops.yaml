@@ -1,0 +1,13 @@
+id: lesson-frontier-ops
+title: "Frontier & operations: agentic-coding benchmarks, long-horizon autonomy, and the signals to watch"
+material: frontier-ops.md
+segments:
+  - present: the-harness-engineering-frontier
+  - check: mc-frontier-harness-swebench
+  - check: mc-frontier-harness-longhorizon
+  - check: mc-frontier-harness-openended
+  - present: operating-harness-engineering-in-production
+  - check: mc-ops-harness-budget-exhaustion
+  - check: mc-ops-harness-verify-vs-tool
+  - apply: code-harness-idempotent
+  - apply: code-harness-arg-repair

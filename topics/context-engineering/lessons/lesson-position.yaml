@@ -1,0 +1,14 @@
+id: lesson-position
+title: "Position effects: lost in the middle"
+material: context-position.md
+segments:
+  - present: lost-in-the-middle
+  - check: mc-lost-in-middle
+  - check: mc-primacy-recency
+  - check: cloze-lost-middle
+  - check: cloze-recency
+  - check: cloze-primacy
+  - present: placing-important-context
+  - check: mc-position-placement
+  - check: fe-position-fix
+  - apply: essay-position-explain

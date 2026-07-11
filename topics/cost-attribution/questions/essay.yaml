@@ -1,0 +1,37 @@
+# Essay
+- id: essay-per-model-wrong
+  type: essay
+  length: short
+  tags: [attribution]
+  difficulty: 3
+  prompt: "Your dashboard shows cost per model, and leadership wants to cut spend. Explain why that view is the wrong granularity and what dimensions you'd attribute cost to instead."
+  eval_skill: eval-cost-essay
+  reference_points:
+    - "Per-model totals aggregate every use of a model and hide where cost actually accrues, so you can't tell which feature, workflow, or tenant to optimize."
+    - "The business-relevant dimensions are feature, workflow, tenant, and user journey — the levels where you can act on the number."
+    - "You attribute by attaching attribution tags at the entry point and propagating them through downstream calls so each cost record rolls up by dimension."
+
+- id: essay-cost-per-success
+  type: essay
+  length: short
+  tags: [economics]
+  difficulty: 3
+  prompt: "Explain why 'cost per successful task' is a more honest unit-economics metric than 'cost per API call', and what it captures that per-call cost misses."
+  eval_skill: eval-cost-essay
+  reference_points:
+    - "A single successful outcome often takes several calls, retries, and even abandoned attempts, so per-call cost understates the true price of delivering value."
+    - "Cost per successful task amortizes all of that wasted spend over the tasks that actually succeeded, giving a true unit cost."
+    - "It ties cost directly to value delivered and exposes hidden costs like retries and abandonment that per-call metrics ignore."
+
+- id: essay-hidden-costs
+  type: essay
+  length: long
+  tags: [hidden]
+  difficulty: 4
+  prompt: "A cost estimate based only on the happy-path prompt is coming in far under the real bill. Identify the hidden costs likely responsible and explain how each inflates spend and how you'd surface it."
+  eval_skill: eval-cost-essay
+  reference_points:
+    - "Retries after malformed or failed output multiply token spend on the same task without adding a new successful outcome."
+    - "Abandoned or failed sessions consume tokens that never produce value, and per-call estimates ignore them."
+    - "Over-retrieval stuffs the context with more chunks than needed, paying for input tokens that add nothing on every call."
+    - "Surface them by tagging and recording every call (including retries and async work) and measuring cost per successful task, so wasted spend shows up against real outcomes."

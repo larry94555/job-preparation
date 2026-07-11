@@ -1,0 +1,11 @@
+id: lesson-frontier-ops
+title: "Frontier & operations: outcome economics, cost cascades, and the signals to watch"
+material: frontier-ops.md
+segments:
+  - present: the-cost-attribution-frontier
+  - check: mc-frontier-cost-outcome-vs-token
+  - check: mc-frontier-cost-frugalgpt-cascade
+  - check: mc-frontier-cost-shared-allocation
+  - present: operating-cost-attribution-in-production
+  - check: mc-ops-cost-tag-coverage
+  - check: mc-ops-cost-per-success-drift

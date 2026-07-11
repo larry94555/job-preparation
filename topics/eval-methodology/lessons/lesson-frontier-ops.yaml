@@ -1,0 +1,12 @@
+id: lesson-frontier-ops
+title: "Frontier & operations: judge calibration & bias, Arena/Elo, contamination, and the signals to watch"
+material: frontier-ops.md
+segments:
+  - present: the-eval-methodology-frontier
+  - check: mc-frontier-eval-judge-bias
+  - check: mc-frontier-eval-arena-elo
+  - check: mc-frontier-eval-contamination
+  - present: operating-eval-methodology-in-production
+  - check: mc-ops-eval-judge-agreement
+  - check: mc-ops-eval-drift-gate
+  - apply: code-eval-kappa

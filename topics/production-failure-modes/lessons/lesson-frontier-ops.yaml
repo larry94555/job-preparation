@@ -1,0 +1,12 @@
+id: lesson-frontier-ops
+title: "Frontier & operations: silent-regression detection, failure prediction, and the signals to watch"
+material: frontier-ops.md
+segments:
+  - present: the-production-failure-modes-frontier
+  - check: mc-frontier-fail-silent-early
+  - check: mc-frontier-fail-prediction
+  - check: mc-frontier-fail-multi-recovery
+  - present: operating-for-failure-in-production
+  - check: mc-ops-fail-burn-rate
+  - check: mc-ops-fail-lead-time
+  - apply: code-fail-loop-detector

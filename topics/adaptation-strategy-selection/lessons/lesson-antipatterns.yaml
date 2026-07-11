@@ -1,0 +1,14 @@
+id: lesson-antipatterns
+title: "When each is the wrong tool"
+material: antipatterns.md
+segments:
+  - present: when-each-is-the-wrong-tool
+  - check: mc-ft-volatile-antipattern
+  - check: mc-rag-format-antipattern
+  - check: cloze-volatile
+  - check: fe-wrong-tool-facts
+  - present: over-adapting-and-premature-commitment
+  - check: mc-over-adapting
+  - check: mc-premature-ft
+  - check: mc-distill-premature-antipattern
+  - apply: essay-wrong-tool

@@ -1,0 +1,13 @@
+id: lesson-validation
+title: "Argument validation & hallucinated calls"
+material: argument-validation.md
+segments:
+  - present: validate-before-you-execute
+  - check: mc-who-validates
+  - check: mc-hallucinated-tool
+  - check: mc-invalid-args
+  - check: cloze-validate
+  - check: fe-unknown-tool
+  - present: return-a-model-facing-error
+  - check: fe-invalid-args-feedback
+  - apply: essay-hallucinated-call

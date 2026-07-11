@@ -1,0 +1,41 @@
+- id: mc-cost-per-success-denominator
+  type: multiple_choice
+  tags: [economics]
+  difficulty: 2
+  prompt: "Cost per successful task divides total cost by:"
+  options:
+    - { text: "The number of successful tasks", correct: true }
+    - { text: "The total number of requests" }
+    - { text: "The total number of tokens" }
+    - { text: "The number of features" }
+  explanation: "Cost-per-success uses successes as the denominator — that's what makes it differ from cost-per-request."
+
+- id: mc-why-per-success-higher
+  type: multiple_choice
+  tags: [economics]
+  difficulty: 3
+  prompt: "Why is cost-per-successful-task usually HIGHER than cost-per-request?"
+  options:
+    - { text: "Failed and retried runs cost money but don't count as successes", correct: true }
+    - { text: "Successful tasks always use more tokens" }
+    - { text: "Requests are free but successes are billed" }
+    - { text: "It double-counts the same request" }
+  explanation: "You pay for failures and retries too, so dividing by successes (fewer than requests) raises the number — and reveals hidden waste."
+
+- id: essay-cost-attribution-system
+  type: essay
+  length: long
+  tags: [economics]
+  difficulty: 4
+  prompt: >-
+    Project: design a cost-attribution system for an LLM product. Cover how spend is tagged across
+    features, workflows, and tenants; how those tags propagate through multi-step and async pipelines;
+    how you compute cost-per-successful-task; and how you surface hidden costs (retries, abandonment,
+    over-retrieval, oversized context). Include a short test plan.
+  eval_skill: eval-cost-essay
+  reference_points:
+    - "Cost drivers: input/output tokens, model tier, retries/repairs, tool calls, caching."
+    - "Attribution dimensions (feature/workflow/tenant/journey) via tags propagated through the pipeline."
+    - "Unit economics: cost per successful task (not per request/model); margin per tenant."
+    - "Hidden costs: failed/abandoned runs, retries, over-retrieval, oversized context."
+    - "Test plan: rollup correctness on fixtures, tag-propagation coverage, cost-per-success math."

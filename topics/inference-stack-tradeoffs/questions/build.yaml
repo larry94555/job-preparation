@@ -1,0 +1,40 @@
+- id: mc-filter-then-rank
+  type: multiple_choice
+  tags: [slos]
+  difficulty: 2
+  prompt: "When selecting a stack config against SLOs, you should:"
+  options:
+    - { text: "First disqualify any config violating an SLO, then rank the survivors", correct: true }
+    - { text: "Rank all configs by a blended score and pick the top one" }
+    - { text: "Pick the highest-quality config regardless of latency and cost" }
+    - { text: "Pick the cheapest config regardless of quality" }
+  explanation: "Filter to feasible (SLO-meeting) configs first; only then rank them. Scoring without the filter can pick a config that violates a budget."
+
+- id: mc-slo-is-a-gate
+  type: multiple_choice
+  tags: [slos]
+  difficulty: 3
+  prompt: "Meeting an SLO is:"
+  options:
+    - { text: "A hard gate — a violation disqualifies the config regardless of its other metrics", correct: true }
+    - { text: "A soft preference you can average against quality" }
+    - { text: "Only relevant for latency, not cost or quality" }
+    - { text: "Optional if quality is high enough" }
+  explanation: "You don't average a latency violation away with high quality; an SLO is a hard floor/ceiling — meet it or be disqualified."
+
+- id: essay-architect-stack
+  type: essay
+  length: long
+  tags: [slos]
+  difficulty: 4
+  prompt: >-
+    Project: given SLOs for latency, cost, and quality, architect the full inference stack (routing,
+    caching, batching, quantization, decoding) and justify each layer's tradeoff against those SLOs.
+    Describe how you would score/compare candidate configurations. Include a short test plan.
+  eval_skill: eval-tradeoffs-essay
+  reference_points:
+    - "Anchor on SLOs; every layer's lever moves latency/cost/quality/reliability differently."
+    - "Per-layer choices: routing, caching, batching (throughput vs latency), quantization (cost vs quality), speculative decoding (latency)."
+    - "Selection = filter to SLO-feasible configs, then rank; reject violations rather than averaging them away."
+    - "Reliability as a first-class axis (fallbacks cost latency/cost)."
+    - "Test plan: score candidate stacks, confirm SLO-violating configs are rejected, measure jointly."

@@ -1,0 +1,57 @@
+# Literature/canon (WS1) + interview (WS2) — tags [canon]/[interview] are NOT in any section's
+# from_tags, so these don't enter the deterministic section-assessment pools.
+- id: mc-canon-cost-cascades
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Which work popularized using LLM cascades — try a cheap model first, escalate only when needed — to cut cost?"
+  options:
+    - { text: "FrugalGPT (Chen et al., 2023)", correct: true }
+    - { text: "Helicone" }
+    - { text: "PagedAttention" }
+    - { text: "RAGAS" }
+  explanation: "FrugalGPT popularized cost-cutting LLM cascades; Helicone is a cost-tracking tool, PagedAttention is KV-cache paging, and RAGAS is a RAG eval metric suite."
+
+- id: mc-interview-cost-granularity
+  type: multiple_choice
+  tags: [interview]
+  difficulty: 3
+  prompt: "In a cost-attribution interview, the strongest signal is a candidate who explains that:"
+  options:
+    - { text: "Per-model cost is the wrong granularity, and spend should be attributed across features, workflows, and tenants", correct: true }
+    - { text: "Cost per model is the right granularity for optimization" }
+    - { text: "Failed and abandoned runs can be ignored in the cost picture" }
+    - { text: "Over-retrieval is free because retrieved chunks are cheap" }
+  explanation: "The senior signal is treating per-model cost as too coarse and attributing across feature/workflow/tenant; per-model-only reporting, ignoring failed runs, and calling over-retrieval free are red flags."
+
+- id: essay-cost-literature
+  type: essay
+  length: long
+  tags: [canon]
+  difficulty: 4
+  prompt: >-
+    Cost attribution is a practice-led topic more than a paper-led one. Summarize the canon: the role
+    of FrugalGPT and LLM cascades, the FinOps-for-LLM discipline, and the tooling (Helicone, LiteLLM,
+    Langfuse). Explain what current SOTA attribution looks like and which open problems remain.
+  eval_skill: eval-cost-essay
+  reference_points:
+    - "FrugalGPT (Chen et al., 2023) popularized LLM cascades — try a cheap model first, escalate only when needed — to cut cost while holding quality."
+    - "The field is practice-led: FinOps-for-LLM discipline treats spend as something you tag, attribute, and optimize continuously rather than a fixed invoice line."
+    - "Tools: Helicone and Langfuse for per-request cost tracking/rollups, LiteLLM as a gateway that records per-call cost, plus custom aggregators."
+    - "SOTA is tagged attribution (feature/workflow/tenant) plus cost-per-successful-task unit economics; open problems are attributing shared/cached/async cost, predicting per-feature cost, and fair per-tenant billing."
+
+- id: essay-cost-interview
+  type: essay
+  length: long
+  tags: [interview]
+  difficulty: 4
+  prompt: >-
+    You're in a senior interview and asked to design cost attribution for an LLM product. Explain why
+    per-model cost is the wrong granularity, how you'd attribute spend across features and tenants, and
+    what unit metric you'd report. Show the depth that reads as senior and name the red flags you'd avoid.
+  eval_skill: eval-cost-essay
+  reference_points:
+    - "Per-model cost is too coarse: a per-model total aggregates every use of the model and hides which feature, workflow, or tenant is actually spending."
+    - "Attribute by attaching attribution tags at the entry point and propagating them through downstream (including retried and async) calls so cost rolls up by dimension."
+    - "Report cost per successful task so retries, abandoned runs, and over-retrieval show up against real outcomes instead of hiding in a per-call average."
+    - "Red flags: cost-per-model-only reporting, ignoring failed/abandoned runs, treating over-retrieval/oversized context as free; name FrugalGPT and Helicone/LiteLLM/Langfuse as prior art/tooling."

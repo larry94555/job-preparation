@@ -1,0 +1,14 @@
+id: lesson-deep-dive
+title: "Architecture & tradeoffs: reviewing a multi-tenant-isolation design"
+material: deep-dive.md
+segments:
+  - present: the-multi-tenant-isolation-design-space
+  - present: a-tradeoff-table-for-multi-tenant-isolation
+  - check: mc-review-mti-cache-key
+  - check: mc-review-mti-postfilter
+  - present: common-sota-and-antipattern
+  - check: mc-review-mti-rls-backstop
+  - present: scaling-performance-and-the-token-budget
+  - present: reviewing-a-multi-tenant-isolation-design
+  - apply: essay-mti-deep-dive
+  - apply: debug-mti-tenant-cache

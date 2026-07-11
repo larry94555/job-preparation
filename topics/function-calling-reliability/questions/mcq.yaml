@@ -1,0 +1,108 @@
+# Multiple choice
+- id: mc-tool-is-api
+  type: multiple_choice
+  tags: [contract]
+  difficulty: 2
+  prompt: "Treating a tool as an API means the tool definition is best understood as:"
+  options:
+    - { text: "A contract — a typed schema of arguments plus a defined behavior and errors", correct: true }
+    - { text: "A hint the model may interpret however it likes" }
+    - { text: "A block of prose the model reads for inspiration" }
+    - { text: "An internal model weight that cannot be inspected" }
+  explanation: "A tool is an API: its schema is a contract the caller must satisfy, with defined arguments, behavior, and error responses — not a suggestion."
+
+- id: mc-schema-purpose
+  type: multiple_choice
+  tags: [contract]
+  difficulty: 2
+  prompt: "Why give a tool a typed argument schema (e.g. JSON Schema / Zod / Pydantic) rather than accepting free-form arguments?"
+  options:
+    - { text: "So the harness can validate and coerce arguments before executing, and reject malformed ones", correct: true }
+    - { text: "So the model runs faster at inference time" }
+    - { text: "So the tool never needs error handling" }
+    - { text: "So the prompt can be shorter" }
+  explanation: "A typed schema lets the harness check arguments against the contract, coerce types, and reject anything malformed before any side effect happens."
+
+- id: mc-who-validates
+  type: multiple_choice
+  tags: [validation]
+  difficulty: 2
+  prompt: "Whose responsibility is it to validate the arguments in a tool call before executing?"
+  options:
+    - { text: "The harness — validate against the schema before dispatch", correct: true }
+    - { text: "The model — it should just get the arguments right" }
+    - { text: "Nobody — the tool will crash if they're wrong, which is fine" }
+    - { text: "The user, by reviewing every call" }
+  explanation: "Argument validation is harness-side: the model proposes arguments, but the dispatcher must check them against the contract before running the tool."
+
+- id: mc-hallucinated-tool
+  type: multiple_choice
+  tags: [validation]
+  difficulty: 3
+  prompt: "The model emits a call to a tool named `deleteAllUsers`, which is not in the registry. The harness should:"
+  options:
+    - { text: "Reject the call and return a structured error the model can read", correct: true }
+    - { text: "Guess the closest real tool and run that instead" }
+    - { text: "Execute it anyway since the model asked for it" }
+    - { text: "Silently drop it and continue with no feedback" }
+  explanation: "An unknown tool name is a hallucinated call: reject it and feed back a model-facing error so the loop can recover; never guess or execute blindly."
+
+- id: mc-invalid-args
+  type: multiple_choice
+  tags: [validation]
+  difficulty: 3
+  prompt: "A call passes a known tool but with a required field missing and a string where an integer is required. The best response is to:"
+  options:
+    - { text: "Fail validation and return the specific errors so the model can retry with corrected arguments", correct: true }
+    - { text: "Fill in default values silently and run the tool" }
+    - { text: "Coerce the string to any integer and proceed" }
+    - { text: "Throw an unhandled exception and end the session" }
+  explanation: "Report the specific validation failures back to the model. Silent defaults or blind coercion corrupt intent; a structured error lets the model self-correct."
+
+- id: mc-idempotent-def
+  type: multiple_choice
+  tags: [idempotency]
+  difficulty: 2
+  prompt: "An idempotent operation is one where:"
+  options:
+    - { text: "Performing it more than once has the same effect as performing it once", correct: true }
+    - { text: "It can only ever be performed a single time" }
+    - { text: "It never changes any state at all" }
+    - { text: "It always returns a random result" }
+  explanation: "Idempotency means repeated application yields the same end state as a single application — the property that makes retries safe."
+
+- id: mc-retry-danger
+  type: multiple_choice
+  tags: [idempotency]
+  difficulty: 3
+  prompt: "Why is retrying a non-idempotent mutating tool (e.g. `chargeCard`) dangerous?"
+  options:
+    - { text: "A retry after a timeout can apply the effect twice — double-charging", correct: true }
+    - { text: "Retries always fail on non-idempotent tools" }
+    - { text: "The model cannot see the result of a retry" }
+    - { text: "Retrying is only a problem for read-only tools" }
+  explanation: "If the first call actually succeeded but the response was lost, a naive retry repeats the side effect — hence the duplicate-charge class of bugs."
+
+- id: mc-idempotency-key
+  type: multiple_choice
+  tags: [idempotency]
+  difficulty: 4
+  prompt: "How does an idempotency key make a mutating tool safe to retry?"
+  options:
+    - { text: "The server records the key on first use and returns the stored result for any repeat of the same key", correct: true }
+    - { text: "It encrypts the arguments so they can't be replayed" }
+    - { text: "It makes the tool read-only" }
+    - { text: "It disables retries entirely" }
+  explanation: "A client-supplied key lets the server dedupe: the first request commits under the key; identical retries return the same recorded outcome instead of re-applying it."
+
+- id: mc-read-write-sep
+  type: multiple_choice
+  tags: [contract]
+  difficulty: 3
+  prompt: "Separating tools into read vs. write (side-effect) classes primarily lets the harness:"
+  options:
+    - { text: "Auto-execute safe reads while gating or confirming risky writes", correct: true }
+    - { text: "Remove the need to validate arguments" }
+    - { text: "Guarantee the model never hallucinates" }
+    - { text: "Make every tool idempotent automatically" }
+  explanation: "Classifying side effects lets reads run freely while writes go through confirmation gates or idempotency protection — permissioning by risk."

@@ -14,6 +14,12 @@ export const EvalSkillFrontmatter = z.object({
   /** Name of the Zod schema the engine enforces on the model's JSON output. */
   output_schema: z.string().min(1),
   model_hint: z.string().optional(),
+  /**
+   * Check names that act as scoring gates: if a gate check is false, the verdict
+   * is capped one level down (pass→borderline, borderline→fail). Defaults to any
+   * check whose name contains "correct".
+   */
+  gates: z.array(z.string()).optional(),
 });
 
 export type EvalSkillFrontmatter = z.infer<typeof EvalSkillFrontmatter>;

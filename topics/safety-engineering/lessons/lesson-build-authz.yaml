@@ -1,0 +1,10 @@
+id: lesson-build-authz
+title: "Build it: provenance-aware authorization"
+material: build-authz.md
+segments:
+  - present: the-confused-deputy
+  - check: mc-confused-deputy-build
+  - present: the-authorization-rule
+  - check: mc-authz-rule
+  - apply: code-authz
+  - apply: essay-defense-in-depth

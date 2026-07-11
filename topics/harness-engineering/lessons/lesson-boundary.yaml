@@ -1,0 +1,11 @@
+id: lesson-boundary
+title: "The model/harness boundary"
+material: harness-boundary.md
+segments:
+  - present: the-model-and-the-harness
+  - check: mc-responsibility
+  - present: what-the-harness-owns
+  - check: mc-prompt-cant-fix
+  - check: cloze-harness
+  - check: fe-invalid-json
+  - apply: essay-boundary-explain

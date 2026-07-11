@@ -1,0 +1,71 @@
+# Literature/canon (WS1) + interview (WS2) — tags [canon]/[interview] are NOT in any section's
+# from_tags, so these don't enter the deterministic section-assessment pools.
+- id: mc-canon-eval-judge-benchmark
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Which work popularized LLM-as-judge and the pairwise Chatbot Arena (Elo-ranked battles) alongside the MT-Bench benchmark?"
+  options:
+    - { text: "Zheng et al. (LMSYS) — MT-Bench & Chatbot Arena", correct: true }
+    - { text: "HELM (Liang et al., Stanford CRFM)" }
+    - { text: "RAGAS (Exploding Gradients)" }
+    - { text: "BEIR (Thakur et al.)" }
+  explanation: "Zheng et al. (LMSYS, 2023) introduced MT-Bench (LLM-judged) and Chatbot Arena (crowd-sourced pairwise Elo), and documented judge biases. HELM is the holistic Stanford CRFM benchmark; RAGAS and BEIR are retrieval-side."
+
+- id: mc-canon-eval-helm
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Which holistic benchmark, from Stanford CRFM, measures models across many scenarios and metrics (accuracy, robustness, calibration, bias, efficiency) rather than a single number?"
+  options:
+    - { text: "HELM (Liang et al., Stanford CRFM)", correct: true }
+    - { text: "MT-Bench (LMSYS)" }
+    - { text: "MTEB (Muennighoff et al.)" }
+    - { text: "TREC" }
+  explanation: "HELM — Holistic Evaluation of Language Models (Liang et al., Stanford CRFM, 2022) — argued for holistic, multi-metric measurement. MT-Bench is LMSYS's LLM-judged set; MTEB is an embedding benchmark; TREC is classic IR."
+
+- id: mc-interview-eval-signal
+  type: multiple_choice
+  tags: [interview]
+  difficulty: 3
+  prompt: "In an eval-methodology interview, the answer that most signals seniority about LLM-as-judge is:"
+  options:
+    - { text: "It's appropriate for open-ended quality but must be calibrated against human labels and checked for position/verbosity/self-preference bias", correct: true }
+    - { text: "It removes the need for any golden set or human labels" }
+    - { text: "It is always more reliable than human graders" }
+    - { text: "It needs no calibration if the judge model is strong" }
+  explanation: "A strong candidate knows when LLM-as-judge fits, insists on calibration against human labels, and names the biases (position, verbosity, self-preference). Claiming a judge needs no calibration is a red flag."
+
+- id: essay-eval-literature
+  type: essay
+  length: long
+  tags: [canon]
+  difficulty: 4
+  prompt: >-
+    Summarize the influential work on eval methodology — LLM-as-judge with MT-Bench and
+    Chatbot Arena (Zheng et al., LMSYS), and the holistic HELM benchmark (Liang et al., Stanford
+    CRFM). For each, say what it contributed, and name the practitioners and tools that shape the
+    discipline today.
+  eval_skill: eval-evals-essay
+  reference_points:
+    - "Zheng et al. (LMSYS, 2023): popularized LLM-as-judge; MT-Bench = curated multi-turn LLM-judged set; Chatbot Arena = crowd-sourced pairwise Elo battles; documented judge biases (position, verbosity, self-preference)."
+    - "HELM (Liang et al., Stanford CRFM, 2022): holistic evaluation across many scenarios and metrics (accuracy, robustness, calibration, bias, efficiency) rather than one leaderboard number."
+    - "Practitioners: Hamel Husain and Eugene Yan — look at your data, build domain golden sets, calibrate judges against human labels."
+    - "Tools: promptfoo, OpenAI Evals, LangSmith, Braintrust, Inspect. Open problems: trustworthy cheap judges, contamination, benchmark construct validity."
+
+- id: essay-eval-interview
+  type: essay
+  length: long
+  tags: [interview]
+  difficulty: 4
+  prompt: >-
+    You're in a senior AI-engineering interview being asked how you'd evaluate an LLM feature.
+    Explain your eval strategy: golden sets and regression gates, adversarial coverage, and when
+    (and how) you'd use a calibrated LLM-as-judge. Show the depth that reads as senior, and name the
+    canon.
+  eval_skill: eval-evals-essay
+  reference_points:
+    - "Lead with a curated golden set + a CI regression gate that blocks merges on a metric drop; add adversarial suites for known failure modes."
+    - "Use LLM-as-judge for open-ended quality, but calibrate against human labels and control for position/verbosity/self-preference bias."
+    - "Distinguish MT-Bench-style absolute scoring from Chatbot Arena pairwise/Elo ranking; name HELM as the holistic-benchmark reference."
+    - "Red flags to avoid: vibes-only, teaching to the test (overfitting), uncalibrated judge, stale golden sets. Name Zheng et al./LMSYS and Liang et al./Stanford CRFM as canon."

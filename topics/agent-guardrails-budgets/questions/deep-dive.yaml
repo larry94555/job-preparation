@@ -1,0 +1,92 @@
+# Deep-dive — architecture judgment (code-review MCs + an L4 essay)
+
+- id: mc-review-guard-success-only
+  type: multiple_choice
+  tags: [budgets, review]
+  difficulty: 4
+  prompt: >-
+    A design doc for an autonomous agent runner says: "The loop exits as soon as the task is solved,
+    and we cap it at 200 steps so it can't run forever." Reviewing it, what is the most important
+    remaining problem?
+  options:
+    - { text: "A success-only exit plus a step cap has no failure/no-progress exit and no cost or wall-clock bound, so a stuck run drains all 200 steps and can still hang or overspend within them", correct: true }
+    - { text: "200 steps is too many; a correct agent never needs more than 10", correct: false }
+    - { text: "Nothing — a step cap already bounds tokens, cost, and wall-clock time", correct: false }
+    - { text: "The problem is the model; a larger model would solve the task before step 200", correct: false }
+  explanation: >-
+    A step cap bounds iteration count but not time-per-step (a hung tool call) or dollars, and a
+    success-only exit means an unreachable goal drains the whole step budget before stopping. A
+    production design adds a failure/no-progress exit plus separate wall-clock and cost ceilings — the
+    step count is not a proxy for any of them.
+
+- id: mc-review-guard-onebudget
+  type: multiple_choice
+  tags: [budgets, review]
+  difficulty: 4
+  prompt: >-
+    A runner caps total tokens per task at 100k and nothing else, arguing "tokens are what we pay for,
+    so a token cap bounds everything." Rate this and pick the best fix.
+  options:
+    - { text: "Prototype-grade: a token cap alone lets one hung tool call stall indefinitely and lets a rate-limited tool be hammered under the token limit — add separate wall-clock and per-tool caps", correct: true }
+    - { text: "Production-ready: since tokens map to cost, a token cap is the only budget dimension that matters", correct: false }
+    - { text: "Fine as-is, but lower the cap to 10k tokens so runs are cheaper", correct: false }
+    - { text: "The real fix is raising the token cap so tasks never truncate", correct: false }
+  explanation: >-
+    Budget dimensions are not interchangeable. A single step can hang on a slow tool or network call
+    without spending tokens, so a wall-clock timeout is a separate guard; and a rate-limited or
+    expensive tool can be called repeatedly while total tokens stay under cap, so a per-tool count is
+    separate again. Each axis bounds a different failure mode.
+
+- id: mc-review-guard-denylist-log
+  type: multiple_choice
+  tags: [budgets, review]
+  difficulty: 4
+  prompt: >-
+    An agent can call tools that delete data and send external messages. The PR uses a deny-list of
+    "dangerous" tool names and logs every destructive action after it runs "for auditing." What is the
+    strongest objection?
+  options:
+    - { text: "A deny-list fails open on any risky action nobody thought to list, and after-the-fact logging does not prevent harm — use an allow-list (deny-by-default) plus a human-in-the-loop confirmation gate before irreversible actions execute", correct: true }
+    - { text: "Logging is unnecessary overhead; remove it and let the deny-list handle safety alone", correct: false }
+    - { text: "Deny-lists are fine, but the log should be written before the action instead of after", correct: false }
+    - { text: "The fix is a larger step budget so the agent has more attempts to avoid the dangerous tool", correct: false }
+  explanation: >-
+    A deny-list permits everything it does not name, so it fails open on the first unforeseen risky
+    action; an allow-list denies by default and fails safe. And logging happens after the harm is
+    done — an irreversible action needs a confirmation gate before it executes, not an audit entry
+    afterward.
+
+- id: essay-guard-deep-dive
+  type: essay
+  length: long
+  tags: [termination, review]
+  difficulty: 4
+  prompt: >-
+    You are the reviewer on a guardrails-and-budgets design for a long-horizon, autonomous agent that
+    can call tools which spend money and delete data. Write a design review: walk the levers (budget
+    dimensions, termination conditions, no-progress detection, action gating, failure containment),
+    give an explicit tradeoff for each, and state what would move the design from demo-ready to
+    production-ready. Call out at least two antipatterns and name the gate you would require before a
+    high-risk, irreversible action executes.
+  eval_skill: eval-guardrails-essay
+
+- id: debug-guard-bounded
+  type: code
+  language: typescript
+  tags: [budgets, review]
+  difficulty: 4
+  prompt: >-
+    DEBUGGING: the provided `runBounded(step, maxSteps)` is supposed to enforce a hard step budget —
+    call `step` at most `maxSteps` times and return the number of steps taken. There is exactly one bug
+    in the loop guard. Fix it (make the minimal change) so a step that never returns true stops at
+    exactly maxSteps, the returned count never exceeds maxSteps, and an early-terminating step still
+    stops early.
+  starter_file: exercises/bounded-run-debug/starter.ts
+  test_file: exercises/bounded-run-debug/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-guardrails-code
+  concept_checks:
+    must_use: ["strict `< maxSteps` bound so the loop stops exactly at the cap", "returned step count never exceeds maxSteps", "early-terminating step still stops early"]
+    avoid_antipattern: ["running one step past the budget with a `<=` guard", "treating the step cap as a soft limit that can be overshot"]

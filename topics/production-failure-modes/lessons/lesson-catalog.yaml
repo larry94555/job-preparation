@@ -1,0 +1,12 @@
+id: lesson-catalog
+title: "The failure catalog & the silent-failure danger"
+material: failure-catalog.md
+segments:
+  - present: the-failure-catalog
+  - check: mc-failure-catalog
+  - check: cloze-hallucinated
+  - check: fe-name-failure
+  - present: why-silent-failures-are-the-real-danger
+  - check: mc-silent-vs-loud
+  - check: cloze-silent
+  - apply: essay-silent-danger

@@ -1,0 +1,108 @@
+# Multiple choice
+- id: mc-injection-def
+  type: multiple_choice
+  tags: [injection]
+  difficulty: 2
+  prompt: "Prompt injection is best described as:"
+  options:
+    - { text: "Untrusted input smuggling instructions the model follows as if they were the developer's", correct: true }
+    - { text: "A model running out of context window" }
+    - { text: "The model refusing a legitimate request" }
+    - { text: "A slow tool call timing out" }
+  explanation: "Injection is an untrusted-content attack: crafted text is treated by the model as authoritative instructions, overriding the developer's intent."
+
+- id: mc-direct-vs-indirect
+  type: multiple_choice
+  tags: [injection]
+  difficulty: 3
+  prompt: "What distinguishes *indirect* prompt injection from *direct* injection?"
+  options:
+    - { text: "The malicious instructions arrive via content the model retrieves or a tool returns, not from the user typing them", correct: true }
+    - { text: "It only works on open-source models" }
+    - { text: "It requires access to the model weights" }
+    - { text: "It targets the tokenizer rather than the prompt" }
+  explanation: "Direct injection comes straight from the user; indirect injection is planted in a web page, document, or tool output that the system later reads into context."
+
+- id: mc-fencing
+  type: multiple_choice
+  tags: [boundary]
+  difficulty: 2
+  prompt: "Fencing untrusted content means:"
+  options:
+    - { text: "Clearly delimiting external text and instructing the model to treat it as data, never as instructions", correct: true }
+    - { text: "Encrypting the retrieved documents at rest" }
+    - { text: "Blocking all network egress from the agent" }
+    - { text: "Rate-limiting the number of tool calls" }
+  explanation: "Fencing marks a trust boundary: the untrusted span is quoted/delimited and the system prompt says content inside it is data to analyze, not commands to obey."
+
+- id: mc-trust-boundary
+  type: multiple_choice
+  tags: [boundary]
+  difficulty: 3
+  prompt: "A trust boundary in an LLM system is the point where:"
+  options:
+    - { text: "Data crosses from a less-trusted source into a more-trusted context and must be treated accordingly", correct: true }
+    - { text: "The model switches from one language to another" }
+    - { text: "The context window is exceeded" }
+    - { text: "Two users share the same API key" }
+  explanation: "Trust boundaries mark where provenance changes; anything crossing from untrusted (web, tool output, user upload) into the model's instruction context needs handling as untrusted."
+
+- id: mc-filtering-fails
+  type: multiple_choice
+  tags: [injection]
+  difficulty: 4
+  prompt: "Why is a single output/input filter an unreliable defense against prompt injection?"
+  options:
+    - { text: "Attacks can be rephrased, encoded, or split to evade any fixed pattern, so one filter is not robust — defense-in-depth is needed", correct: true }
+    - { text: "Filters are too slow to run in production" }
+    - { text: "Filters always block legitimate requests" }
+    - { text: "Filters require fine-tuning the model" }
+  explanation: "There is no robust general injection classifier; a determined attacker evades any single filter, so filtering must be one layer among several (fencing, least privilege, egress gating)."
+
+- id: mc-data-leakage
+  type: multiple_choice
+  tags: [leakage]
+  difficulty: 2
+  prompt: "Data leakage (exfiltration) in an agent most directly means:"
+  options:
+    - { text: "Sensitive data reaching a destination it should never go to, e.g. an attacker's URL via a tool call", correct: true }
+    - { text: "The model forgetting earlier turns of the conversation" }
+    - { text: "A prompt exceeding the token limit" }
+    - { text: "The model hallucinating a citation" }
+  explanation: "Exfiltration is a data-flow failure: secrets, credentials, or private context flow across a boundary to somewhere unauthorized — often driven by injected instructions."
+
+- id: mc-least-privilege
+  type: multiple_choice
+  tags: [permission]
+  difficulty: 2
+  prompt: "Applying least privilege to an agent's tools means:"
+  options:
+    - { text: "Granting each tool only the minimum access it needs, so a compromised turn has a small blast radius", correct: true }
+    - { text: "Giving the agent every tool up front to avoid re-prompting" }
+    - { text: "Running all tools with the developer's own credentials" }
+    - { text: "Disabling tool use entirely" }
+  explanation: "Least privilege caps what damage injected instructions can do: a read-only tool can't write, a scoped token can't reach unrelated systems."
+
+- id: mc-egress-confirm
+  type: multiple_choice
+  tags: [permission]
+  difficulty: 3
+  prompt: "Requiring a human confirmation before an agent sends data to an external address is a control on:"
+  options:
+    - { text: "Egress — the risky data-out step where exfiltration happens", correct: true }
+    - { text: "The tokenizer's vocabulary" }
+    - { text: "The model's temperature setting" }
+    - { text: "The retry budget for failed calls" }
+  explanation: "Gating egress (email, HTTP POST, external writes) with confirmation blocks the final exfiltration step even if injection succeeded upstream."
+
+- id: mc-confused-deputy
+  type: multiple_choice
+  tags: [permission]
+  difficulty: 4
+  prompt: "The confused-deputy risk in an agent is:"
+  options:
+    - { text: "A privileged agent being tricked by untrusted input into misusing its authority on the attacker's behalf", correct: true }
+    - { text: "Two agents disagreeing about the next step" }
+    - { text: "An agent that has no tools and cannot act" }
+    - { text: "A user impersonating an administrator at login" }
+  explanation: "The agent holds legitimate permissions; injected instructions make it exercise those permissions for the attacker — the deputy is 'confused' about whose instructions to serve."

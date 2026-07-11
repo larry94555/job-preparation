@@ -1,0 +1,109 @@
+# Frontier & operations drill — closes D2 (frontier open-problems drill) and D6 (ops metrics drill).
+
+- id: mc-frontier-fail-silent-early
+  type: multiple_choice
+  tags: [detection, frontier]
+  difficulty: 4
+  prompt: >-
+    CI eval gates and canaries already exist. Why is "catching silent regressions early" still named
+    an open problem rather than a solved one?
+  options:
+    - { text: "A quality regression can slip past both — a drift the held-out set doesn't probe and the canary window doesn't surface — and behind a clean 200 nothing pages you", correct: true }
+    - { text: "Eval gates and canaries are theoretical and no one has built them" }
+    - { text: "Silent regressions always raise an exception, so alerting already covers them" }
+    - { text: "The problem is solved; error-rate dashboards catch all silent regressions" }
+  explanation: >-
+    The gate blocks what it can measure on a held-out set and the canary catches what shows up in its
+    slice; a confident, well-formed, wrong answer that slips past both is still the hard case. The
+    frontier is detection that closes the gap between "shipped" and "noticed" for failures that never throw.
+
+- id: mc-frontier-fail-prediction
+  type: multiple_choice
+  tags: [detection, frontier]
+  difficulty: 4
+  prompt: >-
+    "End-to-end failure prediction" is a frontier direction beyond today's single-failure playbooks.
+    What does it actually mean?
+  options:
+    - { text: "Reading leading signals — rising fallback rate, creeping eval score — as a forecast to see a failure before it lands, not just reacting after the incident", correct: true }
+    - { text: "Predicting the exact HTTP status code a request will return" }
+    - { text: "Replaying production traffic to reproduce a past crash deterministically" }
+    - { text: "Raising the request timeout so slow answers still return" }
+  explanation: >-
+    Failure prediction is anticipating a failure from leading indicators before it lands, versus the
+    settled stack which is reactive and single-failure — it catches what it can measure, one mode at a
+    time, after it happens. It is a named open problem, not a shipped pattern.
+
+- id: mc-frontier-fail-multi-recovery
+  type: multiple_choice
+  tags: [mitigation, frontier]
+  difficulty: 4
+  prompt: >-
+    Why is "graceful multi-failure recovery" harder than the single-failure mitigations you already
+    know (repair malformed JSON, refuse on stale retrieval, halt on budget breach)?
+  options:
+    - { text: "Failures can stack and compound — stale retrieval feeding a malformed tool call feeding a budget breach — so guards can fight each other instead of degrading cleanly", correct: true }
+    - { text: "Multiple failures always cancel each other out, so no recovery is needed" }
+    - { text: "It only requires adding one more try/catch around the model call" }
+    - { text: "Single-failure mitigations are unsolved, so multi-failure is trivial by comparison" }
+  explanation: >-
+    Single-failure playbooks are mature; the frontier is compositional. Recovering cleanly when several
+    failures stack at once — rather than the guards conflicting or the system collapsing — is a named
+    open problem beyond one-mode-at-a-time mitigation.
+
+- id: mc-ops-fail-burn-rate
+  type: multiple_choice
+  tags: [prevention, ops]
+  difficulty: 4
+  prompt: >-
+    Applying SRE error budgets to an LLM system, what does a fast **error-budget burn rate** tell you
+    to do?
+  options:
+    - { text: "You're spending your allowed-failure tolerance too fast — freeze risky rollouts and stop shipping until the burn slows", correct: true }
+    - { text: "Increase the model temperature to add variety" }
+    - { text: "Ignore it, because burn rate only measures loud crashes" }
+    - { text: "Immediately roll out more changes to spend the remaining budget" }
+  explanation: >-
+    The SLO implies a spendable budget of allowed failures; burn rate is how fast you're consuming it.
+    A fast burn — a burst of breaches or fallbacks against the SLO — is the signal to freeze rollouts,
+    because the error budget governs how much risk a change may spend before the door closes.
+
+- id: mc-ops-fail-lead-time
+  type: multiple_choice
+  tags: [detection, ops]
+  difficulty: 4
+  prompt: >-
+    You track **silent-regression detection lead time** (time from a regression shipping to it being
+    noticed) and it is growing month over month. What does that indicate, and what related metric
+    moves with it?
+  options:
+    - { text: "Silent drift is outrunning your detection; it is the operational proxy for the hardest open problem and moves together with mean-time-to-detect (MTTD)", correct: true }
+    - { text: "The service is getting faster, since lead time is a latency metric" }
+    - { text: "Weights now take more memory on disk" }
+    - { text: "Nothing, because error rate is unchanged" }
+  explanation: >-
+    A growing lead time means silent regressions are slipping past detection — the number the frontier
+    tries to drive toward zero. It is the same fight as shrinking MTTD: for silent failures MTTD is the
+    metric that hurts, since a loud crash has near-zero MTTD but a hallucinated-citation regression can
+    run for days.
+
+- id: code-fail-loop-detector
+  type: code
+  language: typescript
+  tags: [mitigation, review]
+  difficulty: 3
+  prompt: >-
+    Implement `isStuck(actions, k)`, a standalone loop/no-progress guard. Return `true` if the LAST `k`
+    actions exist and are ALL identical to each other (the agent repeated itself `k` times running);
+    return `false` if there are fewer than `k` actions, or the last `k` are not all identical. Assume
+    k >= 1 (with k = 1, any non-empty history trips). Only the tail matters — a different action earlier
+    does not clear the guard.
+  starter_file: exercises/loop-detector/starter.ts
+  test_file: exercises/loop-detector/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-failuremodes-code
+  concept_checks:
+    must_use: ["inspect only the last k actions (the tail)", "return false when fewer than k actions exist", "trip only when all of the last k are identical"]
+    avoid_antipattern: ["scanning the whole history instead of the tail", "tripping when the last k differ", "off-by-one on the fewer-than-k boundary"]

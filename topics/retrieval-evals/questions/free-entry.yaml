@@ -1,0 +1,36 @@
+# Free entry (short answer)
+- id: fe-metric-first-hit
+  type: text_input
+  tags: [metrics]
+  difficulty: 2
+  prompt: "Which retrieval metric rewards putting the FIRST relevant result as high as possible? (abbreviation or name)"
+  answer:
+    regex: '^(mrr|mean reciprocal rank|reciprocal rank)$'
+    normalize: true
+
+- id: fe-low-recall-fix
+  type: text_input
+  tags: [metrics]
+  difficulty: 3
+  prompt: "recall@k is too low: the right passage rarely reaches the top-k. Name one lever that raises recall. (a few words)"
+  answer:
+    regex: '^(increase k|bigger k|larger k|raise k|hybrid( search)?|add sparse|better embeddings?|rerank(ing|er)?|better chunking|smaller chunks|query expansion|more candidates)$'
+    normalize: true
+
+- id: fe-grounding-term
+  type: text_input
+  tags: [grounding]
+  difficulty: 2
+  prompt: "What is the one-word property of an answer that only asserts claims the retrieved context supports? (grounded / ____)"
+  answer:
+    regex: '^(faithful|faithfulness|grounded|groundedness)$'
+    normalize: true
+
+- id: fe-attribution-problem
+  type: text_input
+  tags: [attribution]
+  difficulty: 2
+  prompt: "What do you call a citation whose source does not actually support (or does not exist for) the claim? (one or two words)"
+  answer:
+    regex: '^(fabricated( citation)?|hallucinated( citation)?|fake( citation)?|false citation|unsupported citation)$'
+    normalize: true

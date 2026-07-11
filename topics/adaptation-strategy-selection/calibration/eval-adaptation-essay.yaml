@@ -1,0 +1,44 @@
+# Calibration for eval-adaptation-essay (exemplars target essay-wrong-tool).
+skill: eval-adaptation-essay
+cases:
+  # PASS 1 — RAG for volatile facts. All four checks unmistakably true; gate (technically_correct) true.
+  - answer: >-
+      The prices change every day, so this is a freshness problem, and fine-tuning is the wrong tool:
+      it bakes facts into the weights, so every price update means another training run and stale
+      answers in between. Use RAG instead — index the current price list, retrieve the matching row at
+      inference time, and feed it into context so the model answers from live data and can cite the
+      source row for attribution. Fine-tuning and distillation change behavior, style, or model size,
+      not volatile facts; retrieval keeps answers current with no retraining and low added latency.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # PASS 2 — same verdict via the decision axes; in-context learning vs RAG vs fine-tune vs distill, all named.
+  - answer: >-
+      Pick the strategy by what actually needs to change. Here only the facts change, and they change
+      constantly, so freshness dominates: fine-tuning bakes today's prices into the weights and goes
+      stale immediately, which is the classic fine-tune-for-volatile-facts antipattern. In-context
+      learning by pasting the whole price list works but does not scale; RAG is the right fit — a
+      retrieval index over the current prices, pulled into the prompt per query, giving fresh answers
+      plus source attribution at inference-time cost only. Reserve fine-tuning (or LoRA) for stable
+      behavior and format changes, and distillation (teacher to student) for shrinking a settled model.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — wrong tool asserted with a false claim; gate false AND everything else false. 0/4 -> fail.
+  - answer: "Just fine-tune the model on the prices — a bigger trained model always knows more, so it will keep the numbers fresh and handle everything else too."
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # BORDERLINE — right shape and concrete, but a false technical claim trips only the gate.
+  # 3/4 = 0.75 (base pass) capped one level by failed gate (technically_correct) -> borderline.
+  - answer: >-
+      Prices change every day, so freshness is the issue and I would not bake them into the weights.
+      I would fine-tune a small LoRA adapter nightly on the current price list so the model retrieves
+      the exact row and cites it, which keeps the numbers fresh without a full retrain and adds no
+      inference latency. That way the volatile facts stay current inside the model itself.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: false, concrete: true }

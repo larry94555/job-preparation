@@ -1,0 +1,16 @@
+id: lesson-phases
+title: "Two phases, two bottlenecks"
+material: phases.md
+segments:
+  - present: the-two-phases-of-inference
+  - check: mc-two-phases
+  - check: mc-sequential-parallel
+  - check: cloze-prefill
+  - check: cloze-decode
+  - present: two-opposite-bottlenecks
+  - check: mc-prefill-bound
+  - check: mc-decode-bound
+  - check: cloze-bandwidth
+  - check: fe-prefill-bottleneck
+  - check: fe-decode-bottleneck
+  - apply: essay-two-phases

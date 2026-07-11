@@ -1,0 +1,108 @@
+# Multiple choice
+- id: mc-two-phases
+  type: multiple_choice
+  tags: [phases]
+  difficulty: 2
+  prompt: "LLM inference is split into two phases. Which pair names them correctly?"
+  options:
+    - { text: "Prefill (process the whole prompt) then decode (generate output tokens one at a time)", correct: true }
+    - { text: "Encode (embed the prompt) then rerank (reorder candidates)" }
+    - { text: "Training (learn weights) then inference (serve requests)" }
+    - { text: "Retrieval (fetch context) then generation (answer)" }
+  explanation: "Prefill processes all prompt tokens in one forward pass to build the KV cache; decode then generates output tokens autoregressively, one per step."
+
+- id: mc-prefill-bound
+  type: multiple_choice
+  tags: [phases]
+  difficulty: 3
+  prompt: "The prefill phase is primarily:"
+  options:
+    - { text: "Compute-bound — it runs a large parallel matrix multiply over all prompt tokens at once", correct: true }
+    - { text: "Memory-bandwidth-bound — it is limited by streaming weights for each token" }
+    - { text: "Network-bound — it is limited by fetching documents" }
+    - { text: "Disk-bound — it is limited by reading the model from storage each step" }
+  explanation: "Prefill processes every prompt token in parallel, so it does a lot of arithmetic per byte of weights moved — it saturates the GPU's compute (FLOPs) and is compute-bound."
+
+- id: mc-decode-bound
+  type: multiple_choice
+  tags: [phases]
+  difficulty: 3
+  prompt: "The decode phase is primarily:"
+  options:
+    - { text: "Memory-bandwidth-bound — each step reads the full weights (and KV cache) to produce just one token", correct: true }
+    - { text: "Compute-bound — it does a huge parallel matmul each step" }
+    - { text: "Bound by the number of prompt tokens, not the model size" }
+    - { text: "Free of any hardware bottleneck once prefill is done" }
+  explanation: "Decode generates one token per forward pass, so it moves the entire weight matrix (and grows the KV cache) for very little arithmetic — it is limited by memory bandwidth, not compute."
+
+- id: mc-sequential-parallel
+  type: multiple_choice
+  tags: [phases]
+  difficulty: 2
+  prompt: "Why is decode sequential while prefill is parallel?"
+  options:
+    - { text: "Each output token depends on the previous one, so decode cannot process future tokens ahead of time; prefill already has all prompt tokens available", correct: true }
+    - { text: "Prefill runs on CPU and decode runs on GPU" }
+    - { text: "Decode uses a smaller model than prefill" }
+    - { text: "Prefill has to wait for the network while decode does not" }
+  explanation: "Autoregressive generation feeds each produced token back in, so token N+1 cannot start until token N exists. The prompt, by contrast, is fully known up front and can be processed in one parallel pass."
+
+- id: mc-ttft-phase
+  type: multiple_choice
+  tags: [metrics]
+  difficulty: 2
+  prompt: "Time to first token (TTFT) is dominated by which phase?"
+  options:
+    - { text: "Prefill — TTFT is essentially how long it takes to process the prompt and emit the first token", correct: true }
+    - { text: "Decode — TTFT measures the gap between later tokens" }
+    - { text: "Neither; TTFT depends only on output length" }
+    - { text: "Both equally, regardless of prompt length" }
+  explanation: "The first token cannot appear until the prompt has been prefilled, so TTFT tracks prefill and scales with prompt length."
+
+- id: mc-tpot-phase
+  type: multiple_choice
+  tags: [metrics]
+  difficulty: 2
+  prompt: "Time per output token (TPOT), also called inter-token latency, is set by which phase?"
+  options:
+    - { text: "Decode — TPOT is the time between successive generated tokens", correct: true }
+    - { text: "Prefill — TPOT is how long the prompt takes to process" }
+    - { text: "Retrieval — TPOT depends on the vector index" }
+    - { text: "Tokenization — TPOT is the cost of splitting text into tokens" }
+  explanation: "TPOT (a.k.a. ITL) measures the steady-state gap between output tokens, which is exactly the per-step cost of the sequential decode phase."
+
+- id: mc-batching-decode
+  type: multiple_choice
+  tags: [optimization]
+  difficulty: 4
+  prompt: "Why does batching improve throughput in the decode phase but give little benefit in prefill?"
+  options:
+    - { text: "Decode is memory-bandwidth-bound, so batching amortizes the one weight read across many requests; prefill is already compute-bound, so more work just saturates the GPU further", correct: true }
+    - { text: "Batching only works when the prompts are identical, which is common in decode" }
+    - { text: "Prefill cannot be batched at all because it is sequential" }
+    - { text: "Decode uses less memory, leaving room for larger batches only there" }
+  explanation: "In decode each step re-reads the weights for one token, so batching many requests reuses that single weight read and lifts throughput. Prefill already does heavy parallel compute per request, so it is compute-saturated and gains little from batching."
+
+- id: mc-longer-prompt
+  type: multiple_choice
+  tags: [metrics]
+  difficulty: 3
+  prompt: "A user doubles their prompt length but asks for the same short answer. Which metric moves most?"
+  options:
+    - { text: "TTFT rises (more prompt to prefill); TPOT is roughly unchanged", correct: true }
+    - { text: "TPOT rises sharply; TTFT is unchanged" }
+    - { text: "Both fall because the model has more context" }
+    - { text: "Neither changes; latency depends only on the model size" }
+  explanation: "A longer prompt means more tokens to prefill, so TTFT grows; the per-output-token decode cost (TPOT) is largely independent of prompt length."
+
+- id: mc-chunked-prefill
+  type: multiple_choice
+  tags: [optimization]
+  difficulty: 4
+  prompt: "Chunked prefill (as in Sarathi) helps mainly by:"
+  options:
+    - { text: "Splitting a long prompt into smaller pieces so prefill can be interleaved with ongoing decode, keeping decode latency (TPOT) low", correct: true }
+    - { text: "Skipping most of the prompt to save compute" }
+    - { text: "Running decode before prefill to hide latency" }
+    - { text: "Compressing the weights so they fit in cache" }
+  explanation: "A big single prefill step stalls all in-flight decode requests. Chunked prefill breaks the prompt into chunks that share GPU steps with decode, smoothing inter-token latency for other users."

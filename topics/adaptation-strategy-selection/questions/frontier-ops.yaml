@@ -1,0 +1,113 @@
+# Frontier & operations drill — closes D2 (continual/online adaptation frontier) and D6 (ops metrics drill).
+
+- id: mc-frontier-adapt-continual
+  type: multiple_choice
+  tags: [decision, frontier]
+  difficulty: 4
+  prompt: >-
+    Continual/online adaptation is an open problem because the classic levers assume a static snapshot.
+    Which drift is *already* cheap to handle, and which one is the harder open case?
+  options:
+    - { text: "Fact drift is cheap — RAG updates the index, not the weights; behavior drift is the harder case, since re-fine-tuning is a data+training loop and a distilled student is frozen at distill time", correct: true }
+    - { text: "Behavior drift is cheap because prompts update instantly; fact drift is impossible to fix without retraining the base model" }
+    - { text: "Both are equally cheap because any drift can be fixed by adding more few-shot examples" }
+    - { text: "Neither can be handled without a full monolithic retraining run every cycle" }
+  explanation: >-
+    RAG already handles fact drift cheaply — you update the external index independently of the weights,
+    which is why it is the default lever for volatile knowledge. Behavior drift has no equally cheap fix:
+    re-fine-tuning is a data-collection-plus-training loop and a distilled student is frozen at distill
+    time. Adapting the weight-based levers incrementally as the world moves is the open frontier work.
+
+- id: mc-frontier-adapt-hybrid-cost
+  type: multiple_choice
+  tags: [decision, frontier]
+  difficulty: 4
+  prompt: >-
+    The SOTA adaptation design is a principled RAG + PEFT + distillation pipeline rather than one lever.
+    What is the central cost of combining methods that the frontier framing warns about?
+  options:
+    - { text: "Every added lever multiplies the eval surface — RAG + PEFT gives two independent places quality can silently regress (a retrieval miss vs. a behavior regression), each needing its own eval", correct: true }
+    - { text: "Combining levers is mathematically unstable and the model diverges during serving" }
+    - { text: "A hybrid can only ever use one lever at inference time, so the others are wasted" }
+    - { text: "Stacking levers always increases per-token latency more than any quality gain justifies" }
+  explanation: >-
+    A hybrid buys knowledge *and* behavior *and* cheap serving, but each layer adds a place quality can
+    regress. RAG + PEFT means a retrieval miss and a behavior regression are separate failures that look
+    different and need different evals. The scaling cost of the SOTA design is operational — more
+    silent-regression surface to guard — not just compute.
+
+- id: mc-frontier-adapt-when-finetune
+  type: multiple_choice
+  tags: [decision, frontier]
+  difficulty: 4
+  prompt: >-
+    "When to fine-tune vs. keep using prompt/RAG" is framed as an open decision problem rather than a
+    solved formula. What makes the boundary a *judgment* call rather than automatic?
+  options:
+    - { text: "It depends on scenario requirements — is the gap knowledge or behavior, how volatile, does it need attribution, what volume — and both errors are costly: fine-tune too early and you freeze effort before the target is validated; too late and you pay a token tax for behavior an adapter would make durable", correct: true }
+    - { text: "You should always fine-tune, because weights are strictly better than prompting once volume is nonzero" }
+    - { text: "You should never fine-tune while RAG is available, because retrieval subsumes behavior changes" }
+    - { text: "The boundary is a fixed token-count threshold published for each model" }
+  explanation: >-
+    The escalation ladder (prompt → RAG → fine-tune → distill) is guidance, but the crossover point is
+    set by requirements — knowledge vs. behavior, volatility, attribution, volume — not a formula. Both
+    directions of error are expensive, so the frontier is making the call defensible from the scenario
+    rather than by habit.
+
+- id: mc-ops-adapt-per-strategy
+  type: multiple_choice
+  tags: [decision, ops]
+  difficulty: 4
+  prompt: >-
+    End-to-end quality on your RAG + PEFT assistant drops. You track metrics per lever rather than one
+    aggregate number. Why is the per-strategy split the operationally correct instrument?
+  options:
+    - { text: "A single end-to-end number hides which lever moved; tracking retrieval quality apart from generation/behavior quality tells you whether it was a retrieval miss or a behavior regression — two failures that need different fixes", correct: true }
+    - { text: "Per-strategy metrics are only about cost; quality can only ever be measured end-to-end" }
+    - { text: "The aggregate number is always sufficient because both levers fail together" }
+    - { text: "Splitting metrics per lever is impossible once the levers are combined in one pipeline" }
+  explanation: >-
+    A hybrid has more than one lever, so an aggregate score conflates them. Tracking retrieval quality
+    (did the right documents come back?) separately from behavior/generation quality — and RAG's
+    per-query token cost/latency separately from the fine-tuned model's short-prompt serving cost — is
+    what localizes the regression, because a retrieval miss and a behavior regression need different fixes.
+
+- id: mc-ops-adapt-staleness-cadence
+  type: multiple_choice
+  tags: [decision, ops]
+  difficulty: 4
+  prompt: >-
+    You operate a fine-tuned assistant and a RAG index. Which set of signals should drive the decision
+    to *retrain* the fine-tune, versus keeping it as-is?
+  options:
+    - { text: "Measured drift — a rising stale-fact/behavior-regression rate on the eval set and growing distance between production traffic and the training distribution; retrain on measured drift, not the calendar, and keep the index fresh via TTL rather than baking volatile facts into weights", correct: true }
+    - { text: "A fixed weekly schedule, because regular retraining is always the safe default regardless of drift" }
+    - { text: "Total GPU hours consumed since the last training run" }
+    - { text: "The size of the model checkpoint on disk" }
+  explanation: >-
+    Weight-frozen knowledge is perishable — it was correct at train time and drifts silently after. The
+    triggers for retraining are measured: rising behavior regression on the eval set, growing
+    train-vs-production distribution distance, and stale-fact rate. Fixed-schedule retraining wastes
+    compute when nothing drifted and lags when something did; volatile facts belong in a fresh (TTL'd)
+    retrieval index, not in the weights.
+
+- id: code-adapt-hybrid-gate
+  type: code
+  language: typescript
+  tags: [decision, review]
+  difficulty: 4
+  prompt: >-
+    Implement `selectAdapters(candidates, gates)` for a RAG-vs-PEFT hybrid pipeline with per-lever eval
+    gates. Each candidate lever carries a measured `qualityGain`, `costPerReq`, and `latencyMs`. Return
+    the `lever` names of every candidate that clears **all** gates — `qualityGain >= gates.minQuality`
+    **and** `costPerReq <= gates.maxCost` **and** `latencyMs <= gates.maxLatency` — sorted by
+    `qualityGain` descending. Return an empty array if none pass.
+  starter_file: exercises/adapter-gate/starter.ts
+  test_file: exercises/adapter-gate/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-adaptation-code
+  concept_checks:
+    must_use: ["gate on all three thresholds (quality, cost, latency)", "use >= for minQuality and <= for maxCost/maxLatency", "sort passing levers by qualityGain descending"]
+    avoid_antipattern: ["passing a lever that fails any single gate", "using strict > / < that drops boundary values", "returning candidates unsorted or sorted ascending"]

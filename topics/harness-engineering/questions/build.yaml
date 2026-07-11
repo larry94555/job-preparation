@@ -1,0 +1,40 @@
+- id: mc-duplicate-guard-build
+  type: multiple_choice
+  tags: [loop]
+  difficulty: 2
+  prompt: "A duplicate-call guard stops the loop when:"
+  options:
+    - { text: "The model proposes the same action twice in a row (it's stuck repeating)", correct: true }
+    - { text: "The first tool call succeeds" }
+    - { text: "The output is longer than the input" }
+    - { text: "Two different tools are used" }
+  explanation: "Repeating the same action means no progress; the guard breaks the cycle instead of looping."
+
+- id: mc-harness-owns-stop
+  type: multiple_choice
+  tags: [loop]
+  difficulty: 2
+  prompt: "Who decides when the agent loop stops?"
+  options:
+    - { text: "The harness — via budgets and guards, not the model", correct: true }
+    - { text: "The model, by choosing to stop reasoning" }
+    - { text: "Nobody — it runs until it errors" }
+    - { text: "The user, after the run finishes" }
+  explanation: "Termination (complete/budget/duplicate) is harness code; the model proposes actions but can't be trusted to stop itself."
+
+- id: essay-harness-design
+  type: essay
+  length: long
+  tags: [loop]
+  difficulty: 4
+  prompt: >-
+    Project: design the harness for a code-editing agent. Cover the think-act-observe loop, the tool
+    set with argument validation, budgets and duplicate/no-progress guards, verification (run tests /
+    diff after edits), and recovery from failures. Include a short test plan.
+  eval_skill: eval-harness-essay
+  reference_points:
+    - "Loop: think→act→observe with a step budget and duplicate/no-progress guards; report the stop reason."
+    - "Tools: typed contracts + argument validation before executing."
+    - "Verification: run tests / git diff after edits — don't trust, check."
+    - "Recovery: turn failures into next actions; idempotent mutations; escalate when stuck."
+    - "Test plan: trigger complete/budget/duplicate stops and a failed-verification path."

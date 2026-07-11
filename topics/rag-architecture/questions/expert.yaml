@@ -1,0 +1,59 @@
+# Literature/canon (WS1) + interview (WS2) — tags [canon]/[interview] are NOT in any section's
+# from_tags, so these don't enter the deterministic section-assessment pools.
+- id: mc-canon-rag-late-interaction
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Late-interaction retrieval, which keeps per-token embeddings and scores them with a fine-grained interaction, was introduced by which system?"
+  options:
+    - { text: "ColBERT (Khattab & Zaharia)", correct: true }
+    - { text: "RAG (Lewis et al.)" }
+    - { text: "Reciprocal Rank Fusion (Cormack et al.)" }
+    - { text: "FAISS" }
+  explanation: "ColBERT introduced late interaction (per-token embeddings + MaxSim). RAG coined retrieval-augmented generation, RRF is a rank-fusion method, and FAISS is a vector index."
+
+- id: mc-interview-rag-hybrid
+  type: multiple_choice
+  tags: [interview]
+  difficulty: 3
+  prompt: "In a RAG interview, the strongest justification for hybrid (dense + BM25) retrieval over dense-only is:"
+  options:
+    - { text: "Dense embeddings miss exact-keyword and rare-term matches that BM25 catches, so fusing the two covers both", correct: true }
+    - { text: "Hybrid retrieval removes the need for any reranker" }
+    - { text: "Dense retrieval is always slower than BM25" }
+    - { text: "BM25 changes the generator's behavior" }
+  explanation: "Dense-only pipelines miss exact-keyword/rare-term matches; combining dense and sparse (typically fused with RRF) covers both failure modes. A reranker is still valuable, and retrieval does not change model behavior."
+
+- id: essay-rag-literature
+  type: essay
+  length: long
+  tags: [canon]
+  difficulty: 4
+  prompt: >-
+    Summarize the influential work behind modern RAG architecture — RAG (Lewis et al.), ColBERT's
+    late interaction, Reciprocal Rank Fusion (Cormack et al.), and Anthropic's Contextual Retrieval.
+    For each, say what it contributed, and name the tools that implement these ideas in a pipeline today.
+  eval_skill: eval-rag-essay
+  reference_points:
+    - "RAG (Lewis et al., FAIR, 2020): coined retrieval-augmented generation — parametric generator conditioned on retrieved non-parametric passages."
+    - "ColBERT (Khattab & Zaharia, 2020): late interaction — per-token embeddings scored with a fine-grained (MaxSim) interaction, between single-vector dense and full cross-encoder."
+    - "Reciprocal Rank Fusion (Cormack et al., 2009): rank fusion via sum of 1/(k+rank); no score calibration needed; default for merging dense + BM25."
+    - "Contextual Retrieval (Anthropic, 2024): prepend an LLM-generated context blurb to each chunk before indexing to reduce retrieval misses."
+    - "Tools: FAISS, pgvector, Elastic/OpenSearch, Qdrant/Weaviate; rerankers bge / Cohere Rerank."
+
+- id: essay-rag-interview
+  type: essay
+  length: long
+  tags: [interview]
+  difficulty: 4
+  prompt: >-
+    You're in a senior RAG-architecture interview. Design a retrieval pipeline end to end: how you'd
+    chunk, retrieve, fuse, and rerank, and justify each choice. Call out the anti-patterns you're
+    avoiding and the depth that reads as senior.
+  eval_skill: eval-rag-essay
+  reference_points:
+    - "Chunking: justify size/overlap and prefer structure-aware splitting over fixed-size naive chunking."
+    - "Retrieval: hybrid dense + BM25 (sparse), because dense misses exact-keyword/rare-term matches; dense-only is a red flag."
+    - "Fusion: combine the ranked lists with Reciprocal Rank Fusion (no score calibration needed)."
+    - "Rerank: cross-encoder reranker over the top-k for precision after cheap high-recall first-stage retrieval."
+    - "Name prior art (RAG/Lewis et al., ColBERT, RRF/Cormack, Anthropic Contextual Retrieval); avoid dense-only, no reranker, stale index."

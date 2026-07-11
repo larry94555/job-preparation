@@ -1,0 +1,10 @@
+id: lesson-expert-context
+title: "Expert context: papers, frontier & interview"
+material: expert-context.md
+segments:
+  - present: papers-people-and-the-frontier
+  - check: mc-canon-rag-late-interaction
+  - present: interviewing-on-rag-architecture
+  - check: mc-interview-rag-hybrid
+  - apply: essay-rag-literature
+  - apply: essay-rag-interview

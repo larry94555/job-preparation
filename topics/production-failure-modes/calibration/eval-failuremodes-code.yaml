@@ -1,0 +1,50 @@
+skill: eval-failuremodes-code
+cases:
+  # PASS: all four checks true. score 4/4 = 1.0 >= 0.75, gate bounded_attempts true -> pass.
+  - answer: >-
+      tests_passed=true. bounded_attempts: the retry loop runs at most maxAttempts times, no unbounded
+      loop. all_guards_pass: an output is accepted only when guards.every(g=>g(v)) holds, every guard
+      must pass. returns_fallback: when the budget is exhausted it returns {ok:false,value:fallback}
+      and never throws. reports_outcome: the ok flag and attempts count report whether the real output
+      or the fallback was used. signals.must_use=[maxAttempts cap, every guard, fallback with ok:false];
+      avoid=[].
+    expect:
+      verdict: pass
+      checks: { bounded_attempts: true, all_guards_pass: true, returns_fallback: true, reports_outcome: true }
+
+  # PASS: three checks true incl. the gate. score 3/4 = 0.75 >= 0.75, gate true -> pass.
+  - answer: >-
+      tests_passed=true. bounded_attempts: loops for i in 0..maxAttempts-1 so it is bounded, no unbounded
+      loop. all_guards_pass: accepts an output only when guards.every(...) passes every guard.
+      returns_fallback: on exhaustion returns {ok:false,value:fallback} without throwing. reports_outcome
+      is not satisfied: it returns only the bare value and never surfaces the ok flag or attempts count,
+      so the caller cannot tell whether the fallback was used. signals.must_use=[maxAttempts cap, every
+      guard, fallback with ok:false]; avoid=[silent fallback with no ok flag].
+    expect:
+      verdict: pass
+      checks: { bounded_attempts: true, all_guards_pass: true, returns_fallback: true, reports_outcome: false }
+
+  # FAIL: gate false plus one more false. score 2/4 = 0.5 -> borderline base, gate false caps down -> fail.
+  - answer: >-
+      tests_passed=true. bounded_attempts is NOT satisfied: it uses while(true) calling produce() until a
+      guard passes, with no maxAttempts cap, an unbounded retry loop. all_guards_pass holds: it accepts an
+      output only when guards.every(...) passes every guard. returns_fallback is NOT satisfied: there is no
+      fallback branch, so when nothing validates it loops forever rather than returning {ok:false}.
+      reports_outcome holds: on success it returns the ok flag and attempts count. signals.must_use=[];
+      avoid=[unbounded while(true) loop, no fallback branch].
+    expect:
+      verdict: fail
+      checks: { bounded_attempts: false, all_guards_pass: true, returns_fallback: false, reports_outcome: true }
+
+  # BORDERLINE: only the gate false. score 3/4 = 0.75 -> pass base, gate false caps down -> borderline.
+  - answer: >-
+      tests_passed=true. bounded_attempts is NOT satisfied: the loop is capped by a wall-clock deadline
+      instead of maxAttempts, so a fast produce() can spin without a hard attempt bound, effectively
+      unbounded. all_guards_pass holds: it accepts an output only when guards.every(...) passes every
+      guard. returns_fallback holds: on exhaustion it returns {ok:false,value:fallback} and never throws.
+      reports_outcome holds: it returns the ok flag and attempts count so the caller knows the fallback was
+      used. signals.must_use=[every guard, fallback with ok:false, ok/attempts reporting]; avoid=[time-only
+      bound with no attempt cap].
+    expect:
+      verdict: borderline
+      checks: { bounded_attempts: false, all_guards_pass: true, returns_fallback: true, reports_outcome: true }

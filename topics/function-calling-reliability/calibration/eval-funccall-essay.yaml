@@ -1,0 +1,59 @@
+# Calibration for eval-funccall-essay (exemplars target essay-idempotency-retry).
+skill: eval-funccall-essay
+cases:
+  # PASS — answers the question, hits every reference point, all claims correct,
+  # names concrete mechanisms. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      The duplicate-effect risk is that after chargeCard runs, the response can be lost in transit, so
+      a naive retry re-applies the effect and charges the customer twice. Make the write idempotent: the
+      client sends a stable idempotency key with the call, the server records the first outcome under
+      that key, and any identical retry returns the stored result instead of charging again — so
+      repeating the call reaches the same end state as doing it once, which is exactly what makes the
+      retry safe. Read/write separation is what lets this work cleanly: pure reads like getBalance can
+      retry freely because they have no side effect, while writes like chargeCard get an idempotency key
+      plus a confirmation gate so the model cannot fire them blindly.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # PASS — a second strong, correct, specific answer using different wording.
+  # 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      A mutating tool such as chargeCard is unsafe to retry naively because a dropped acknowledgement
+      leaves the client unsure whether the charge landed; retrying then double-charges. The fix is to
+      make the operation idempotent — repeating it must leave the same end state as a single
+      application. In practice the caller attaches a unique idempotency key, the server deduplicates on
+      that key by persisting the result of the first successful charge and replaying it for any request
+      carrying the same key, so a retry short-circuits instead of re-charging. Because reads are
+      side-effect-free they can be retried without any key, so separating read tools from write tools
+      lets the harness retry safe calls automatically and reserve keys, dedupe, and confirmation gates
+      for the writes.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — off-topic and technically wrong: claims retrying is always safe and the
+  # model validates itself. Fails the gate (technically_correct) plus every other
+  # check. 0/4 = 0.0 → fail; gate false caps fail→fail.
+  - answer: >-
+      Retries are always safe because the model validates its own arguments and chargeCard is
+      idempotent by default, so you can just retry the call in a loop until it succeeds and no key or
+      server-side dedupe is ever needed. If you are worried about performance, add more retries and a
+      bigger timeout.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # BORDERLINE — on-topic, hits the key points, but contains a wrong claim (says the
+  # network guarantees exactly-once so no key is needed), so it misses ONLY the gate.
+  # 3/4 = 0.75 → base pass; gate technically_correct=false caps pass→borderline.
+  - answer: >-
+      The risk with chargeCard is a duplicate effect: a lost response makes a retry charge the customer
+      twice, and you avoid that by making the write idempotent so repeating it lands the same end state
+      as running it once. You separate reads, which retry freely, from writes, which need extra care.
+      The key detail is that modern networks and TCP guarantee exactly-once delivery, so the server does
+      not actually need an idempotency key or any dedupe — the transport already prevents the retry from
+      reaching the server twice.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: false, concrete: true }

@@ -1,0 +1,18 @@
+sections:
+  - id: sec-memory
+    title: "Memory & sizing: what the KV cache costs"
+    lessons: [lesson-kv-memory, lesson-expert-context, lesson-frontier-ops]
+    assessment:
+      title: "Section 1 — KV memory & sizing"
+      from_tags: [memory, sizing]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-paging-eviction
+    title: "Paging & eviction: fitting many sequences"
+    lessons: [lesson-paging, lesson-eviction, lesson-build-paged-allocator, lesson-deep-dive]
+    assessment:
+      title: "Section 2 — Paging & eviction"
+      from_tags: [paging, eviction]
+      count: 5
+      pass_threshold: 0.8

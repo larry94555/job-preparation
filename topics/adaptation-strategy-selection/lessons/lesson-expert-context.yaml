@@ -1,0 +1,10 @@
+id: lesson-expert-context
+title: "Expert context: papers, frontier & interview"
+material: expert-context.md
+segments:
+  - present: papers-people-and-the-frontier
+  - check: mc-canon-adapt-lora
+  - present: interviewing-on-adaptation-strategy-selection
+  - check: mc-interview-adapt-wrong-tool
+  - apply: essay-adapt-literature
+  - apply: essay-adapt-interview

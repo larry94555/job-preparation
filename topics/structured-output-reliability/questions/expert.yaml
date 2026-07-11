@@ -1,0 +1,84 @@
+# Literature/canon (WS1) + interview (WS2) — tags [canon]/[interview] are NOT in any section's
+# from_tags, so these don't enter the deterministic section-assessment pools.
+- id: mc-canon-so-constrained-decoding
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Grammar / finite-state constrained decoding — masking the token distribution so generation cannot leave the supplied grammar — was popularized by which library?"
+  options:
+    - { text: "Outlines (Willard & Louf)", correct: true }
+    - { text: "Zod" }
+    - { text: "ColBERT" }
+    - { text: "vLLM" }
+  explanation: "Outlines (Willard & Louf, 2023) popularized grammar/finite-state constrained decoding. Zod is a schema/validation library, ColBERT is retrieval, and vLLM is a serving system."
+
+- id: mc-canon-so-instructor
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 2
+  prompt: "Which is a schema-first structured-output library that returns validated objects rather than hand-parsed strings?"
+  options:
+    - { text: "Instructor (Jason Liu)", correct: true }
+    - { text: "FlashAttention" }
+    - { text: "Orca" }
+    - { text: "RAGAS" }
+  explanation: "Instructor (Jason Liu), alongside jsonformer, made schema-first extraction ergonomic. FlashAttention is an attention kernel, Orca is continuous batching, and RAGAS is a RAG eval library."
+
+- id: mc-interview-so-signal
+  type: multiple_choice
+  tags: [interview]
+  difficulty: 3
+  prompt: "In a structured-output interview, the answer that most reads as senior when asked about constrained decoding is:"
+  options:
+    - { text: "You still parse-then-validate against an explicit schema, because constrained decoding guarantees shape, not semantic validity", correct: true }
+    - { text: "Constrained decoding removes the need to validate at all" }
+    - { text: "You can scrape the JSON out with a regular expression once decoding is constrained" }
+    - { text: "The model usually returns valid JSON, so validation is optional" }
+  explanation: "Constrained decoding gives syntax and shape, not meaning; senior engineers validate on top of it. Skipping validation, regex-scraping, and 'usually valid' are all red flags."
+
+- id: mc-interview-so-redflag
+  type: multiple_choice
+  tags: [interview]
+  difficulty: 2
+  prompt: "Which candidate answer is a red flag in a structured-output-reliability interview?"
+  options:
+    - { text: "'The model usually returns valid JSON, so I don't design for failure'", correct: true }
+    - { text: "'I parse then validate against an explicit schema'" }
+    - { text: "'I use a bounded repair loop before falling back'" }
+    - { text: "'I treat the schema as the contract for validity'" }
+  explanation: "'Usually returns valid JSON' ignores the nonzero tail failure rate that becomes frequent at scale — a classic red flag, alongside regex-scraping JSON and unbounded repair."
+
+- id: essay-so-literature
+  type: essay
+  length: long
+  tags: [canon]
+  difficulty: 4
+  prompt: >-
+    Summarize the influential work on structured-output reliability — grammar/finite-state
+    constrained decoding (Outlines), the structured-output libraries (Instructor, jsonformer), and
+    provider "JSON mode" / structured outputs. For each, say what it contributed, and name the tools
+    used for the validation half of the stack and the current SOTA and open problems.
+  eval_skill: eval-structured-output-essay
+  reference_points:
+    - "Outlines (Willard & Louf, 2023): grammar/finite-state constrained decoding that masks tokens so output cannot leave the grammar; guarantees shape."
+    - "Instructor (Jason Liu) and jsonformer: schema-first libraries returning validated objects instead of hand-parsed strings."
+    - "Provider 'JSON mode'/structured outputs enforce a schema at the API boundary; llama.cpp GBNF brings grammars to local inference."
+    - "Validation layer: Zod / Pydantic. SOTA stack: constrained decoding + schema validation + bounded repair + fallback chains."
+    - "Open problems: semantic (not just syntactic) validity; quality effects of aggressive constraints."
+
+- id: essay-so-interview
+  type: essay
+  length: long
+  tags: [interview]
+  difficulty: 4
+  prompt: >-
+    You're in a senior interview on structured-output reliability. Explain why you validate even when
+    you use constrained decoding, and design a full reliability pipeline. Show the depth (ordering,
+    budgets, and the canon you'd name) that reads as senior, and call out the red flags you'd avoid.
+  eval_skill: eval-structured-output-essay
+  reference_points:
+    - "Constrained decoding guarantees syntax/shape, not semantic validity; still parse-then-validate against an explicit schema (the contract)."
+    - "Pipeline: prevention (constrained decoding / provider JSON mode) → validate → bounded repair (feed error back, capped attempts) → simpler schema → deterministic default → human."
+    - "Budgets/limits on attempts, latency, and cost; order steps by cost."
+    - "Name the canon: Outlines for constrained decoding; Instructor / Pydantic / Zod for schema and validation."
+    - "Red flags to avoid: regex-scraping JSON; 'the model usually returns valid JSON'; unbounded repair."

@@ -1,0 +1,80 @@
+# Deep-dive — architecture judgment (code-review MCs + an L4 essay)
+
+- id: mc-review-harness-prompt-fix
+  type: multiple_choice
+  tags: [boundary, review]
+  difficulty: 4
+  prompt: >-
+    A design doc says: "Our agent occasionally emits invalid tool-call JSON and sometimes double-
+    applies a write. We'll fix both by tightening the system prompt with clearer instructions and
+    more examples." Reviewing it, what is the most important problem?
+  options:
+    - { text: "These are structural harness failures — invalid args need harness-side validation/repair and double-writes need idempotency; a better prompt cannot reliably supply either", correct: true }
+    - { text: "The prompt is simply too short; adding more examples will eliminate both failures" }
+    - { text: "Invalid JSON means the wrong model was chosen; swap models and both issues disappear" }
+    - { text: "Nothing — tightening the prompt is the correct first and only fix for tool-call reliability" }
+  explanation: >-
+    Reliability lives in the harness, not the prompt. Invalid tool arguments are fixed by harness-side
+    validation and repair; double-applied writes are fixed by idempotency. Both are structural — they
+    have to be built in the code around the model, not reworded into the prompt, which is why
+    prompting alone plateaus on exactly these failures.
+
+- id: mc-review-harness-unbounded-loop
+  type: multiple_choice
+  tags: [boundary, review]
+  difficulty: 4
+  prompt: >-
+    A PR adds an agent loop: "while not done: think → call tool → feed result back." There is no step,
+    tool, token, or time cap, and `done` is set only when the model says it's finished. Rate this
+    design and pick the best fix.
+  options:
+    - { text: "Prototype-grade: it's an unbounded loop that can spin forever or run away the bill; add step/tool/token/time budgets and explicit termination plus duplicate-call and no-progress guards", correct: true }
+    - { text: "Production-ready: letting the model decide when it's done is the most flexible termination condition" }
+    - { text: "Fine as-is, but rename `done` to `finished` so the loop reads more clearly" }
+    - { text: "The real problem is the tool call; remove tools and let the model answer in one shot" }
+  explanation: >-
+    An unbounded loop whose only exit is the model declaring victory is the classic antipattern — it
+    can loop forever, oscillate, or run away the cost. The harness must bound it with step/tool/token/
+    time budgets and explicit termination, and guard it with duplicate-call and no-progress detection.
+    Renaming a variable or removing tools addresses neither the boundlessness nor the loop control.
+
+- id: mc-review-harness-noverify
+  type: multiple_choice
+  tags: [boundary, review]
+  difficulty: 4
+  prompt: >-
+    A PR description reads: "After the agent edits a file, we ask the model 'are you sure this is
+    correct?' and apply the change if it answers yes. Shipping it." What is the strongest objection?
+  options:
+    - { text: "Self-review is unreliable — the same reasoning that made the error tends to miss it; the harness must verify deterministically (run tests / read the diff / run the code), not trust a self-check", correct: true }
+    - { text: "The prompt should ask 'are you certain?' instead of 'are you sure?' for a more reliable answer" }
+    - { text: "Verification is unnecessary overhead; a capable model's edits can be trusted as-is" }
+    - { text: "The only fix is to add a second model to review the first model's answer" }
+  explanation: >-
+    A model's claim that it fixed something is not a fact, and self-verification is unreliable because
+    the reasoning that produced the error tends to miss it on review. Verification is a harness
+    responsibility done with deterministic checks — run the tests, read the git diff, run the code —
+    not a prompt asking the model whether it's sure. Rewording the self-check or trusting the edit
+    both leave the same gap.
+
+- id: essay-harness-deep-dive
+  type: essay
+  length: long
+  tags: [boundary, review]
+  difficulty: 4
+  prompt: >-
+    You are the reviewer on a harness design for a multi-step, autonomous code-editing agent that runs
+    with write access to a real repository. Write a design review: walk the levers (boundary
+    placement, loop control, verification, tool contract and permissions, orchestration shape), give
+    an explicit tradeoff for each, and state what would move the design from demo-ready to
+    production-ready. Call out at least two antipatterns and name the deterministic verification you
+    would require before accepting a mutating action.
+  eval_skill: eval-harness-essay
+  reference_points:
+    - "Boundary: reliability lives in the harness, not the prompt — tools, validation, retries, verification are structural, not proddable."
+    - "Loop control: think→act→observe with step/tool/token/time budgets, duplicate-call and no-progress guards, explicit termination."
+    - "Verification: deterministic checks (run tests / read git diff / run the code) after mutating actions; don't trust, check."
+    - "Tool contract & permissions: typed contracts, argument validation, read/write separation, confirmation for destructive actions, idempotent mutations."
+    - "Orchestration: single bounded ReAct loop or plan-then-execute; reach for multiple agents only for genuine decomposition or isolation."
+    - "Antipatterns: 'just improve the prompt' for structural failures; trusting model output unverified; unbounded loops with no ceiling."
+    - "Demo→production: add typed idempotent tools, an explicit failure/recovery policy (retry/re-plan/escalate), and justified orchestration."

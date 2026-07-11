@@ -1,0 +1,129 @@
+# Frontier & operations drill — closes D2 (frontier scheduling drill) and D6 (ops metrics drill).
+
+- id: mc-frontier-batch-goodput-knee
+  type: multiple_choice
+  tags: [scheduling, frontier]
+  difficulty: 4
+  prompt: >-
+    Continuous batching + paged attention is now table stakes, so the frontier moved past maximizing raw
+    tokens/sec. What does an SLO-aware / goodput scheduler do differently?
+  options:
+    - { text: "Sizes the running batch to the goodput knee — where extra batch stops improving work-completed-within-SLO — instead of a fixed cap, treating the latency SLO as an admission and batch-sizing signal", correct: true }
+    - { text: "Removes paged attention so the KV cache stays contiguous" }
+    - { text: "Maximizes tokens/sec unconditionally, since goodput always tracks throughput" }
+    - { text: "Falls back to static batching to make latency predictable" }
+  explanation: >-
+    Past the goodput knee, extra raw throughput comes entirely from requests missing their SLO — the
+    throughput number keeps climbing while goodput falls. A goodput-aware scheduler uses the SLO as the
+    signal that sizes the batch, rather than a fixed cap or blind tokens/sec.
+
+- id: mc-frontier-batch-fairness-isolation
+  type: multiple_choice
+  tags: [scheduling, frontier]
+  difficulty: 4
+  prompt: >-
+    The canon names two still-open problems on the throughput frontier beyond raw scheduling. Which pair
+    are they?
+  options:
+    - { text: "SLO-fair scheduling (meeting latency SLOs fairly across requests via per-request deadlines) and multi-tenant throughput isolation (one tenant's burst not starving another's goodput)", correct: true }
+    - { text: "Choosing a tokenizer and choosing a sampling temperature" }
+    - { text: "Whether to use fp16 or fp32 weights, and which GPU vendor to buy" }
+    - { text: "Static vs. dynamic batching — the field has not yet decided" }
+  explanation: >-
+    SLO-fair scheduling reasons about per-request deadlines rather than one aggregate throughput number;
+    multi-tenant isolation keeps a shared replica from letting one tenant's load starve another's
+    goodput. Both are genuinely unsolved. Static-vs-continuous is long settled (continuous wins).
+
+- id: mc-frontier-batch-chunked-prefill
+  type: multiple_choice
+  tags: [batching, frontier]
+  difficulty: 4
+  prompt: >-
+    Inside one running batch, a wave of long prefills spikes decode TPOT. What is the frontier direction
+    that targets this prefill/decode interaction?
+  options:
+    - { text: "Interference-aware scheduling that splits a long prefill into chunks so it interleaves with decode instead of stalling it", correct: true }
+    - { text: "Running prefill at fp32 to make it finish faster" }
+    - { text: "Disabling continuous batching whenever a prefill arrives" }
+    - { text: "Padding every decode step to the prefill length" }
+  explanation: >-
+    Prefill is compute-heavy and bursty; decode is latency-sensitive and steady. Chunking a long prefill
+    lets it interleave with decode rather than pinning the batch, protecting the decode tail that goodput
+    measures. The frontier is interference-aware scheduling, not blanket throughput claims.
+
+- id: mc-ops-batch-goodput-vs-throughput
+  type: multiple_choice
+  tags: [throughput, ops]
+  difficulty: 4
+  prompt: >-
+    Your raw throughput (tokens/sec) chart is climbing steadily, but the endpoint is under an explicit
+    latency SLO. Which reading actually tells you whether the server is healthy?
+  options:
+    - { text: "Goodput — work completed within its latency SLO; if throughput rises while goodput flattens or falls, the extra work is all requests missing their SLO", correct: true }
+    - { text: "Raw throughput alone, since more tokens/sec is always better" }
+    - { text: "Model weight size on disk" }
+    - { text: "The number of CUDA kernels compiled at startup" }
+  explanation: >-
+    Under an SLO, goodput is the objective and raw throughput is a trap: past the goodput knee, the extra
+    tokens/sec come entirely from SLO-missing requests. Read the two together — a rising throughput chart
+    with flat or falling goodput is a warning, not a win.
+
+- id: mc-ops-batch-queue-preemption
+  type: multiple_choice
+  tags: [throughput, ops]
+  difficulty: 4
+  prompt: >-
+    You want the earliest operational signals that your running batch is over-subscribed for the offered
+    load — before users see errors. Which metrics lead?
+  options:
+    - { text: "Queue depth / wait time and preemption rate — rising queue depth climbs TTFT and rising preemption spikes tail latency, both ahead of outright failures", correct: true }
+    - { text: "Total GPU power draw and fan RPM" }
+    - { text: "Batch occupancy alone, which is only a capacity-planning gauge" }
+    - { text: "The tokenizer vocabulary size" }
+  explanation: >-
+    Queue depth/wait time and preemption rate are leading indicators: waiting requests raise TTFT and
+    preempted/deferred sequences spike tail latency before capacity is formally exceeded. Occupancy and
+    the goodput-vs-throughput gap are for capacity planning, not early alerting.
+
+- id: code-batch-goodput
+  type: code
+  language: typescript
+  tags: [throughput, review]
+  difficulty: 4
+  prompt: >-
+    Implement `batchSize(waiting, maxBatch, targetLatencyMs, msPerItem)` for an SLO-aware (goodput)
+    scheduler: pick the **largest** batch that still meets the latency SLO. A batch of `n` items spends
+    `n * msPerItem` ms, so the SLO caps the batch at `floor(targetLatencyMs / msPerItem)` items. Return
+    `min(waiting, maxBatch, floor(targetLatencyMs / msPerItem))`, clamped to never go negative (min 0).
+    This sizes the running batch to the goodput knee instead of a fixed cap.
+  starter_file: exercises/goodput-batch/starter.ts
+  test_file: exercises/goodput-batch/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-batching-code
+  concept_checks:
+    must_use: ["cap the batch by the latency SLO (floor(targetLatencyMs / msPerItem))", "take the min of waiting, maxBatch, and the SLO cap", "clamp the result to be non-negative (min 0)"]
+    avoid_antipattern: ["ignoring the latency SLO and returning min(waiting, maxBatch)", "returning a negative batch size when the SLO is tighter than one item", "using a fixed batch cap instead of sizing to the knee"]
+
+- id: code-batch-block-table
+  type: code
+  language: typescript
+  tags: [paged-attention, review]
+  difficulty: 4
+  prompt: >-
+    Implement `blockTable(seqLens, blockSize)` for paged KV memory: build the per-sequence block table
+    from a single running counter starting at 0. Sequence `i` needs `Math.ceil(seqLens[i] / blockSize)`
+    blocks; give it the next that-many **consecutive** block ids, then advance the counter so blocks are
+    globally unique and non-overlapping across sequences. Return one array of block ids per sequence, in
+    order. A length-0 sequence needs 0 blocks → `[]` (and consumes no id). E.g.
+    `blockTable([3, 5], 2)` → `[[0, 1], [2, 3, 4]]`.
+  starter_file: exercises/block-table/starter.ts
+  test_file: exercises/block-table/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-batching-code
+  concept_checks:
+    must_use: ["allocate ceil(seqLens[i] / blockSize) blocks per sequence", "draw ids from one running counter starting at 0 so blocks are globally unique", "give each sequence consecutive ids and preserve input order"]
+    avoid_antipattern: ["restarting block ids per sequence (overlapping ids across sequences)", "allocating a block for a length-0 sequence", "leaving gaps in the global id sequence"]

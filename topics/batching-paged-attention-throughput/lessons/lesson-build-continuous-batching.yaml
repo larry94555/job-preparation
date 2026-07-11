@@ -1,0 +1,10 @@
+id: lesson-build-continuous-batching
+title: "Build it: a continuous-batching scheduler"
+material: build-continuous-batching.md
+segments:
+  - present: static-vs-continuous-batching
+  - check: mc-head-of-line-static
+  - present: simulating-it
+  - check: mc-continuous-admits
+  - apply: code-continuous-batching
+  - apply: essay-scheduler-design

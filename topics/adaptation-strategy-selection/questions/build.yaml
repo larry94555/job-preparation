@@ -1,0 +1,40 @@
+- id: mc-fresh-facts-rag
+  type: multiple_choice
+  tags: [decision]
+  difficulty: 2
+  prompt: "For a task that needs current, changing facts with citations, the right approach is:"
+  options:
+    - { text: "RAG", correct: true }
+    - { text: "Fine-tuning" }
+    - { text: "Distillation" }
+    - { text: "In-context learning only" }
+  explanation: "Fresh, attributable facts come from retrieval at query time — RAG. Frozen fine-tuned weights would go stale."
+
+- id: mc-finetune-wrong-tool
+  type: multiple_choice
+  tags: [decision]
+  difficulty: 3
+  prompt: "Fine-tuning a model to keep up with frequently-changing facts is:"
+  options:
+    - { text: "The wrong tool — fine-tuned weights go stale; use RAG for volatile facts", correct: true }
+    - { text: "The best tool, since fine-tuning always improves accuracy" }
+    - { text: "Equivalent to RAG in every way" }
+    - { text: "Only wrong if the model is small" }
+  explanation: "Fine-tuning bakes facts into frozen weights; volatile facts need retrieval (RAG). Fine-tuning is for behavior/format, not changing knowledge."
+
+- id: essay-adaptation-recommendation
+  type: essay
+  length: long
+  tags: [decision]
+  difficulty: 4
+  prompt: >-
+    Project: a domain assistant needs fresh facts, a strict output format, and low latency. Recommend a
+    combination of adaptation approaches and — just as important — defend what you would NOT use, on the
+    freshness / behavior / cost / attribution axes. Include an evaluation plan.
+  eval_skill: eval-adaptation-essay
+  reference_points:
+    - "Fresh facts + attribution → RAG (not fine-tuning, which goes stale)."
+    - "Strict format/behavior → fine-tuning (or strong prompting), layered on top of RAG."
+    - "Low latency on the fixed behavior → distillation of the tuned model."
+    - "What NOT to use: fine-tuning for volatile facts; RAG to fix formatting; premature distillation."
+    - "Evaluation plan: measure freshness/staleness, format compliance, latency, and answer quality."

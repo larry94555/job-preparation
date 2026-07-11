@@ -1,0 +1,10 @@
+id: lesson-expert-context
+title: "Expert context: papers, frontier & interview"
+material: expert-context.md
+segments:
+  - present: papers-people-and-the-frontier
+  - check: mc-canon-quant-awq-idea
+  - present: interviewing-on-quantization-formats-quality
+  - check: mc-interview-quant-perplexity
+  - apply: essay-quant-literature
+  - apply: essay-quant-interview

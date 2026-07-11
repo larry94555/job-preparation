@@ -1,0 +1,11 @@
+id: lesson-build-metrics
+title: "Build it: computing the metrics"
+material: build-metrics.md
+segments:
+  - present: recall-precision-and-mrr-precisely
+  - check: mc-recall-denominator
+  - check: mc-mrr-definition
+  - present: edge-cases-and-pitfalls
+  - check: fe-zero-relevant-guard
+  - apply: code-retrieval-metrics
+  - apply: essay-retrieval-eval-harness

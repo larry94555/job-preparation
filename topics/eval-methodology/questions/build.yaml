@@ -1,0 +1,41 @@
+- id: mc-pass-rate-definition
+  type: multiple_choice
+  tags: [regression]
+  difficulty: 1
+  prompt: "A golden-set pass rate is:"
+  options:
+    - { text: "The fraction of cases whose output matches the expected answer", correct: true }
+    - { text: "The average latency across the cases" }
+    - { text: "The number of cases in the set" }
+    - { text: "The judge model's confidence" }
+  explanation: "Pass rate = passing cases / total cases — the single number a regression gate watches."
+
+- id: mc-gate-fails-when
+  type: multiple_choice
+  tags: [regression]
+  difficulty: 2
+  prompt: "A regression gate fails the build when:"
+  options:
+    - { text: "The pass rate falls below the threshold", correct: true }
+    - { text: "Any single case takes too long" }
+    - { text: "The golden set has more than N cases" }
+    - { text: "The judge disagrees with itself once" }
+  explanation: "The gate compares pass rate to a threshold; below it → fail the build (and report which cases failed)."
+
+- id: essay-eval-program
+  type: essay
+  length: long
+  tags: [regression]
+  difficulty: 4
+  prompt: >-
+    Project: design an eval program for a production LLM feature. Cover the golden set (curation,
+    coverage, maintenance), a regression gate in CI, adversarial/edge-case tests, LLM-as-judge (with
+    its biases and calibration against humans), and when human evals are needed. Specify when each
+    runs and include a short test plan.
+  eval_skill: eval-evals-essay
+  reference_points:
+    - "Golden set: curated labeled cases; coverage and drift/maintenance."
+    - "Regression gate: pass-rate threshold in CI that fails the build on regression."
+    - "Adversarial tests: injection/jailbreak/edge cases, gated alongside the golden set."
+    - "LLM-as-judge: rubric decomposition; position/verbosity/self bias; calibrate against humans."
+    - "Test plan: fixtures + thresholds + canary; human eval for the cases automation can't judge."

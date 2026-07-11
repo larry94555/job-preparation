@@ -1,0 +1,13 @@
+id: lesson-attribution
+title: "Attribution dimensions & tag propagation"
+material: attribution.md
+segments:
+  - present: attribution-dimensions
+  - check: mc-attribution-dimensions
+  - check: fe-attribution-dimension
+  - check: cloze-attribution-tag
+  - present: tag-propagation
+  - check: mc-tag-propagation
+  - check: mc-lost-tag
+  - check: cloze-propagation
+  - apply: essay-per-model-wrong

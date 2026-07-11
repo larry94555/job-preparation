@@ -1,0 +1,10 @@
+id: lesson-expert-context
+title: "Expert context: papers, frontier & interview"
+material: expert-context.md
+segments:
+  - present: papers-people-and-the-frontier
+  - check: mc-canon-cache-semantic-origin
+  - present: interviewing-on-prompt-vs-semantic-caching
+  - check: mc-interview-cache-tell-apart
+  - apply: essay-cache-literature
+  - apply: essay-cache-interview

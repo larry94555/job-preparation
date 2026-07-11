@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: jobprep
+      POSTGRES_PASSWORD: jobprep
+      POSTGRES_DB: jobprep
+    ports:
+      - "5432:5432"
+    volumes:
+      - jobprep_pgdata:/var/lib/postgresql/data
+
+volumes:
+  jobprep_pgdata:

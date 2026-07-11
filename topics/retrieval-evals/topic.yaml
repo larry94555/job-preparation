@@ -1,0 +1,8 @@
+id: retrieval-evals
+title: "Retrieval Evals"
+description: "Measuring whether retrieval actually helps: did you fetch the right context (recall@k, precision@k, MRR), did the answer use it (grounding), and are the citations real (attribution) — the quality lives in isolating retrieval failures from generation failures."
+pass_threshold: 0.8
+tag_weights:
+  metrics: 1.2
+  grounding: 1.2
+  attribution: 1.0

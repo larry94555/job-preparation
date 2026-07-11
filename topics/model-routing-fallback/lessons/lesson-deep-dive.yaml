@@ -1,0 +1,14 @@
+id: lesson-deep-dive
+title: "Architecture & tradeoffs: reviewing a model-routing design"
+material: deep-dive.md
+segments:
+  - present: the-model-routing-fallback-design-space
+  - present: a-tradeoff-table-for-model-routing-fallback
+  - check: mc-review-route-silent-fallback
+  - check: mc-review-route-no-breaker
+  - present: common-sota-and-antipattern
+  - check: mc-review-route-cascade-gate
+  - present: scaling-performance-and-the-token-budget
+  - present: reviewing-a-model-routing-fallback-design
+  - apply: essay-route-deep-dive
+  - apply: debug-route-breaker

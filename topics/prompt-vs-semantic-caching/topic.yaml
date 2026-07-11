@@ -1,0 +1,8 @@
+id: prompt-vs-semantic-caching
+title: "Prompt vs. Semantic Caching"
+description: "Two different caches with two different hit conditions: prefix (prompt) caching reuses computed attention for identical leading tokens, while semantic caching returns a stored response for a similar request — trading compute savings against correctness and staleness risk."
+pass_threshold: 0.8
+tag_weights:
+  prefix: 1.2
+  semantic: 1.2
+  tradeoffs: 1.0

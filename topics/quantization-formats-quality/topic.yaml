@@ -1,0 +1,8 @@
+id: quantization-formats-quality
+title: "Quantization: Formats & Quality"
+description: "Quantization shrinks a model's footprint by storing weights and activations in fewer bits — the engineering lives in the numeric formats, the method (GPTQ, AWQ, SmoothQuant), and knowing when low-bit precision quietly wrecks task quality."
+pass_threshold: 0.8
+tag_weights:
+  formats: 1.2
+  methods: 1.2
+  quality: 1.2

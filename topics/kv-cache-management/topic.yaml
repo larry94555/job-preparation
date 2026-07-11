@@ -1,0 +1,9 @@
+id: kv-cache-management
+title: "KV Cache Management"
+description: "Per-request key/value tensors dominate serving memory and cap concurrency. Sizing the KV cache, paging it to fight fragmentation, and evicting under pressure — recompute vs. swap — is what lets a server hold many sequences without OOM."
+pass_threshold: 0.8
+tag_weights:
+  memory: 1.2
+  sizing: 1.2
+  paging: 1.0
+  eviction: 1.0

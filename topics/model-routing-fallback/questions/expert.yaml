@@ -1,0 +1,57 @@
+# Literature/canon (WS1) + interview (WS2) — tags [canon]/[interview] are NOT in any section's
+# from_tags, so these don't enter the deterministic section-assessment pools.
+- id: mc-canon-route-cascades
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Which work popularized LLM cascades — trying a cheap model first and only escalating to a stronger model when a quality check fails — to cut cost?"
+  options:
+    - { text: "FrugalGPT (Chen et al., Stanford)", correct: true }
+    - { text: "RouteLLM (LMSYS)" }
+    - { text: "LiteLLM" }
+    - { text: "OpenRouter" }
+  explanation: "FrugalGPT popularized cost-cutting LLM cascades (cheap-first, escalate on a failed quality check). RouteLLM is learned request routing; LiteLLM and OpenRouter are gateway/proxy tools, not the cascade idea."
+
+- id: mc-interview-route-signal
+  type: multiple_choice
+  tags: [interview]
+  difficulty: 3
+  prompt: "In a model-routing interview, which candidate behavior is the clearest red flag?"
+  options:
+    - { text: "Silently substituting a weaker model with no signal to users or logs", correct: true }
+    - { text: "Escalating hard requests from a cheap model to a stronger one" }
+    - { text: "Adding a circuit breaker to drop a failing provider" }
+    - { text: "Using exponential backoff with jitter on retries" }
+  explanation: "Silent model substitution (and, with it, no circuit breaker and retry storms) is the classic red flag; cascading, circuit breakers, and backoff-with-jitter are the good practices interviewers want to hear."
+
+- id: essay-route-literature
+  type: essay
+  length: long
+  tags: [canon]
+  difficulty: 4
+  prompt: >-
+    Summarize the influential work on model routing and fallback — FrugalGPT's cost-cutting cascades
+    and RouteLLM's learned request routing. For each, say what it contributed, and name the
+    gateway/proxy tools used to run a mix of local and frontier models in production today.
+  eval_skill: eval-routing-essay
+  reference_points:
+    - "FrugalGPT (Chen et al., Stanford, 2023): popularized LLM cascades — try a cheap model first, escalate to a stronger model only when a quality check on the cheap answer fails; spend compute on hard requests."
+    - "RouteLLM (LMSYS, 2024): learned request routing — a trained router predicts per request whether a cheap model suffices or a strong model is needed, routing by predicted difficulty."
+    - "Gateway/proxy tools: LiteLLM, OpenRouter, gateway proxies — front a mix of local + frontier models behind one interface."
+    - "SOTA: difficulty-based routing + fallback cascade + circuit breakers + hedged requests."
+
+- id: essay-route-interview
+  type: essay
+  length: long
+  tags: [interview]
+  difficulty: 4
+  prompt: >-
+    You're in a senior interview and asked to design model routing and fallback for a production LLM
+    service. Explain how you'd route requests, build a fallback chain, keep a failing provider from
+    taking the system down, and handle degraded mode honestly. Show the depth that reads as senior.
+  eval_skill: eval-routing-essay
+  reference_points:
+    - "Route by difficulty: cheap→strong cascade with an explicit quality gate / difficulty signal deciding when to escalate (cite FrugalGPT cascades, RouteLLM learned routing)."
+    - "Resilience: circuit breakers to drop a failing provider, exponential backoff with jitter, optionally hedged requests for tail latency."
+    - "Honest degraded-mode UX when falling back to a weaker model — surface it, don't substitute silently."
+    - "Red flags to avoid: silent model substitution, no circuit breaker, retry storms."

@@ -1,0 +1,94 @@
+# WS3 deep-dive — architecture judgment (code-review MCs + an L4 essay)
+
+- id: mc-review-cost-permodel
+  type: multiple_choice
+  tags: [economics, review]
+  difficulty: 4
+  prompt: >-
+    A cost-attribution doc says: "We have a dashboard of spend per model, so when leadership asks us to
+    cut cost we can just pick the cheapest model." Reviewing it, what is the most important problem?
+  options:
+    - { text: "Per-model totals aggregate every use of the model and hide which feature, workflow, or tenant is driving spend, so the design gives you nowhere to aim", correct: true }
+    - { text: "Model prices never differ, so the dashboard is meaningless" }
+    - { text: "Per-model cost double-counts input and output tokens" }
+    - { text: "Nothing — cheapest model is always the right cost lever" }
+  explanation: >-
+    Cost attribution is about rolling spend up to a dimension you can act on. A per-model total tells
+    you what you spent but not where value or waste accrues, so it can't target the feature, workflow,
+    or tenant driving the bill — the classic granularity antipattern.
+
+- id: mc-review-cost-async-untagged
+  type: multiple_choice
+  tags: [economics, review]
+  difficulty: 4
+  prompt: >-
+    A design tags LLM calls by feature and tenant at the API boundary, but an async background job and a
+    shared prompt cache make their own calls with no tags. Rate this design and pick the best fix.
+  options:
+    - { text: "Demo-grade: the untagged async/cached work lands in an unattributed bucket that hides real spend; propagate the attribution context through the background job and cache path", correct: true }
+    - { text: "Production-ready: tagging the top-level request is enough because downstream cost is negligible" }
+    - { text: "Fine as-is, but rename the model on every async retry to keep records unique" }
+    - { text: "The problem is the dashboard chart color; switch it and ship" }
+  explanation: >-
+    Tag propagation must reach every downstream call, including async jobs and cache-served work.
+    When it breaks, that spend is still on the provider bill but invisible to every rollup — an
+    unattributed bucket. The fix is threading the attribution context through those paths, not
+    accepting the blind spot.
+
+- id: mc-review-cost-percall-unit
+  type: multiple_choice
+  tags: [economics, review]
+  difficulty: 4
+  prompt: >-
+    A PR reports unit economics as "cost per API call, computed on happy-path calls only" and concludes
+    the feature is cheap. What is the strongest objection?
+  options:
+    - { text: "A successful outcome often takes several calls, retries, and abandoned attempts, so per-call cost on happy-path calls understates the true price — report cost per successful task with failed/abandoned runs counted", correct: true }
+    - { text: "Per-call cost is impossible to measure accurately, so any number is wrong" }
+    - { text: "Cost per successful task is always smaller, so it just looks better to finance" }
+    - { text: "API calls are free, so only output tokens should be counted" }
+  explanation: >-
+    Per-call cost — especially on happy-path calls only — ignores the retries, abandoned sessions, and
+    fan-out that a real delivered outcome requires. Cost per successful task charges that waste to the
+    tasks that actually succeeded, giving the honest unit cost. The fix is the metric and its coverage,
+    not banning per-call reporting entirely.
+
+- id: essay-cost-deep-dive
+  type: essay
+  length: long
+  tags: [economics, review]
+  difficulty: 4
+  prompt: >-
+    You are the reviewer on a cost-attribution design for a multi-feature, multi-tenant LLM product.
+    Write a design review: walk the levers (attribution granularity, tag propagation, unit metric,
+    blended vs. marginal cost, shared/cached/async allocation), give an explicit tradeoff for each, and
+    state what would move the design from demo-ready to production-ready. Call out at least two
+    antipatterns and the unit metric you would require before accepting the spend numbers.
+  eval_skill: eval-cost-essay
+  reference_points:
+    - "Attribution granularity: per-model totals aggregate every use and hide where spend accrues; attribute to feature, workflow, tenant, and user journey — the dimensions you can act on."
+    - "Tag propagation: set attribution context once at the entry point and carry it through every downstream call, including retries and async/cached work, so nothing lands in an unattributed bucket."
+    - "Unit metric: cost per successful task, counting failed and abandoned runs, is the honest number; per-call cost flatters because one outcome takes several calls and retries."
+    - "Blended vs. marginal: judge a new feature on the marginal cost it adds per task, not the blended average that smears expensive and cheap work together."
+    - "Antipatterns to call out: cost-per-model-only reporting, ignoring failed/abandoned runs, and treating over-retrieval/oversized context as free; production-ready adds propagation through async/retries plus a defensible shared-cost allocation policy."
+
+- id: debug-cost-per-success
+  type: code
+  language: typescript
+  tags: [economics, review]
+  difficulty: 4
+  prompt: >-
+    DEBUGGING: the provided `costPerSuccess` is meant to report true unit economics — total spend
+    divided by the number of SUCCESSFUL calls — but it divides total spend by every attempt instead.
+    There is exactly one bug. Fix it so the denominator is the count of successful calls (make the
+    minimal change), and handle zero successes deliberately by returning Infinity as a documented
+    sentinel rather than dividing by zero.
+  starter_file: exercises/cost-per-success-debug/starter.ts
+  test_file: exercises/cost-per-success-debug/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-cost-code
+  concept_checks:
+    must_use: ["divide total spend by the count of SUCCESSFUL calls, not all attempts", "cost-per-success rises when failures/retries are present", "zero successes returns the Infinity sentinel instead of dividing by zero"]
+    avoid_antipattern: ["using calls.length (all attempts) as the denominator", "understating cost-per-success by charging spend to failed attempts"]

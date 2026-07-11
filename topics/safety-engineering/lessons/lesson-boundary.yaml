@@ -1,0 +1,11 @@
+id: lesson-boundary
+title: "Trust boundaries & fencing"
+material: boundary.md
+segments:
+  - present: trust-boundaries
+  - check: mc-trust-boundary
+  - check: cloze-boundary
+  - present: fencing-untrusted-content
+  - check: mc-fencing
+  - check: fe-fence-untrusted
+  - apply: essay-trust-boundary

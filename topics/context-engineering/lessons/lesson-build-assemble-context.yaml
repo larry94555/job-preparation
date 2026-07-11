@@ -1,0 +1,10 @@
+id: lesson-build-assemble-context
+title: "Build it: a budget-aware context assembler"
+material: build-assemble-context.md
+segments:
+  - present: rank-then-fit
+  - check: mc-rank-then-fit-build
+  - present: why-drop-not-truncate-blindly
+  - check: mc-context-rot-build
+  - apply: code-assemble-context
+  - apply: essay-context-policy

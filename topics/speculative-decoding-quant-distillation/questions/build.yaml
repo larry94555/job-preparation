@@ -1,0 +1,41 @@
+- id: mc-lossless
+  type: multiple_choice
+  tags: [speculative]
+  difficulty: 2
+  prompt: "Speculative decoding changes inference how?"
+  options:
+    - { text: "It speeds up latency losslessly — the output matches the target model alone", correct: true }
+    - { text: "It reduces memory by using fewer bits per weight" }
+    - { text: "It trains a smaller model to replace the target" }
+    - { text: "It lowers quality in exchange for throughput" }
+  explanation: "The target verifies every token, so the output is identical to the target alone — only latency improves. (Quantization/distillation are the quality/size levers.)"
+
+- id: mc-tokens-per-step
+  type: multiple_choice
+  tags: [speculative]
+  difficulty: 3
+  prompt: "In one verification step, the number of tokens produced equals:"
+  options:
+    - { text: "The number of accepted leading draft tokens, plus one", correct: true }
+    - { text: "Exactly the draft length" }
+    - { text: "Always one token" }
+    - { text: "The acceptance rate times the vocabulary size" }
+  explanation: "You keep the accepted prefix (up to the first reject) and the target emits one more token — so accepted-prefix + 1."
+
+- id: essay-lever-choice
+  type: essay
+  length: long
+  tags: [speculative]
+  difficulty: 4
+  prompt: >-
+    Project: for a cost-constrained, latency-sensitive product, choose among speculative decoding,
+    quantization, and distillation (and combinations). Justify which lever(s) you'd use and, just as
+    important, which you would NOT — reasoning on the latency, cost, and quality axes. Include an
+    evaluation plan to confirm the choice.
+  eval_skill: eval-specdec-essay
+  reference_points:
+    - "Speculative decoding: latency win, lossless; payoff scales with acceptance rate; no quality risk."
+    - "Quantization: memory/cost win with quality risk (measure task evals, not just perplexity)."
+    - "Distillation: smaller/cheaper model but upfront training and a quality ceiling."
+    - "Composition: distill → quantize → serve with speculative decoding; match lever to the goal."
+    - "Evaluation plan: measure latency/cost AND task quality; don't ship a quality regression."

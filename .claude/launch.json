@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "begin-lesson",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "begin-lesson"],
+      "port": 4319
+    }
+  ]
+}

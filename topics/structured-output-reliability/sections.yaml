@@ -1,0 +1,19 @@
+# Sections group lessons and define the summative section assessments.
+sections:
+  - id: sec-failures-and-validation
+    title: "Failures & the validation contract"
+    lessons: [lesson-taxonomy, lesson-validation, lesson-expert-context, lesson-frontier-ops]
+    assessment:
+      title: "Section 1 — Failures & validation"
+      from_tags: [taxonomy, validation, constrained-decoding]
+      count: 6
+      pass_threshold: 0.8
+
+  - id: sec-repair-and-fallback
+    title: "Recovery: repair & fallback"
+    lessons: [lesson-repair-fallback, lesson-deep-dive]
+    assessment:
+      title: "Section 2 — Repair & fallback"
+      from_tags: [repair, fallback]
+      count: 6
+      pass_threshold: 0.8

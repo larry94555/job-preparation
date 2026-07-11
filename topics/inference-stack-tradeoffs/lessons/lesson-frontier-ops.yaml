@@ -1,0 +1,12 @@
+id: lesson-frontier-ops
+title: "Frontier & operations: joint optimization, predictable SLOs, and the signals to watch"
+material: frontier-ops.md
+segments:
+  - present: the-inference-stack-tradeoffs-frontier
+  - check: mc-frontier-ist-joint
+  - check: mc-frontier-ist-predictable-slo
+  - check: mc-frontier-ist-roofline
+  - present: operating-the-inference-stack-in-production
+  - check: mc-ops-ist-cost-per-success
+  - check: mc-ops-ist-triad
+  - apply: code-ist-cascade

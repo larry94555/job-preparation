@@ -1,0 +1,66 @@
+# Calibration for eval-observability-essay (exemplars target essay-why-traces).
+skill: eval-observability-essay
+cases:
+  # PASS — all four checks true; gate (technically_correct) true. score 4/4 = 1.0 → pass.
+  - answer: >-
+      Directly on the teammate's claim: request-level latency and error metrics are NOT enough, because
+      one agent request fans out into many steps — planning, tool calls, retrieval, retries, and
+      sub-model calls — so a single aggregate latency or error number hides where the time, tokens,
+      errors, and cost actually go. Traces and spans fix this: a trace is the whole request, and spans
+      are the nested units of work, forming a tree over the call graph so you can pinpoint the one slow
+      or failing step instead of guessing. A correlation ID (trace ID) propagated through every step and
+      service stitches those spans into a single trace even across process and network boundaries, which
+      lets you debug per step and roll token counts and cost up the trace. Concretely, per span you
+      record input/output tokens, latency split into TTFT and TPOT, retries, and derived cost, then sum
+      cost and take the critical path up the trace to answer "why was this request slow and expensive?"
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # PASS — all four checks true; gate true. score 4/4 = 1.0 → pass.
+  - answer: >-
+      Aggregate request metrics answer "how many were slow" but never "which step was slow," and for an
+      LLM agent that distinction is everything, because a single request expands into planning, multiple
+      tool calls, retrieval, retries, and nested model calls. That is exactly why you need traces and
+      spans instead of just metrics: the trace represents the entire end-to-end request while each span
+      is one nested unit of work, and together they form a tree over the call graph so you can locate the
+      exact failing or slow span. The correlation ID is what makes this work — propagated through every
+      service and step, it ties all the spans of one request into a single trace across process
+      boundaries, so you can follow one user's request end to end and roll per-span tokens and cost up
+      into a per-request total. What it buys you: per-step latency (TTFT and TPOT), per-step token and
+      cost attribution, a visible retry/error path, and a critical-path view — none of which a flat
+      latency or error counter can give you.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — gate (technically_correct) false AND concrete false; addresses_question + covers_key_points
+  # true. score 2/4 = 0.5 → borderline base, gate false caps one level down → fail.
+  - answer: >-
+      My teammate is wrong that request-level latency and error metrics are enough, and traces and spans
+      with correlation IDs are what you want instead so you can see the many steps an agent takes and
+      understand what happened during a request. To be precise about the terminology, a span is the whole
+      end-to-end request and the trace is just one small step nested inside that span, and the correlation
+      ID works by encrypting the prompt so that it can never be logged anywhere. Tracing generally helps
+      you observe the agent and get more insight into its behavior than plain metrics do, which is the
+      main benefit here.
+    expect:
+      verdict: fail
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: false, concrete: false }
+
+  # BORDERLINE — misses ONLY the gate (technically_correct); the other three are true.
+  # score 3/4 = 0.75 → pass base, gate false caps one level down → borderline.
+  - answer: >-
+      Right on the question: request-level latency and error metrics are not enough, and you need traces
+      and spans with correlation IDs instead, because a single agent request fans out into planning, tool
+      calls, retrieval, retries, and sub-model calls, so one aggregate number hides where the time,
+      tokens, cost, and errors go. Traces and spans give you per-step structure and a correlation ID
+      stitches the spans of one request together across services so you can debug it end to end, and per
+      span you capture tokens, latency, retries, and cost and roll them up to explain a slow or expensive
+      request. One technical detail I'll state for completeness: TTFT (time to first token) is the metric
+      that measures per-output-token decode speed during steady-state generation, so it is the number to
+      watch for streaming throughput. With that, spans let you attribute latency and spend to the exact
+      step responsible.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: false, concrete: true }

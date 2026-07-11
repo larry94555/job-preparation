@@ -1,0 +1,21 @@
+# Coding exercise — engine type: code (graded by tests + concept skill)
+- id: code-choose-strategy
+  type: code
+  language: typescript
+  tags: [decision]
+  difficulty: 3
+  prompt: >-
+    Implement `chooseStrategy(req)` where req is `{ freshness?, attribution?, behaviorChange?,
+    lowLatency? }` (booleans). Return one of "rag" | "fine-tuning" | "distillation" | "in-context" by
+    precedence: freshness OR attribution → "rag"; else behaviorChange → "fine-tuning"; else lowLatency
+    → "distillation"; else "in-context". (The precedence encodes the antipattern fix: never pick
+    fine-tuning to solve a fresh-facts requirement.)
+  starter_file: exercises/choose-strategy/starter.ts
+  test_file: exercises/choose-strategy/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-adaptation-code
+  concept_checks:
+    must_use: ["freshness or attribution → rag first", "behaviorChange → fine-tuning", "default → in-context"]
+    avoid_antipattern: ["fine-tuning chosen when freshness is set", "ignoring the precedence order"]

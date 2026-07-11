@@ -1,0 +1,9 @@
+id: rag-architecture
+title: "RAG Architecture"
+description: "Retrieval-augmented generation grounds the model in your data — the quality lives in the pipeline: chunking, embeddings, dense/sparse/hybrid search, and reranking, not in the prompt."
+pass_threshold: 0.8
+tag_weights:
+  pipeline: 1.0
+  chunking: 1.2
+  retrieval: 1.2
+  reranking: 1.0

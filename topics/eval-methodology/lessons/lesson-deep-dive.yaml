@@ -1,0 +1,14 @@
+id: lesson-deep-dive
+title: "Architecture & tradeoffs: reviewing an eval-methodology design"
+material: deep-dive.md
+segments:
+  - present: the-eval-methodology-design-space
+  - present: a-tradeoff-table-for-eval-methodology
+  - check: mc-review-eval-vibes-gate
+  - check: mc-review-eval-judge-uncalibrated
+  - present: common-sota-and-antipattern
+  - check: mc-review-eval-overfit-static
+  - present: scaling-performance-and-the-token-budget
+  - present: reviewing-an-eval-methodology-design
+  - apply: essay-eval-deep-dive
+  - apply: debug-eval-gate

@@ -1,0 +1,108 @@
+# Multiple choice
+- id: mc-why-retrieval-evals
+  type: multiple_choice
+  tags: [metrics]
+  difficulty: 2
+  prompt: "The main reason to evaluate retrieval separately from the end-to-end answer is to:"
+  options:
+    - { text: "Tell a retrieval miss apart from a grounding failure so you fix the right stage", correct: true }
+    - { text: "Make the vector index smaller" }
+    - { text: "Remove the need for any labeled data" }
+    - { text: "Guarantee the model never hallucinates" }
+  explanation: "End-to-end-only evals conflate two very different failures. Component-isolated evals let you see whether the right context was fetched (retrieval) versus whether the model used it (grounding)."
+
+- id: mc-recall-at-k-def
+  type: multiple_choice
+  tags: [metrics]
+  difficulty: 2
+  prompt: "recall@k measures:"
+  options:
+    - { text: "The fraction of all relevant documents that appear in the top-k retrieved results", correct: true }
+    - { text: "The fraction of the top-k results that are relevant" }
+    - { text: "The rank position of the first relevant result" }
+    - { text: "How fast the retriever returns results" }
+  explanation: "recall@k = (relevant docs found in top-k) / (total relevant docs). It answers 'did we catch enough of what mattered' within the cutoff k."
+
+- id: mc-precision-at-k-def
+  type: multiple_choice
+  tags: [metrics]
+  difficulty: 2
+  prompt: "precision@k measures:"
+  options:
+    - { text: "The fraction of the top-k retrieved results that are relevant", correct: true }
+    - { text: "The fraction of all relevant documents that were retrieved" }
+    - { text: "The reciprocal of the first relevant rank" }
+    - { text: "The number of documents in the corpus" }
+  explanation: "precision@k = (relevant docs in top-k) / k. It answers 'how much of what we returned was actually useful' — the noise cost of the top-k window."
+
+- id: mc-recall-precision-tradeoff
+  type: multiple_choice
+  tags: [metrics]
+  difficulty: 3
+  prompt: "As you increase k (return more results), typically:"
+  options:
+    - { text: "recall@k rises or stays flat while precision@k tends to fall", correct: true }
+    - { text: "both recall@k and precision@k always rise" }
+    - { text: "both always fall" }
+    - { text: "precision@k rises while recall@k falls" }
+  explanation: "A larger window can only find more of the relevant set (recall up or equal) but usually admits more irrelevant results too, diluting precision."
+
+- id: mc-mrr-def
+  type: multiple_choice
+  tags: [metrics]
+  difficulty: 3
+  prompt: "Mean Reciprocal Rank (MRR) rewards a retriever for:"
+  options:
+    - { text: "Placing the first relevant result as high as possible, averaged over queries", correct: true }
+    - { text: "Returning as many relevant results as possible regardless of order" }
+    - { text: "Minimizing total latency across queries" }
+    - { text: "Returning exactly k results every time" }
+  explanation: "MRR averages 1/rank of the first relevant hit across queries, so a relevant doc at rank 1 scores 1.0, at rank 2 scores 0.5. It measures how quickly the first good result appears."
+
+- id: mc-grounding-vs-retrieval
+  type: multiple_choice
+  tags: [grounding]
+  difficulty: 3
+  prompt: "The retriever returned the correct passage, but the answer states something the passage does not support. This is best classified as a:"
+  options:
+    - { text: "Grounding (faithfulness) failure, not a retrieval failure", correct: true }
+    - { text: "Retrieval failure, because recall@k must be low" }
+    - { text: "Chunking failure at index time" }
+    - { text: "Embedding-model failure" }
+  explanation: "The right context was in the window, so retrieval succeeded. The generation didn't stay faithful to that context — a grounding/faithfulness failure. Fixing the retriever would not help."
+
+- id: mc-retrieval-failure-symptom
+  type: multiple_choice
+  tags: [grounding]
+  difficulty: 3
+  prompt: "Which symptom points to a RETRIEVAL failure rather than a grounding failure?"
+  options:
+    - { text: "The context window never contained the passage needed to answer, so recall@k is low", correct: true }
+    - { text: "The needed passage was in context but the answer contradicts it" }
+    - { text: "The answer copies the passage faithfully but is verbose" }
+    - { text: "The citation points to the exact supporting sentence" }
+  explanation: "If the supporting evidence never made it into context, no amount of faithful generation can produce a grounded answer — the failure is upstream in retrieval (low recall@k)."
+
+- id: mc-fabricated-citation
+  type: multiple_choice
+  tags: [attribution]
+  difficulty: 2
+  prompt: "A 'fabricated' or 'hallucinated' citation is one where:"
+  options:
+    - { text: "The cited source does not actually support (or does not exist for) the claim", correct: true }
+    - { text: "The source exists and clearly supports the claim" }
+    - { text: "The citation is formatted with the wrong punctuation" }
+    - { text: "The source was retrieved but ranked second" }
+  explanation: "Attribution quality is about whether the cited span really backs the claim. A fabricated citation points at a source that doesn't exist or doesn't support what's asserted — even if the prose looks authoritative."
+
+- id: mc-attribution-check
+  type: multiple_choice
+  tags: [attribution]
+  difficulty: 3
+  prompt: "The most direct way to check citation/attribution quality is to:"
+  options:
+    - { text: "Verify each cited span actually entails the claim it is attached to (a span/entailment check)", correct: true }
+    - { text: "Count how many citations the answer contains" }
+    - { text: "Measure the answer's total token length" }
+    - { text: "Check that the citations are alphabetically ordered" }
+  explanation: "Attribution correctness is per-claim: for each cited claim, confirm the referenced span supports it. Counting citations or measuring length says nothing about whether they hold up."

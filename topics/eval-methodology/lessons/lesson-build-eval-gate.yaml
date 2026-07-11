@@ -1,0 +1,10 @@
+id: lesson-build-eval-gate
+title: "Build it: an eval gate"
+material: build-eval-gate.md
+segments:
+  - present: running-a-golden-set-and-computing-pass-rate
+  - check: mc-pass-rate-definition
+  - present: gating-on-a-threshold
+  - check: mc-gate-fails-when
+  - apply: code-eval-gate
+  - apply: essay-eval-program

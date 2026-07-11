@@ -1,0 +1,12 @@
+id: lesson-pipeline
+title: "The RAG pipeline & when to use it"
+material: rag-pipeline.md
+segments:
+  - present: what-rag-is-and-when-to-use-it
+  - check: mc-rag-why
+  - check: mc-rag-not-for
+  - check: cloze-rag
+  - check: fe-when-rag
+  - present: the-query-time-pipeline
+  - check: mc-rag-pipeline-order
+  - apply: essay-when-rag

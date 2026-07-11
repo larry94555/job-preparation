@@ -1,0 +1,120 @@
+# Multiple choice
+- id: mc-rag-why
+  type: multiple_choice
+  tags: [pipeline]
+  difficulty: 2
+  prompt: "The main reason to reach for RAG instead of just prompting the model is to:"
+  options:
+    - { text: "Ground answers in specific, current, or private data the model was not trained on", correct: true }
+    - { text: "Make the model's weights larger" }
+    - { text: "Remove the need for any prompt" }
+    - { text: "Guarantee the model never hallucinates anything" }
+  explanation: "RAG retrieves relevant documents at query time and puts them in context, grounding generation in data outside the model's training set."
+
+- id: mc-rag-pipeline-order
+  type: multiple_choice
+  tags: [pipeline]
+  difficulty: 2
+  prompt: "Which ordering describes the classic RAG query-time pipeline?"
+  options:
+    - { text: "embed query → retrieve candidates → (rerank) → assemble context → generate", correct: true }
+    - { text: "generate → embed → retrieve → rerank" }
+    - { text: "fine-tune → prompt → retrieve" }
+    - { text: "chunk → generate → embed → answer" }
+  explanation: "At query time you embed the query, retrieve candidate chunks, optionally rerank them, assemble the top-k into context, then generate."
+
+- id: mc-rag-not-for
+  type: multiple_choice
+  tags: [pipeline]
+  difficulty: 3
+  prompt: "RAG is usually the WRONG tool when:"
+  options:
+    - { text: "The task needs a reasoning or behavior change, not access to more facts", correct: true }
+    - { text: "The knowledge is private and cannot go into training" }
+    - { text: "The corpus changes frequently and must stay fresh" }
+    - { text: "The answer must cite specific source documents" }
+  explanation: "RAG supplies facts into context; it does not teach new skills or behaviors. Those call for fine-tuning or better prompting, not retrieval."
+
+- id: mc-chunk-tradeoff
+  type: multiple_choice
+  tags: [chunking]
+  difficulty: 3
+  prompt: "The core tradeoff in choosing chunk size is:"
+  options:
+    - { text: "Large chunks give more context but dilute embedding precision; small chunks are precise but may lose surrounding context", correct: true }
+    - { text: "Large chunks are always faster to embed" }
+    - { text: "Small chunks always produce better answers" }
+    - { text: "Chunk size only affects storage cost, not retrieval quality" }
+  explanation: "Bigger chunks carry more context but their embedding averages more content and loses precision; smaller chunks are sharper but can strand a fact from its context."
+
+- id: mc-chunk-antipattern
+  type: multiple_choice
+  tags: [chunking]
+  difficulty: 2
+  prompt: "Which is a chunking antipattern?"
+  options:
+    - { text: "Fixed-size character splitting that cuts through the middle of sentences and tables", correct: true }
+    - { text: "Splitting on document structure like headings and paragraphs" }
+    - { text: "Adding a small overlap between adjacent chunks" }
+    - { text: "Attaching source metadata to each chunk" }
+  explanation: "Naive fixed-size splitting ignores structure and severs coherent units; structure-aware chunking with overlap preserves meaning."
+
+- id: mc-overlap-why
+  type: multiple_choice
+  tags: [chunking]
+  difficulty: 2
+  prompt: "Why add overlap between adjacent chunks?"
+  options:
+    - { text: "So a fact that straddles a boundary still appears intact in at least one chunk", correct: true }
+    - { text: "To reduce the total number of chunks stored" }
+    - { text: "To make embeddings deterministic" }
+    - { text: "To remove the need for a reranker" }
+  explanation: "Overlap ensures information near a split point isn't lost, because it is duplicated into the neighboring chunk."
+
+- id: mc-dense-vs-sparse
+  type: multiple_choice
+  tags: [retrieval]
+  difficulty: 3
+  prompt: "Compared with dense (embedding) retrieval, sparse retrieval like BM25 is stronger at:"
+  options:
+    - { text: "Exact keyword, code identifier, and rare-term matching", correct: true }
+    - { text: "Capturing paraphrase and semantic similarity" }
+    - { text: "Understanding synonyms it has never seen as tokens" }
+    - { text: "Matching across different languages by meaning" }
+  explanation: "BM25 matches lexical tokens, so it excels at exact terms, IDs, and rare words; dense vectors capture semantic/paraphrase similarity that lexical matching misses."
+
+- id: mc-hybrid-fusion
+  type: multiple_choice
+  tags: [retrieval]
+  difficulty: 3
+  prompt: "Reciprocal Rank Fusion (RRF) combines dense and sparse results by:"
+  options:
+    - { text: "Merging their ranked lists using each item's rank position, not raw scores", correct: true }
+    - { text: "Averaging the cosine similarity and BM25 scores directly" }
+    - { text: "Discarding whichever list is shorter" }
+    - { text: "Retraining the embedding model on the query" }
+  explanation: "RRF sums 1/(k + rank) across lists, so it fuses by rank position and sidesteps the problem of dense and sparse scores being on incomparable scales."
+
+- id: mc-reranker-role
+  type: multiple_choice
+  tags: [reranking]
+  difficulty: 3
+  prompt: "A cross-encoder reranker improves results because it:"
+  options:
+    - { text: "Scores each query–document pair jointly, capturing relevance a single-vector match cannot", correct: true }
+    - { text: "Embeds documents faster than a bi-encoder" }
+    - { text: "Replaces the need to retrieve any candidates first" }
+    - { text: "Stores documents more compactly in the index" }
+  explanation: "A cross-encoder reads the query and candidate together and outputs a relevance score, which is more accurate than comparing two independently-computed vectors — at higher latency, so it runs only on a small candidate set."
+
+- id: mc-reranker-latency
+  type: multiple_choice
+  tags: [reranking]
+  difficulty: 4
+  prompt: "The standard way to get reranker quality without paying its full latency cost is to:"
+  options:
+    - { text: "Retrieve a larger candidate set cheaply, then rerank only that small set", correct: true }
+    - { text: "Rerank every document in the whole corpus per query" }
+    - { text: "Skip retrieval and rerank the query against itself" }
+    - { text: "Use the reranker as the first-stage retriever" }
+  explanation: "Cross-encoders are too slow to score the whole corpus, so a cheap first stage narrows to (say) top-100 candidates and the reranker reorders just those."

@@ -1,0 +1,10 @@
+id: lesson-expert-context
+title: "Expert context: papers, frontier & interview"
+material: expert-context.md
+segments:
+  - present: papers-people-and-the-frontier
+  - check: mc-canon-harness-react
+  - present: interviewing-on-harness-engineering
+  - check: mc-interview-harness-unbounded
+  - apply: essay-harness-literature
+  - apply: essay-harness-interview

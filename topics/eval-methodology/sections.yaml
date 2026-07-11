@@ -1,0 +1,18 @@
+sections:
+  - id: sec-foundations
+    title: "Foundations: golden sets & regression gates"
+    lessons: [lesson-golden, lesson-build-eval-gate, lesson-expert-context, lesson-deep-dive]
+    assessment:
+      title: "Section 1 — Golden sets & regression gates"
+      from_tags: [golden, regression]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-coverage
+    title: "Coverage & judging: adversarial tests & LLM-as-judge"
+    lessons: [lesson-adversarial, lesson-judge, lesson-frontier-ops]
+    assessment:
+      title: "Section 2 — Adversarial tests & LLM-as-judge"
+      from_tags: [adversarial, judge]
+      count: 5
+      pass_threshold: 0.8

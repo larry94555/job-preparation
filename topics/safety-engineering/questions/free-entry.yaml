@@ -1,0 +1,36 @@
+# Free entry (short answer)
+- id: fe-fence-untrusted
+  type: text_input
+  tags: [boundary]
+  difficulty: 2
+  prompt: "Name one technique for keeping retrieved/tool content from being obeyed as instructions. (one word or short phrase)"
+  answer:
+    regex: '^(fenc(e|ing)|delimit(ing|ers?)?|quoting|provenance( tags?)?|trust tags?|tagging)$'
+    normalize: true
+
+- id: fe-egress-control
+  type: text_input
+  tags: [permission]
+  difficulty: 3
+  prompt: "Name one control that stops an agent from sending sensitive data to an attacker's destination."
+  answer:
+    regex: '^(egress (gat(e|ing)|control|filter)|allow-?list|human confirm(ation)?|confirm(ation)? on egress|block egress|gated egress)$'
+    normalize: true
+
+- id: fe-blast-radius
+  type: text_input
+  tags: [permission]
+  difficulty: 3
+  prompt: "What do you shrink by giving an agent only least-privilege, scoped tools? (two words)"
+  answer:
+    regex: '^blast radius$'
+    normalize: true
+
+- id: fe-defense-depth
+  type: text_input
+  tags: [injection]
+  difficulty: 3
+  prompt: "Layering several imperfect defenses so no single failure is fatal is called defense in ____."
+  answer:
+    regex: '^depth$'
+    normalize: true

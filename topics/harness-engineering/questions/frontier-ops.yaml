@@ -1,0 +1,132 @@
+# Frontier & operations drill — closes D2 (frontier benchmark/paper drill) and D6 (ops metrics drill).
+
+- id: mc-frontier-harness-swebench
+  type: multiple_choice
+  tags: [canon, frontier]
+  difficulty: 4
+  prompt: >-
+    SWE-bench-style agentic-coding harnesses are the benchmark frontier for long-horizon, verifiable
+    agent work. What, more than raw model capability, most determines whether such a harness succeeds?
+  options:
+    - { text: "Verification — running the project's tests and reading the diff so a claimed fix is checked against a real success signal, not trusted", correct: true }
+    - { text: "A longer, more detailed system prompt that describes the codebase" }
+    - { text: "Removing all step and token budgets so the agent can run as long as it wants" }
+    - { text: "Using the largest available context window regardless of cost" }
+  explanation: >-
+    These harnesses win or lose on verification — executing the test suite and inspecting the git diff
+    to gate on a real, deterministic success signal (tests pass) rather than the model's claim. This is
+    why the correct lens is eval-gated claims, not leaderboard theater; a harness that trusts "I fixed
+    it" without running the suite is not at the frontier no matter how strong the base model is.
+
+- id: mc-frontier-harness-longhorizon
+  type: multiple_choice
+  tags: [canon, frontier]
+  difficulty: 4
+  prompt: >-
+    Reliable long-horizon autonomy is a live open problem in harness engineering. As an agent loop gets
+    longer, what is the core failure it fights, and where does the fix live?
+  options:
+    - { text: "Context accumulates and small errors compound so the agent drifts or gets stuck; reliability at length comes from harness structure (plan-then-execute, reflect/retry, error recovery), not a longer prompt", correct: true }
+    - { text: "The model forgets its system prompt, fixed by repeating the prompt every turn" }
+    - { text: "The tokenizer slows down, fixed by switching tokenizers" }
+    - { text: "Nothing — long-horizon autonomy is already a solved problem in production harnesses" }
+  explanation: >-
+    Length is the enemy: as the loop lengthens, observations accumulate and small errors compound,
+    causing drift or stuck states. The frontier work is structural — plan-then-execute so each step is
+    independently checkable and re-plannable, self-reflection/retry (Reflexion) so a failed attempt is
+    critiqued rather than repeated, and robust error recovery that turns failure into a next action.
+
+- id: mc-frontier-harness-openended
+  type: multiple_choice
+  tags: [canon, frontier]
+  difficulty: 4
+  prompt: >-
+    Verifying open-ended tasks is called out as the hardest open problem. Why does the SWE-bench harness
+    pattern not simply transfer to a task like "improve this design doc"?
+  options:
+    - { text: "Open-ended tasks have no crisp success check, so a deterministic gate like 'tests pass' does not exist; the honest move is proxy/rubric/human-in-the-loop verification, not pretending a soft check is a hard one", correct: true }
+    - { text: "Design docs are too long to fit in any context window" }
+    - { text: "Open-ended tasks never need verification at all" }
+    - { text: "The model cannot read prose, only code" }
+  explanation: >-
+    The transferable strength of the SWE-bench pattern is a deterministic gate on a real success signal
+    (the test suite). Open-ended tasks lack that crisp ground truth, so the frontier is trustworthy soft
+    verification — proxy checks, rubric-graded self-review, human escalation — while being honest that a
+    soft check is not a hard one. An expert flags exactly this non-transfer rather than faking a gate.
+
+- id: mc-ops-harness-budget-exhaustion
+  type: multiple_choice
+  tags: [control, ops]
+  difficulty: 4
+  prompt: >-
+    You track the stop-reason distribution of a live agent fleet. A healthy fleet is dominated by
+    "completed". Which shift is the leading indicator that budgets are too tight or tasks too hard?
+  options:
+    - { text: "A rising budget-exhaustion rate in the stop-reason distribution", correct: true }
+    - { text: "A rising share of runs that complete successfully" }
+    - { text: "The total size of the model weights on disk" }
+    - { text: "The number of distinct tools registered in the harness" }
+  explanation: >-
+    Every run should end for a named reason — completed, budget-exhausted, duplicate-call, no-progress.
+    A rising budget-exhaustion share means runs are hitting the step/token/cost ceiling before finishing,
+    the leading indicator that budgets are too tight or tasks too hard. A rising duplicate-call/no-progress
+    share instead means the agent is getting stuck; both are read from the stop-reason distribution.
+
+- id: mc-ops-harness-verify-vs-tool
+  type: multiple_choice
+  tags: [control, ops]
+  difficulty: 4
+  prompt: >-
+    Two operational signals help you tell a model problem from a harness problem. What does a rising
+    tool-error rate (bad arguments, hallucinated tool names, timeouts) most directly point to?
+  options:
+    - { text: "A structural tool-contract / argument-validation gap in the harness — not the model — so fix it with typed contracts and validation, not a better prompt", correct: true }
+    - { text: "That verification is too strict and should be removed" }
+    - { text: "That steps-per-task is too low and budgets should be raised" }
+    - { text: "That the model weights are corrupted" }
+  explanation: >-
+    Tool-error rate rising points at the tool contract: malformed arguments, hallucinated tool names, or
+    timeouts are structural failures the harness owns via typed contracts and argument validation, not
+    something a reworded prompt fixes. Verification-failure rate, by contrast, tells you the model is
+    confidently wrong and the deterministic gate is catching it — a model-side rather than tooling signal.
+
+- id: code-harness-idempotent
+  type: code
+  language: typescript
+  tags: [control, review]
+  difficulty: 4
+  prompt: >-
+    Implement `runIdempotent(key, run, done)` for a retry-safe tool. `done` is a `Map<string, string>`
+    of already-completed work keyed by an idempotency `key`. If `done` already has `key`, return the
+    cached result WITHOUT calling `run` (so a retry does not repeat the side effect). Otherwise call
+    `run()` exactly once, store its result under `key` in `done`, and return it.
+  starter_file: exercises/idempotent-tool/starter.ts
+  test_file: exercises/idempotent-tool/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-harness-code
+  concept_checks:
+    must_use: ["short-circuit when done already has the key (return cached, do not call run)", "call run exactly once for a new key", "store the result under key in done before returning"]
+    avoid_antipattern: ["calling run again on a cached key", "not persisting the result so retries re-run", "keying results incorrectly so different keys collide"]
+
+- id: code-harness-arg-repair
+  type: code
+  language: typescript
+  tags: [boundary, review]
+  difficulty: 4
+  prompt: >-
+    Implement `repairToolArgs(raw, numberKeys)` for a harness that repairs malformed tool-call argument
+    JSON before dispatch. The model may wrap the arg object in prose or markdown fences, so extract the
+    JSON object by taking the substring from the FIRST `{` to the LAST `}` and `JSON.parse` it; if there
+    is no `{`/`}` or the parse fails, return `null`. Then for every key in `numberKeys` whose parsed
+    value is a numeric STRING (e.g. "42", "3.5"), coerce it to a Number, and return the repaired object.
+  starter_file: exercises/arg-repair/starter.ts
+  test_file: exercises/arg-repair/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-harness-code
+  concept_checks:
+    must_use: ["extract substring from first { to last } before parsing", "return null when no braces or JSON.parse throws", "coerce numeric-string values to Number only for keys listed in numberKeys"]
+    avoid_antipattern: ["passing raw prose straight to JSON.parse", "coercing keys that are not in numberKeys", "throwing instead of returning null on malformed input"]

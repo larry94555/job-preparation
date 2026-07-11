@@ -1,0 +1,10 @@
+id: lesson-drivers
+title: "Cost drivers & why per-model is wrong"
+material: drivers.md
+segments:
+  - present: what-actually-drives-cost
+  - check: mc-cost-drivers
+  - check: cloze-drivers
+  - check: fe-driver-multiplier
+  - present: why-per-model-is-the-wrong-granularity
+  - check: mc-per-model-wrong

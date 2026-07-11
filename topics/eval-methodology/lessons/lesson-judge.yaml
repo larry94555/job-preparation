@@ -1,0 +1,13 @@
+id: lesson-judge
+title: "LLM-as-judge: rubrics, biases, calibration"
+material: llm-as-judge.md
+segments:
+  - present: llm-as-judge-rubrics-and-biases
+  - check: mc-judge-when
+  - check: cloze-judge
+  - check: mc-judge-bias
+  - check: fe-judge-bias
+  - present: calibrating-the-judge
+  - check: mc-judge-calibration
+  - check: cloze-calibration
+  - apply: essay-judge-calibration

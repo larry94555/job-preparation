@@ -1,0 +1,18 @@
+sections:
+  - id: sec-approaches-and-axes
+    title: "Approaches & decision axes"
+    lessons: [lesson-approaches, lesson-decision, lesson-build-choose-strategy, lesson-expert-context, lesson-deep-dive, lesson-frontier-ops]
+    assessment:
+      title: "Section 1 — Approaches & decision axes"
+      from_tags: [approaches, decision]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-antipatterns
+    title: "When each is the wrong tool"
+    lessons: [lesson-antipatterns]
+    assessment:
+      title: "Section 2 — Antipatterns"
+      from_tags: [antipatterns]
+      count: 5
+      pass_threshold: 0.8

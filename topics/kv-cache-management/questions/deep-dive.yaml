@@ -1,0 +1,87 @@
+# WS3 deep-dive — architecture judgment (code-review MCs, a debugging exercise, an L4 essay)
+
+- id: mc-review-kv-capacity
+  type: multiple_choice
+  tags: [memory, review]
+  difficulty: 4
+  prompt: >-
+    A capacity-planning doc says: "The model weights are 16 GB and the GPU has 80 GB, so we can
+    comfortably serve ~64 GB worth of concurrent requests." Reviewing it, what is the most important
+    problem?
+  options:
+    - { text: "It budgets from weights only and ignores per-token KV cache, which is the real cap on concurrency and will OOM under load", correct: true }
+    - { text: "16 GB is too large; the weights should be quantized first" }
+    - { text: "80 GB GPUs are not suitable for serving" }
+    - { text: "Nothing — leftover HBM minus weights is exactly the servable capacity" }
+  explanation: >-
+    Concurrency is KV-bound: each active sequence carries its own K/V tensors that grow with context
+    length. A plan that counts weights and not per-token KV is the classic antipattern — it OOMs the
+    moment real, long traffic arrives.
+
+- id: mc-review-kv-contiguous
+  type: multiple_choice
+  tags: [paging, review]
+  difficulty: 4
+  prompt: >-
+    A multi-tenant server reserves a contiguous KV buffer of `max_seq_len` (8192) for every request,
+    though the average request generates ~600 tokens. Rate this design and pick the best fix.
+  options:
+    - { text: "Prototype-grade: it wastes ~90% of the pool to internal fragmentation; switch to paged fixed-size blocks allocated on demand", correct: true }
+    - { text: "Production-ready: pre-reserving max length guarantees no request ever runs out of cache" }
+    - { text: "Fine as-is, but lower max_seq_len to 600 so buffers are right-sized" }
+    - { text: "The problem is dtype; switch the buffer to int8 and keep contiguous reservation" }
+  explanation: >-
+    Reserving max_len contiguously when the average request uses a fraction of it wastes most of the
+    HBM pool and caps concurrency to a handful of users. Paging allocates blocks on demand, cutting
+    waste to at most one partial block per sequence. Lowering max_len just truncates long requests;
+    int8 helps footprint but does not fix the fragmentation.
+
+- id: mc-review-kv-quant-noeval
+  type: multiple_choice
+  tags: [memory, review]
+  difficulty: 4
+  prompt: >-
+    A PR quantizes the KV cache to int8 to double concurrency and reports "MT-Bench unchanged on our
+    short prompts, shipping it." What is the strongest objection?
+  options:
+    - { text: "KV quantization error compounds over long contexts, so a short-prompt eval can hide real long-context regressions — gate it behind a long-context quality eval", correct: true }
+    - { text: "int8 KV is never acceptable; only fp16 KV preserves quality" }
+    - { text: "MT-Bench is the wrong benchmark; only perplexity can measure KV quality" }
+    - { text: "Doubling concurrency is impossible from an 8-bit cache" }
+  explanation: >-
+    The concurrency win from int8 KV is real and roughly linear, but its error accumulates with
+    context length. Validating only on short prompts is exactly where a silent long-context
+    regression slips through. The fix is a long-context eval gate, not banning quantization.
+
+- id: essay-kv-deep-dive
+  type: essay
+  length: long
+  tags: [paging, review]
+  difficulty: 4
+  prompt: >-
+    You are the reviewer on a KV-cache design for a multi-tenant, long-context serving deployment on
+    fixed HBM. Write a design review: walk the levers (layout, attention sharing, precision,
+    placement, reuse), give an explicit tradeoff for each, and state what would move the design from
+    demo-ready to production-ready. Call out at least two antipatterns and the eval you would require
+    before accepting a precision change.
+  eval_skill: eval-kvcache-essay
+
+- id: debug-kv-allocator
+  type: code
+  language: typescript
+  tags: [paging, review]
+  difficulty: 4
+  prompt: >-
+    DEBUGGING: the provided `PagedKVAllocator` corrupts KV across sequences — two concurrent requests
+    end up sharing blocks and `freeBlocks()` never decreases. There is exactly one bug in
+    `allocate()`. Fix it so allocated blocks actually leave the free pool (make the minimal change),
+    keeping `allocate`/`free`/`freeBlocks` correct.
+  starter_file: exercises/paged-allocator-debug/starter.ts
+  test_file: exercises/paged-allocator-debug/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-kvcache-code
+  concept_checks:
+    must_use: ["remove allocated blocks from the free pool (splice, not slice)", "freeBlocks decreases after allocate", "no shared blocks between live allocations"]
+    avoid_antipattern: ["copying block ids while leaving them in the pool", "handing the same block to two live sequences"]

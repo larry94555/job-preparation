@@ -1,0 +1,98 @@
+# Deep-dive — architecture judgment (code-review MCs + an L4 essay)
+
+- id: mc-review-rag-dense-only
+  type: multiple_choice
+  tags: [retrieval, review]
+  difficulty: 4
+  prompt: >-
+    A RAG design doc for a developer-docs assistant says: "We embed every chunk and return the top-k
+    by cosine similarity — dense retrieval is state of the art, so no keyword search needed." Reviewing
+    it, what is the most important problem?
+  options:
+    - { text: "Dense-only retrieval misses exact identifiers, error codes, and rare terms that BM25 catches; add sparse retrieval and fuse the lists (e.g. RRF)", correct: true }
+    - { text: "Cosine similarity is the wrong distance metric; dot product would fix the recall gap" }
+    - { text: "Nothing — dense retrieval strictly dominates sparse retrieval on every query type" }
+    - { text: "The chunks should be embedded with a larger model; retrieval method is irrelevant" }
+  explanation: >-
+    Developer docs are full of exact identifiers, flags, and error codes — precisely the lexical
+    matches dense embeddings blur and BM25 nails. The classic antipattern here is dense-only; the fix
+    is hybrid retrieval with rank fusion (RRF), not a different distance metric or embedding model.
+
+- id: mc-review-rag-no-reranker
+  type: multiple_choice
+  tags: [retrieval, review]
+  difficulty: 4
+  prompt: >-
+    A design retrieves the top-50 chunks by hybrid search and feeds all 50 straight into the model's
+    context "to maximize recall." Rate this design and pick the best fix.
+  options:
+    - { text: "Prototype-grade: stuffing 50 chunks dilutes the answer and burns tokens; rerank the candidates with a cross-encoder and pass only the top few", correct: true }
+    - { text: "Production-ready: more chunks in context always yields more accurate answers" }
+    - { text: "Fine as-is, but switch from hybrid back to dense-only to cut latency" }
+    - { text: "The problem is embedding dimension; use a smaller embedding to fit more chunks" }
+  explanation: >-
+    Context is a ranked budget, not a bucket. Passing 50 mediocre chunks both dilutes the signal and
+    wastes tokens. The standard fix is a cross-encoder reranker over the widened candidate set,
+    passing only the high-precision top few into context — recall from a big candidate set, precision
+    from the reranker.
+
+- id: mc-review-rag-stale-index
+  type: multiple_choice
+  tags: [retrieval, review]
+  difficulty: 4
+  prompt: >-
+    A RAG assistant over a company's policy docs was indexed once at launch and never re-indexed;
+    users report it confidently cites superseded policies. What is the strongest objection to the
+    design?
+  options:
+    - { text: "It has no freshness policy — a stale index serves confidently wrong answers no model-side eval will catch; add re-indexing cadence / TTLs / incremental updates", correct: true }
+    - { text: "The generator is hallucinating; switching to a larger LLM will fix the citations" }
+    - { text: "The chunks are too small; larger chunks would make the answers current" }
+    - { text: "Reranking is missing; a cross-encoder would detect the outdated documents" }
+  explanation: >-
+    The retrieved documents are genuinely present in the index but stale, so the model faithfully
+    grounds on outdated text — this is a freshness failure, not a hallucination, chunk-size, or
+    reranking problem. The fix is an explicit freshness policy: re-index cadence, TTLs, and
+    incremental updates as the corpus changes.
+
+- id: essay-rag-deep-dive
+  type: essay
+  length: long
+  tags: [retrieval, review]
+  difficulty: 4
+  prompt: >-
+    You are the reviewer on a RAG design for a multi-tenant, frequently-changing knowledge base that
+    must return current, citable answers. Write a design review: walk the levers (chunking, retrieval
+    method, reranking, context enrichment, freshness), give an explicit tradeoff for each, and state
+    what would move the design from demo-ready to production-ready. Call out at least two antipatterns
+    and how you would decide between dense-only and hybrid retrieval for this corpus.
+  eval_skill: eval-rag-essay
+  reference_points:
+    - "Chunking: structure-aware splitting on headings/paragraphs with overlap and metadata beats fixed-size splitting, which severs sentences and tables and strands boundary facts; chunk size trades embedding precision against surrounding context."
+    - "Retrieval: dense captures paraphrase/semantic similarity, sparse (BM25) catches exact IDs and rare terms; hybrid with RRF fuses by rank position and is the production default — choose hybrid when the corpus has identifiers/codes, dense-only only for purely semantic corpora."
+    - "Reranking: a cross-encoder scores query-document pairs jointly for higher precision, run only over a widened first-stage candidate set to bound latency; context is a ranked budget, so precision at small k beats raw recall."
+    - "Context enrichment: Contextual Retrieval prepends a chunk-situating summary before embedding to lift recall on context-poor chunks, at one LLM call per chunk at index time."
+    - "Freshness: an explicit re-index cadence, TTLs, and incremental updates keep a frequently-changing corpus current; a stale index is an antipattern that serves confidently wrong answers no model-side eval catches."
+    - "Antipatterns to name: naive fixed-size chunking, dense-only retrieval, no reranker, and a stale index; production-ready adds enrichment, bounded/tuned k, and a named freshness policy on top of hybrid + rerank."
+
+- id: debug-rag-rrf
+  type: code
+  language: typescript
+  tags: [retrieval, review]
+  difficulty: 4
+  prompt: >-
+    DEBUGGING: the provided `reciprocalRankFusion` fuses ranked id lists from a hybrid retriever, but
+    the fused order is wrong — an id both retrievers rank near the top ends up below an id that only
+    one list ranked #1, and some scores come out as `Infinity`, so any ranking that involves a list's
+    first element is nonsense. There is exactly one bug in the scoring. Fix it (make the minimal
+    change) so RRF scores each id by the sum of 1/(k + rank) with rank counted from 1, no score is
+    ever Infinity or NaN, and a broadly-agreed id outranks a single-list top hit.
+  starter_file: exercises/rrf-debug/starter.ts
+  test_file: exercises/rrf-debug/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-rag-code
+  concept_checks:
+    must_use: ["1-based rank in the RRF formula", "divide by (k + rank), keeping the k smoothing constant", "every id scored finite (no Infinity/NaN)"]
+    avoid_antipattern: ["using 1/rank and dropping the k constant", "0-based rank causing a divide-by-zero on the top item"]

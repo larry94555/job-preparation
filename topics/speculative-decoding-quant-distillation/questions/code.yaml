@@ -1,0 +1,20 @@
+# Coding exercise — engine type: code (graded by tests + concept skill)
+- id: code-accepted-tokens
+  type: code
+  language: typescript
+  tags: [speculative]
+  difficulty: 2
+  prompt: >-
+    Implement `acceptedTokens(draftMatches)`. Given a boolean list of whether each drafted token was
+    accepted (in draft order), return the number of tokens produced in that verification step: the
+    count of leading `true`s (stopping at the first `false`), plus one for the token the target always
+    emits. Examples: [true,true,false] → 3; [false,...] → 1; [true,true,true] → 4; [] → 1.
+  starter_file: exercises/accepted-tokens/starter.ts
+  test_file: exercises/accepted-tokens/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-specdec-code
+  concept_checks:
+    must_use: ["count leading matches", "stop at the first reject", "add one bonus token"]
+    avoid_antipattern: ["counting matches after a reject", "returning zero for a fully-rejected draft"]

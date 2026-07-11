@@ -1,0 +1,9 @@
+id: lesson-loop
+title: "The agent loop"
+material: harness-loop.md
+segments:
+  - present: the-agent-loop
+  - check: mc-loop-phases
+  - check: cloze-loop
+  - present: guarding-the-loop
+  - check: mc-duplicate-guard

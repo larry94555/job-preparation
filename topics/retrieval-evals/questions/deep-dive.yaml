@@ -1,0 +1,89 @@
+# Deep-dive — architecture judgment (code-review MCs + an L4 essay)
+
+- id: mc-review-reval-e2e-only
+  type: multiple_choice
+  tags: [metrics, review]
+  difficulty: 4
+  prompt: >-
+    An eval design doc says: "We score every release with a single LLM-judged pass/fail on the final
+    answer over 500 queries. If pass rate drops, we investigate." Reviewing it, what is the most
+    important problem?
+  options:
+    - { text: "It is end-to-end-only, so it conflates a retrieval miss with a grounding failure and cannot tell you which stage regressed — add component-isolated retrieval metrics", correct: true }
+    - { text: "500 queries is far too many; a dozen would be more reliable" }
+    - { text: "LLM judges can never be used for evaluation; only humans can score answers" }
+    - { text: "The problem is pass/fail; the same end-to-end score reported as a percentage would fix it" }
+  explanation: >-
+    A single end-to-end number blurs the two failure modes together: when it drops you cannot tell
+    whether the right passage was never retrieved (a recall@k problem) or was retrieved and ignored (a
+    grounding problem). Component isolation — scoring retrieval separately from generation — is what
+    makes a regression point at the stage to fix.
+
+- id: mc-review-reval-wrong-metric
+  type: multiple_choice
+  tags: [metrics, review]
+  difficulty: 4
+  prompt: >-
+    A team complains their RAG "usually has the right passage but buries it several ranks down," yet
+    their eval tracks only recall@k, which stays high. Rate this eval design and pick the best fix.
+  options:
+    - { text: "Prototype-grade: recall@k is blind to rank, so it can't see the buried-result problem — add an order-sensitive metric (MRR or nDCG) and consider reranking", correct: true }
+    - { text: "Production-ready: high recall@k already proves the ranking is fine" }
+    - { text: "Fine as-is, but lower k until recall@k drops so the problem shows up" }
+    - { text: "The metric is fine; the real fix is a larger embedding model, no eval change needed" }
+  explanation: >-
+    recall@k only checks whether the relevant doc is somewhere in the top-k; a passage at rank 1 and at
+    rank k score identically. The complaint is about position, so you need an order-sensitive metric like
+    MRR or nDCG, and the fix is usually reranking. Lowering k just hides coverage; it doesn't measure order.
+
+- id: mc-review-reval-synthetic-labels
+  type: multiple_choice
+  tags: [metrics, review]
+  difficulty: 4
+  prompt: >-
+    A PR bootstraps a relevance-labeled set entirely with an LLM ("it labeled 20k query/doc pairs in an
+    hour, and our recall@k jumped to 0.92, shipping it"). What is the strongest objection?
+  options:
+    - { text: "Fully synthetic labels with no human-validated slice mean the metric is measuring the judge, not the retriever — spot-check against a human-labeled subset before trusting the number", correct: true }
+    - { text: "Synthetic labels are never acceptable; only TREC-style human qrels can ever be used" }
+    - { text: "recall@k of 0.92 is impossible, so the pipeline must be broken" }
+    - { text: "The problem is coverage; 20k pairs is far too few to be meaningful" }
+  explanation: >-
+    LLM-generated labels scale cheaply and are a legitimate way to bootstrap coverage, but if none of
+    them are validated against human judgments the eval is grading the label-generator's biases rather
+    than the retriever. The fix is a human-labeled slice to calibrate the synthetic labels, not banning
+    them outright.
+
+- id: essay-reval-deep-dive
+  type: essay
+  length: long
+  tags: [metrics, review]
+  difficulty: 4
+  prompt: >-
+    You are the reviewer on a retrieval-evals design for a production RAG system that must cite its
+    sources. Write a design review: walk the levers (isolation, labels, retrieval-metric choice,
+    grounding/attribution judging, gating), give an explicit tradeoff for each, and state what would move
+    the design from demo-ready to production-ready. Call out at least two antipatterns and the check you
+    would require before trusting an LLM-as-judge grounding or attribution score.
+  eval_skill: eval-retrievalevals-essay
+
+- id: debug-reval-recall
+  type: code
+  language: typescript
+  tags: [metrics, review]
+  difficulty: 4
+  prompt: >-
+    DEBUGGING: the provided `recallAtK(retrieved, relevant, k)` reports the wrong recall whenever
+    k differs from the number of relevant docs — with a large k it can even report recall greater
+    than 1, which is impossible. There is exactly one bug: it divides the hit count by the wrong
+    denominator. Fix it so recall = (# relevant ids in the top-k) / (total relevant), stays in
+    [0, 1] for any k, and returns 0 for an empty relevant set (make the minimal change).
+  starter_file: exercises/recall-at-k-debug/starter.ts
+  test_file: exercises/recall-at-k-debug/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-retrievalevals-code
+  concept_checks:
+    must_use: ["divide by the number of relevant docs, not by k", "recall stays within [0, 1] for any k", "guard the empty relevant set to return 0"]
+    avoid_antipattern: ["dividing hits by k or by retrieved.length", "letting recall exceed 1 when k is large"]

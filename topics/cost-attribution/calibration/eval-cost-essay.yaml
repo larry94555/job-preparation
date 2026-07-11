@@ -1,0 +1,47 @@
+# Calibration for eval-cost-essay (exemplars target essay-per-model-wrong).
+skill: eval-cost-essay
+cases:
+  # PASS — strong answer: all four checks true, gate (technically_correct) true.
+  - answer: >-
+      Cost per model is the wrong granularity because it sums every use of a model into one number and
+      hides where the spend actually accrues, so you can't tell which feature, workflow, or tenant is
+      driving the bill and therefore where to cut. Attribute cost instead to the dimensions the business
+      can act on: feature, workflow, tenant, and user journey. You get there by attaching attribution
+      tags at the request entry point and propagating them through the downstream retrieval, tool, and
+      generation calls, so every cost record rolls up by dimension and you can see the real cost drivers.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # PASS — second strong answer, different wording: all four checks true, gate true.
+  - answer: >-
+      A per-model view aggregates spend across every caller, so a single model total masks which product
+      surface or customer is responsible and gives leadership nothing to optimize. The dimensions that
+      matter are the ones you can act on — feature, workflow, tenant, and user journey — because those map
+      to owners and decisions. Concretely, you stamp attribution tags (feature, tenant, journey) onto the
+      request at the entry point and propagate that context through each downstream retrieval and
+      generation call, so each cost record carries its tags and rolls up per dimension for the dashboard.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — weak/wrong: gate false plus covers_key_points and concrete false.
+  # Off-topic-ish, no key dimensions, and a false claim (retries are free / cheapest model is always right).
+  - answer: >-
+      Per-model cost is fine as a view, and since retries are free the safest move is to just always
+      switch every call to the cheapest model and stop worrying about where the spend comes from.
+    expect:
+      verdict: fail
+      checks: { addresses_question: true, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # BORDERLINE — strong, specific, on-topic, but misses ONLY the gate (technically_correct false).
+  # score = 3/4 = 0.75 -> base pass; failed gate caps DOWN one level -> borderline.
+  - answer: >-
+      Cost per model is the wrong granularity because one model total hides which feature, workflow, or
+      tenant is actually spending, so leadership can't tell where to cut. You should attribute cost to
+      feature, workflow, tenant, and user journey by attaching attribution tags at the entry point — but
+      the reason this works is that adding those tags makes the provider bill you a lower price per token,
+      which is what actually reduces the number on the dashboard.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: false, concrete: true }

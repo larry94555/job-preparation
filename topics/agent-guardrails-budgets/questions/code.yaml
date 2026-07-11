@@ -1,0 +1,21 @@
+# Coding exercise — engine type: code (graded by tests + concept skill)
+- id: code-bounded-loop
+  type: code
+  language: typescript
+  tags: [budgets]
+  difficulty: 3
+  prompt: >-
+    Implement `runAgent(step, opts)`. `step(state)` returns `{ state, done }`; `opts` is
+    `{ initial, maxSteps }`. Loop from `initial`, applying `step` and counting steps. Stop with
+    `"complete"` when a step reports done; `"no-progress"` when the new state equals the previous
+    state; `"budget"` when steps reaches `maxSteps`. Check in that order. Return
+    `{ steps, stoppedBy, state }`.
+  starter_file: exercises/bounded-loop/starter.ts
+  test_file: exercises/bounded-loop/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-guardrails-code
+  concept_checks:
+    must_use: ["max-steps budget stop", "no-progress detection (state unchanged)", "returns the stop reason"]
+    avoid_antipattern: ["unbounded loop with no step cap", "no no-progress detection"]

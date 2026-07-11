@@ -1,0 +1,10 @@
+id: lesson-build-harness-loop
+title: "Build it: the think-act-observe loop"
+material: build-harness-loop.md
+segments:
+  - present: the-loop-with-a-duplicate-call-guard
+  - check: mc-duplicate-guard-build
+  - present: why-the-harness-owns-termination
+  - check: mc-harness-owns-stop
+  - apply: code-harness-loop
+  - apply: essay-harness-design

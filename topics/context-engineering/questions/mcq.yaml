@@ -1,0 +1,108 @@
+# Multiple choice
+- id: mc-window-budget
+  type: multiple_choice
+  tags: [budget]
+  difficulty: 2
+  prompt: "The most useful way to think about the context window is as:"
+  options:
+    - { text: "A ranked, finite token budget you allocate deliberately", correct: true }
+    - { text: "A scratch buffer that should always be filled to capacity" }
+    - { text: "A free-form place to paste everything that might be relevant" }
+    - { text: "A cache that the model manages for you" }
+  explanation: "Context is a bounded resource; the job is to rank candidates and fit the most valuable ones into the budget — not to fill it."
+
+- id: mc-dump-antipattern
+  type: multiple_choice
+  tags: [budget]
+  difficulty: 2
+  prompt: "Which is a context-engineering antipattern?"
+  options:
+    - { text: "Concatenating every document you have into one long prompt", correct: true }
+    - { text: "Ranking candidates and fitting the top ones to the budget" }
+    - { text: "Summarizing old turns to reclaim space" }
+    - { text: "Dropping low-relevance chunks when the budget is tight" }
+  explanation: "Dump-everything / unranked concatenation dilutes the signal and raises cost and latency without improving — and often hurting — task performance."
+
+- id: mc-more-context-tradeoff
+  type: multiple_choice
+  tags: [budget]
+  difficulty: 3
+  prompt: "Adding more (marginally relevant) context to the window primarily risks:"
+  options:
+    - { text: "Diluting the signal and increasing cost and latency", correct: true }
+    - { text: "Making the model deterministic" }
+    - { text: "Shrinking the tokenizer vocabulary" }
+    - { text: "Removing the need for retrieval" }
+  explanation: "Recall from more context trades off against dilution, cost, and latency; beyond a point extra tokens lower task quality."
+
+- id: mc-lost-in-middle
+  type: multiple_choice
+  tags: [position]
+  difficulty: 2
+  prompt: "The 'lost in the middle' effect describes that models tend to:"
+  options:
+    - { text: "Use information best at the start and end of the context, worst in the middle", correct: true }
+    - { text: "Ignore the first and last tokens of any prompt" }
+    - { text: "Forget the system prompt after a few turns" }
+    - { text: "Perform worse as temperature rises" }
+  explanation: "Retrieval accuracy is U-shaped over position: primacy and recency help, and relevant facts buried in the middle are most often missed."
+
+- id: mc-position-placement
+  type: multiple_choice
+  tags: [position]
+  difficulty: 3
+  prompt: "Given the position effect, where should you place the single most important piece of evidence?"
+  options:
+    - { text: "Near the start or the very end of the context", correct: true }
+    - { text: "Exactly in the middle, to balance attention" }
+    - { text: "Anywhere — position does not matter" }
+    - { text: "Only in the system prompt, never in the user turn" }
+  explanation: "Because performance is best at the edges (primacy/recency), critical evidence belongs near the top or bottom, not buried mid-context."
+
+- id: mc-primacy-recency
+  type: multiple_choice
+  tags: [position]
+  difficulty: 2
+  prompt: "'Primacy and recency' effects in a context window refer to stronger use of tokens that are:"
+  options:
+    - { text: "Early (primacy) and late (recency) in the window", correct: true }
+    - { text: "High-frequency in the training data" }
+    - { text: "Written in uppercase" }
+    - { text: "Closest to the model's stop token only" }
+  explanation: "Primacy = beginning, recency = end; both edges get more effective attention than the middle."
+
+- id: mc-selection-goal
+  type: multiple_choice
+  tags: [selection]
+  difficulty: 2
+  prompt: "The goal of selection/retrieval into the window is to:"
+  options:
+    - { text: "Choose the few most relevant chunks that fit the budget", correct: true }
+    - { text: "Retrieve as many chunks as the store will return" }
+    - { text: "Always include the most recent documents regardless of relevance" }
+    - { text: "Replace ranking with random sampling for diversity" }
+  explanation: "Selection is rank-then-fit: score candidates by relevance and pack the top ones until the token budget is spent."
+
+- id: mc-rank-then-fit
+  type: multiple_choice
+  tags: [selection]
+  difficulty: 3
+  prompt: "In the rank-then-fit-to-budget pattern, what determines whether a candidate chunk makes it into the window?"
+  options:
+    - { text: "Its relevance rank AND whether it still fits the remaining token budget", correct: true }
+    - { text: "Only its length" }
+    - { text: "Only its recency timestamp" }
+    - { text: "Whether it was retrieved first, in arbitrary order" }
+  explanation: "You rank by relevance, then greedily admit chunks while token budget remains — combining relevance and the accounting constraint."
+
+- id: mc-stable-prefix
+  type: multiple_choice
+  tags: [selection]
+  difficulty: 4
+  prompt: "Keeping a stable prefix and putting the variable content in the suffix mainly helps because it:"
+  options:
+    - { text: "Lets prompt caching reuse the unchanged prefix across calls", correct: true }
+    - { text: "Guarantees the model ignores the suffix" }
+    - { text: "Removes the need to rank retrieved chunks" }
+    - { text: "Increases the size of the context window" }
+  explanation: "A stable prefix (system + fixed instructions) can be cached and reused, cutting cost and latency; only the variable suffix changes per request."

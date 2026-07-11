@@ -1,0 +1,12 @@
+id: lesson-frontier-ops
+title: "Frontier & operations: the open injection problem, indirect/agent injection, provenance at scale, and the signals to watch"
+material: frontier-ops.md
+segments:
+  - present: the-safety-engineering-frontier
+  - check: mc-frontier-safety-no-general-defense
+  - check: mc-frontier-safety-indirect-agent
+  - check: mc-frontier-safety-provenance-scale
+  - present: operating-safety-in-production
+  - check: mc-ops-safety-egress-leading-signal
+  - check: mc-ops-safety-denial-and-fp
+  - apply: code-safety-fence

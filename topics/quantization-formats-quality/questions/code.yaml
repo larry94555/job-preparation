@@ -1,0 +1,21 @@
+# Coding exercise — engine type: code (graded by tests + concept skill)
+- id: code-int8-quant
+  type: code
+  language: typescript
+  tags: [methods]
+  difficulty: 3
+  prompt: >-
+    Implement per-tensor asymmetric uint8 quantization. `quantizeInt8(values)` returns
+    `{ scale, zeroPoint, q }` where scale = (max − min) / 255 (if max === min, use scale = 1,
+    zeroPoint = 0), zeroPoint = clamp(round(−min / scale), 0, 255), and q[i] =
+    clamp(round(values[i] / scale) + zeroPoint, 0, 255) as integers. `dequantize(q, scale, zeroPoint)`
+    returns (q − zeroPoint) * scale for each code.
+  starter_file: exercises/int8-quant/starter.ts
+  test_file: exercises/int8-quant/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-quant-code
+  concept_checks:
+    must_use: ["scale = (max-min)/255", "clamp codes to [0,255] integers", "guard constant tensor (no divide by zero)"]
+    avoid_antipattern: ["unclamped codes that overflow", "NaN when max === min"]

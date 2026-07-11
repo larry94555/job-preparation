@@ -1,0 +1,38 @@
+# Essay
+- id: essay-silent-danger
+  type: essay
+  length: short
+  tags: [failures]
+  difficulty: 3
+  prompt: "A teammate says 'our error rate is near zero, so the LLM feature is healthy.' Explain why silent failures make that reasoning dangerous, with a concrete example."
+  eval_skill: eval-failuremodes-essay
+  reference_points:
+    - "Error rate only counts loud failures (exceptions, non-2xx); silent failures return well-formed but wrong output that never throws, so a near-zero error rate says nothing about correctness."
+    - "Concrete examples: a hallucinated citation, a stale-retrieval answer, or a prompt-tweak eval regression — all return HTTP 200 with plausible text."
+    - "Because nothing alerts, silent failures erode user trust before anyone notices; you need eval monitoring and validators, not just error-rate dashboards, to catch them."
+
+- id: essay-detect-mitigate-prevent
+  type: essay
+  length: short
+  tags: [detection, prevention]
+  difficulty: 4
+  prompt: "Pick one failure mode (e.g. malformed JSON or stale retrieval) and walk through how you would detect it, mitigate it, and prevent it. Be specific about the mechanism at each layer."
+  eval_skill: eval-failuremodes-essay
+  reference_points:
+    - "Detection surfaces that the failure happened: schema validation for malformed JSON, or a freshness/TTL check for stale retrieval."
+    - "Mitigation limits the blast radius once detected: validate-repair-fallback to a safe default for JSON, or refusing/flagging and re-retrieving fresh sources for stale data."
+    - "Prevention reduces likelihood up front: constrained decoding / strict schemas for JSON, or TTLs and re-indexing pipelines that keep the corpus current."
+    - "The three layers are distinct and complementary — you want all three, not just a loud runtime error."
+
+- id: essay-runsafely
+  type: essay
+  length: long
+  tags: [mitigation, prevention]
+  difficulty: 4
+  prompt: "Design a `runSafely` guard suite that wraps a production model call so that hallucinated tool calls, malformed JSON, stale retrieval, and runaway agents all degrade gracefully. Explain what each guard contributes and how CI evals and canaries protect against silent regressions."
+  eval_skill: eval-failuremodes-essay
+  reference_points:
+    - "Layered defenses (defense-in-depth): each guard targets a distinct failure mode so no single check has to catch everything, and the wrapper degrades to a safe response instead of crashing."
+    - "Schema/allowlist validation rejects hallucinated tool calls and malformed JSON, with validate-repair-fallback to re-ask or a safe default."
+    - "A freshness/TTL check flags or refuses stale retrieval; budgets (max steps/tokens/cost) plus loop detection contain runaway agents."
+    - "Silent regressions bypass runtime guards, so a CI eval gate blocks merges that drop scores, and canary deploys expose changes to a small traffic slice while watching quality/latency/cost before full rollout."

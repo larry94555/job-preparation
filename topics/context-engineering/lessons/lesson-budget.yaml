@@ -1,0 +1,12 @@
+id: lesson-budget
+title: "Context as a ranked token budget"
+material: context-budget.md
+segments:
+  - present: context-as-a-ranked-token-budget
+  - check: mc-window-budget
+  - check: mc-dump-antipattern
+  - check: cloze-budget
+  - present: the-cost-of-padding
+  - check: mc-more-context-tradeoff
+  - check: fe-budget-tradeoff
+  - apply: essay-budget-explain

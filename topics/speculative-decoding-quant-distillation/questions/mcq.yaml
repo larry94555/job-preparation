@@ -1,0 +1,108 @@
+# Multiple choice
+- id: mc-three-levers
+  type: multiple_choice
+  tags: [tradeoffs]
+  difficulty: 2
+  prompt: "Speculative decoding, quantization, and distillation each primarily target a different goal. Which mapping is correct?"
+  options:
+    - { text: "Speculative decoding → latency; quantization → memory/cost; distillation → a smaller model", correct: true }
+    - { text: "Speculative decoding → memory; quantization → latency; distillation → cost" }
+    - { text: "All three primarily reduce output quality" }
+    - { text: "All three primarily increase the model's parameter count" }
+  explanation: "The three levers map to distinct goals: speculative decoding speeds up latency, quantization shrinks memory/compute cost, and distillation produces a permanently smaller student model."
+
+- id: mc-lossless-lever
+  type: multiple_choice
+  tags: [speculative, tradeoffs]
+  difficulty: 2
+  prompt: "Which of the three levers is lossless — it does not change the model's output distribution at all?"
+  options:
+    - { text: "Speculative decoding", correct: true }
+    - { text: "Quantization" }
+    - { text: "Distillation" }
+    - { text: "None of them are lossless" }
+  explanation: "Speculative decoding produces exactly the tokens the target model would have produced; it only reaches them faster. Quantization and distillation both risk changing outputs."
+
+- id: mc-quant-goal
+  type: multiple_choice
+  tags: [quantization]
+  difficulty: 2
+  prompt: "The main thing quantization buys you is:"
+  options:
+    - { text: "Smaller memory footprint and cheaper compute by storing weights/activations in lower precision", correct: true }
+    - { text: "Guaranteed identical outputs to the full-precision model" }
+    - { text: "A permanently smaller number of parameters" }
+    - { text: "A faster draft model for verification" }
+  explanation: "Quantization stores weights (and sometimes activations) in lower bit-widths (e.g. INT8/INT4), cutting memory and often speeding compute — at the risk of some quality loss."
+
+- id: mc-quant-risk
+  type: multiple_choice
+  tags: [quantization, tradeoffs]
+  difficulty: 3
+  prompt: "The characteristic risk of quantization that speculative decoding does NOT have is:"
+  options:
+    - { text: "A drop in output quality, because low precision perturbs the weights", correct: true }
+    - { text: "That it requires training a separate draft model" }
+    - { text: "That it can only ever slow the model down" }
+    - { text: "That it increases the parameter count" }
+  explanation: "Quantization is lossy: rounding weights to fewer bits can degrade quality. Speculative decoding, by contrast, is lossless — it changes speed, not the output distribution."
+
+- id: mc-distill-cost
+  type: multiple_choice
+  tags: [distillation]
+  difficulty: 3
+  prompt: "Compared with the other two levers, the distinctive upfront cost of distillation is:"
+  options:
+    - { text: "A training step — you train a smaller student model to mimic the larger teacher", correct: true }
+    - { text: "It must run a draft model on every request" }
+    - { text: "It can only be applied at query time" }
+    - { text: "It always requires INT4 hardware support" }
+  explanation: "Distillation is a training-time investment: a student model learns from a teacher, yielding a permanently smaller/cheaper model to serve, but requiring the upfront training effort and data."
+
+- id: mc-specdec-flow
+  type: multiple_choice
+  tags: [speculative]
+  difficulty: 3
+  prompt: "The speculative-decoding loop works by:"
+  options:
+    - { text: "A cheap draft model proposes several tokens, then the target model verifies them in one parallel pass", correct: true }
+    - { text: "The target model generates tokens one at a time with no draft" }
+    - { text: "A draft model replaces the target model entirely" }
+    - { text: "Two target models vote on each token" }
+  explanation: "A small draft model proposes a run of tokens; the large target model then verifies that run in a single parallel forward pass, accepting the longest correct prefix."
+
+- id: mc-acceptance-rate
+  type: multiple_choice
+  tags: [speculative]
+  difficulty: 3
+  prompt: "In speculative decoding, the acceptance rate is:"
+  options:
+    - { text: "The fraction of the draft model's proposed tokens that the target model verifies as correct", correct: true }
+    - { text: "The fraction of requests that are routed to the draft model" }
+    - { text: "The percentage of weights quantized to INT4" }
+    - { text: "The share of the teacher's knowledge retained by the student" }
+  explanation: "Acceptance rate measures how many drafted tokens survive verification. A higher acceptance rate means more tokens land per verification pass, so more speedup."
+
+- id: mc-acceptance-speedup
+  type: multiple_choice
+  tags: [speculative, tradeoffs]
+  difficulty: 4
+  prompt: "If the draft model's acceptance rate is very low, speculative decoding can:"
+  options:
+    - { text: "Provide little or no speedup — even slow things down — because verification of rejected drafts is wasted work", correct: true }
+    - { text: "Still guarantee a large speedup regardless of acceptance" }
+    - { text: "Change the target model's output distribution" }
+    - { text: "Reduce the model's memory footprint" }
+  explanation: "Speculative decoding only wins when enough drafted tokens are accepted. A poor draft model means most drafts are rejected, and the overhead of drafting plus verifying can erase the gains."
+
+- id: mc-wrong-tool-latency
+  type: multiple_choice
+  tags: [tradeoffs]
+  difficulty: 4
+  prompt: "Your serving cost per token is too high because the model barely fits in GPU memory. Which lever is the WRONG first choice?"
+  options:
+    - { text: "Speculative decoding — it targets latency, not memory footprint or cost", correct: true }
+    - { text: "Quantization — it directly shrinks the memory footprint" }
+    - { text: "Distillation — a smaller student model costs less to serve" }
+    - { text: "Either quantization or distillation, which both cut memory/cost" }
+  explanation: "Speculative decoding speeds up latency but adds a draft model and does not reduce memory; for a memory/cost problem, quantization or distillation are the right levers."

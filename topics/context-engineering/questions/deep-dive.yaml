@@ -1,0 +1,99 @@
+# Deep-dive — architecture judgment (code-review MCs + an L4 essay)
+
+- id: mc-review-context-unranked-dump
+  type: multiple_choice
+  tags: [selection, review]
+  difficulty: 4
+  prompt: >-
+    A retrieval step is documented as: "We concatenate every chunk the vector store returns, in
+    whatever order it returns them, so nothing relevant is ever left out." Reviewing it, what is the
+    most important problem?
+  options:
+    - { text: "It is unranked dump-everything: it dilutes the signal (context rot), raises cost and latency, and buries key facts mid-context — rank candidates and fit the top ones to a budget", correct: true }
+    - { text: "The vector store is the wrong data structure; a relational database would rank chunks automatically" }
+    - { text: "Nothing — returning every retrieved chunk maximizes recall, which is always what you want" }
+    - { text: "The only issue is that embeddings are lossy; switching to keyword search fixes it" }
+  explanation: >-
+    Returning as many chunks as the store gives back, unranked, is the classic antipattern. It floods
+    the window with marginally-relevant tokens that dilute signal, cost money and latency, and can
+    push the actually-needed fact into the middle where models under-use it. The disciplined fix is
+    rank-then-fit-to-budget: score candidates by relevance and admit the top ones while budget
+    remains.
+
+- id: mc-review-context-middle-placement
+  type: multiple_choice
+  tags: [selection, review]
+  difficulty: 4
+  prompt: >-
+    A pipeline ranks chunks correctly, then lays them out by putting the single highest-scoring chunk
+    dead-center of a long context "to give it balanced attention," with filler before and after. Rate
+    this design and pick the best fix.
+  options:
+    - { text: "Prototype-grade: retrieval accuracy is U-shaped, so the center is exactly where facts are under-used — move the top chunk to the start or the very end", correct: true }
+    - { text: "Production-ready: the middle is the most attended position, so the top chunk belongs there" }
+    - { text: "Fine as-is, but the fix is to raise temperature so the model attends more evenly" }
+    - { text: "The ranking is the problem; drop ranking and order chunks purely by recency" }
+  explanation: >-
+    "Lost in the middle" means models use information best at the start (primacy) and end (recency)
+    and worst in the middle. Placing the single most important chunk dead-center puts it where it is
+    most likely to be overlooked. The fix is deliberate ordering: the top-ranked evidence belongs near
+    the top or the very end, not buried mid-context.
+
+- id: mc-review-context-advertised-window
+  type: multiple_choice
+  tags: [selection, review]
+  difficulty: 4
+  prompt: >-
+    A design doc says: "The model advertises a 200k-token window, so we can safely pack 180k tokens of
+    retrieved context and trust the model to use all of it." What is the strongest objection?
+  options:
+    - { text: "Advertised context is not the same as effective context; usable performance must be measured with a long-context eval (needle-in-a-haystack, RULER) before relying on it", correct: true }
+    - { text: "180k tokens is impossible to tokenize; the tokenizer will fail above 128k" }
+    - { text: "The window is too small; only models above 1M tokens are usable for retrieval" }
+    - { text: "There is no objection — if the API accepts the tokens, the model uses them all equally" }
+  explanation: >-
+    The gap between advertised and effective context is a live concern. A model that accepts 200k
+    tokens may under-use much of that window, especially mid-context. Trusting the advertised number
+    without measuring effective context — with needle-in-a-haystack or RULER — claims capacity that
+    has not been verified, and it compounds with dilution as the window fills.
+
+- id: essay-context-deep-dive
+  type: essay
+  length: long
+  tags: [selection, review]
+  difficulty: 4
+  prompt: >-
+    You are the reviewer on a context-engineering design for a multi-turn, long-context agent on a
+    fixed token window. Write a design review: walk the levers (budget allocation, selection/retrieval,
+    position/ordering, compaction, stable-prefix reuse), give an explicit tradeoff for each, and state
+    what would move the design from demo-ready to production-ready. Call out at least two antipatterns
+    and how you would verify effective (not advertised) context before accepting the design.
+  eval_skill: eval-context-essay
+  reference_points:
+    - "Budget allocation: carve the fixed window into slices (system prefix, retrieved evidence, history, reserved headroom); over-spending one slice starves another."
+    - "Selection/retrieval: rank candidates by relevance and fit the top ones to the budget; the antipattern is unranked dump-everything concatenation."
+    - "Position/ordering: retrieval accuracy is U-shaped, so place the most important evidence near the start or the very end, not the middle."
+    - "Compaction: summarize or drop overflow rather than force it in; the tradeoff is lossy summaries; a stable prefix + variable suffix enables prompt-cache reuse."
+    - "Production-ready adds compaction of overflow, prefix reuse, and measured effective context (needle-in-a-haystack, RULER); antipatterns include dump-everything, ignoring context rot, mid-context placement, and trusting the advertised window."
+
+- id: debug-context-rank-fit
+  type: code
+  language: typescript
+  tags: [selection, review]
+  difficulty: 4
+  prompt: >-
+    DEBUGGING: the provided `rankThenFit` selects retrieved items in descending score order to
+    assemble context, but the assembled context sometimes exceeds the token budget by one item and the
+    tail of the prompt gets silently truncated. There is exactly one bug. Fix it so the total tokens of
+    the returned items never exceed `budget` — admit an item only when it still fits, and skip (do not
+    stop) a too-big item so a smaller lower-score item later can still be admitted. Make the minimal
+    change, keeping descending-score ordering.
+  starter_file: exercises/rank-then-fit-debug/starter.ts
+  test_file: exercises/rank-then-fit-debug/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-context-code
+  concept_checks:
+    must_use: ["check the running total BEFORE admitting an item (running + tokens <= budget)", "returned total never exceeds budget", "skip a too-big item so a smaller later item can still fit"]
+    avoid_antipattern: ["pushing the item before checking whether it fits", "stopping at the first item that does not fit instead of skipping it"]

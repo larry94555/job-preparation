@@ -1,0 +1,9 @@
+id: eval-methodology
+title: "Eval Methodology"
+description: "You can't improve what you don't measure — evals are the core discipline: golden sets and regression gates, adversarial coverage, and calibrated LLM-as-judge grading."
+pass_threshold: 0.8
+tag_weights:
+  golden: 1.0
+  regression: 1.2
+  adversarial: 1.2
+  judge: 1.2

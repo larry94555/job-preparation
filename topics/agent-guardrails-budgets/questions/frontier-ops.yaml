@@ -1,0 +1,112 @@
+# Frontier & operations drill — closes D2 (frontier framework/termination drill) and D6 (ops metrics drill).
+
+- id: mc-frontier-guard-frameworks
+  type: multiple_choice
+  tags: [budgets, frontier]
+  difficulty: 4
+  prompt: >-
+    Named enforcement frameworks (NeMo Guardrails, Guardrails AI) represent a shift in how guardrails are
+    built. What is the load-bearing change relative to hand-rolling an allow-list inside each runner?
+  options:
+    - { text: "Guardrails become declarable, reviewable, versionable policy (rails / validators) instead of incidental code scattered through the loop", correct: true }
+    - { text: "They make the agent loop provably terminate in a fixed number of steps" }
+    - { text: "They eliminate the need for budgets by making tools free to call" }
+    - { text: "They replace the LLM with a rules engine so no model runs" }
+  explanation: >-
+    NeMo Guardrails makes programmable rails around an agent a first-class artifact you define rather than
+    scatter as if-checks; Guardrails AI does the same on the content axis with validators and a
+    validate→repair→gate cycle. The win is that "what an agent can do" becomes a spec you can review,
+    version, and test, independent of what the loop happens to run — not a termination guarantee.
+
+- id: mc-frontier-guard-principled-termination
+  type: multiple_choice
+  tags: [budgets, frontier]
+  difficulty: 4
+  prompt: >-
+    The research edge on budgets and termination is moving toward "principled" bounds. What does that
+    frontier actually mean, per the canon's open problems?
+  options:
+    - { text: "Replacing hand-tuned ceilings and heuristic step-diffing with defensible termination bounds and no-progress detection that generalizes across task types", correct: true }
+    - { text: "Removing budgets entirely once agents are reliable enough" }
+    - { text: "Standardizing every runner on exactly 20 steps as the correct budget" }
+    - { text: "Proving that agents never get stuck, so stuck-detection can be deleted" }
+  explanation: >-
+    Reliably detecting "stuck" and principled budgets are stated open problems. Today budgets are mostly
+    picked numbers and no-progress detection is heuristic; the frontier is moving toward budgets with a
+    backing argument (formal termination bounds) and detection that generalizes — not a fixed magic number
+    and not a claim that agents never get stuck.
+
+- id: mc-frontier-guard-longhorizon
+  type: multiple_choice
+  tags: [budgets, frontier]
+  difficulty: 4
+  prompt: >-
+    As agents run over longer horizons, canon frames the frontier guardrail problem as shifting from
+    "cap the loop" to something else. What is the right emphasis?
+  options:
+    - { text: "Safe long-horizon autonomy via containment — HITL escalation and staying safe across many steps — not merely larger budgets", correct: true }
+    - { text: "Simply multiplying every budget ceiling by ten so long tasks fit" }
+    - { text: "Dropping guardrails once the agent has run without incident for a while" }
+    - { text: "Switching to a success-only exit condition to let long tasks finish" }
+  explanation: >-
+    Safe long-horizon autonomy is a stated open problem: the concern shifts from bounding a short loop to
+    staying safe across many steps, which calls for containment and human-in-the-loop escalation rather
+    than just bigger caps. Larger budgets, dropped guardrails, and success-only exits all make long-horizon
+    runs less safe, not more.
+
+- id: mc-ops-guard-exhaustion
+  type: multiple_choice
+  tags: [guardrails, ops]
+  difficulty: 4
+  prompt: >-
+    Your budget-exhaustion rate (runs that end because a budget drained, not because the task completed)
+    has climbed over a week at constant traffic. What does this signal, operationally?
+  options:
+    - { text: "Budgets are backstopping correctly, but the agent is increasingly failing to finish inside them — investigate task difficulty or a regression, don't just raise the cap", correct: true }
+    - { text: "The budgets are set too low and should always be raised whenever exhaustion rises" }
+    - { text: "Nothing actionable — exhaustion rate is independent of agent health" }
+    - { text: "The model weights have grown and need more memory" }
+  explanation: >-
+    Rising budget-exhaustion means the backstop is firing more often because runs aren't completing inside
+    their bounds — a symptom of harder tasks or a regression. Reflexively raising the cap just pays out more
+    budget on runs that were going to fail; the signal is to investigate why completion moved, alongside the
+    steps-per-task distribution.
+
+- id: mc-ops-guard-degradation
+  type: multiple_choice
+  tags: [guardrails, ops]
+  difficulty: 4
+  prompt: >-
+    Two runners both terminate early when a budget drains. Which single operational metric tells you which
+    one is actually serving its users well at the boundary?
+  options:
+    - { text: "Graceful-degradation rate — the fraction of early-terminated runs that returned a usable partial result and inspectable state instead of crashing or returning nothing", correct: true }
+    - { text: "Total GPU power draw during the run" }
+    - { text: "The raw number of tools registered in the allow-list" }
+    - { text: "Whether the runner logs the budget value at startup" }
+  explanation: >-
+    Graceful-degradation rate is the operational form of "terminate gracefully": a bounded loop that hits
+    its budget and crashes has failed its users as surely as an unbounded one. Two runners with the same
+    exhaustion rate can differ entirely on whether the boundary returns value or nothing — that is what this
+    metric captures.
+
+- id: code-guard-action-gate
+  type: code
+  language: typescript
+  tags: [termination, review]
+  difficulty: 4
+  prompt: >-
+    Implement `gateAction(action, ctx)` for a guarded runner combining HITL confirmation and a circuit
+    breaker. `action` is `{ risk: "low" | "high" }`; `ctx` is `{ confirmed: boolean; breakerOpen: boolean }`.
+    The circuit breaker wins over everything: if `ctx.breakerOpen`, return `"deny"` regardless of anything
+    else. Otherwise, a `"high"`-risk action that is not yet `confirmed` returns `"needs_confirmation"`;
+    everything else returns `"allow"`. Check the breaker FIRST.
+  starter_file: exercises/action-gate/starter.ts
+  test_file: exercises/action-gate/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-guardrails-code
+  concept_checks:
+    must_use: ["circuit breaker denies first (breakerOpen wins over everything)", "high-risk unconfirmed action needs confirmation (HITL gate)", "allow otherwise"]
+    avoid_antipattern: ["letting a high-risk action through without confirmation", "allowing actions while the breaker is open", "checking confirmation before the breaker"]

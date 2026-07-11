@@ -1,0 +1,109 @@
+# Frontier & operations drill — closes D2 (frontier joint-optimization drill) and D6 (ops metrics drill).
+
+- id: mc-frontier-ist-joint
+  type: multiple_choice
+  tags: [tradeoffs, frontier]
+  difficulty: 4
+  prompt: >-
+    The acknowledged frontier of inference-stack tradeoffs is joint multi-objective optimization. What
+    is the load-bearing reason single-lever tuning is not enough?
+  options:
+    - { text: "The four axes are coupled — every lever moves at least two of latency/throughput/cost/quality, so optimizing one in isolation silently taxes the others", correct: true }
+    - { text: "Modern GPUs can only run one lever at a time" }
+    - { text: "Quantization has been proven to dominate every other lever" }
+    - { text: "Once SLOs are fixed there is only ever one feasible configuration" }
+  explanation: >-
+    The topic's load-bearing frame is that the axes are coupled: continuous batching buys throughput at a
+    tail-latency cost, quantization buys cost/memory at a quality risk, a cascade buys cost at a routing
+    risk. The frontier is optimizing the whole Pareto frontier together and reasoning about interaction
+    effects, not declaring a win on the single axis a lever was aimed at.
+
+- id: mc-frontier-ist-predictable-slo
+  type: multiple_choice
+  tags: [tradeoffs, frontier]
+  difficulty: 4
+  prompt: >-
+    "Predictable SLOs under load" is named as an open frontier problem. What failure is it a response to?
+  options:
+    - { text: "A stack tuned against an idle-load benchmark blows its p99 once concurrency, KV pressure, and prefill/decode contention climb under real traffic", correct: true }
+    - { text: "SLOs cannot be written down until the model finishes training" }
+    - { text: "p99 latency is always lower under load than at idle" }
+    - { text: "Load testing is impossible on GPU hardware" }
+  explanation: >-
+    Best-effort tuning that passes a light-load benchmark routinely fails once the batch fills and phases
+    contend for the same GPU. The frontier is load-aware, SLO-anchored scheduling whose behavior you can
+    predict under pressure — a p99 that holds under load, not one that only looks good at idle.
+
+- id: mc-frontier-ist-roofline
+  type: multiple_choice
+  tags: [tradeoffs, frontier]
+  difficulty: 4
+  prompt: >-
+    Before reaching for a lever in a joint optimization, why does an expert first ask whether the
+    workload is compute-bound or memory-bandwidth-bound?
+  options:
+    - { text: "The roofline answer tells you which levers can move the needle at all — e.g. adding compute to a memory-bandwidth-bound decode phase is effort spent on an axis the workload isn't limited by", correct: true }
+    - { text: "It determines the model's parameter count" }
+    - { text: "Memory-bound workloads can never meet any SLO" }
+    - { text: "It is only relevant for training, not inference" }
+  explanation: >-
+    The roofline model is the diagnostic underneath every lever choice. Knowing whether the workload is
+    compute-bound or memory-bandwidth-bound tells you which levers can help before you tune anything;
+    the expert uses it to select the lever, then reasons about what that lever costs on the other axes.
+
+- id: mc-ops-ist-cost-per-success
+  type: multiple_choice
+  tags: [slos, ops]
+  difficulty: 4
+  prompt: >-
+    You are operating a FrugalGPT-style cascade and must report the cost axis honestly. Which unit
+    actually moves, and what must it include?
+  options:
+    - { text: "Cost-per-successful-request — spend follows routed difficulty, and it must count failed/abandoned runs, checked against the quality floor", correct: true }
+    - { text: "Cost-per-model, since each model has a fixed price" }
+    - { text: "Cost-per-token, ignoring whether the request succeeded" }
+    - { text: "Total monthly GPU rental, with no per-request attribution" }
+  explanation: >-
+    A cascade routes most easy requests to a cheap model, so spend follows routed difficulty, not request
+    or token count. Failed and abandoned runs still cost money, so cost-per-successful-request is the unit
+    that moves — and it is only honest when validated against the quality floor the cascade could regress.
+
+- id: mc-ops-ist-triad
+  type: multiple_choice
+  tags: [slos, ops]
+  difficulty: 4
+  prompt: >-
+    Your latency and error dashboards are all green, yet a quantization change shipped last week is
+    degrading answers. Which operational discipline is designed to catch exactly this?
+  options:
+    - { text: "The eval + cost + observability triad read together — a live eval watches the quality floor for the silent regression a latency graph never shows", correct: true }
+    - { text: "Watching total GPU power draw" }
+    - { text: "Tracking a single blended average-latency number" }
+    - { text: "Counting the number of CUDA kernels compiled" }
+  explanation: >-
+    Observability traces latency and errors, cost tracking rolls up spend per successful request, and a
+    live eval watches the quality floor. A silent quality regression never appears on a latency or error
+    graph, so reading all three together — not any one alone — is what lets you claim a lever improved the
+    stack rather than quietly regressing an unmeasured axis.
+
+- id: code-ist-cascade
+  type: code
+  language: typescript
+  tags: [tradeoffs, review]
+  difficulty: 4
+  prompt: >-
+    Implement `runCascade(tiers, threshold)` for a FrugalGPT-style cost/quality cascade. `tiers` are
+    candidate models in cheap→strong order, each `{ name, cost, confidence }`. Run them in order,
+    accumulating `cost`; STOP at the first tier whose `confidence >= threshold` and return its `name`
+    with `totalCost` = cumulative cost through (and including) that tier. If NO tier reaches the
+    threshold, return the LAST tier's `name` with `totalCost` = the sum of all tiers' costs (you paid to
+    run the whole cascade).
+  starter_file: exercises/cost-cascade/starter.ts
+  test_file: exercises/cost-cascade/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-tradeoffs-code
+  concept_checks:
+    must_use: ["accumulate cost tier by tier in cheap→strong order", "stop at the first tier with confidence >= threshold", "fall back to the last tier with the full cost sum when none are confident"]
+    avoid_antipattern: ["returning before adding the confident tier's own cost", "skipping the accumulated cost of earlier tiers", "picking the highest-confidence tier instead of the first that clears the threshold"]

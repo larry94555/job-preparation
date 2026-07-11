@@ -1,0 +1,36 @@
+# Essay
+- id: essay-why-kv-dominates
+  type: essay
+  length: short
+  tags: [memory, sizing]
+  difficulty: 3
+  prompt: "A colleague sizes a serving deployment purely on model weights and is surprised it OOMs under load. Explain why the KV cache, not the weights, usually determines how many concurrent requests you can serve."
+  eval_skill: eval-kvcache-essay
+  reference_points:
+    - "Weights are a fixed, one-time cost loaded once and shared across all requests, so they do not grow with load."
+    - "KV cache is per-request and grows linearly with sequence length (prompt plus generated tokens) times the number of concurrent sequences (batch)."
+    - "At scale the sum of per-request KV memory dwarfs the weights, so KV is what runs you out of memory and caps concurrency; capacity planning must budget KV per token, not just weights."
+
+- id: essay-fragmentation-paging
+  type: essay
+  length: long
+  tags: [paging]
+  difficulty: 4
+  prompt: "Explain why allocating each sequence's KV cache as one contiguous max-length block wastes memory, and how paged attention with block tables fixes it. Mention at least one extra capability paging unlocks."
+  eval_skill: eval-kvcache-essay
+  reference_points:
+    - "Reserving a contiguous slab sized to the maximum possible length wastes the gap between reserved and actually-used length (internal fragmentation) and strands freed gaps (external fragmentation)."
+    - "Paged attention splits KV into fixed-size blocks mapped through a per-sequence block table (like OS virtual memory / paging), so physical memory need not be contiguous and a sequence grows block-by-block on demand."
+    - "This packs memory tightly, raising the number of concurrent sequences, and enables prefix sharing (sequences with a common prompt prefix point at the same physical blocks) so shared prefixes are stored once."
+
+- id: essay-recompute-vs-swap
+  type: essay
+  length: short
+  tags: [eviction]
+  difficulty: 4
+  prompt: "Under KV memory pressure a server must preempt a running sequence. Compare recompute and swap as recovery strategies and explain how you would choose between them."
+  eval_skill: eval-kvcache-essay
+  reference_points:
+    - "Preemption pauses a sequence and reclaims its KV; the two ways to restore it are recompute (drop the KV, rebuild it from the tokens when resumed) and swap (move the KV to host/CPU memory and copy it back)."
+    - "Recompute spends GPU compute and is cheap for short prefixes; swap spends PCIe/host bandwidth and avoids redoing work but is bounded by the interconnect."
+    - "Choose based on sequence length and hardware: short sequences favor recompute, long sequences with fast interconnect favor swap; neither strategy dominates universally."

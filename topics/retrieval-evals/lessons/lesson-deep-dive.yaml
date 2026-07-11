@@ -1,0 +1,14 @@
+id: lesson-deep-dive
+title: "Architecture & tradeoffs: reviewing a retrieval-evals design"
+material: deep-dive.md
+segments:
+  - present: the-retrieval-evals-design-space
+  - present: a-tradeoff-table-for-retrieval-evals
+  - check: mc-review-reval-e2e-only
+  - check: mc-review-reval-wrong-metric
+  - present: common-sota-and-antipattern
+  - check: mc-review-reval-synthetic-labels
+  - present: scaling-performance-and-the-token-budget
+  - present: reviewing-a-retrieval-evals-design
+  - apply: essay-reval-deep-dive
+  - apply: debug-reval-recall

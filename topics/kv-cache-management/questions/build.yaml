@@ -1,0 +1,40 @@
+- id: mc-blocks-needed
+  type: multiple_choice
+  tags: [paging]
+  difficulty: 2
+  prompt: "To hold N tokens with a block size of B, how many blocks are needed?"
+  options:
+    - { text: "ceil(N / B)", correct: true }
+    - { text: "floor(N / B)" }
+    - { text: "N × B" }
+    - { text: "B / N" }
+  explanation: "A partly-filled block still occupies a whole block, so you round up: ceil(N / B)."
+
+- id: mc-fragmentation-eliminated
+  type: multiple_choice
+  tags: [paging]
+  difficulty: 3
+  prompt: "Fixed-size KV blocks primarily eliminate:"
+  options:
+    - { text: "External fragmentation — any freed block can serve any request", correct: true }
+    - { text: "The need for a KV cache at all" }
+    - { text: "The quadratic cost of attention" }
+    - { text: "The difference between prefill and decode" }
+  explanation: "Uniform block size means a freed block fits any future need, so memory doesn't fragment — the property that lets you pack more sequences."
+
+- id: essay-kv-manager
+  type: essay
+  length: long
+  tags: [paging]
+  difficulty: 4
+  prompt: >-
+    Project: design a KV-cache manager for a multi-tenant, mixed-SLO inference server. Cover paged
+    allocation, an eviction / preemption policy (recompute vs. swap-to-host), prefix sharing across
+    requests, and how you handle memory pressure. Justify the tradeoffs and include a short test plan.
+  eval_skill: eval-kvcache-essay
+  reference_points:
+    - "Paged allocation with fixed-size blocks + a block table (no external fragmentation)."
+    - "Eviction/preemption under pressure: recompute (compute cost) vs. swap-to-host (bandwidth cost), by priority/SLO."
+    - "Prefix sharing: reuse KV blocks for common prompt prefixes across requests."
+    - "Memory pressure: concurrency ceiling from KV size; admission control / queueing."
+    - "Test plan: allocation/free invariants (no overlap, no leak), eviction ordering, capacity limits."

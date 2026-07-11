@@ -1,0 +1,18 @@
+sections:
+  - id: sec-catalog
+    title: "Foundations: the failure catalog & handling"
+    lessons: [lesson-catalog, lesson-handling, lesson-expert-context, lesson-frontier-ops]
+    assessment:
+      title: "Section 1 — Failures & detection"
+      from_tags: [failures, detection]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-guards
+    title: "Guarding & preventing failures"
+    lessons: [lesson-guards, lesson-build-run-safely, lesson-deep-dive]
+    assessment:
+      title: "Section 2 — Mitigation & prevention"
+      from_tags: [mitigation, prevention]
+      count: 5
+      pass_threshold: 0.8

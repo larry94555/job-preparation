@@ -1,0 +1,45 @@
+# Missing term (cloze)
+- id: cloze-cascade
+  type: text_input
+  tags: [routing]
+  difficulty: 2
+  prompt: "Trying a cheap model first and escalating to a stronger one only when a quality gate fails is called a model ____."
+  answer:
+    regex: '^cascade$'
+    normalize: true
+
+- id: cloze-router
+  type: text_input
+  tags: [routing]
+  difficulty: 1
+  prompt: "The component that inspects a request and decides which model should handle it is the ____."
+  answer:
+    regex: '^router$'
+    normalize: true
+
+- id: cloze-circuit-breaker
+  type: text_input
+  tags: [resilience]
+  difficulty: 2
+  prompt: "The pattern that trips open after repeated failures so calls fail fast instead of hammering a struggling provider is a circuit ____."
+  answer:
+    regex: '^breaker$'
+    normalize: true
+
+- id: cloze-backoff
+  type: text_input
+  tags: [resilience]
+  difficulty: 2
+  prompt: "Waiting progressively longer between retries — often doubling the delay each time — is called exponential ____."
+  answer:
+    regex: '^backoff$'
+    normalize: true
+
+- id: cloze-degraded
+  type: text_input
+  tags: [degraded]
+  difficulty: 2
+  prompt: "Keeping the product usable at reduced capability while being transparent about it is serving a ____ mode."
+  answer:
+    regex: '^degraded$'
+    normalize: true

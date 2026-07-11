@@ -1,0 +1,120 @@
+# Multiple choice
+- id: mc-why-budgets
+  type: multiple_choice
+  tags: [termination]
+  difficulty: 2
+  prompt: "The core reason an autonomous agent loop needs an explicit budget and termination condition is that:"
+  options:
+    - { text: "Without a bound, a stuck or looping agent will keep spending steps, tokens, and money with no natural stopping point", correct: true }
+    - { text: "The model's weights degrade after too many calls" }
+    - { text: "Budgets make the agent's answers more creative" }
+    - { text: "Termination conditions are only needed for multi-agent systems" }
+  explanation: "An agent decides its own next action, so nothing inherently stops it. Explicit budgets and termination conditions are what keep a stuck or looping run from consuming unbounded steps, tokens, and cost."
+
+- id: mc-success-only-exit
+  type: multiple_choice
+  tags: [termination]
+  difficulty: 3
+  prompt: "Why is a success-only exit condition (stop only when the task is solved) an antipattern?"
+  options:
+    - { text: "If the agent can never reach success it never stops, so you also need failure and budget-exhaustion exits", correct: true }
+    - { text: "It makes the agent stop too early on easy tasks" }
+    - { text: "It forces the agent to always ask a human" }
+    - { text: "Success is impossible to detect, so it is never usable" }
+  explanation: "A goal the agent cannot reach means an open-ended loop. Robust runners terminate on success, on detected failure/no-progress, and on any budget being exhausted."
+
+- id: mc-loop-detection
+  type: multiple_choice
+  tags: [termination]
+  difficulty: 3
+  prompt: "A practical signal that an agent is stuck in a loop (rather than making progress) is:"
+  options:
+    - { text: "It repeats the same action or revisits the same state without changing anything", correct: true }
+    - { text: "It calls a different tool on each step" }
+    - { text: "Its token usage increases every step" }
+    - { text: "It produces a final answer" }
+  explanation: "Repeated or oscillating states with no change to the environment or plan indicate no progress. Detecting repeated actions/states lets the runner break the loop instead of waiting for a budget to run out."
+
+- id: mc-graceful-termination
+  type: multiple_choice
+  tags: [termination]
+  difficulty: 3
+  prompt: "When a budget is exhausted mid-task, graceful termination means the runner should:"
+  options:
+    - { text: "Stop and return the best partial result and its state, rather than crashing or silently dropping work", correct: true }
+    - { text: "Silently discard everything done so far" }
+    - { text: "Ignore the budget and keep going until success" }
+    - { text: "Immediately delete the agent's memory" }
+  explanation: "Hitting a cap should not lose work. Graceful termination returns a partial result plus state so the run can be inspected, resumed, or escalated."
+
+- id: mc-budget-dimensions
+  type: multiple_choice
+  tags: [budgets]
+  difficulty: 2
+  prompt: "Which set best describes the dimensions an agent budget typically caps?"
+  options:
+    - { text: "Steps/iterations, tool calls, tokens, cost, and wall-clock time", correct: true }
+    - { text: "Only the number of tokens per single model call" }
+    - { text: "Only the size of the vector index" }
+    - { text: "Only the temperature and top-p sampling settings" }
+  explanation: "Budgets are multi-dimensional: a runner caps loop steps, tool invocations, cumulative tokens, dollar cost, and elapsed wall-clock — any one hitting its limit terminates the run."
+
+- id: mc-wall-clock-why
+  type: multiple_choice
+  tags: [budgets]
+  difficulty: 3
+  prompt: "Why keep a wall-clock (elapsed-time) budget even when you already cap steps and tokens?"
+  options:
+    - { text: "A single step can hang on a slow tool or network call, so step/token caps alone don't bound latency", correct: true }
+    - { text: "Wall-clock time is the only budget that affects cost" }
+    - { text: "Token counts are impossible to measure at runtime" }
+    - { text: "Step budgets automatically enforce time limits" }
+  explanation: "Step and token caps don't bound how long any single step takes. A hung tool or slow API call can stall a run under its step budget, so a wall-clock timeout is a separate, necessary guard."
+
+- id: mc-tool-budget
+  type: multiple_choice
+  tags: [budgets]
+  difficulty: 3
+  prompt: "A per-tool call budget (e.g. at most N web searches per task) mainly protects against:"
+  options:
+    - { text: "An agent hammering one expensive or rate-limited tool in a loop", correct: true }
+    - { text: "The model choosing the wrong sampling temperature" }
+    - { text: "Chunks being embedded at the wrong size" }
+    - { text: "The context window being too large for the model" }
+  explanation: "Beyond a global step cap, per-tool budgets stop a single expensive or rate-limited tool (search, code execution, an external API) from being called in a runaway loop."
+
+- id: mc-allow-list
+  type: multiple_choice
+  tags: [guardrails]
+  difficulty: 2
+  prompt: "An allow-list guardrail for agent actions works by:"
+  options:
+    - { text: "Permitting only an explicitly approved set of tools/actions and denying everything else by default", correct: true }
+    - { text: "Blocking a named list of bad actions and allowing everything else" }
+    - { text: "Letting the model decide at runtime which actions are safe" }
+    - { text: "Allowing all read actions but no write actions" }
+  explanation: "An allow-list is deny-by-default: only explicitly approved actions/tools run. This is safer than a deny-list (block-list), which fails open on any action nobody thought to forbid."
+
+- id: mc-hitl-gate
+  type: multiple_choice
+  tags: [guardrails]
+  difficulty: 3
+  prompt: "For a high-risk, irreversible action (e.g. deleting a database, sending money), the standard guardrail is to:"
+  options:
+    - { text: "Require human-in-the-loop confirmation before the action executes", correct: true }
+    - { text: "Increase the step budget so the agent has more attempts" }
+    - { text: "Let the agent proceed but log the action afterward" }
+    - { text: "Lower the model temperature to make it more careful" }
+  explanation: "High-risk or irreversible actions should pause for explicit human confirmation (HITL) before executing. Logging after the fact does not prevent the harm; a confirmation gate does."
+
+- id: mc-circuit-breaker
+  type: multiple_choice
+  tags: [guardrails]
+  difficulty: 4
+  prompt: "A circuit breaker in an agent runner does what?"
+  options:
+    - { text: "Trips to halt the run when a failure/error signal crosses a threshold, preventing repeated harmful or failing actions", correct: true }
+    - { text: "Rotates API keys when one is rate-limited" }
+    - { text: "Automatically increases the token budget under load" }
+    - { text: "Reranks tool outputs by relevance" }
+  explanation: "Borrowed from distributed systems, a circuit breaker trips when errors or a risk signal exceed a threshold, stopping the agent from repeating a failing or dangerous action until the condition clears."

@@ -1,0 +1,16 @@
+id: lesson-guards
+title: "Freshness, budgets, guard suites & canaries"
+material: guards.md
+segments:
+  - present: stale-retrieval-and-runaway-agents
+  - check: mc-runaway-agent
+  - check: cloze-budget
+  - check: fe-agent-control
+  - present: a-runsafely-guard-suite
+  - check: mc-runsafely-wrapper
+  - present: silent-regressions-ci-eval-gates-and-canaries
+  - check: mc-silent-regression
+  - check: mc-canary
+  - check: cloze-canary
+  - check: fe-ci-gate
+  - apply: essay-runsafely

@@ -1,0 +1,75 @@
+# Deep-dive — architecture judgment (code-review MCs + an L4 essay)
+
+- id: mc-review-pd-single-number
+  type: multiple_choice
+  tags: [optimization, review]
+  difficulty: 4
+  prompt: >-
+    A serving design doc sets a single SLO: "p95 end-to-end latency under 3s." Reviewing it for a chat
+    product with both long-prompt and long-output traffic, what is the most important problem?
+  options:
+    - { text: "One latency number hides the TTFT/TPOT split, so you can't tell whether a regression is in prefill or decode — set separate TTFT and TPOT SLOs", correct: true }
+    - { text: "3s is too generous; the target should be tightened to 500ms end-to-end" }
+    - { text: "p95 is the wrong percentile; only p50 is meaningful for latency" }
+    - { text: "Nothing — a single end-to-end number fully captures both phases" }
+  explanation: >-
+    Prefill (TTFT) and decode (TPOT) optimize differently and are stressed by different traffic
+    (prompt length vs. output length). A single end-to-end number averages the two phases together, so
+    you cannot attribute a regression to the phase that caused it. The fix is separate TTFT and TPOT
+    SLOs, not a different threshold or percentile.
+
+- id: mc-review-pd-wrong-phase
+  type: multiple_choice
+  tags: [optimization, review]
+  difficulty: 4
+  prompt: >-
+    A workload is dominated by very long prompts with short answers, and TTFT is missing the SLO. A PR
+    proposes raising the decode batch size to fix it. Rate this and pick the best response.
+  options:
+    - { text: "Wrong phase: the workload is prefill-bound (long prompts → TTFT), and decode batching only helps decode throughput; reach for chunked prefill or more prefill capacity instead", correct: true }
+    - { text: "Production-ready: bigger decode batches always lower every latency metric" }
+    - { text: "Fine, but only if you also shrink the model so decode is faster" }
+    - { text: "Correct fix, because batching is the universal remedy for any latency problem" }
+  explanation: >-
+    Long prompts load prefill, which sets TTFT; decode batching amortizes the memory-bandwidth-bound
+    weight read and lifts decode throughput, doing nothing for a prefill-bound TTFT miss. Optimizing
+    the wrong phase is the classic antipattern. Chunked prefill or added prefill compute targets the
+    phase that is actually bound.
+
+- id: mc-review-pd-monolithic-prefill
+  type: multiple_choice
+  tags: [optimization, review]
+  difficulty: 4
+  prompt: >-
+    In a shared-GPU server, whenever one user submits a very long prompt, other users' inter-token
+    latency (TPOT) spikes for the duration. What is the best explanation and fix?
+  options:
+    - { text: "The monolithic prefill occupies a whole GPU step and stalls in-flight decode; split it with chunked prefill (Sarathi) so prefill interleaves with decode", correct: true }
+    - { text: "The KV cache is too small; doubling it removes the spike" }
+    - { text: "Decode is compute-bound during long prompts; lowering the batch size fixes it" }
+    - { text: "The spike is unavoidable on shared GPUs; only a bigger GPU helps" }
+  explanation: >-
+    A single large prefill runs as one step that blocks every concurrent decode, so their TPOT spikes
+    until it finishes. Chunked prefill breaks the prompt into chunks interleaved with decode, so no
+    single prefill monopolizes a step. (P/D disaggregation is the heavier alternative when the phases
+    must be scaled independently.)
+
+- id: essay-pd-deep-dive
+  type: essay
+  length: long
+  tags: [optimization, review]
+  difficulty: 4
+  prompt: >-
+    You are the reviewer on a prefill/decode serving design for a chat product with mixed traffic —
+    some very long prompts, some very long outputs — on shared GPUs under high load. Write a design
+    review: set the latency SLOs, say which phase each governs and which traffic stresses it, and walk
+    the levers (single vs. separate SLOs, monolithic vs. chunked prefill, prefill/decode
+    disaggregation, decode batching) with an explicit tradeoff for each. State what would move the
+    design from demo-ready to production-ready, and call out at least two antipatterns you would reject.
+  eval_skill: eval-prefill-essay
+  reference_points:
+    - "Set separate TTFT and TPOT SLOs: TTFT is governed by prefill and stressed by long prompts; TPOT (ITL) is governed by decode and stressed by long outputs. A single latency number hides the split and must be rejected."
+    - "Monolithic prefill runs a long prompt as one GPU step that stalls all in-flight decode, spiking others' TPOT; chunked prefill (Sarathi) interleaves prefill chunks with decode to keep TPOT low, at some scheduling complexity."
+    - "Prefill/decode disaggregation (DistServe, Splitwise) puts the two phases on separate resources so each scales to its own SLO with no cross-phase interference, at the cost of transferring KV state between tiers — warranted under high mixed load."
+    - "Decode batching amortizes the bandwidth-bound weight read and lifts decode throughput, but helps only decode and can raise TTFT if a big prefill blocks the batch; it is the wrong fix for a prefill-bound (long-prompt) TTFT miss."
+    - "Antipatterns to reject: a single latency SLO, and optimizing the wrong phase (decode batching for a prefill-bound workload, or shrinking prompts for a decode-bound one). Production-ready means both SLOs benchmarked separately (e.g. GenAI-Perf) under realistic concurrency, with chunked prefill and a data-driven decision on disaggregation."

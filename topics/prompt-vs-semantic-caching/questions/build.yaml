@@ -1,0 +1,50 @@
+# Deeper checks + the project (long-form design) for the semantic-cache build lesson.
+- id: mc-cosine-hit
+  type: multiple_choice
+  tags: [semantic]
+  difficulty: 2
+  prompt: "A semantic cache returns a hit when:"
+  options:
+    - { text: "The most-similar non-expired entry's cosine similarity is at or above the threshold", correct: true }
+    - { text: "Any stored entry shares a leading token with the request" }
+    - { text: "The request string is byte-identical to a stored request" }
+    - { text: "The stored entry is newer than the request" }
+  explanation: "Semantic hits are decided by cosine similarity vs. a threshold (and non-expiry); exact/prefix matching is what the prefix cache does."
+
+- id: mc-threshold-too-low
+  type: multiple_choice
+  tags: [semantic]
+  difficulty: 3
+  prompt: "Setting the similarity threshold too LOW mainly causes:"
+  options:
+    - { text: "False-positive hits — returning a cached answer for a genuinely different request", correct: true }
+    - { text: "Slower embedding computation" }
+    - { text: "Fewer cache hits overall" }
+    - { text: "The prefix cache to stop working" }
+  explanation: "A too-low threshold makes different requests look 'close enough', so you serve a confidently wrong cached answer — the signature semantic-cache risk."
+
+- id: fe-expired-is-miss
+  type: text_input
+  tags: [semantic]
+  difficulty: 2
+  prompt: "An entry older than the TTL should be treated as a cache ____ (one word)."
+  answer:
+    regex: '^miss$'
+    normalize: true
+
+- id: essay-layered-caching
+  type: essay
+  length: long
+  tags: [tradeoffs]
+  difficulty: 4
+  prompt: >-
+    Project: design a layered caching strategy combining prefix and semantic caching for a customer
+    support assistant. Specify what each layer caches and saves, the correctness risks, how you set
+    thresholds / TTL / invalidation, and how you keep it safe across tenants. Include a short test plan.
+  eval_skill: eval-caching-essay
+  reference_points:
+    - "Prefix cache reuses prefill for identical leading tokens (structure prompts stable-prefix/variable-suffix)."
+    - "Semantic cache returns a stored answer for similar requests — saves a full generation but risks false positives."
+    - "Threshold/TTL/invalidation tuned conservatively for high-stakes answers; expiry guards staleness."
+    - "Multi-tenant safety: include tenant scope in the cache key so answers never leak across users."
+    - "Test plan: hit-rate, false-positive rate on a labeled set, staleness, and a cross-tenant leak test."

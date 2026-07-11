@@ -1,0 +1,13 @@
+id: lesson-deep-dive
+title: "Architecture & tradeoffs: reviewing an adaptation-strategy design"
+material: deep-dive.md
+segments:
+  - present: the-adaptation-strategy-selection-design-space
+  - present: a-tradeoff-table-for-adaptation-strategy-selection
+  - check: mc-review-adapt-volatile-ft
+  - check: mc-review-adapt-rag-format
+  - present: common-sota-and-antipattern
+  - check: mc-review-adapt-premature-distill
+  - present: scaling-performance-and-the-token-budget
+  - present: reviewing-an-adaptation-strategy-selection-design
+  - apply: essay-adapt-deep-dive

@@ -1,0 +1,16 @@
+id: lesson-retrieval
+title: "Dense, sparse, hybrid & reranking"
+material: retrieval.md
+segments:
+  - present: dense-sparse-and-hybrid-search
+  - check: mc-dense-vs-sparse
+  - check: mc-hybrid-fusion
+  - check: cloze-bm25
+  - check: cloze-hybrid
+  - check: fe-sparse-name
+  - present: reranking-and-the-latency-tradeoff
+  - check: mc-reranker-role
+  - check: mc-reranker-latency
+  - check: cloze-reranker
+  - check: fe-rerank-cost
+  - apply: essay-hybrid-rerank

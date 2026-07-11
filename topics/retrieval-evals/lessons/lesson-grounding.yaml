@@ -1,0 +1,11 @@
+id: lesson-grounding
+title: "Grounding vs. retrieval failures"
+material: grounding.md
+segments:
+  - present: two-failures-that-look-the-same-from-outside
+  - check: mc-grounding-vs-retrieval
+  - check: mc-retrieval-failure-symptom
+  - check: cloze-grounding
+  - present: diagnosing-which-one-you-have
+  - check: fe-grounding-term
+  - apply: essay-grounding-vs-retrieval

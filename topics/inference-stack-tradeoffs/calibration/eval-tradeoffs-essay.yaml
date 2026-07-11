@@ -1,0 +1,59 @@
+skill: eval-tradeoffs-essay
+# Calibration for eval-tradeoffs-essay (four-way latency/quality/cost/reliability,
+# SLO-anchored). Gate = technically_correct (any check name containing "correct").
+# Verdict math: score = trueChecks/4; >=0.75 pass, >=0.5 borderline, else fail;
+# a false gate caps the verdict down one level.
+cases:
+  # PASS — strong: all four checks true, gate true. 4/4 = 1.0 -> pass.
+  - answer: >-
+      There is no free lunch: every serving lever trades among four axes — latency, quality, cost,
+      and reliability — so aggressive continuous batching cannot make serving both faster and cheaper.
+      Batching amortizes GPU work across many concurrent requests, which raises throughput and lowers
+      cost-per-token, but each request must now wait for the batch window to fill, so per-request and
+      especially tail (p99) latency go up and can breach a 900 ms p99 SLO. The gain is real but traded,
+      not free: we buy throughput and cost with latency, and if the SLO is the fixed constraint we cap
+      the batch size so p99 stays inside its budget and only then minimize cost.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # PASS — strong: all four checks true, gate true, anchored on per-lever dominant axes. 4/4 = 1.0 -> pass.
+  - answer: >-
+      Each lever has a dominant axis and pays for its win elsewhere. Batching is a throughput and
+      cost-per-token win paid for in higher per-request and tail (p99) latency, since requests wait
+      for the batch. Quantization to INT8/INT4 is a cost, memory, and often latency win paid for in
+      risk to output quality from reduced precision. Caching is a latency and cost win on hits, paid
+      for in staleness and invalidation/hit-rate complexity. Fallback and redundancy are a reliability
+      and availability win paid for in extra cost and sometimes added latency on the retry path. Because
+      the axes trade against each other, you anchor on the p99 latency and availability SLOs first,
+      decompose the budget per stage (network + queue + retrieval + prefill/TTFT + decode), then pick
+      the lever whose dominant axis fixes the stage that blows its sub-budget without breaching the others.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — gate false + one more false: false technical claims and misses the key points.
+  # addresses_question true, covers_key_points false, technically_correct false, concrete true.
+  # 2/4 = 0.5 -> base borderline; gate false -> cap down -> fail.
+  - answer: >-
+      Just turn continuous batching all the way up. Bigger batches lower per-request and p99 latency
+      for every request while also cutting cost-per-token, so batching strictly improves latency, cost,
+      and throughput at once. Quantizing to INT4 is a free win with no quality risk, and fallback
+      redundancy costs nothing, so there is no real tradeoff to worry about and no SLO is ever at risk.
+    expect:
+      verdict: fail
+      checks: { addresses_question: true, covers_key_points: false, technically_correct: false, concrete: true }
+
+  # BORDERLINE — misses only the make-or-break gate check. One false technical claim (batching lowers
+  # latency) inside otherwise on-topic, key-point-hitting, concrete prose.
+  # addresses_question true, covers_key_points true, technically_correct false, concrete true.
+  # 3/4 = 0.75 -> base pass; gate false -> cap down -> borderline.
+  - answer: >-
+      Batching trades among latency, quality, cost, and reliability, so it is not a pure win. It
+      amortizes GPU work to raise throughput and lower cost-per-token, and because the batch runs on
+      one pass it also lowers per-request and p99 latency for every request, so we still have to watch
+      the availability SLO for the fallback path. The throughput and cost gains are the headline, but
+      redundancy for reliability adds cost, so batch size should be chosen against the latency budget.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: false, concrete: true }

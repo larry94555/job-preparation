@@ -1,0 +1,62 @@
+# Literature/canon (WS1) + interview (WS2) — tags [canon]/[interview] are NOT in any section's
+# from_tags, so these don't enter the deterministic section-assessment pools.
+- id: mc-canon-mti-rls
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "The database mechanism that scopes rows per tenant — so a query can only ever see that tenant's data — is?"
+  options:
+    - { text: "Row-level security (RLS)", correct: true }
+    - { text: "A larger connection pool" }
+    - { text: "A shared semantic cache" }
+    - { text: "An unscoped vector search" }
+  explanation: "Row-level security (e.g. Postgres RLS) enforces the tenant predicate in the database engine, not in hand-written WHERE clauses a developer can forget. Multi-tenant isolation is a SaaS/security tradition, not a single LLM paper."
+
+- id: mc-interview-mti-signal
+  type: multiple_choice
+  tags: [interview]
+  difficulty: 3
+  prompt: "In an isolation interview, the answer that best shows you understand semantic-cache leakage is:"
+  options:
+    - { text: "A similarity-keyed cache can serve tenant A's answer to tenant B because the key ignored tenant identity", correct: true }
+    - { text: "The embedding space alone keeps tenants apart" }
+    - { text: "Post-filtering after an unscoped search fully prevents cross-tenant retrieval" }
+    - { text: "A prompt-only cache key is safe as long as prompts differ" }
+  explanation: "A semantic cache hits on prompt/embedding similarity; if the key omits the tenant, one tenant's cached answer can be returned to another. Embedding space, post-filtering, and prompt-only keys are exactly the false comforts that cause leaks."
+
+- id: essay-mti-literature
+  type: essay
+  length: long
+  tags: [canon]
+  difficulty: 4
+  prompt: >-
+    Multi-tenant isolation is a security-tradition topic more than an LLM-paper one. Summarize the
+    canon: multi-tenant isolation patterns, row-level security, and semantic-cache leakage. Say what
+    each contributes, note that this is SaaS/security tradition rather than a single seminal paper, and
+    name the tools (vector-DB namespaces, Postgres RLS, cache-key conventions) that implement isolation
+    today.
+  eval_skill: eval-isolation-essay
+  reference_points:
+    - "This is a SaaS/security tradition, not a single LLM paper — do not invent a seminal paper."
+    - "Multi-tenant isolation patterns: scope tenants on shared infrastructure via per-tenant partitions and scoped keys, enforcing authz at the data boundary."
+    - "Row-level security (RLS, e.g. Postgres): the DB engine enforces the tenant predicate so a query only sees that tenant's rows."
+    - "Semantic-cache leakage: a similarity-keyed shared cache can serve one tenant's answer to another because the prompt, not the tenant, decided the hit."
+    - "Tools: vector-DB namespaces, Postgres RLS, tenant-scoped cache-key conventions. SOTA = tenant-scoped cache keys + authz-filtered retrieval + per-tenant partitions."
+
+- id: essay-mti-interview
+  type: essay
+  length: long
+  tags: [interview]
+  difficulty: 4
+  prompt: >-
+    You're in a senior interview and asked to design multi-tenant isolation for an LLM application.
+    Explain how a semantic cache can leak across tenants, how retrieval must be scoped, and the
+    data-boundary mechanisms you'd use. Show the depth that reads as senior, and call out the red flags
+    you'd avoid.
+  eval_skill: eval-isolation-essay
+  reference_points:
+    - "Semantic-cache leakage: a similarity-keyed cache returns tenant A's answer to tenant B when the key ignores tenant identity; fold tenant (and user) into the cache key."
+    - "Retrieval scoping: constrain vector search to the tenant's namespace/partition or authorization-filter it — do not post-filter an unscoped search."
+    - "Data-boundary mechanisms: row-level security and per-tenant partitions enforce isolation in the engine, not in app code that can forget the tenant predicate."
+    - "Red flags: tenant-blind cache keys, a shared semantic cache, unscoped vector search, reused sessions carrying context across users."
+    - "Design order: tenant-scoped cache keys → authz-filtered retrieval within per-tenant partitions → RLS at the DB boundary; be honest it's a security tradition, not a single paper."

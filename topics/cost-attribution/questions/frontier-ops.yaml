@@ -1,0 +1,90 @@
+# Frontier & operations drill — closes D2 (frontier/unit-economics drill) and D6 (ops metrics drill).
+
+- id: mc-frontier-cost-outcome-vs-token
+  type: multiple_choice
+  tags: [economics, frontier]
+  difficulty: 4
+  prompt: >-
+    The cost-attribution frontier pushes past cost-per-token toward cost-per-successful-*outcome*. What
+    is the load-bearing move, and what stays a genuinely open problem?
+  options:
+    - { text: "Pick a denominator (a resolved ticket, a completed task) you can defend end-to-end with hidden costs included; predicting per-feature cost before ship stays open because it's forecasting against an unknown traffic mix", correct: true }
+    - { text: "Switch the invoice to per-model totals, which already solves per-feature forecasting" }
+    - { text: "Count every API call as one success, so retries and abandonment no longer matter" }
+    - { text: "Measure only raw output tokens, since input tokens are free" }
+  explanation: >-
+    The honest unit is cost-per-successful-task; the frontier prices on the business outcome, which
+    means choosing a defensible denominator with hidden costs (retries, abandonment, over-retrieval)
+    included. Predicting per-feature cost before ship remains open — it is estimation against an unknown
+    traffic mix, not accounting, and rarely survives contact with real traffic.
+
+- id: mc-frontier-cost-frugalgpt-cascade
+  type: multiple_choice
+  tags: [economics, frontier]
+  difficulty: 4
+  prompt: >-
+    FrugalGPT (Chen et al., 2023) made LLM cost a first-class target. What is its durable idea, and why
+    does it complicate attribution?
+  options:
+    - { text: "Route to a cheap model first and escalate to a stronger one only on low confidence — so a single task now bills a mix of tiers, and attribution must roll spend up across the tiers a task touched, not per model", correct: true }
+    - { text: "Always use the largest model, because quality per dollar is irrelevant" }
+    - { text: "Its exact '~98% cost reduction' number is a general law you should quote as the target" }
+    - { text: "It caches every response, so per-feature cost becomes zero" }
+  explanation: >-
+    FrugalGPT's durable framing is cheap-first, escalate-on-low-confidence, measured as quality-per-dollar;
+    the headline cost-reduction figure was model- and price-specific and shouldn't be quoted as a law. A
+    cascade changes what a task costs by mixing cheap and frontier calls, so attribution must sum spend
+    across the tiers a single task touched rather than reporting per model.
+
+- id: mc-frontier-cost-shared-allocation
+  type: multiple_choice
+  tags: [attribution, frontier]
+  difficulty: 4
+  prompt: >-
+    A shared system prompt served via prefix caching is billed to many tenants at once, at a fraction of
+    input price. What does a frontier-grade attribution design do with that cached, shared cost?
+  options:
+    - { text: "Name an explicit, defensible allocation rule (split by usage share, charge whoever warmed the cache, or pool-and-prorate) — because there is no single correct policy and the cheap tokens still belong to some feature", correct: true }
+    - { text: "Drop the cached cost entirely, since cache hits are effectively free" }
+    - { text: "Dump the whole shared cost on whichever tenant happened to be first that day" }
+    - { text: "Let the policy stay implicit inside the cache key, so no one has to decide" }
+  explanation: >-
+    Fair allocation of shared/cached/async cost is the hard open problem: pooled work serves many tenants
+    and features and has no single correct split. The expert move is an explicit, auditable rule rather
+    than dropping the cost or hiding the policy in a cache key — the cheap cached tokens still belong to
+    some feature and must be attributed.
+
+- id: mc-ops-cost-tag-coverage
+  type: multiple_choice
+  tags: [attribution, ops]
+  difficulty: 4
+  prompt: >-
+    You want the earliest operational signal that your cost numbers have gone blind — before any
+    per-feature dashboard looks wrong. Which metric leads?
+  options:
+    - { text: "Tag-coverage % — a falling share of billed spend carrying an actionable tag means an untagged async job or broken retry is dumping money into the unattributed bucket", correct: true }
+    - { text: "Total monthly invoice from the provider" }
+    - { text: "The number of models deployed" }
+    - { text: "Average prompt length in characters" }
+  explanation: >-
+    Tag-coverage % is the leading indicator: when coverage falls, real spend is landing in the
+    unattributed bucket (usually a broken tag through async work or retries), so every per-feature and
+    per-tenant number is silently understated. You can't optimize what you can't see — coverage slips
+    before the dashboards do.
+
+- id: mc-ops-cost-per-success-drift
+  type: multiple_choice
+  tags: [hidden, ops]
+  difficulty: 4
+  prompt: >-
+    A feature's cost-per-success has drifted up 40% over a month at constant successful-task volume.
+    What does the operating signal tell you, and what guard must the metric carry?
+  options:
+    - { text: "Spend per delivered outcome is leaking to retries, abandonment, or over-retrieval; and a zero-success slice is a divide-by-zero to guard, not a free feature", correct: true }
+    - { text: "Nothing changed, because the number of successes is constant" }
+    - { text: "The provider raised per-model prices, which is the only possible cause" }
+    - { text: "Cost-per-success can never rise if request count is flat" }
+  explanation: >-
+    Cost-per-success = spend / successful outcomes; rising it at constant success volume means more
+    wasted spend per delivered outcome — retries, abandonment, or over-retrieval. The metric must guard
+    the zero-success case (a divide-by-zero), which is a feature delivering no value, not a free one.

@@ -1,0 +1,69 @@
+# Literature/canon (WS1) + interview (WS2) — tags [canon]/[interview] are NOT in any section's
+# from_tags, so these don't enter the deterministic section-assessment pools.
+- id: mc-canon-pd-technique
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Which technique splits a long prompt's prefill into chunks interleaved with decode to smooth TTFT and keep TPOT low under load?"
+  options:
+    - { text: "Chunked prefill (Sarathi)", correct: true }
+    - { text: "Prefill/decode disaggregation (DistServe/Splitwise)" }
+    - { text: "PagedAttention (vLLM)" }
+    - { text: "Continuous batching (Orca)" }
+  explanation: "Chunked prefill (Sarathi, Agrawal et al., MSR) interleaves prompt chunks with decode; P/D disaggregation (DistServe/Splitwise) instead separates the phases onto different resources, PagedAttention pages the KV cache, and Orca is continuous batching."
+
+- id: mc-canon-pd-disaggregation
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Serving that separates prefill and decode onto different resources so each hits its own SLO is called what, and which systems introduced it?"
+  options:
+    - { text: "Prefill/decode disaggregation — DistServe and Splitwise", correct: true }
+    - { text: "Chunked prefill — Sarathi" }
+    - { text: "Prefix sharing — RadixAttention/SGLang" }
+    - { text: "Speculative decoding — Medusa/EAGLE" }
+  explanation: "Prefill/decode disaggregation (DistServe, Splitwise, 2024) splits the compute-bound prefill from the memory-bandwidth-bound decode; Sarathi is chunked prefill, RadixAttention is KV prefix sharing, and speculative decoding is a separate lever."
+
+- id: mc-interview-pd-signal
+  type: multiple_choice
+  tags: [interview]
+  difficulty: 3
+  prompt: "In an inference-infra interview, the answer that most signals you've served models is:"
+  options:
+    - { text: "Saying which phase a change affects and why the two phases optimize differently", correct: true }
+    - { text: "Reporting a single end-to-end latency number" }
+    - { text: "Naming the tokenizer library" }
+    - { text: "Optimizing decode to fix a prefill-bound workload" }
+  explanation: "Attributing a latency symptom to prefill (TTFT) or decode (TPOT) — and knowing prefill is compute-bound while decode is memory-bandwidth-bound — is the senior signal; a single latency number and cross-phase fixes are red flags."
+
+- id: essay-pd-literature
+  type: essay
+  length: long
+  tags: [canon]
+  difficulty: 4
+  prompt: >-
+    Summarize the influential work on prefill vs. decode latency — chunked prefill (Sarathi) and
+    prefill/decode disaggregation (DistServe/Splitwise). For each, say what it contributed and the
+    problem it solves, and name the tools used to serve and benchmark these ideas today.
+  eval_skill: eval-prefill-essay
+  reference_points:
+    - "Chunked prefill (Sarathi, Agrawal et al., MSR): splits a long prompt's prefill into chunks interleaved with decode so a big prefill doesn't stall in-flight decode; smooths TTFT and keeps TPOT low."
+    - "Prefill/decode disaggregation (DistServe, Splitwise, 2024): separates the compute-bound prefill from the memory-bandwidth-bound decode onto different resources so each can be scheduled/scaled for its own SLO."
+    - "Both target the same goal — hitting separate TTFT and TPOT SLOs without the two phases interfering."
+    - "Tools: vLLM and TensorRT-LLM for serving; GenAI-Perf for benchmarking the two SLOs."
+
+- id: essay-pd-interview
+  type: essay
+  length: long
+  tags: [interview]
+  difficulty: 4
+  prompt: >-
+    You're in a senior inference-infrastructure interview. A chat product misses its latency targets.
+    Explain how you'd diagnose whether it's prefill- or decode-bound, why the two phases optimize
+    differently, and which levers you'd reach for. Show the depth that reads as senior.
+  eval_skill: eval-prefill-essay
+  reference_points:
+    - "Diagnose by phase: TTFT (set by prefill, scales with prompt length) vs. TPOT (set by decode, scales with output length) — say which phase a symptom points to before proposing a fix."
+    - "Prefill is compute-bound and decode is memory-bandwidth-bound, so they optimize differently and deserve separate SLOs; a single latency number hides the split."
+    - "Levers: chunked prefill (Sarathi) so a large prefill doesn't stall decode; prefill/decode disaggregation (DistServe/Splitwise) to scale each phase to its own SLO."
+    - "Red flags to avoid: reporting one latency number, or optimizing decode to fix a prefill-bound workload (or vice versa)."

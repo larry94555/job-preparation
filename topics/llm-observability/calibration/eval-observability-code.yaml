@@ -1,0 +1,49 @@
+skill: eval-observability-code
+# Calibration for eval-observability-code.
+# 'answer' summarizes the submitted approach + provided signals (the grader sees extracted evidence,
+# not raw code). Exemplars target a recursive token rollup over a span tree.
+cases:
+  # PASS — all four checks true (gate true, score 4/4 = 1.0 -> pass).
+  - answer: >-
+      tests_passed=true. recurses_children: calls itself on every child span so all depths are walked.
+      includes_own_tokens: adds the span's own tokens to the running total. sums_all_depths: the total
+      accounts for descendants at every level. handles_leaf: a childless span returns just its own
+      tokens as the base case. signals.must_use=[recursion over children, add own tokens, leaf base
+      case]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { recurses_children: true, includes_own_tokens: true, sums_all_depths: true, handles_leaf: true }
+
+  # PASS — gate true + two more true, one false (score 3/4 = 0.75 -> pass).
+  - answer: >-
+      tests_passed=true. recurses_children: recurses into each child span at every depth.
+      includes_own_tokens: adds the span's own tokens. sums_all_depths: descendants at all levels are
+      counted. handles_leaf: does NOT special-case a leaf, relying on the empty-children reduce to
+      return 0 extra, which is correct but not an explicit base case. signals.must_use=[recursion over
+      children, add own tokens]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { recurses_children: true, includes_own_tokens: true, sums_all_depths: true, handles_leaf: false }
+
+  # FAIL — gate false + two more false (score 1/4 = 0.25 -> fail; gate keeps it at fail).
+  - answer: >-
+      tests_passed=true on shallow inputs. recurses_children: does NOT recurse — it only maps over the
+      direct children once. includes_own_tokens: adds the span's own tokens. sums_all_depths: does NOT
+      hold, grandchildren and deeper descendants are never added. handles_leaf: does NOT return a leaf's
+      own tokens because the non-recursive sum drops them. signals.must_use=[add own tokens];
+      avoid=[single-level sum, ignoring nested spans].
+    expect:
+      verdict: fail
+      checks: { recurses_children: false, includes_own_tokens: true, sums_all_depths: false, handles_leaf: false }
+
+  # BORDERLINE — only the gate false, other three true (score 3/4 = 0.75 -> pass, gate caps to borderline).
+  - answer: >-
+      tests_passed=true. recurses_children: does NOT recurse — it flattens the tree with a helper and
+      then sums that one list, so nested spans are only reached by the flatten, not by self-recursion.
+      includes_own_tokens: adds the span's own tokens. sums_all_depths: the flattened list does include
+      every descendant, so all depths are summed. handles_leaf: a childless span flattens to itself and
+      returns its own tokens. signals.must_use=[add own tokens, count all descendants];
+      avoid=[skipping self-recursion].
+    expect:
+      verdict: borderline
+      checks: { recurses_children: false, includes_own_tokens: true, sums_all_depths: true, handles_leaf: true }

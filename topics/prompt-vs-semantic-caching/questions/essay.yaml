@@ -1,0 +1,37 @@
+# Essay
+- id: essay-two-caches
+  type: essay
+  length: short
+  tags: [prefix, semantic]
+  difficulty: 3
+  prompt: "A teammate says 'we added caching' but can't say which kind. Explain how prefix (prompt) caching and semantic caching differ in what they cache, when they hit, and what they save."
+  eval_skill: eval-caching-essay
+  reference_points:
+    - "Prefix (prompt) caching reuses the model's already-computed attention state for identical leading tokens; it hits only on an exact-prefix match and saves the prefill compute for those shared tokens while still generating a fresh completion."
+    - "Semantic caching embeds the request and hits when the embedding is within a similarity threshold of a stored request; on a hit it returns the stored response and skips the model call entirely, saving the whole generation."
+    - "So they differ in hit condition (exact leading-token match vs. embedding similarity) and in savings (prefill compute vs. full generation)."
+
+- id: essay-prompt-structure
+  type: essay
+  length: short
+  tags: [prefix]
+  difficulty: 3
+  prompt: "Your prefix-cache hit rate is near zero even though most requests share the same system prompt. Explain how to structure prompts to get hits, and name a common mistake that breaks them."
+  eval_skill: eval-caching-essay
+  reference_points:
+    - "Prefix caching matches from the start of the token stream, so put the stable, shared content (system prompt, instructions, few-shot examples) first and the variable content (the user's specific input) last."
+    - "This maximizes the length of the shared, reusable prefix; the model reuses prefill for those leading tokens and only computes the variable suffix."
+    - "A common mistake is injecting per-request variability at the top — a timestamp, unique request ID, or reordered content — which changes the leading tokens and destroys the exact-prefix match."
+
+- id: essay-semantic-tradeoff
+  type: essay
+  length: long
+  tags: [semantic, tradeoffs]
+  difficulty: 4
+  prompt: "Design a semantic cache for a support assistant. Explain the similarity-threshold tradeoff, the false-positive risk, where semantic caching is and isn't safe, and one safeguard you would add."
+  eval_skill: eval-caching-essay
+  reference_points:
+    - "A semantic cache embeds each request and returns a stored response when similarity clears a threshold, saving the full generation."
+    - "The threshold is a tradeoff: too permissive (low) causes false-positive hits that return a stored answer to a genuinely different question (a wrong response); too strict (high) lowers the hit rate and the savings."
+    - "It is safe on repeated, stable, low-personalization queries (FAQ-style) and risky on high-stakes or highly personalized answers where a near-miss returns a subtly wrong response."
+    - "Safeguards include a conservative threshold plus verification, per-tenant/per-user cache keys to avoid leaking another user's answer, and a TTL to bound staleness."

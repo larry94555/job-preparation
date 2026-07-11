@@ -1,0 +1,16 @@
+id: lesson-methods-quality
+title: "GPTQ vs. AWQ, and when quantization hurts"
+material: methods-and-quality.md
+segments:
+  - present: gptq-awq-and-smoothquant
+  - check: mc-gptq-vs-awq
+  - check: mc-smoothquant
+  - check: mc-weight-only-good
+  - check: cloze-smoothquant
+  - check: fe-name-a-method
+  - apply: essay-gptq-vs-awq
+  - present: when-quantization-hurts-quality
+  - check: mc-perplexity-hides
+  - check: cloze-perplexity
+  - check: fe-verify-metric
+  - apply: essay-when-quant-hurts

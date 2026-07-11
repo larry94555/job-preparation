@@ -1,0 +1,8 @@
+id: agent-guardrails-budgets
+title: "Agent Guardrails & Budgets"
+description: "Autonomous agents loop until something stops them — safety and cost live in the runner: explicit termination conditions, progress and loop detection, budgets on steps/tools/tokens/cost/wall-clock, and guardrails that gate high-risk actions behind allow-lists and human review."
+pass_threshold: 0.8
+tag_weights:
+  termination: 1.2
+  budgets: 1.2
+  guardrails: 1.2

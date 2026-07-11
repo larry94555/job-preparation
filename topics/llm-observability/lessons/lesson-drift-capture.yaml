@@ -1,0 +1,14 @@
+id: lesson-drift-capture
+title: "Drift detection, canaries, capture & replay"
+material: drift-and-capture.md
+segments:
+  - present: detecting-drift-with-canaries
+  - check: mc-drift-what
+  - check: mc-drift-canary
+  - check: cloze-canary
+  - check: fe-drift-signal
+  - present: capture-replay-and-privacyredaction
+  - check: mc-redaction
+  - check: cloze-redaction
+  - check: fe-capture-cost
+  - apply: essay-drift-capture

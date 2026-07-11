@@ -1,0 +1,70 @@
+# Literature/canon (WS1) + interview (WS2) — tags [canon]/[interview] are NOT in any section's
+# from_tags, so these don't enter the deterministic section-assessment pools.
+- id: mc-canon-spec-drafts
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Draft-and-verify (lossless) speculative decoding was introduced by which two concurrent 2023 works?"
+  options:
+    - { text: "Leviathan et al. (Google) and Chen et al. (DeepMind)", correct: true }
+    - { text: "Medusa (Cai et al.) and EAGLE" }
+    - { text: "Hinton et al. and GPTQ" }
+    - { text: "vLLM and TensorRT-LLM" }
+  explanation: "Speculative decoding (draft + verify, lossless) was introduced concurrently in 2023 by Leviathan et al. (Google) and Chen et al. (DeepMind). Medusa/EAGLE are later self-speculative heads; Hinton et al. is knowledge distillation."
+
+- id: mc-canon-spec-heads
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Self-speculative decoding heads — folding the drafter into the target model instead of serving a separate draft model — are used by which approaches?"
+  options:
+    - { text: "Medusa and EAGLE", correct: true }
+    - { text: "Leviathan et al. and Chen et al." }
+    - { text: "Hinton et al. (distillation)" }
+    - { text: "GPTQ and AWQ" }
+  explanation: "Medusa (Cai et al., 2024) adds extra decoding heads and EAGLE drafts at the feature level — both self-speculative, avoiding a separate draft model. Leviathan/Chen use a distinct draft model; Hinton is distillation."
+
+- id: mc-interview-spec-lever
+  type: multiple_choice
+  tags: [interview]
+  difficulty: 3
+  prompt: "In an inference-optimization interview, which framing most signals expertise across speculative decoding, quantization, and distillation?"
+  options:
+    - { text: "Matching each lever to its goal (latency vs. memory/cost vs. smaller model) and naming that speculative decoding is the lossless one", correct: true }
+    - { text: "Claiming speculative decoding reduces memory footprint" }
+    - { text: "Recommending quantization to fix decode-step latency" }
+    - { text: "Distilling a model for facts that change frequently" }
+  explanation: "Speculative decoding targets latency and is lossless; quantization targets memory/cost; distillation yields a smaller model. The other options are red flags — spec-dec doesn't shrink memory, quantization isn't a latency fix, and distillation freezes volatile facts."
+
+- id: essay-spec-literature
+  type: essay
+  length: long
+  tags: [canon]
+  difficulty: 4
+  prompt: >-
+    Summarize the influential work behind these three inference levers: speculative decoding
+    (Leviathan et al. and Chen et al.), self-speculative heads (Medusa/EAGLE), and knowledge
+    distillation (Hinton et al.). For each, say what it contributed, and name the tools that
+    implement speculative decoding today.
+  eval_skill: eval-specdec-essay
+  reference_points:
+    - "Speculative decoding (draft + verify, lossless) was introduced concurrently in 2023 by Leviathan et al. (Google) and Chen et al. (DeepMind): a small draft model proposes tokens, the target verifies them in one pass, and the output matches the target model."
+    - "Self-speculative heads fold the drafter into the target model: Medusa (Cai et al., 2024) adds extra decoding heads; EAGLE drafts at the feature level — no separate draft model needed."
+    - "Knowledge distillation (Hinton et al., 2015) trains a small student to mimic a large teacher, giving a permanently smaller, cheaper model at an upfront training cost."
+    - "Tools that implement speculative decoding today: vLLM and TensorRT-LLM speculative support, plus Medusa/EAGLE implementations."
+
+- id: essay-spec-interview
+  type: essay
+  length: long
+  tags: [interview]
+  difficulty: 4
+  prompt: >-
+    You're in a senior inference-optimization interview. Explain how you'd choose among speculative
+    decoding, quantization, and distillation for a given goal — which lever each fits, which is
+    lossless, and the red flags of misapplying them. Show the depth that reads as senior.
+  eval_skill: eval-specdec-essay
+  reference_points:
+    - "Match each lever to its goal: speculative decoding targets latency; quantization targets memory/cost; distillation yields a smaller model."
+    - "Speculative decoding is the lossless lever (its output matches the target model); quantization and distillation both trade some quality for their gains."
+    - "Acceptance rate governs speculative decoding's payoff: a poor draft with low acceptance can yield little speedup or even a slowdown, since rejected drafts waste verification work."
+    - "Red flags: speculative decoding with poor acceptance, distilling for volatile facts, or quantizing to 'fix' latency. When stacking levers, order distill → quantize → speculate."

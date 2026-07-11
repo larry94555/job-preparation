@@ -1,0 +1,100 @@
+# Deep-dive — architecture judgment (code-review MCs + an L4 essay)
+
+- id: mc-review-route-silent-fallback
+  type: multiple_choice
+  tags: [resilience, review]
+  difficulty: 4
+  prompt: >-
+    A gateway design says: "On a primary timeout we fall back to our cheaper backup model and return
+    its answer to the user as normal." Reviewing it, what is the most important problem?
+  options:
+    - { text: "It substitutes a weaker model silently, so users get quietly-lower-quality or inconsistent answers with no signal and operators can't tell degradation from a bug — add an honest degraded-mode UX and a fallback-rate metric", correct: true }
+    - { text: "Falling back on a timeout is wrong; the request should hard-fail so the user retries manually" }
+    - { text: "The backup model must be more expensive than the primary, never cheaper" }
+    - { text: "Nothing — as long as the user gets some answer, the substitution is invisible and that is the goal" }
+  explanation: >-
+    Silent substitution hides a real quality change: the fallback answer may be worse or inconsistent
+    with prior ones, users can't calibrate trust, and operators can't distinguish degraded output from
+    a bug. The fix is an honest degraded-mode UX (notice, lowered-confidence, disabled features) plus a
+    fallback-rate metric on the dashboard — not hard-failing the user.
+
+- id: mc-review-route-no-breaker
+  type: multiple_choice
+  tags: [resilience, review]
+  difficulty: 4
+  prompt: >-
+    A resilience design retries every failed provider call up to 5 times with a fixed 200ms delay and
+    has no circuit breaker. During a provider outage, what happens and what is the best fix?
+  options:
+    - { text: "Prototype-grade: synchronized, uncapped-in-effect retries pile onto a struggling provider (a retry storm); add exponential backoff with jitter and a circuit breaker that fails fast to the fallback", correct: true }
+    - { text: "Production-ready: fixed short delays guarantee the fastest possible recovery for every client" }
+    - { text: "Fine as-is, but raise the retry count to 20 so a flaky provider eventually responds" }
+    - { text: "The only issue is the delay value; change 200ms to 50ms and keep everything else" }
+  explanation: >-
+    Fixed-delay retries let many clients retry in lockstep, and with no breaker they bury a failing
+    provider in traffic exactly when it is weakest — a self-inflicted retry storm. Jittered exponential
+    backoff desynchronizes clients and a circuit breaker caps the load entirely by failing fast to the
+    fallback. Raising the retry count or shrinking the delay makes the storm worse.
+
+- id: mc-review-route-cascade-gate
+  type: multiple_choice
+  tags: [resilience, review]
+  difficulty: 4
+  prompt: >-
+    A cheap→strong cascade escalates to the strong model whenever the cheap model's output is
+    non-empty-checked only for length, and the team reports "cost is barely lower than sending
+    everything to the strong model." What is the strongest objection?
+  options:
+    - { text: "The quality gate is the cost/quality knob and it is untuned: a length-only check escalates almost everything, erasing the savings — calibrate the gate (confidence/verifier/self-check) on held-out traffic to escalate only genuinely hard requests", correct: true }
+    - { text: "Cascades can never save cost; the team should route everything to the cheap model instead" }
+    - { text: "The cheap model must be removed because any escalation at all defeats the purpose" }
+    - { text: "The problem is latency, not the gate; add hedged requests to fix the cost" }
+  explanation: >-
+    In a cascade you pay `cheap + X·strong` where X is the escalation rate the gate produces. A
+    length-only gate is effectively untuned and escalates nearly everything, so X approaches 1 and the
+    savings vanish. The fix is a validated quality gate (confidence, verifier, or self-check) tuned on
+    held-out traffic so only genuinely hard requests escalate. Hedging addresses tail latency, not this
+    cost problem.
+
+- id: debug-route-breaker
+  type: code
+  language: typescript
+  tags: [resilience, review]
+  difficulty: 4
+  prompt: >-
+    DEBUGGING: the provided `CircuitBreaker` is meant to trip open after N consecutive failures
+    (N is the constructor threshold) so calls fail fast to the fallback instead of hammering a
+    dead provider. But `isOpen()` never returns true no matter how many failures pile up in a
+    row. There is exactly one bug in how the consecutive-failure counter is maintained. Fix it
+    (make the minimal change) so consecutive failures accumulate to the threshold, a success
+    resets the count, and the breaker stays closed while below the threshold.
+  starter_file: exercises/circuit-breaker-debug/starter.ts
+  test_file: exercises/circuit-breaker-debug/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-routing-code
+  concept_checks:
+    must_use: ["reset the consecutive-failure count only on success", "increment the count on each failure", "open when the count reaches the threshold"]
+    avoid_antipattern: ["resetting the counter at the start of every record call", "recomputing open state from only the latest result"]
+
+- id: essay-route-deep-dive
+  type: essay
+  length: long
+  tags: [resilience, review]
+  difficulty: 4
+  prompt: >-
+    You are the reviewer on a model-routing-and-fallback design for a production chat feature that
+    depends on an external provider which is sometimes slow, rate-limited, or down. Write a design
+    review: walk the levers (routing policy, cascade depth, failure handling, latency shaping,
+    degraded-mode UX), give an explicit tradeoff for each, and state what would move the design from
+    demo-ready to production-ready. Call out at least two antipatterns and what you would require
+    before accepting a difficulty-based router or a cheap→strong cascade.
+  eval_skill: eval-routing-essay
+  reference_points:
+    - "Routing policy: static per-route is simple but leaves savings on the table; difficulty-based or learned routing sends the easy majority to a cheap/local model but needs a predictor you calibrate and monitor for drift."
+    - "Cascade depth: a cheap→strong cascade pays for the strong model only on requests that fail a quality gate; the gate is the cost/quality knob and must be tuned on held-out traffic, or it either leaks bad cheap answers or escalates everything and erases savings."
+    - "Failure handling: on timeouts/429/5xx, retry with exponential backoff + jitter, fall back to an alternate provider, and put a circuit breaker in front so calls fail fast instead of a retry storm burying a struggling provider."
+    - "Latency shaping: hedged requests fire a duplicate to a backup past a p95 threshold and take the first response, cutting p99 latency at the cost of extra spend and load."
+    - "Degraded-mode UX: when the fallback is a weaker model, silent substitution is an antipattern; an honest UX signals the change (notice/lowered-confidence/disabled features) and the system emits a fallback-rate metric so operators see it on dashboards."
+    - "Demo-ready → production-ready: add a tuned quality gate, calibrated/monitored routing, bounded jittered retries plus a breaker, honest degradation, and fallback-rate observability; require validation of the difficulty predictor and the cascade gate on held-out traffic before accepting them."

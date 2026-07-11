@@ -1,0 +1,95 @@
+# Deep-dive — architecture judgment (code-review MCs + an L4 design-review essay)
+
+- id: mc-review-so-jsonmode-novalidate
+  type: multiple_choice
+  tags: [fallback, review]
+  difficulty: 4
+  prompt: >-
+    A design doc says: "We enable the provider's JSON mode, so the output is always valid — we parse it
+    directly and skip schema validation." Reviewing it, what is the most important problem?
+  options:
+    - { text: "Constrained decoding guarantees form (well-formed, schema-shaped JSON), not meaning — the enum value, number range, or business rule can still be wrong, so you must still parse-then-validate", correct: true }
+    - { text: "JSON mode is unreliable and produces malformed JSON often, so validation is needed to catch parse errors" }
+    - { text: "Nothing — if JSON mode is on, a schema validator is genuinely redundant" }
+    - { text: "The real issue is that JSON mode is slower than prompt-only, so it should be removed" }
+  explanation: >-
+    Constrained decoding restricts the decoder to tokens that keep the output well-formed and
+    schema-shaped, which largely eliminates syntax failures — but it constrains form, not meaning. A
+    syntactically valid response can still carry an illegal enum, an out-of-range number, or a
+    business-rule violation. Prevention and validation are complementary, not substitutes, so you still
+    validate on top of constrained decoding.
+
+- id: mc-review-so-unbounded-repair
+  type: multiple_choice
+  tags: [fallback, review]
+  difficulty: 4
+  prompt: >-
+    A repair implementation loops `while (!valid) { output = model.fix(output, error) }` until
+    validation passes. Rate this design and pick the best fix.
+  options:
+    - { text: "Prototype-grade: an unbounded repair loop can burn latency and money forever on unrepairable outputs — cap it at N attempts and fall back when exhausted", correct: true }
+    - { text: "Production-ready: looping until valid guarantees the caller always gets a correct object" }
+    - { text: "Fine as-is, but the model should not be shown the validation error — just the raw output" }
+    - { text: "The problem is using a schema at all; drop validation and accept the first output" }
+  explanation: >-
+    Some outputs are simply unrepairable, and a loop with no maximum is a `while(true)` waiting to
+    happen — unbounded p99 latency and cost. The fix is a bound: at most N attempts, then fall back to
+    a simpler schema, a deterministic default, or human review. Feeding the concrete validation error
+    back is correct and should stay; dropping validation is the opposite of the fix.
+
+- id: mc-review-so-regex-scrape
+  type: multiple_choice
+  tags: [fallback, review]
+  difficulty: 4
+  prompt: >-
+    A service extracts fields from model responses with a set of regexes over the raw text, with no
+    JSON parse step. What is the strongest objection?
+  options:
+    - { text: "Regex-scraping fields out of raw text is fragile and silently wrong — parse the text then validate against an explicit schema so failures are loud and precise", correct: true }
+    - { text: "Regexes are too slow at scale; the fix is to compile them once and cache" }
+    - { text: "Regex is fine; the only missing piece is a bounded repair loop around it" }
+    - { text: "The real problem is that the model should return XML, which regex handles better" }
+  explanation: >-
+    Regex-scraping is one of the classic red flags: it fails silently and wrongly instead of loudly and
+    precisely, and it does not distinguish syntax from semantic failure. The correct approach is
+    parse-then-validate — parse to catch malformed output, then validate the parsed value against a
+    schema to catch missing fields, wrong types, and illegal values. Caching or switching formats does
+    not address the silent-wrongness.
+
+- id: essay-so-deep-dive
+  type: essay
+  length: long
+  tags: [fallback, review]
+  difficulty: 4
+  prompt: >-
+    You are the reviewer on a structured-output pipeline for a production service that extracts a
+    strict JSON record (with several required fields and an enum) from model responses at high volume.
+    The current design pipes the model's text through a few regexes and retries "until it looks right."
+    Write a design review: walk the levers (prevention via constrained decoding, the schema as
+    contract, bounded error-fed repair, the fallback chain, and failure-class logging), give an
+    explicit tradeoff for each, and state what would move the design from demo-ready to
+    production-ready. Call out at least two antipatterns and explain why validating on top of
+    constrained decoding is still required.
+  eval_skill: eval-structured-output-essay
+
+- id: debug-so-extract-json
+  type: code
+  language: typescript
+  tags: [fallback, review]
+  difficulty: 4
+  prompt: >-
+    DEBUGGING: the provided `extractJson(text)` helper is supposed to pull the JSON object out of a
+    model reply that may have prose before and/or after it. Symptom: it works on flat single-line
+    objects but fails on any object containing a nested `{...}`, and on objects followed by trailing
+    prose — it stops reading too early and returns a truncated/invalid slice. There is exactly one bug
+    in how it locates the end of the object. Fix it (make the minimal change) so the full object is
+    returned for nested objects and trailing prose is ignored, while flat objects keep working.
+  starter_file: exercises/extract-json-debug/starter.ts
+  test_file: exercises/extract-json-debug/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-structured-output-code
+  concept_checks:
+    must_use: ["end the slice at the outermost closing brace (lastIndexOf('}'), not the first '}')", "return the full nested object", "ignore trailing prose after the object"]
+    avoid_antipattern: ["ending the object at the first '}' so nested objects are truncated", "rewriting the helper into a full brace-counting parser instead of the minimal fix"]

@@ -1,0 +1,56 @@
+# Calibration for eval-kvcache-essay (exemplars target essay-why-kv-dominates).
+skill: eval-kvcache-essay
+cases:
+  # PASS — strong answer: on-topic, hits the key points, all claims correct, concrete mechanisms.
+  - answer: >-
+      The question is why KV cache — not weights — is what dominates memory and caps concurrency at
+      scale, and that's exactly the trade-off. Weights are a one-time fixed cost: you load them once and
+      every request in the batch shares the same tensors, so they don't grow with load. The KV cache is
+      per request and grows linearly with sequence length — you store roughly 2 (K and V) * num_layers *
+      num_kv_heads * head_dim bytes per token, per sequence. Multiply that by every concurrent sequence
+      and by their context lengths and the summed KV tensors quickly exceed the weight footprint, so KV
+      is what you run out of first. Paged attention helps by splitting KV into fixed-size blocks tracked
+      in a block table, which cuts internal/external fragmentation and lets you share a prefix's blocks
+      across requests. You budget KV bytes per token, and when you're out you preempt a sequence and
+      either recompute its cache or swap it to host memory over PCIe.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # PASS — different strong answer, same quality bar: all four checks true.
+  - answer: >-
+      Why KV dominates: the weights are static and amortized across the whole batch, but each request
+      carries its own KV cache that scales linearly with its sequence length, and you pay it once per
+      concurrent sequence. So even when the model fits comfortably, the aggregate KV across many long
+      concurrent contexts is what exhausts the GPU and limits how many requests you can serve at once.
+      Concretely you size it as per-token KV bytes (K and V across all layers and kv-heads) times tokens
+      times concurrency. To manage it you page the cache into fixed-size blocks with a block table so
+      unrelated requests don't fragment each other's memory, share blocks for a common prompt prefix, and
+      under pressure preempt a sequence — recomputing its KV from the prompt or swapping the blocks to
+      host RAM rather than corrupting anyone's output.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — wrong on the core mechanism (gate false) and misses the key points and specificity too.
+  - answer: >-
+      Honestly the KV cache is a fixed constant baked into the model that never changes with the request,
+      so it isn't the thing that grows. What grows is the weights — they get re-copied for every
+      concurrent request, so more traffic means more copies of the weights and that's why you run out of
+      memory. Just add GPUs and the problem goes away.
+    expect:
+      verdict: fail
+      checks: { addresses_question: true, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # BORDERLINE — on-topic, hits the points, names real mechanisms, but slips one false claim
+  # (paging as lossy compression) so it fails ONLY the gate → capped from pass down to borderline.
+  - answer: >-
+      The reason KV dominates is that weights are a shared one-time cost while the KV cache is per request
+      and grows linearly with sequence length, so summed across all the concurrent sequences in the batch
+      it dwarfs the weights and caps concurrency. You measure it as KV bytes per token times context
+      length times the number of live requests, and paged attention stores it in fixed-size blocks with a
+      block table to limit fragmentation. The one catch is that paging is a lossy compression step — it
+      shrinks each block by dropping some of the stored values, which is how it fits more sequences in.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: false, concrete: true }

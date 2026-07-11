@@ -1,0 +1,31 @@
+# Calibration for eval-isolation-essay (exemplars target essay-cache-leak).
+skill: eval-isolation-essay
+cases:
+  - answer: >-
+      The key is tenant-blind: it hashes only the prompt, so when two tenants send the same request
+      Tenant B is served Tenant A's cached answer — a cross-tenant leak. With a semantic cache a merely
+      similar query leaks too, and an attacker can poison the cache by seeding an entry under a key a
+      victim will read. Fix it by namespacing the key: tenant_id + normalized request + model/version,
+      so identical requests from different tenants never collide.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  - answer: "A shared cache is fine because the embedding space keeps each tenant's data apart automatically."
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  - answer: >-
+      It could leak because different tenants might share the same key and get each other's answers, so
+      you should probably add the tenant to the key somehow.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
+
+  - answer: >-
+      Just add a random UUID to every cache key so keys are always unique — that guarantees no tenant
+      ever reads another tenant's entry and keeps the cost savings.
+    expect:
+      verdict: fail
+      checks: { technically_correct: false }

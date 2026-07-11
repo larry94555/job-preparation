@@ -1,0 +1,37 @@
+# Essay
+- id: essay-budget-explain
+  type: essay
+  length: short
+  tags: [budget]
+  difficulty: 3
+  prompt: "A teammate wants to 'just paste all the docs into the prompt.' Explain why treating context as a ranked token budget beats dumping everything."
+  eval_skill: eval-context-essay
+  reference_points:
+    - "The window is finite; every token spent on low-value content crowds out high-value content."
+    - "Dumping everything dilutes the signal and raises cost and latency, often lowering task quality."
+    - "Better: rank candidates by relevance and fit the top ones to the budget, dropping the rest."
+
+- id: essay-position-explain
+  type: essay
+  length: short
+  tags: [position]
+  difficulty: 3
+  prompt: "Explain the 'lost in the middle' effect and how it should change where you place important context."
+  eval_skill: eval-context-essay
+  reference_points:
+    - "Models use information best at the start (primacy) and end (recency) of the window and worst in the middle."
+    - "Retrieval accuracy over position is roughly U-shaped, so key facts buried mid-context are most often missed."
+    - "Therefore place the most important evidence near the top or the very end, not in the middle."
+
+- id: essay-selection-design
+  type: essay
+  length: long
+  tags: [selection]
+  difficulty: 4
+  prompt: "Design a selection/retrieval step that assembles a bounded context for an agent: how do you choose, order, and fit chunks, and how do you account for position and cost?"
+  eval_skill: eval-context-essay
+  reference_points:
+    - "Rank candidate chunks by relevance (e.g. embedding similarity / score) to the current query."
+    - "Fit-to-budget: greedily admit top-ranked chunks while token budget remains; drop or compress the rest."
+    - "Order deliberately for position effects: put the most important chunks near the start or end, not the middle."
+    - "Account for cost/latency and a stable prefix so prompt caching can reuse unchanged content."

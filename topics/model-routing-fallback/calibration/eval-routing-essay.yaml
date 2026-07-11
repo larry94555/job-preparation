@@ -1,0 +1,32 @@
+# Calibration for eval-routing-essay (exemplars target essay-cascade-design).
+skill: eval-routing-essay
+cases:
+  - answer: >-
+      Sending everything to the strongest model wastes money and adds latency, because most requests
+      are easy. Use a cascade: route to a cheap, fast model first, then apply a quality gate — a
+      confidence score or a small verifier — and only escalate to the strong model when the gate
+      rejects the cheap answer. The risk is a mis-tuned gate: too strict and you escalate everything
+      (losing the savings and adding a hop of latency), too loose and bad cheap answers slip through.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  - answer: "Just use the biggest model for everything — bigger is always better and cost doesn't matter."
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  - answer: >-
+      A cascade is probably cheaper since you try a smaller model first and only sometimes use the big
+      one, so you don't pay full price on every request.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
+
+  - answer: >-
+      Use a cascade, but start with the most powerful model and fall back to the cheap one — that way
+      the quality gate isn't needed because the big model already answered first, which also makes it
+      cheaper.
+    expect:
+      verdict: fail
+      checks: { technically_correct: false }

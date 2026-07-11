@@ -1,0 +1,70 @@
+# Literature/canon (WS1) + interview (WS2) — tags [canon]/[interview] are NOT in any section's
+# from_tags, so these don't enter the deterministic section-assessment pools.
+- id: mc-canon-rev-ragas
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Which framework provides RAG-specific evaluation metrics (faithfulness, answer relevance, context precision/recall)?"
+  options:
+    - { text: "RAGAS", correct: true }
+    - { text: "BEIR" }
+    - { text: "MTEB" }
+    - { text: "TREC" }
+  explanation: "RAGAS (Exploding Gradients) provides RAG-specific metrics; BEIR is a retrieval benchmark, MTEB an embedding benchmark, and TREC the classic IR relevance methodology."
+
+- id: mc-canon-rev-beir
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Which is the standard heterogeneous benchmark for evaluating retrieval across diverse tasks?"
+  options:
+    - { text: "BEIR", correct: true }
+    - { text: "RAGAS" }
+    - { text: "MTEB" }
+    - { text: "MT-Bench" }
+  explanation: "BEIR (Thakur et al.) is the standard retrieval benchmark; RAGAS scores RAG components, MTEB benchmarks embeddings, and MT-Bench evaluates chat models."
+
+- id: mc-interview-rev-localize
+  type: multiple_choice
+  tags: [interview]
+  difficulty: 3
+  prompt: "In a retrieval-evals interview, the skill that most separates strong candidates is:"
+  options:
+    - { text: "Separating a retrieval miss from a grounding failure and picking the metric that catches each", correct: true }
+    - { text: "Reciting the embedding model's parameter count" }
+    - { text: "Judging the final answer as pass/fail with no labels" }
+    - { text: "Listing prompt-engineering tips" }
+  explanation: "Localizing a failure to the retrieval vs. generation layer — and choosing recall@k vs. faithfulness accordingly — is the core signal; end-to-end vibes-only grading is a red flag."
+
+- id: essay-rev-literature
+  type: essay
+  length: long
+  tags: [canon]
+  difficulty: 4
+  prompt: >-
+    Summarize the influential work on retrieval evaluation — RAG-specific metrics (RAGAS), the retrieval
+    benchmark (BEIR), the embedding benchmark (MTEB), and the classic IR relevance methodology (TREC).
+    For each, say what it contributes, and name the tools used to run retrieval evals today.
+  eval_skill: eval-retrievalevals-essay
+  reference_points:
+    - "RAGAS (Exploding Gradients, 2023): RAG-specific metrics — faithfulness, answer relevance, context precision/recall — scoring components not just the final answer."
+    - "BEIR (Thakur et al., 2021): standard heterogeneous retrieval benchmark testing zero-shot generalization across diverse IR tasks."
+    - "MTEB (Muennighoff et al., 2022): massive embedding benchmark/leaderboard for comparing embedding models across many tasks."
+    - "TREC: classic IR relevance methodology (pooled human-labeled relevance judgments) that modern retrieval eval inherits."
+    - "Tools: RAGAS, TruLens, promptfoo, and custom harnesses."
+
+- id: essay-rev-interview
+  type: essay
+  length: long
+  tags: [interview]
+  difficulty: 4
+  prompt: >-
+    You're in a senior interview on retrieval evaluation. Explain how you'd evaluate a RAG system: how you
+    separate a retrieval miss from a grounding failure, which metrics you'd use at each layer, and how
+    you'd design the eval. Show the depth that reads as senior — and name the canon.
+  eval_skill: eval-retrievalevals-essay
+  reference_points:
+    - "Isolate components: score retrieval (recall@k, precision@k, MRR/nDCG) separately from generation."
+    - "Retrieval miss = right passage never retrieved (recall@k); grounding failure = model ignores/contradicts a passage that was in context — different fixes."
+    - "Add grounding/faithfulness checks and attribution/citation correctness over a labeled golden set — not end-to-end vibes."
+    - "Name the prior art: RAGAS (RAG-specific metrics), BEIR (retrieval benchmark), MTEB (embeddings), TREC (relevance methodology)."

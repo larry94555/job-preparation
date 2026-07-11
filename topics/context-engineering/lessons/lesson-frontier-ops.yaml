@@ -1,0 +1,12 @@
+id: lesson-frontier-ops
+title: "Frontier & operations: principled compaction, the effective-context gap, and the signals to watch"
+material: frontier-ops.md
+segments:
+  - present: the-context-engineering-frontier
+  - check: mc-frontier-context-compaction
+  - check: mc-frontier-context-effective-gap
+  - check: mc-frontier-context-ruler
+  - present: operating-context-engineering-in-production
+  - check: mc-ops-context-truncation-rate
+  - check: mc-ops-context-tokens-trend
+  - apply: code-context-compact

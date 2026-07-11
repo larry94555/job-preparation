@@ -1,0 +1,30 @@
+# Calibration for eval-harness-essay (exemplars target essay-boundary-explain).
+skill: eval-harness-essay
+cases:
+  - answer: >-
+      Prompts shape how the model reasons, but they can't supply the tools, validate the arguments,
+      retry failed calls, or verify that an edit worked — all of that is harness code. So beyond a
+      point, better prompts stop helping: the remaining failures are structural (invalid tool JSON,
+      unverified edits) and only harness-side validation, retries, and verification fix them.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  - answer: "Prompts are important and you should write clear ones."
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, concrete: false }
+
+  - answer: >-
+      The harness handles some of the plumbing while the model does the thinking, so prompts alone
+      aren't enough.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
+
+  - answer: >-
+      Actually the prompt does everything; the harness just forwards text, so better prompts always
+      fix reliability.
+    expect:
+      verdict: fail
+      checks: { technically_correct: false }

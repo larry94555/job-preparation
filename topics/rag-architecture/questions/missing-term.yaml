@@ -1,0 +1,45 @@
+# Missing term (cloze)
+- id: cloze-rag
+  type: text_input
+  tags: [pipeline]
+  difficulty: 1
+  prompt: "Fetching relevant documents at query time and adding them to the model's context is called retrieval-augmented ____."
+  answer:
+    regex: '^generation$'
+    normalize: true
+
+- id: cloze-overlap
+  type: text_input
+  tags: [chunking]
+  difficulty: 2
+  prompt: "Duplicating a little text across adjacent chunks so boundary-straddling facts survive is called chunk ____."
+  answer:
+    regex: '^overlap$'
+    normalize: true
+
+- id: cloze-bm25
+  type: text_input
+  tags: [retrieval]
+  difficulty: 2
+  prompt: "The classic sparse, term-frequency lexical ranking function used as a baseline retriever is ____."
+  answer:
+    regex: '^bm25$'
+    normalize: true
+
+- id: cloze-hybrid
+  type: text_input
+  tags: [retrieval]
+  difficulty: 2
+  prompt: "Combining dense (embedding) and sparse (keyword) retrieval into one result set is called ____ search."
+  answer:
+    regex: '^hybrid$'
+    normalize: true
+
+- id: cloze-reranker
+  type: text_input
+  tags: [reranking]
+  difficulty: 3
+  prompt: "A model that jointly scores each query–document pair to reorder candidates is a cross-____."
+  answer:
+    regex: '^encoder$'
+    normalize: true

@@ -1,0 +1,58 @@
+# Literature/canon (WS1) + interview (WS2) — tags [canon]/[interview] are NOT in any section's
+# from_tags, so these don't enter the deterministic section-assessment pools.
+- id: mc-canon-batch-continuous
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Which system introduced iteration-level (continuous) batching — scheduling at the granularity of a single decode step so finished sequences leave and waiting ones join?"
+  options:
+    - { text: "Orca", correct: true }
+    - { text: "vLLM (PagedAttention)" }
+    - { text: "FlashAttention" }
+    - { text: "TensorRT-LLM" }
+  explanation: "Orca (Yu et al., OSDI 2022) introduced iteration-level (continuous) batching; vLLM/PagedAttention paged the KV cache, FlashAttention is the attention kernel, and TensorRT-LLM is a serving tool."
+
+- id: mc-interview-batch-signal
+  type: multiple_choice
+  tags: [interview]
+  difficulty: 3
+  prompt: "In a serving-systems interview, the strongest signal on batching is that a candidate can:"
+  options:
+    - { text: "Explain what continuous batching solves over static batching and name its latency cost", correct: true }
+    - { text: "Recite the transformer block diagram" }
+    - { text: "Name the tokenizer library" }
+    - { text: "List prompt-engineering tips" }
+  explanation: "Continuous batching admits/evicts sequences per decode step instead of padding to the slowest member; the trade is added per-request latency (queueing/interference), so throughput and latency trade off. Reasoning about that separates people who've served models from people who've only called them."
+
+- id: essay-batch-literature
+  type: essay
+  length: long
+  tags: [canon]
+  difficulty: 4
+  prompt: >-
+    Summarize the influential work behind high-throughput LLM serving — iteration-level (continuous)
+    batching (Orca), paged attention (vLLM/PagedAttention), and the FlashAttention kernel. For each,
+    say what it contributed and how the field received it, and name the tools that implement these
+    ideas today.
+  eval_skill: eval-batching-essay
+  reference_points:
+    - "Orca (Yu et al., OSDI 2022): iteration-level (continuous) batching — schedules per decode step so finished sequences leave and waiting ones join, replacing static batching for variable-length generation."
+    - "vLLM / PagedAttention (Kwon et al., 2023): fixed-size non-contiguous KV blocks tracked by a block table; ended fragmentation and raised concurrency; adopted fast and pairs with continuous batching."
+    - "FlashAttention (Dao, 2022): IO-aware attention kernel reducing attention memory traffic (kernel, not batching or KV storage)."
+    - "Tools that implement these: vLLM, TGI, TensorRT-LLM, SGLang, LMDeploy. SOTA is continuous batching + paged attention with SLO-aware / goodput scheduling."
+
+- id: essay-batch-interview
+  type: essay
+  length: long
+  tags: [interview]
+  difficulty: 4
+  prompt: >-
+    You're in a senior inference-infrastructure interview. Explain batching and throughput to the
+    interviewer: what continuous batching solves over static batching, the latency cost it introduces,
+    and how you'd design a high-throughput serving path. Show the depth that reads as senior.
+  eval_skill: eval-batching-essay
+  reference_points:
+    - "Static batching pads the batch to the slowest sequence and wastes GPU cycles under variable output lengths; continuous (iteration-level) batching admits/evicts sequences per decode step."
+    - "The cost: packing more sequences raises throughput but can add per-request latency (queueing and interference) — throughput and latency trade off."
+    - "Design: continuous batching (iteration-level scheduling) + paged attention (non-contiguous KV blocks so more sequences fit), then SLO-aware / goodput scheduling (serve requests within their targets, not raw tokens/sec)."
+    - "Name Orca and vLLM/PagedAttention as prior art; avoid batch-blind SLOs and static batching under variable output lengths."

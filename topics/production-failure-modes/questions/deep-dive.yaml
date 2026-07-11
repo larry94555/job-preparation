@@ -1,0 +1,76 @@
+# Deep-dive — architecture judgment (code-review MCs + an L4 essay)
+
+- id: mc-review-fail-loud-only
+  type: multiple_choice
+  tags: [mitigation, review]
+  difficulty: 4
+  prompt: >-
+    A reliability design doc says: "We wrap every model call in try/catch and alert on the error rate;
+    it's held below 0.1% for a month, so the feature is healthy." Reviewing it, what is the most
+    important problem?
+  options:
+    - { text: "Error rate counts only loud failures; a hallucinated citation or stale-retrieval answer returns a clean 200, so silent regressions are invisible — you need output validators and eval monitoring", correct: true }
+    - { text: "0.1% is too high an error rate; it should be driven to exactly zero before shipping" }
+    - { text: "try/catch is the wrong construct; the calls should use promises instead" }
+    - { text: "Nothing — a month below 0.1% error rate is sufficient evidence of correctness" }
+  explanation: >-
+    The classic antipattern is a loud-error focus: error-rate dashboards only see exceptions and non-2xx
+    responses. Silent failures — hallucinated tool calls, stale retrieval, eval regressions — return
+    well-formed wrong answers on clean 200s and never touch that metric. Catching them needs validators
+    on output content and eval monitoring on quality, not more error alerting.
+
+- id: mc-review-fail-no-evalgate
+  type: multiple_choice
+  tags: [mitigation, review]
+  difficulty: 4
+  prompt: >-
+    A PR retunes the system prompt to improve tone. It has runtime schema validation, a fallback, and
+    error-rate alerting, but no eval gate. A reviewer approves because "all the guards are green." Rate
+    this and pick the strongest objection.
+  options:
+    - { text: "Demo-ready at best: runtime guards catch loud failures but a prompt tweak can silently drop answer quality without erroring — require a CI eval gate that scores a held-out set and blocks the merge on a drop", correct: true }
+    - { text: "Production-ready: schema validation plus a fallback already guarantees quality can't regress" }
+    - { text: "The fix is to raise the request timeout so slower, higher-quality answers still return" }
+    - { text: "The problem is the fallback; remove it so regressions surface as loud errors" }
+  explanation: >-
+    A prompt change is exactly the kind of quality-affecting change that regresses silently — nothing
+    throws, so every runtime guard stays green. The mechanism that catches it is a CI eval gate scoring
+    the change against a fixed held-out set and blocking the merge when quality drops. Runtime guards and
+    an eval gate are complementary, not substitutes.
+
+- id: mc-review-fail-unbounded-agent
+  type: multiple_choice
+  tags: [mitigation, review]
+  difficulty: 4
+  prompt: >-
+    A design for an autonomous multi-step agent has schema validation, a freshness/TTL check, and a
+    safe fallback, but no cap on steps or spend and no loop detection. What is the most important gap?
+  options:
+    - { text: "A runaway agent can loop or spend without bound; add a hard budget (max steps/tokens/dollars) plus loop detection so a stuck agent halts instead of burning cost indefinitely", correct: true }
+    - { text: "The TTL check is redundant with schema validation and should be removed" }
+    - { text: "The agent needs a larger model and more tools to avoid getting stuck in the first place" }
+    - { text: "Nothing — a safe fallback already guarantees the agent terminates" }
+  explanation: >-
+    Validators and a fallback contain per-call output failures, but none of them bounds an agent that
+    loops or spends without limit. The direct controls are a hard budget on steps/tokens/cost plus loop
+    detection that trips on repeated states. A bigger model or more tools does not bound cost; only
+    budgets and loop detection do.
+
+- id: essay-fail-deep-dive
+  type: essay
+  length: long
+  tags: [mitigation, review]
+  difficulty: 4
+  prompt: >-
+    You are the reviewer on a reliability design for a multi-tenant, agentic LLM feature with a RAG
+    backend. Write a design review: walk the levers (detection surface, mitigation policy, containment
+    bounds, prevention gates, rollout safety), give an explicit tradeoff for each, and state what would
+    move the design from demo-ready to production-ready. Call out at least two antipatterns and name the
+    mechanism you would require before accepting a quality-affecting change.
+  eval_skill: eval-failuremodes-essay
+  reference_points:
+    - "Detection: runtime validators (schema/allowlist, freshness/TTL) catch loud per-request failures cheaply but see nothing silent; eval monitoring is the only thing that catches quality drift. Error-rate dashboards alone are the trap."
+    - "Mitigation: validate-repair-fallback degrades gracefully instead of crashing; refuse/re-retrieve on stale; the tradeoff is extra latency/tokens and a masked failure if unlogged."
+    - "Containment: hard budgets (steps/tokens/dollars) plus loop detection bound a runaway agent's blast radius and cost, at the risk of cutting off a legitimately long task."
+    - "Prevention & rollout: a CI eval gate blocks merges that drop a held-out score (the mechanism required before any quality-affecting change ships); canaries plus an error budget limit the blast radius of regressions offline evals missed."
+    - "Production-ready adds eval gates, bounded agents, canary + error-budget rollout, and blameless postmortems feeding fixes back into the catalog. Antipatterns to call out: loud-error focus that ignores silent regressions, and no guardrails / no postmortems."

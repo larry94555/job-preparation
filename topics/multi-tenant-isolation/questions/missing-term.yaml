@@ -1,0 +1,45 @@
+# Missing term (cloze)
+- id: cloze-tenant-scope
+  type: text_input
+  tags: [cache-safety]
+  difficulty: 2
+  prompt: "To stop cross-tenant cache hits, every cache key must include the ____ scope."
+  answer:
+    regex: '^tenant$'
+    normalize: true
+
+- id: cloze-poisoning
+  type: text_input
+  tags: [cache-safety]
+  difficulty: 3
+  prompt: "Seeding a malicious entry under a key a victim will later read is called cache ____."
+  answer:
+    regex: '^poisoning$'
+    normalize: true
+
+- id: cloze-authz-filter
+  type: text_input
+  tags: [retrieval-scoping]
+  difficulty: 2
+  prompt: "Retrieval from a shared index must apply an ____ filter on tenant metadata so search only returns the caller's documents."
+  answer:
+    regex: '^authorization$'
+    normalize: true
+
+- id: cloze-namespace
+  type: text_input
+  tags: [retrieval-scoping]
+  difficulty: 3
+  prompt: "Giving each tenant its own partition of a vector store, keyed by tenant id, is called a per-tenant ____."
+  answer:
+    regex: '^namespace$'
+    normalize: true
+
+- id: cloze-context-bleed
+  type: text_input
+  tags: [contamination]
+  difficulty: 3
+  prompt: "When one user's history leaks into another user's prompt through reused session state, that is context ____."
+  answer:
+    regex: '^(bleed|contamination)$'
+    normalize: true

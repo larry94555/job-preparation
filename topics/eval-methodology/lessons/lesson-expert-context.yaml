@@ -1,0 +1,10 @@
+id: lesson-expert-context
+title: "Expert context: papers, frontier & interview"
+material: expert-context.md
+segments:
+  - present: papers-people-and-the-frontier
+  - check: mc-canon-eval-judge-benchmark
+  - present: interviewing-on-eval-methodology
+  - check: mc-interview-eval-signal
+  - apply: essay-eval-literature
+  - apply: essay-eval-interview

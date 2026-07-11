@@ -1,0 +1,57 @@
+# Literature/canon (WS1) + interview (WS2) — tags [canon]/[interview] are NOT in any section's
+# from_tags, so these don't enter the deterministic section-assessment pools.
+- id: mc-canon-paged-attention
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Which system introduced paged attention — storing the KV cache in fixed-size, non-contiguous blocks with a block table?"
+  options:
+    - { text: "vLLM (PagedAttention)", correct: true }
+    - { text: "FlashAttention" }
+    - { text: "ColBERT" }
+    - { text: "Orca" }
+  explanation: "PagedAttention (Kwon et al., vLLM) paged the KV cache to eliminate fragmentation; FlashAttention is the attention kernel, ColBERT is retrieval, Orca is continuous batching."
+
+- id: mc-interview-kv-signal
+  type: multiple_choice
+  tags: [interview]
+  difficulty: 3
+  prompt: "In a systems interview, the KV-cache question that most separates experienced candidates is:"
+  options:
+    - { text: "Computing KV memory and explaining why long contexts limit concurrency", correct: true }
+    - { text: "Naming the tokenizer library" }
+    - { text: "Reciting the transformer block diagram" }
+    - { text: "Listing prompt-engineering tips" }
+  explanation: "The memory calculation (and its concurrency implication) is the signal that you've actually served models, not just called them."
+
+- id: essay-kv-literature
+  type: essay
+  length: long
+  tags: [canon]
+  difficulty: 4
+  prompt: >-
+    Summarize the influential work on KV-cache management — paged attention (vLLM), prefix
+    sharing (RadixAttention/SGLang), and the FlashAttention kernel. For each, say what it contributed
+    and how the field received it, and name the tools that implement these ideas today.
+  eval_skill: eval-kvcache-essay
+  reference_points:
+    - "PagedAttention/vLLM (Kwon et al., 2023): fixed-size non-contiguous KV blocks + block table; ended fragmentation; adopted fast."
+    - "RadixAttention/SGLang: prefix tree so common prompt prefixes share KV blocks across requests."
+    - "FlashAttention (Tri Dao): IO-aware attention kernel reducing memory traffic (kernel, not KV storage)."
+    - "Tools that implement these: vLLM, SGLang, TensorRT-LLM, TGI."
+
+- id: essay-kv-interview
+  type: essay
+  length: long
+  tags: [interview]
+  difficulty: 4
+  prompt: >-
+    You're in a senior inference-infrastructure interview. Explain KV-cache management to the
+    interviewer: what the KV cache is, why it caps concurrency, and how you'd design a serving memory
+    manager. Show the depth (and the arithmetic) that reads as senior.
+  eval_skill: eval-kvcache-essay
+  reference_points:
+    - "KV cache stores per-token keys/values; size = layers × heads × head_dim × seq × batch × dtype."
+    - "It dominates serving memory, so long contexts and large batches cap concurrency."
+    - "Design: paged blocks + block table (no fragmentation), then prefix sharing, then SLO-aware eviction (recompute vs. swap)."
+    - "Name vLLM/PagedAttention as prior art; do the memory calculation out loud."

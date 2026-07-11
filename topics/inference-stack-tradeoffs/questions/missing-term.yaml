@@ -1,0 +1,54 @@
+# Missing term (cloze)
+- id: cloze-slo
+  type: text_input
+  tags: [slos]
+  difficulty: 1
+  prompt: "The measurable target that anchors a serving design — e.g. 'p99 TTFT under 300 ms' — is a service-level ____ (three-letter acronym)."
+  answer:
+    regex: '^slo$'
+    normalize: true
+
+- id: cloze-batching
+  type: text_input
+  tags: [levers]
+  difficulty: 2
+  prompt: "The lever that amortizes GPU work across many requests to raise throughput, at the cost of higher per-request latency, is ____."
+  answer:
+    regex: '^batching$'
+    normalize: true
+
+- id: cloze-quantization
+  type: text_input
+  tags: [levers]
+  difficulty: 2
+  prompt: "Reducing the numerical precision of weights (FP16 → INT8/INT4) to cut cost and memory, risking some quality, is called ____."
+  answer:
+    regex: '^quantization$'
+    normalize: true
+
+- id: cloze-budget
+  type: text_input
+  tags: [slos]
+  difficulty: 3
+  prompt: "Splitting an end-to-end latency SLO into additive per-stage targets (network, queue, prefill, decode) is called budget ____."
+  answer:
+    regex: '^decomposition$'
+    normalize: true
+
+- id: cloze-pareto
+  type: text_input
+  tags: [tradeoffs]
+  difficulty: 3
+  prompt: "The set of configurations where you cannot improve one axis without worsening another is called the ____ frontier."
+  answer:
+    regex: '^pareto$'
+    normalize: true
+
+- id: cloze-tail
+  type: text_input
+  tags: [tradeoffs]
+  difficulty: 3
+  prompt: "Latency measured at a high percentile like p99 — the slow requests that batching can worsen — is called ____ latency."
+  answer:
+    regex: '^tail$'
+    normalize: true

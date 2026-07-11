@@ -1,0 +1,37 @@
+# Essay
+- id: essay-tool-contract
+  type: essay
+  length: short
+  tags: [contract]
+  difficulty: 3
+  prompt: "Explain what it means to 'treat a tool as an API with a contract,' and why a typed argument schema improves reliability."
+  eval_skill: eval-funccall-essay
+  reference_points:
+    - "A tool is an API: its schema is a contract of arguments, types, behavior, and errors that the caller must satisfy."
+    - "A typed schema (JSON Schema / Zod / Pydantic) lets the harness validate and coerce arguments before any side effect."
+    - "The contract turns malformed calls into rejectable errors instead of undefined behavior, and separates read from write tools."
+
+- id: essay-hallucinated-call
+  type: essay
+  length: short
+  tags: [validation]
+  difficulty: 3
+  prompt: "The model emits a call to a tool that doesn't exist, and another call with a missing required field. Describe how a well-built dispatcher should handle each, and why."
+  eval_skill: eval-funccall-essay
+  reference_points:
+    - "Unknown tool name: reject the call rather than guessing or executing; it is a hallucinated call."
+    - "Invalid arguments: fail schema validation before executing; do not silently default or coerce blindly."
+    - "In both cases return a structured, model-facing error so the loop can retry with a corrected call — never crash or execute unvalidated input."
+
+- id: essay-idempotency-retry
+  type: essay
+  length: long
+  tags: [idempotency]
+  difficulty: 4
+  prompt: "Design safe-retry handling for a mutating tool such as `chargeCard`. Explain the duplicate-effect risk and how idempotency keys and read/write separation make retries safe."
+  eval_skill: eval-funccall-essay
+  reference_points:
+    - "A retried mutation after a lost response can apply the effect twice (double-charge) — the core duplicate-effect risk."
+    - "Idempotency: repeating the operation yields the same end state as doing it once, which is what makes a retry safe."
+    - "An idempotency key lets the server record the first outcome and return it for identical retries instead of re-applying the effect."
+    - "Read/write separation lets safe reads retry freely while writes get keys, confirmation gates, or dedupe."

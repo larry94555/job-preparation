@@ -1,0 +1,108 @@
+# Multiple choice
+- id: mc-why-trace
+  type: multiple_choice
+  tags: [tracing]
+  difficulty: 2
+  prompt: "Why are request-level metrics insufficient for observing an LLM agent?"
+  options:
+    - { text: "A single user request fans out into many model, tool, and retrieval calls, so you need the whole call graph, not one aggregate number", correct: true }
+    - { text: "LLM requests are always faster than ordinary HTTP requests" }
+    - { text: "Agents never make more than one model call per request" }
+    - { text: "Request metrics reveal the model's internal weights" }
+  explanation: "An agent turn expands into a tree of steps — plan, tool calls, retries, sub-model calls. A single request timer hides where time, tokens, and errors actually go; you need a trace over the whole graph."
+
+- id: mc-trace-vs-span
+  type: multiple_choice
+  tags: [tracing]
+  difficulty: 2
+  prompt: "In tracing terminology, what is the relationship between a trace and a span?"
+  options:
+    - { text: "A trace is the whole end-to-end operation; a span is one unit of work within it, and spans nest to form the trace's tree", correct: true }
+    - { text: "A span is the whole operation; a trace is a single step inside it" }
+    - { text: "Traces and spans are two words for the same single log line" }
+    - { text: "A trace holds tokens while a span holds only timestamps" }
+  explanation: "A trace represents one full request; spans are the individual steps (a model call, a tool call, a retrieval) that nest under it, giving parent/child structure over the call graph."
+
+- id: mc-correlation-id
+  type: multiple_choice
+  tags: [tracing]
+  difficulty: 3
+  prompt: "What is the purpose of a correlation ID (trace ID) propagated through an LLM call graph?"
+  options:
+    - { text: "It stitches spans emitted by different services and steps into one trace so you can follow a single request end to end", correct: true }
+    - { text: "It encrypts the prompt so it cannot be logged" }
+    - { text: "It replaces the need to record latency on each span" }
+    - { text: "It guarantees the model returns deterministic output" }
+  explanation: "The correlation/trace ID is threaded through every step and service so their spans can be joined back into one coherent trace, even across process and network boundaries."
+
+- id: mc-ttft-tpot
+  type: multiple_choice
+  tags: [signals]
+  difficulty: 3
+  prompt: "TTFT and TPOT measure two different parts of streaming latency. Which is correct?"
+  options:
+    - { text: "TTFT is time to the first token; TPOT is the per-token time during decoding after the first token", correct: true }
+    - { text: "TTFT is total tokens for training; TPOT is total prompt output tokens" }
+    - { text: "TTFT and TPOT both measure only the network round-trip" }
+    - { text: "TTFT is per-token decode time; TPOT is time to first token" }
+  explanation: "Time-To-First-Token captures prefill + queueing before streaming starts; Time-Per-Output-Token captures the steady-state decode rate. Together they explain perceived latency far better than a single end-to-end number."
+
+- id: mc-core-signals
+  type: multiple_choice
+  tags: [signals]
+  difficulty: 2
+  prompt: "Which set best describes the core signals to capture on an LLM span?"
+  options:
+    - { text: "Tokens (in/out), latency (TTFT/TPOT), errors and retries, and cost", correct: true }
+    - { text: "Only the final answer text" }
+    - { text: "CPU temperature and disk usage of the GPU host" }
+    - { text: "The model's training data and hyperparameters" }
+  explanation: "Token counts, latency breakdown, error/retry rate, and derived cost are the primary telemetry per step; rolled up across a trace they explain quality, speed, and spend."
+
+- id: mc-cost-rollup
+  type: multiple_choice
+  tags: [signals]
+  difficulty: 3
+  prompt: "How is per-request cost most naturally derived in an LLM trace?"
+  options:
+    - { text: "Multiply each span's input/output token counts by the model's per-token prices, then roll the span costs up the trace", correct: true }
+    - { text: "Count the number of HTTP requests and multiply by a flat fee" }
+    - { text: "Measure wall-clock latency and bill per second regardless of tokens" }
+    - { text: "Cost cannot be attributed to individual steps" }
+  explanation: "Cost is a function of tokens and model prices per step. Recording tokens on every span lets you compute span cost and sum it up the trace to get per-request (and per-user/per-feature) spend."
+
+- id: mc-drift-canary
+  type: multiple_choice
+  tags: [drift]
+  difficulty: 3
+  prompt: "What is a canary in the context of shipping a new prompt or model version?"
+  options:
+    - { text: "Route a small slice of traffic to the new version and compare its signals against the current one before a full rollout", correct: true }
+    - { text: "A synthetic prompt that is never sent to real users" }
+    - { text: "A backup copy of the vector index" }
+    - { text: "A redaction rule that removes PII from logs" }
+  explanation: "A canary exposes a small percentage of live traffic to the candidate version so you can compare latency, cost, error, and quality signals side by side and catch regressions before promoting it."
+
+- id: mc-drift-what
+  type: multiple_choice
+  tags: [drift]
+  difficulty: 3
+  prompt: "\"Quality drift\" in an LLM system most precisely refers to:"
+  options:
+    - { text: "A gradual change in output quality or input distribution over time, even when the code did not change", correct: true }
+    - { text: "The model file being corrupted on disk" }
+    - { text: "A spike in HTTP 500 errors from the load balancer" }
+    - { text: "The correlation ID failing to propagate between services" }
+  explanation: "Drift is a slow shift — in the input distribution, in provider behavior, or in eval scores — that degrades quality without any deploy. It is caught by trending eval scores and distribution stats, not by error counters alone."
+
+- id: mc-redaction
+  type: multiple_choice
+  tags: [capture]
+  difficulty: 3
+  prompt: "You want to capture full prompts and completions for replay/debugging but must protect user privacy. The standard approach is to:"
+  options:
+    - { text: "Redact or tokenize PII before it is written to the trace store, and sample rather than capture everything", correct: true }
+    - { text: "Log every raw prompt and completion verbatim to a public bucket" }
+    - { text: "Disable tracing entirely so nothing sensitive is stored" }
+    - { text: "Encrypt the correlation ID and store the prompt in plaintext" }
+  explanation: "Capture/replay needs the payloads, but raw prompts often contain PII. Redaction/tokenization at capture time plus sampling gives you debuggable traces without hoarding sensitive data."

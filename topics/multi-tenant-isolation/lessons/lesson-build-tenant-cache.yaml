@@ -1,0 +1,10 @@
+id: lesson-build-tenant-cache
+title: "Build it: a tenant-scoped cache"
+material: build-tenant-cache.md
+segments:
+  - present: the-cache-key-must-carry-the-tenant
+  - check: mc-tenant-blind-leak
+  - present: why-identical-keys-must-not-collide
+  - check: mc-isolation-fix
+  - apply: code-tenant-cache
+  - apply: essay-isolation-design

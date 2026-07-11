@@ -1,0 +1,13 @@
+id: lesson-deep-dive
+title: "Architecture & tradeoffs: reviewing a failure-modes design"
+material: deep-dive.md
+segments:
+  - present: the-production-failure-modes-design-space
+  - present: a-tradeoff-table-for-production-failure-modes
+  - check: mc-review-fail-loud-only
+  - check: mc-review-fail-no-evalgate
+  - present: common-sota-and-antipattern
+  - check: mc-review-fail-unbounded-agent
+  - present: scaling-performance-and-the-token-budget
+  - present: reviewing-a-production-failure-modes-design
+  - apply: essay-fail-deep-dive

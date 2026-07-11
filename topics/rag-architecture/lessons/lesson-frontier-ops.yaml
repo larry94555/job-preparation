@@ -1,0 +1,12 @@
+id: lesson-frontier-ops
+title: "Frontier & operations: GraphRAG, contextual/agentic retrieval, and the signals to watch"
+material: frontier-ops.md
+segments:
+  - present: the-rag-architecture-frontier
+  - check: mc-frontier-rag-graphrag
+  - check: mc-frontier-rag-contextual
+  - check: mc-frontier-rag-agentic
+  - present: operating-rag-in-production
+  - check: mc-ops-rag-recall-at-k
+  - check: mc-ops-rag-freshness-grounding
+  - apply: code-rag-rerank-funnel

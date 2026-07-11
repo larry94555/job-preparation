@@ -1,0 +1,16 @@
+id: lesson-verification
+title: "Verification & loop control"
+material: harness-verification.md
+segments:
+  - present: verification-is-the-harnesss-job
+  - check: mc-verify-who
+  - check: mc-antipattern-trust
+  - check: fe-verify-method
+  - present: bounding-and-controlling-the-loop
+  - check: mc-plan-execute
+  - check: cloze-plan
+  - check: cloze-idempotency
+  - check: mc-multiagent-when
+  - check: fe-noprogress
+  - apply: essay-verify-why
+  - apply: essay-design-harness

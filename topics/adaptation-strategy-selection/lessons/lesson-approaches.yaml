@@ -1,0 +1,14 @@
+id: lesson-approaches
+title: "The four approaches at a glance"
+material: approaches.md
+segments:
+  - present: the-four-approaches-at-a-glance
+  - check: mc-icl-what
+  - check: mc-rag-what
+  - check: cloze-icl
+  - present: what-each-one-changes
+  - check: mc-ft-what
+  - check: mc-distill-what
+  - check: cloze-distillation
+  - check: fe-behavior-method
+  - apply: essay-four-approaches

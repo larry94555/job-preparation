@@ -1,0 +1,111 @@
+# Frontier & operations drill — closes D2 (frontier paper drill) and D6 (ops metrics drill).
+
+- id: mc-frontier-route-cascade-vs-learned
+  type: multiple_choice
+  tags: [routing, frontier]
+  difficulty: 4
+  prompt: >-
+    FrugalGPT (cost cascade) and RouteLLM (learned router) both cut cost, but they get the per-request
+    difficulty judgment in fundamentally different ways. What is the difference?
+  options:
+    - { text: "A cascade discovers difficulty by paying for a cheap first attempt and escalating only when a quality gate rejects it; a learned router predicts difficulty up front and routes straight to the cheapest capable model", correct: true }
+    - { text: "A cascade routes randomly, while a learned router always uses the strongest model" }
+    - { text: "A cascade needs a trained predictor, while a learned router uses no signal at all" }
+    - { text: "They are the same technique under two names" }
+  explanation: >-
+    FrugalGPT is try-then-check: run the cheap model, escalate only when the quality gate fails — it
+    *discovers* difficulty by paying for a first attempt. RouteLLM is predict-then-route: a trained router
+    estimates difficulty and sends the request straight to the cheapest model likely to clear the bar,
+    skipping the first attempt. Both still depend on the same difficulty judgment being right.
+
+- id: mc-frontier-route-difficulty-prediction
+  type: multiple_choice
+  tags: [routing, frontier]
+  difficulty: 4
+  prompt: >-
+    Accurate difficulty prediction is called the load-bearing open problem for routing. Why does getting
+    it wrong hurt in *both* directions?
+  options:
+    - { text: "Underestimate difficulty and hard work goes to the weak model (quality degrades); overestimate it and easy work goes to the strong model (you overpay)", correct: true }
+    - { text: "It only ever causes overspending, never quality loss" }
+    - { text: "It only matters for fallback, not for the initial route" }
+    - { text: "Wrong predictions are harmless because the circuit breaker corrects them" }
+  explanation: >-
+    Routing economics hinge on the difficulty signal. Route hard requests to the cheap model and quality
+    silently drops; route easy requests to the strong model and you pay for capability you didn't need.
+    A circuit breaker handles provider *failure*, not mis-judged difficulty — so it can't rescue a bad
+    prediction.
+
+- id: mc-frontier-route-quality-preserving
+  type: multiple_choice
+  tags: [routing, frontier]
+  difficulty: 4
+  prompt: >-
+    The frontier goal of "quality-preserving routing / consistency under model swaps" targets a specific
+    failure. Which one, and how should you read a claim that a new router is "cheaper with no quality loss"?
+  options:
+    - { text: "The failure is a swap that looks free on a cost dashboard but silently shifts answer quality/format/tone; treat the claim skeptically and demand the eval that gates the quality check, not just the cost number", correct: true }
+    - { text: "The failure is high latency; accept the claim if p99 improved" }
+    - { text: "The failure is running out of providers; accept the claim if there are enough fallbacks configured" }
+    - { text: "There is no real failure here; a cheaper cost number alone proves quality was preserved" }
+  explanation: >-
+    Quality-preserving routing is about not silently changing answer quality when models are swapped
+    (fallback fires, a provider is deprecated, a route is re-tuned). A cost dashboard can't see a tone or
+    correctness shift, so the honest read of any "cheaper, no quality loss" claim is to ask what eval
+    proves the quality half — not to accept it on the cost number alone.
+
+- id: mc-ops-route-breaker-open-rate
+  type: multiple_choice
+  tags: [resilience, ops]
+  difficulty: 4
+  prompt: >-
+    You want the earliest operational signal that an upstream provider is going unhealthy — before users
+    see errors. Which routing-gateway metric leads?
+  options:
+    - { text: "Circuit-breaker open rate — a breaker tripping open fast-fails the provider into the fallback path, absorbing the failure before it surfaces as user-visible errors", correct: true }
+    - { text: "Total tokens generated across all routes" }
+    - { text: "The number of models configured in the gateway" }
+    - { text: "The size of the router's model on disk" }
+  explanation: >-
+    A rising breaker-open rate means a dependency is chronically failing; because the breaker diverts those
+    calls into fallback, it spikes before errors reach users. Fallback/escalation rate is the next signal;
+    per-route hit rate and cost-per-request-by-route are for cost/capacity planning, not early failure detection.
+
+- id: mc-ops-route-hit-rate-drift
+  type: multiple_choice
+  tags: [resilience, ops]
+  difficulty: 4
+  prompt: >-
+    Over a month at constant request rate, the cheap route's per-route hit rate has fallen and the
+    escalation rate has climbed. What does operational review conclude, and which currency should you plan on?
+  options:
+    - { text: "The cheap path is serving less of the load — traffic drifted harder or the difficulty predictor decalibrated — so the cost savings are evaporating; plan on per-route hit rate and cost-per-request by route, not a single average", correct: true }
+    - { text: "Nothing changed, because the overall request rate is constant" }
+    - { text: "The models got larger on disk, raising cost" }
+    - { text: "Latency alone increased; routing is irrelevant to cost here" }
+  explanation: >-
+    A falling cheap-route hit rate with rising escalation means the cheap model handles less of the traffic
+    than the economics assumed — from harder traffic or a decalibrated difficulty predictor — so
+    cost-per-request drifts up. Routing exists to move the per-route cost curve, so the currency is per-route
+    hit rate and cost-per-request by route, never a single blended average.
+
+- id: code-route-cascade
+  type: code
+  language: typescript
+  tags: [resilience, review]
+  difficulty: 4
+  prompt: >-
+    Implement `route(models, minQuality)` for a cheap→strong routing cascade with a tuned quality gate.
+    `models` are ordered cheap→strong, each `{ name, quality }`. Return the FIRST model whose
+    `quality >= minQuality` as `{ name, escalated }`, where `escalated` is `false` when that model is the
+    first (cheapest) one and `true` otherwise. If NO model clears the gate, return the LAST (strongest)
+    model with `escalated: true`.
+  starter_file: exercises/route-cascade/starter.ts
+  test_file: exercises/route-cascade/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-routing-code
+  concept_checks:
+    must_use: ["scan models in cheap→strong order", "return the first model with quality >= minQuality", "escalated is true only when the chosen model is not the cheapest", "fall back to the strongest model (escalated true) when none clear the gate"]
+    avoid_antipattern: ["returning the strongest model whenever escalating", "ignoring the minQuality gate", "reporting escalated true when the cheapest model already clears the gate"]

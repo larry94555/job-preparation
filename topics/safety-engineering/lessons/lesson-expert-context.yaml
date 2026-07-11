@@ -1,0 +1,10 @@
+id: lesson-expert-context
+title: "Expert context: papers, people & the frontier"
+material: expert-context.md
+segments:
+  - present: papers-people-and-the-frontier
+  - check: mc-canon-safety-coined
+  - present: interviewing-on-safety-engineering
+  - check: mc-interview-safety-signal
+  - apply: essay-safety-literature
+  - apply: essay-safety-interview

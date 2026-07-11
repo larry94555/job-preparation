@@ -1,0 +1,69 @@
+# Literature/canon (WS1) + interview (WS2) — tags [canon]/[interview] are NOT in any section's
+# from_tags, so these don't enter the deterministic section-assessment pools.
+- id: mc-canon-fc-leaderboard
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Which project and leaderboard are the reference for evaluating tool/function-calling ability?"
+  options:
+    - { text: "Gorilla / the Berkeley Function-Calling Leaderboard", correct: true }
+    - { text: "Toolformer / the OpenAI Evals leaderboard" }
+    - { text: "ColBERT / BEIR" }
+    - { text: "ReAct / MT-Bench" }
+  explanation: "Gorilla (Patil et al., Berkeley) targets calling large real API surfaces, and the Berkeley Function-Calling Leaderboard is the reference benchmark for tool/function-calling; Toolformer showed models can learn to call tools but is not the leaderboard."
+
+- id: mc-canon-fc-mcp
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "What is the open standard for the tool boundary — a common interface between models/agents and tools?"
+  options:
+    - { text: "Model Context Protocol (MCP)", correct: true }
+    - { text: "Toolformer" }
+    - { text: "Gorilla" }
+    - { text: "OpenTelemetry GenAI conventions" }
+  explanation: "MCP (Anthropic, 2024) is the open standard for the tool boundary, so a tool implemented once works across hosts; Toolformer and Gorilla are model/eval work, not the interface standard."
+
+- id: mc-interview-fc-signal
+  type: multiple_choice
+  tags: [interview]
+  difficulty: 3
+  prompt: "In a function-calling interview, the strongest reliability signal from a candidate is that they:"
+  options:
+    - { text: "Make mutating tools idempotent (keys + read/write separation) and reject hallucinated calls", correct: true }
+    - { text: "Trust the tool name the model emits and execute it immediately" }
+    - { text: "Retry any failed mutation until it succeeds" }
+    - { text: "Coerce missing arguments to defaults so the call never fails" }
+  explanation: "Idempotency for mutations, plus validating arguments and rejecting unknown/hallucinated calls, is the senior signal; the other options are the classic red flags (blind trust, non-idempotent retries, silent coercion)."
+
+- id: essay-fc-literature
+  type: essay
+  length: long
+  tags: [canon]
+  difficulty: 4
+  prompt: >-
+    Summarize the influential work on function calling — Toolformer, Gorilla and the Berkeley
+    Function-Calling Leaderboard, and MCP. For each, say what it contributed, and name the tools and
+    validators used in practice today.
+  eval_skill: eval-funccall-essay
+  reference_points:
+    - "Toolformer (Schick et al., 2023): models can learn to call tools/APIs, inserting API calls into their own generation and learning when a tool helps."
+    - "Gorilla (Patil et al., Berkeley, 2023): calling large real API surfaces correctly; the same line gives the Berkeley Function-Calling Leaderboard, the reference benchmark for tool/function-calling."
+    - "MCP (Anthropic, 2024): open standard for the tool boundary — a common model/agent-to-tool interface so a tool built once works across hosts."
+    - "In practice: MCP, provider tool/function APIs, and Pydantic/Zod validators; SOTA is typed contracts + argument validation + idempotency."
+
+- id: essay-fc-interview
+  type: essay
+  length: long
+  tags: [interview]
+  difficulty: 4
+  prompt: >-
+    You're in a senior interview on function-calling reliability. Explain how you'd design a reliable
+    function-calling layer: the contract per tool, how you handle unknown or invalid calls, and how you
+    make mutating tools safe to retry. Show the depth that reads as senior.
+  eval_skill: eval-funccall-essay
+  reference_points:
+    - "Treat each tool as an API with a typed contract (JSON Schema / Zod / Pydantic) and validate arguments before any side effect."
+    - "Reject unknown/hallucinated tool calls and invalid arguments with a structured, model-facing error so the loop can retry with a corrected call — never execute unvalidated input."
+    - "Make mutating tools idempotent with idempotency keys so a retried call after a lost response doesn't apply the effect twice; separate read from write tools."
+    - "Name Gorilla / the Berkeley Function-Calling Leaderboard as how the capability is evaluated and MCP as the emerging tool-boundary standard."

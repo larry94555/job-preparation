@@ -1,0 +1,132 @@
+# Multiple choice
+- id: mc-why-quantize
+  type: multiple_choice
+  tags: [formats]
+  difficulty: 2
+  prompt: "The primary reason to quantize an LLM's weights is to:"
+  options:
+    - { text: "Shrink its memory footprint (and bandwidth) so it fits and runs faster on cheaper hardware", correct: true }
+    - { text: "Increase the number of parameters the model has" }
+    - { text: "Guarantee the model becomes more accurate than the original" }
+    - { text: "Remove the need for a GPU entirely" }
+  explanation: "Quantization stores weights in fewer bits (e.g. INT4 instead of FP16), cutting memory and memory-bandwidth cost so a model fits on smaller/cheaper hardware and decodes faster."
+
+- id: mc-fp16-vs-int4-footprint
+  type: multiple_choice
+  tags: [formats]
+  difficulty: 2
+  prompt: "Going from FP16 weights to INT4 weights reduces the weight memory footprint by roughly:"
+  options:
+    - { text: "4x (16 bits down to 4 bits per weight)", correct: true }
+    - { text: "2x" }
+    - { text: "No change; only the format name differs" }
+    - { text: "16x" }
+  explanation: "FP16 uses 16 bits per weight and INT4 uses 4, so the weights take about one quarter of the memory — a ~4x reduction (before quantization overhead like scales/zero-points)."
+
+- id: mc-bf16-vs-fp16
+  type: multiple_choice
+  tags: [formats]
+  difficulty: 3
+  prompt: "Compared with FP16, BF16 (bfloat16) mainly trades:"
+  options:
+    - { text: "Mantissa precision for a wider dynamic range (same 8-bit exponent as FP32)", correct: true }
+    - { text: "Total bit-width — BF16 uses only 8 bits" }
+    - { text: "Range for precision — BF16 has a narrower exponent than FP16" }
+    - { text: "Nothing; BF16 and FP16 are identical bit layouts" }
+  explanation: "BF16 keeps FP32's 8-bit exponent (wide dynamic range) but has fewer mantissa bits, so it resists overflow/underflow during training at the cost of precision, whereas FP16 has more mantissa but a smaller exponent range."
+
+- id: mc-scale-zeropoint
+  type: multiple_choice
+  tags: [formats]
+  difficulty: 3
+  prompt: "In integer (affine) quantization, the scale and zero-point are used to:"
+  options:
+    - { text: "Map the low-bit integer values back to approximate real (floating-point) values", correct: true }
+    - { text: "Encrypt the weights so they cannot be read" }
+    - { text: "Increase the number of bits per weight" }
+    - { text: "Choose which layers to skip during inference" }
+  explanation: "Affine quantization stores integers plus a scale (and, for asymmetric/zero-point schemes, an offset); dequantization multiplies by the scale and subtracts the zero-point to recover an approximate float value."
+
+- id: mc-per-channel
+  type: multiple_choice
+  tags: [formats]
+  difficulty: 4
+  prompt: "Per-channel (vs. per-tensor) quantization improves quality because it:"
+  options:
+    - { text: "Gives each channel its own scale, so a few wide-ranging channels don't force a coarse scale on everything", correct: true }
+    - { text: "Uses more bits per weight than per-tensor" }
+    - { text: "Removes the need for a calibration set" }
+    - { text: "Stores activations instead of weights" }
+  explanation: "A single per-tensor scale must cover the widest value in the whole tensor; per-channel scales let each row/column adapt, so outlier-heavy channels don't blow up the quantization error for well-behaved ones."
+
+- id: mc-activations-harder
+  type: multiple_choice
+  tags: [quality]
+  difficulty: 4
+  prompt: "Why are activations generally HARDER to quantize than weights?"
+  options:
+    - { text: "Activations are dynamic and contain large outlier features that vary per input, so a fixed low-bit range loses information", correct: true }
+    - { text: "Activations have far more values than weights, so they need more bits by count" }
+    - { text: "Weights change every forward pass while activations are fixed" }
+    - { text: "Activations are stored on disk and weights are not" }
+  explanation: "Weights are static and can be carefully calibrated once; activations are computed at runtime, vary with the input, and famously contain a few huge outlier features that a naive low-bit range cannot represent — which is why weight-only quantization is more forgiving."
+
+- id: mc-kv-quant
+  type: multiple_choice
+  tags: [quality]
+  difficulty: 3
+  prompt: "Quantizing the KV cache primarily helps by:"
+  options:
+    - { text: "Shrinking the per-token memory the cache consumes, enabling longer contexts or larger batches", correct: true }
+    - { text: "Making the model's weights smaller on disk" }
+    - { text: "Eliminating the attention computation entirely" }
+    - { text: "Increasing numerical precision of stored keys and values" }
+  explanation: "The KV cache grows with sequence length and batch size and can dominate memory at long context; storing keys/values in INT8/FP8 rather than FP16 roughly halves that footprint, at some risk to quality on long sequences."
+
+- id: mc-gptq-vs-awq
+  type: multiple_choice
+  tags: [methods]
+  difficulty: 4
+  prompt: "A key difference between GPTQ and AWQ is that:"
+  options:
+    - { text: "GPTQ minimizes layer-wise reconstruction error using second-order (Hessian) information; AWQ protects the weights tied to salient activation channels", correct: true }
+    - { text: "AWQ requires no data at all while GPTQ needs the full training set" }
+    - { text: "GPTQ quantizes activations and AWQ quantizes only the KV cache" }
+    - { text: "They are two names for the exact same algorithm" }
+  explanation: "GPTQ is a post-training method that greedily quantizes weights while minimizing the output error using approximate second-order (Hessian) information. AWQ (activation-aware weight quantization) instead identifies the most salient weight channels (those multiplying large activations) and scales/protects them."
+
+- id: mc-smoothquant
+  type: multiple_choice
+  tags: [methods]
+  difficulty: 4
+  prompt: "SmoothQuant makes weight+activation quantization work better by:"
+  options:
+    - { text: "Migrating the difficulty of activation outliers into the weights via a per-channel scaling, so both can be quantized", correct: true }
+    - { text: "Skipping quantization on every layer that has outliers" }
+    - { text: "Training the model from scratch at low precision" }
+    - { text: "Storing activations in FP32 and weights in INT4" }
+  explanation: "Activations have large outliers that are hard to quantize; SmoothQuant applies an equivalent per-channel scale that shifts magnitude from activations into weights (which are easier to quantize), smoothing both so INT8 weight+activation quantization becomes feasible."
+
+- id: mc-perplexity-hides
+  type: multiple_choice
+  tags: [quality]
+  difficulty: 4
+  prompt: "Why can perplexity look fine while a quantized model has actually degraded?"
+  options:
+    - { text: "Perplexity averages next-token loss over generic text and can miss task-specific failures on reasoning, code, or long context", correct: true }
+    - { text: "Perplexity is only defined for INT4 models" }
+    - { text: "Lower perplexity always means worse task quality" }
+    - { text: "Perplexity measures latency, not quality" }
+  explanation: "Perplexity is a smooth average of language-modeling loss; a model can keep low perplexity yet lose accuracy on multi-step reasoning (GSM8K), code, or long-context tasks, so you must confirm with real task evals rather than trusting perplexity alone."
+
+- id: mc-weight-only-good
+  type: multiple_choice
+  tags: [methods]
+  difficulty: 3
+  prompt: "Weight-only INT4 quantization (e.g. GPTQ/AWQ) is popular for LLM serving mainly because:"
+  options:
+    - { text: "Memory-bandwidth-bound decode benefits from smaller weights, and weights quantize with little quality loss while activations stay in higher precision", correct: true }
+    - { text: "It also quantizes activations to INT4, which is where most of the memory is" }
+    - { text: "It makes training faster" }
+    - { text: "It always beats FP16 on task accuracy" }
+  explanation: "Autoregressive decode is dominated by streaming weights from memory, so shrinking weights speeds it up; keeping activations in higher precision avoids the hard outlier problem, so weight-only INT4 usually keeps quality close to the FP16 baseline."

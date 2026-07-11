@@ -1,0 +1,17 @@
+id: lesson-levers
+title: "Per-layer levers & their dominant axis"
+material: per-layer-levers.md
+segments:
+  - present: levers-and-their-dominant-axis
+  - check: mc-batching-axis
+  - check: mc-quant-axis
+  - check: mc-caching-axis
+  - check: mc-speculative-axis
+  - check: cloze-batching
+  - check: cloze-quantization
+  - check: fe-batching-cost
+  - check: fe-quant-risk
+  - present: choosing-the-right-lever
+  - check: mc-fallback-axis
+  - check: fe-fallback-axis
+  - apply: essay-per-layer-levers

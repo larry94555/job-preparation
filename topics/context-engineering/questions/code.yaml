@@ -1,0 +1,20 @@
+# Coding exercise — engine type: code (graded by tests + concept skill)
+- id: code-assemble-context
+  type: code
+  language: typescript
+  tags: [selection]
+  difficulty: 3
+  prompt: >-
+    Implement `assembleContext(sections, tokenBudget)`. Each section is `{ id, tokens, priority }`.
+    Rank sections by priority (highest first), then greedily include a section if adding its tokens
+    keeps the running total <= tokenBudget (otherwise skip it, but keep scanning — a smaller
+    lower-priority section may still fit). Return the ids of the included sections, in priority order.
+  starter_file: exercises/assemble-context/starter.ts
+  test_file: exercises/assemble-context/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-context-code
+  concept_checks:
+    must_use: ["sort by priority descending", "never exceed the token budget", "keep scanning to fit smaller sections"]
+    avoid_antipattern: ["including everything regardless of budget", "stopping at the first section that doesn't fit"]

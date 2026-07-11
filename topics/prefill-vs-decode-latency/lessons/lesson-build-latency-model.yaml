@@ -1,0 +1,10 @@
+id: lesson-build-latency-model
+title: "Build it: a phase-aware latency model"
+material: build-latency-model.md
+segments:
+  - present: the-two-phases-in-one-formula
+  - check: mc-ttft-driver
+  - present: why-the-phases-move-independently
+  - check: mc-longer-output
+  - apply: code-latency-model
+  - apply: essay-serving-config

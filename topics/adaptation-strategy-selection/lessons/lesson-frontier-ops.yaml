@@ -1,0 +1,12 @@
+id: lesson-frontier-ops
+title: "Frontier & operations: continual adaptation, method combination, and the signals to watch"
+material: frontier-ops.md
+segments:
+  - present: the-adaptation-strategy-selection-frontier
+  - check: mc-frontier-adapt-continual
+  - check: mc-frontier-adapt-hybrid-cost
+  - check: mc-frontier-adapt-when-finetune
+  - present: operating-adaptation-in-production
+  - check: mc-ops-adapt-per-strategy
+  - check: mc-ops-adapt-staleness-cadence
+  - apply: code-adapt-hybrid-gate

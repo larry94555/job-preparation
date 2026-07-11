@@ -1,0 +1,14 @@
+id: lesson-termination
+title: "Why agents need budgets & termination"
+material: termination.md
+segments:
+  - present: why-agents-need-budgets-and-termination
+  - check: mc-why-budgets
+  - check: mc-success-only-exit
+  - check: cloze-termination
+  - check: fe-termination-reason
+  - present: termination-conditions-and-progress-detection
+  - check: mc-loop-detection
+  - check: mc-graceful-termination
+  - check: fe-loop-signal
+  - apply: essay-why-terminate

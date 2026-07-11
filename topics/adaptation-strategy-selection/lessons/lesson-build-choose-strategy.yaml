@@ -1,0 +1,10 @@
+id: lesson-build-choose-strategy
+title: "Build it: an adaptation decision function"
+material: build-choose-strategy.md
+segments:
+  - present: the-decision-axes
+  - check: mc-fresh-facts-rag
+  - present: ordering-the-checks
+  - check: mc-finetune-wrong-tool
+  - apply: code-choose-strategy
+  - apply: essay-adaptation-recommendation

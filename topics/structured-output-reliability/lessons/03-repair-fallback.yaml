@@ -1,0 +1,19 @@
+id: lesson-repair-fallback
+title: "Recovery: repair loops and fallback chains"
+material: 03-repair-fallback.md
+segments:
+  - present: repairing-invalid-output
+  - check: mc-first-response-invalid
+  - check: cloze-repair-loop
+  - check: fe-repair-feedback
+  - present: bounding-the-repair-loop
+  - check: mc-why-bound-repair
+  - check: cloze-repair-budget
+  - present: fallback-chains
+  - check: mc-fallback-order
+  - check: cloze-fallback-chain
+  - check: fe-last-resort
+  - apply: essay-design-chain
+  - apply: essay-usually-valid-antipattern
+  - apply: code-get-structured
+  - apply: code-classify-failure

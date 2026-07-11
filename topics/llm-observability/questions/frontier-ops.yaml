@@ -1,0 +1,200 @@
+# Frontier & operations drill — closes D2 (frontier awareness drill) and D6 (ops metrics drill).
+
+- id: mc-frontier-obs-otel-stabilizing
+  type: multiple_choice
+  tags: [tracing, frontier]
+  difficulty: 4
+  prompt: >-
+    You instrument your LLM traces against the OpenTelemetry GenAI semantic conventions. What is the
+    frontier caveat an expert flags about relying on them today?
+  options:
+    - { text: "The gen_ai.* conventions are still largely experimental and their scope keeps growing, so pin/opt-in to a convention version and expect attribute churn", correct: true }
+    - { text: "They are a frozen, finalized standard, so no version pinning is ever needed" }
+    - { text: "They only work with a single proprietary vendor's backend" }
+    - { text: "They forbid recording token counts on spans" }
+  explanation: >-
+    The bet that observability should be a portable, vendor-neutral standard aged well, but the standard
+    itself is not frozen: most gen_ai.* attributes remain experimental and scope has crept from
+    single-call tracing toward agent orchestration. Instrument against the conventions for portability,
+    but pin a convention version so a spec bump doesn't silently break dashboards.
+
+- id: mc-frontier-obs-privacy-capture
+  type: multiple_choice
+  tags: [capture, frontier]
+  difficulty: 4
+  prompt: >-
+    Field-level redaction is the current baseline for keeping PII out of captured traces. Where does the
+    privacy-preserving-traces frontier go beyond it, and why?
+  options:
+    - { text: "Toward tokenization/pseudonymization and privacy-preserving capture that survives an audit — because redaction only catches the named fields you thought of, and captured payloads are where PII hides", correct: true }
+    - { text: "Toward logging every raw prompt so nothing is ever lost" }
+    - { text: "Toward disabling payload capture entirely so no debugging is possible" }
+    - { text: "Toward encrypting only the correlation ID while storing prompts in plaintext" }
+  explanation: >-
+    Redaction is brittle: it only masks the PII you named, and prompts/completions are exactly where
+    sensitive data lives. The frontier moves past field redaction toward tokenization/pseudonymization
+    and capture that survives an audit — capture is a privacy liability, and "we redact the obvious
+    fields" is the classic way to ship a leak the rules never saw.
+
+- id: mc-frontier-obs-silent-drift
+  type: multiple_choice
+  tags: [drift, frontier]
+  difficulty: 4
+  prompt: >-
+    Tracing and cost rollups are essentially solved. Which observability problem is still genuinely open
+    at the frontier, and what shape does the emerging approach take?
+  options:
+    - { text: "Automated silent quality-drift detection with no code change — via eval-gated, canary-anchored trending against a version-tagged baseline, not a single static threshold", correct: true }
+    - { text: "Recording latency on a span, which no tool can yet do" }
+    - { text: "Propagating a correlation ID across two services" }
+    - { text: "Summing token counts up a trace tree" }
+    - { text: "Displaying p95 latency on a dashboard" }
+  explanation: >-
+    Tooling converged on spans, correlation IDs, and token/cost rollups. The open problem is catching a
+    silent quality slide with no deploy — a model swap, input-distribution shift, or rotting prompt that
+    never errors. The direction is eval-gated, canary-anchored detection trending scores/distribution
+    against a versioned baseline, since alerting on loud errors misses drift entirely.
+
+- id: mc-ops-obs-per-route-rollup
+  type: multiple_choice
+  tags: [signals, ops]
+  difficulty: 4
+  prompt: >-
+    In production you want to catch the one endpoint whose spend or tail latency is quietly creeping up.
+    Which operational rollup surfaces that, and how should it be grouped?
+  options:
+    - { text: "Recursive token/cost/latency rollups (own + children, all depths) grouped per route/feature/tenant, trending p95/p99 latency and cost per route", correct: true }
+    - { text: "A single global average latency number across all endpoints", correct: false }
+    - { text: "Only the count of total HTTP requests, ungrouped" }
+    - { text: "The model weight file size on disk" }
+  explanation: >-
+    A global number hides the offending route. The discipline is the recursive rollup — own value plus
+    children at all depths — grouped per route/feature/tenant, then trend and alert on p95/p99 latency,
+    cost per route, and error/retry rate. That's the golden-signals lens applied per route, which is how
+    you point at the endpoint whose average tokens or tail latency crept up.
+
+- id: mc-ops-obs-pii-leak-drift-rate
+  type: multiple_choice
+  tags: [drift, ops]
+  difficulty: 4
+  prompt: >-
+    Two live signals specific to safe, trustworthy LLM traces are the PII-leak rate and the drift-alert
+    rate. Why watch each as an ongoing operational metric rather than assuming it's fine?
+  options:
+    - { text: "PII-leak rate is non-zero because redaction only catches named fields, so a rising rate is a forming privacy incident; drift-alert rate must be tuned since too-quiet misses real regressions and too-noisy gets ignored", correct: true }
+    - { text: "Both should always read exactly zero, so no monitoring is required" }
+    - { text: "Both measure GPU temperature and belong to hardware monitoring" }
+    - { text: "PII-leak rate measures disk usage and drift-alert rate measures CPU load" }
+  explanation: >-
+    Redaction only masks named fields, so PII-leak rate — measured by scanning captured payloads, not
+    assumed zero — is a real signal whose rise is a privacy incident forming. Drift-alert rate keeps
+    silent-drift detection honest: too loose a threshold misses a regression, too noisy and the team
+    learns to ignore it, and by definition nothing else pages when quality slides without an error.
+
+- id: code-obs-redact
+  type: code
+  language: typescript
+  tags: [capture, review]
+  difficulty: 4
+  prompt: >-
+    Implement `redact(obj, sensitiveKeys)` for redaction at capture time: return a **deep copy** of
+    `obj` in which, anywhere a plain-object KEY appears in `sensitiveKeys` (case-sensitive exact match),
+    that key's VALUE is replaced with the string `"[REDACTED]"`, recursing into nested objects and
+    arrays. Do NOT mutate the input; non-object primitives pass through unchanged.
+  starter_file: exercises/redact-capture/starter.ts
+  test_file: exercises/redact-capture/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-observability-code
+  concept_checks:
+    must_use: ["match keys against sensitiveKeys (case-sensitive exact)", "recurse into nested objects and arrays", "return a deep copy without mutating the input"]
+    avoid_antipattern: ["mutating the input object in place", "only redacting top-level keys (no recursion)", "matching on value instead of key"]
+
+# --- Drift/monitoring literature drill (closes D2 practitioner drift/monitoring literature) ---
+- id: mc-obs-drift-literature
+  type: multiple_choice
+  tags: [drift, frontier]
+  difficulty: 4
+  prompt: >-
+    The practitioner drift/monitoring body of knowledge distinguishes several failure shapes an
+    observability system must tell apart. Which mapping matches how the canon uses these terms?
+  options:
+    - { text: "Data (input) drift = the input distribution shifts; concept drift = the input→correct-output relationship changes so a once-right model is now wrong; quality regression = measured output quality drops (e.g. eval scores) regardless of cause — each is watched with a different signal", correct: true }
+    - { text: "All three are the same phenomenon and are detected by the identical error-rate alarm" }
+    - { text: "Data drift means the model weights changed on disk; concept drift means the GPU driver changed; quality regression means latency rose" }
+    - { text: "Concept drift is only ever caused by a code deploy, so version tags alone fully detect it" }
+  explanation: >-
+    The monitoring literature this topic leans on (practitioner writing and tool docs, not landmark
+    papers) separates data/input drift — the input distribution moves — from concept drift — the
+    mapping from input to correct output changes, so a model that was right silently becomes wrong —
+    from a quality regression, the measured drop in output quality itself. They need different signals:
+    input-distribution trends for data drift, eval-score/output trends for concept drift and quality
+    regression. Collapsing them into one error alarm is exactly why silent drift goes unnoticed.
+
+# --- Worked silent-drift diagnosis (closes D4 detect silent quality drift as a worked diagnosis) ---
+- id: mc-obs-silent-diagnosis-1
+  type: multiple_choice
+  tags: [drift, frontier]
+  difficulty: 4
+  prompt: >-
+    Over three weeks your summarization endpoint's rolling eval score drifts from 0.86 to 0.71. Error
+    rate, latency, and cost are flat; there was no deploy and no code change; the input distribution
+    looks unchanged. Your canary (pinned prompt+model version) still scores 0.86 on the same traffic.
+    What is the diagnosis, and what does the canary holding tell you?
+  options:
+    - { text: "A silent quality regression from an underlying change the pinned canary is shielded from — most likely a provider-side model swap behind the same API. The canary holding at 0.86 while live drifts localizes the cause to the version live is using, not to the inputs", correct: true }
+    - { text: "Nothing is wrong — with no errors and no deploy, a falling eval score can be ignored" }
+    - { text: "It must be an input-distribution (data) drift, even though the distribution is unchanged and the canary on the same traffic is fine" }
+    - { text: "The latency dashboard is broken and should be the focus of the investigation" }
+  explanation: >-
+    This is the canonical silent-drift signature: quality slides with no error, no deploy, no code
+    change, so loud-error alerting never fires. Because the version-pinned canary scores the SAME
+    unchanged inputs and stays at 0.86 while live traffic falls, the inputs are exonerated and the cause
+    is isolated to whatever changed underneath live — classically a provider rotating the model behind a
+    stable API. The eval-score trend against a version-tagged baseline plus the canary is exactly the
+    detection loop, since nothing else pages when quality drifts without an error.
+
+- id: mc-obs-silent-diagnosis-2
+  type: multiple_choice
+  tags: [drift, frontier]
+  difficulty: 4
+  prompt: >-
+    A second endpoint shows the OTHER silent-drift shape: eval score falls, but this time the canary
+    (pinned prompt+model) ALSO falls in lockstep with live, and your input-distribution monitor shows
+    the mix of incoming requests has shifted toward a topic the prompt handles poorly. No code changed.
+    What does this pattern indicate, and how does it differ from the model-swap case?
+  options:
+    - { text: "Input (data) drift: the model/prompt are unchanged and still deterministic, but the input distribution moved, so even the pinned canary degrades on the new mix. Unlike a model swap — where the canary holds — here the canary tracks live, pointing at inputs, not the version", correct: true }
+    - { text: "It is identical to the model-swap case and needs no different response, since both show a falling eval score" }
+    - { text: "It proves the eval harness is miscalibrated, because a pinned canary can never change score" }
+    - { text: "It is a latency regression, since eval score and latency always move together" }
+  explanation: >-
+    When the version-pinned canary falls in lockstep with live and the input-distribution monitor shows
+    a shifted request mix, the version is exonerated: the same prompt+model now faces inputs it handles
+    worse. That is data/input drift, distinguished from the model-swap case precisely by the canary — a
+    held canary points at the underlying version, a canary that tracks live points at the inputs. The
+    fix differs too: the swap calls for pinning/version negotiation, the input shift for prompt/coverage
+    work — which is why the diagnosis must separate the two even though both show a falling eval score.
+
+# --- Span instrumentation exercise (closes D5 OTel-style span instrumentation) ---
+- id: code-obs-span-tree
+  type: code
+  language: typescript
+  tags: [tracing, review]
+  difficulty: 4
+  prompt: >-
+    Implement `rootOf(spans)` for correlation-ID propagation over a span tree. A trace is a tree of
+    spans linked by `parentId`; the ROOT span has `parentId === null`. Return a map from EVERY span id
+    to the id of its root ancestor: for each span, walk `parentId` upward until you reach the span whose
+    `parentId` is null and record that id. All spans in one trace share a root (that root id is the
+    trace/correlation ID); a lone root maps to itself. Assume valid trees (no cycles).
+  starter_file: exercises/span-tree/starter.ts
+  test_file: exercises/span-tree/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-observability-code
+  concept_checks:
+    must_use: ["walk parentId upward until parentId is null", "map every span id to its root ancestor", "a root (parentId null) maps to itself"]
+    avoid_antipattern: ["returning the immediate parentId instead of the root ancestor", "stopping after one hop instead of walking to the root", "mapping only root spans instead of every span"]

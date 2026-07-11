@@ -1,0 +1,18 @@
+sections:
+  - id: sec-budget-position
+    title: "Budget & position"
+    lessons: [lesson-budget, lesson-position, lesson-expert-context]
+    assessment:
+      title: "Section 1 — Budget & position"
+      from_tags: [budget, position]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-selection
+    title: "Selection & retrieval"
+    lessons: [lesson-selection, lesson-build-assemble-context, lesson-deep-dive, lesson-frontier-ops]
+    assessment:
+      title: "Section 2 — Selection & retrieval"
+      from_tags: [selection]
+      count: 5
+      pass_threshold: 0.8

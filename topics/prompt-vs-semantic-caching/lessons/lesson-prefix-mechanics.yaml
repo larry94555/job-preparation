@@ -1,0 +1,10 @@
+id: lesson-prefix-mechanics
+title: "Prefix mechanics & prompt structuring"
+material: prefix-mechanics.md
+segments:
+  - present: prefix-mechanics-and-structuring-prompts-for-hits
+  - check: mc-prompt-structure
+  - check: fe-prompt-order
+  - present: antipatterns-that-break-prefix-hits
+  - check: mc-reorder-antipattern
+  - apply: essay-prompt-structure

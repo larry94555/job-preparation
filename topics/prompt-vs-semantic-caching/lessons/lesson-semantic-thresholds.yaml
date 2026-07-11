@@ -1,0 +1,13 @@
+id: lesson-semantic-thresholds
+title: "Semantic thresholds, false positives & the tradeoff"
+material: semantic-thresholds.md
+segments:
+  - present: semantic-thresholds-and-false-positives
+  - check: mc-semantic-threshold
+  - check: cloze-false-positive
+  - check: fe-semantic-match
+  - check: fe-false-positive-cost
+  - present: the-savings-vs-correctness-tradeoff
+  - check: mc-semantic-highstakes
+  - check: cloze-ttl
+  - apply: essay-semantic-tradeoff

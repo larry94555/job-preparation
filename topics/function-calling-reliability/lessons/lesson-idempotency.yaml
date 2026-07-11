@@ -1,0 +1,14 @@
+id: lesson-idempotency
+title: "Idempotency & safe retries"
+material: idempotency.md
+segments:
+  - present: why-retries-are-dangerous
+  - check: mc-retry-danger
+  - check: fe-retry-risk
+  - present: idempotency-makes-retries-safe
+  - check: mc-idempotent-def
+  - check: mc-idempotency-key
+  - check: cloze-idempotent
+  - check: cloze-idempotency-key
+  - check: fe-safe-retry
+  - apply: essay-idempotency-retry

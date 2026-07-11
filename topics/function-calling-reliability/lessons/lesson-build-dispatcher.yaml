@@ -1,0 +1,10 @@
+id: lesson-build-dispatcher
+title: "Build it: a validating, idempotent dispatcher"
+material: build-dispatcher.md
+segments:
+  - present: tools-are-apis-validate-before-you-execute
+  - check: mc-unknown-tool
+  - present: idempotency-for-safe-retries
+  - check: mc-idempotency-dedupe
+  - apply: code-tool-dispatcher
+  - apply: essay-tool-layer

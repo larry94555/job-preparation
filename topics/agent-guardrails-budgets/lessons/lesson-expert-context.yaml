@@ -1,0 +1,10 @@
+id: lesson-expert-context
+title: "Expert context: papers, frontier & interview"
+material: expert-context.md
+segments:
+  - present: papers-people-and-the-frontier
+  - check: mc-canon-guard-react
+  - present: interviewing-on-agent-guardrails-and-budgets
+  - check: mc-interview-guard-signal
+  - apply: essay-guard-literature
+  - apply: essay-guard-interview

@@ -1,0 +1,9 @@
+id: multi-tenant-isolation
+title: "Multi-tenant Isolation"
+description: "Keep tenants and users separated across caches, context, embeddings, and retrieval — the leaks live in tenant-blind cache keys, unscoped vector search, and reused sessions, not in the model."
+pass_threshold: 0.8
+tag_weights:
+  isolation: 1.2
+  cache-safety: 1.2
+  retrieval-scoping: 1.0
+  contamination: 1.2

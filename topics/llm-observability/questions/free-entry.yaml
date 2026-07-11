@@ -1,0 +1,36 @@
+# Free entry (short answer)
+- id: fe-trace-unit
+  type: text_input
+  tags: [tracing]
+  difficulty: 2
+  prompt: "What do you call the whole end-to-end record of one request, made up of nested spans? (one word)"
+  answer:
+    regex: '^(trace|request trace)$'
+    normalize: true
+
+- id: fe-latency-metric
+  type: text_input
+  tags: [signals]
+  difficulty: 3
+  prompt: "Name one streaming-latency metric worth tracking on an LLM span (an abbreviation or short phrase)."
+  answer:
+    regex: '^(ttft|tpot|time to first token|time per output token|time-to-first-token|time-per-output-token|tokens per second|p95( latency)?|p99( latency)?|latency)$'
+    normalize: true
+
+- id: fe-drift-signal
+  type: text_input
+  tags: [drift]
+  difficulty: 3
+  prompt: "What trend do you watch over time to detect quality drift when no code changed? (a few words)"
+  answer:
+    regex: '^(eval scores?|eval score trend|quality scores?|offline eval scores?|score trend|input distribution|output distribution|distribution shift)$'
+    normalize: true
+
+- id: fe-capture-cost
+  type: text_input
+  tags: [capture]
+  difficulty: 3
+  prompt: "Name one thing you must guard against when capturing full prompts for replay. (a word or short phrase)"
+  answer:
+    regex: '^(pii|privacy|sensitive data|leaking pii|storage cost|cost|logging raw pii|pii leakage|personal data)$'
+    normalize: true

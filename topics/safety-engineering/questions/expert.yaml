@@ -1,0 +1,72 @@
+# Literature/canon (WS1) + interview (WS2) — tags [canon]/[interview] are NOT in any section's
+# from_tags, so these don't enter the deterministic section-assessment pools.
+- id: mc-canon-safety-coined
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Who coined the term 'prompt injection'?"
+  options:
+    - { text: "Simon Willison", correct: true }
+    - { text: "Greshake et al." }
+    - { text: "The OWASP LLM Top 10 authors" }
+    - { text: "Tri Dao" }
+  explanation: "Simon Willison coined 'prompt injection' in a 2022 blog post. Greshake et al. later characterized the indirect variant; OWASP LLM Top 10 is the community risk checklist."
+
+- id: mc-canon-safety-indirect
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Injection whose payload is planted in retrieved or tool content the system reads in later is called?"
+  options:
+    - { text: "Indirect prompt injection (Greshake et al.)", correct: true }
+    - { text: "Direct prompt injection" }
+    - { text: "The confused-deputy problem" }
+    - { text: "The OWASP LLM Top 10" }
+  explanation: "Indirect prompt injection — characterized by Greshake et al. (2023) — plants the payload in content (web pages, documents, tool output) the system trusts and reads later, rather than in the user's own input."
+
+- id: mc-interview-safety-signal
+  type: multiple_choice
+  tags: [interview]
+  difficulty: 3
+  prompt: "In a safety-engineering interview, the framing that most signals real depth about prompt injection is:"
+  options:
+    - { text: "Framing it as a confused-deputy problem — the agent misusing legitimate authority", correct: true }
+    - { text: "Promising a single input filter that fully blocks injection" }
+    - { text: "Treating retrieved and tool content as trusted instructions" }
+    - { text: "Maximizing each tool's privileges for convenience" }
+  explanation: "Naming the confused-deputy pattern shows you understand injection as an authorization problem, which is why filtering alone can't fix it. The other options are red flags: single-filter defenses, trusting untrusted content, and over-privileged agents."
+
+- id: essay-safety-literature
+  type: essay
+  length: long
+  tags: [canon]
+  difficulty: 4
+  prompt: >-
+    Summarize the canon of prompt-injection safety: who coined "prompt injection", who characterized
+    the indirect variant, what the OWASP LLM Top 10 is, and how the confused-deputy pattern explains
+    why the problem is hard. Name the tools and the current defense-in-depth approach, and state the
+    open problems.
+  eval_skill: eval-safety-essay
+  reference_points:
+    - "'Prompt injection' was coined by Simon Willison (2022, blog); untrusted input smuggles in instructions the model follows as its own."
+    - "Indirect prompt injection (Greshake et al., 2023): payload planted in retrieved/tool content the system reads later, not in the user's own input — the dangerous class in agents."
+    - "OWASP LLM Top 10 is the community's shared checklist of the most important LLM application risks."
+    - "Confused-deputy pattern: the agent holds legitimate authority; injection makes it misuse that authority, so the fix is authorization/provenance, not detection."
+    - "Tools: guardrails frameworks, injection detectors (Rebuff/LLM-Guard), policy engines. SOTA is defense-in-depth (provenance/trust boundaries + least privilege + egress control); open problems: no robust general injection defense, provenance at scale, agent egress control."
+
+- id: essay-safety-interview
+  type: essay
+  length: long
+  tags: [interview]
+  difficulty: 4
+  prompt: >-
+    You're in a senior safety-engineering interview. Asked how you'd secure an agent that reads
+    untrusted content and can call external tools, walk the interviewer through your approach. Show
+    the signals that read as senior and avoid the red flags.
+  eval_skill: eval-safety-essay
+  reference_points:
+    - "Distinguish direct injection (from the user's own input) from indirect injection (planted in retrieved/tool content the agent reads later); indirect is the harder problem in agents."
+    - "Frame the risk as a confused-deputy problem: the agent misuses its legitimate authority on the attacker's behalf, so authorization must depend on provenance/policy, not on what the model was told."
+    - "Explain why filtering alone fails — no robust general injection classifier exists — so detection is only one layer of defense-in-depth."
+    - "Lead the design with provenance/trust boundaries (fence untrusted content as data), then least privilege on tools, then egress control on any data-out step; name Willison, Greshake et al., and OWASP LLM Top 10 as the canon."
+    - "Avoid red flags: trusting retrieved/tool content, single-filter defenses, over-privileged agents."

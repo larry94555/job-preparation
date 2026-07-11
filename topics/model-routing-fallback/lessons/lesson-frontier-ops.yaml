@@ -1,0 +1,12 @@
+id: lesson-frontier-ops
+title: "Frontier & operations: cost cascades vs. learned routing, and the signals to watch"
+material: frontier-ops.md
+segments:
+  - present: the-model-routing-fallback-frontier
+  - check: mc-frontier-route-cascade-vs-learned
+  - check: mc-frontier-route-difficulty-prediction
+  - check: mc-frontier-route-quality-preserving
+  - present: operating-model-routing-in-production
+  - check: mc-ops-route-breaker-open-rate
+  - check: mc-ops-route-hit-rate-drift
+  - apply: code-route-cascade

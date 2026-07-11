@@ -1,0 +1,20 @@
+# Coding exercise — engine type: code (graded by tests + concept skill)
+- id: code-cost-aggregator
+  type: code
+  language: typescript
+  tags: [economics]
+  difficulty: 3
+  prompt: >-
+    Implement `aggregate(records)` where each record is `{ feature, cost, success }`. Return
+    `{ total, byFeature }`: `total` is the sum of all costs; `byFeature[f]` is
+    `{ cost, successes, costPerSuccess }` where cost is the feature's summed cost, successes is the
+    count of `success === true`, and costPerSuccess = cost / successes when successes > 0, else null.
+  starter_file: exercises/cost-aggregator/starter.ts
+  test_file: exercises/cost-aggregator/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-cost-code
+  concept_checks:
+    must_use: ["group by feature", "cost per success divides by successes", "zero-success guard (null not NaN)"]
+    avoid_antipattern: ["dividing by request count instead of successes", "NaN when successes is 0"]

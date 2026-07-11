@@ -1,0 +1,14 @@
+id: lesson-deep-dive
+title: "Architecture & tradeoffs: reviewing a structured-output design"
+material: deep-dive.md
+segments:
+  - present: the-structured-output-reliability-design-space
+  - present: a-tradeoff-table-for-structured-output-reliability
+  - check: mc-review-so-jsonmode-novalidate
+  - check: mc-review-so-unbounded-repair
+  - present: common-sota-and-antipattern
+  - check: mc-review-so-regex-scrape
+  - present: scaling-performance-and-the-token-budget
+  - present: reviewing-a-structured-output-reliability-design
+  - apply: essay-so-deep-dive
+  - apply: debug-so-extract-json

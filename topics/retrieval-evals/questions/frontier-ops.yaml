@@ -1,0 +1,168 @@
+# Frontier & operations drill — closes D2 (frontier metric/label drill) and D6 (ops metrics drill).
+
+- id: mc-frontier-reval-faithfulness-judge
+  type: multiple_choice
+  tags: [grounding, frontier]
+  difficulty: 4
+  prompt: >-
+    Faithful-grounding metrics are an open frontier problem even though recall@k is settled. What is the
+    core unresolved tension, and why does it matter?
+  options:
+    - { text: "How to score faithfulness — NLI/entailment vs. LLM-as-judge — neither is settled, and a confidently-scored faithfulness number can hide the regressions the eval exists to catch", correct: true }
+    - { text: "Whether to compute recall@k or precision@k first" }
+    - { text: "Whether embeddings should be normalized before scoring" }
+    - { text: "How many GPUs the retriever needs at serving time" }
+  explanation: >-
+    A retriever can hit recall@k and still produce an ungrounded answer, so grounding/faithfulness metrics
+    are mandatory. The unresolved question is how to measure faithfulness — NLI/entailment vs. LLM-judge —
+    and the danger is false precision: a confident faithfulness score can mask the very regressions the
+    eval is supposed to surface.
+
+- id: mc-frontier-reval-synthetic-labels
+  type: multiple_choice
+  tags: [grounding, frontier]
+  difficulty: 4
+  prompt: >-
+    Your team generates relevance labels with an LLM to scale eval coverage cheaply. What is the frontier
+    discipline that keeps this from silently corrupting the eval?
+  options:
+    - { text: "Validate the synthetic labels against a human-labeled slice before trusting them — otherwise the eval measures the generator's blind spots, not the system; label quality, not compute, is the real bottleneck", correct: true }
+    - { text: "Generate more synthetic labels until the numbers stabilize" }
+    - { text: "Switch entirely to end-to-end scoring to avoid needing labels" }
+    - { text: "Use a larger embedding model so labels are unnecessary" }
+  explanation: >-
+    Synthetic labels scale cheaply but bake in the generator's blind spots. The canon method is to validate
+    them against human qrels before trusting them; skip that and the eval is measuring the judge, not the
+    system. The true retrieval-eval bottleneck remains label quality, not compute.
+
+- id: mc-frontier-reval-mteb-generalization
+  type: multiple_choice
+  tags: [grounding, frontier]
+  difficulty: 4
+  prompt: >-
+    A candidate points to a top MTEB score as proof their RAG pipeline will retrieve well. What is the
+    frontier-aware correction?
+  options:
+    - { text: "MTEB grades the embedding, not the end-to-end answer, so a strong score is necessary but not sufficient; BEIR-style zero-shot generalization across domains is the real question, not one leaderboard number", correct: true }
+    - { text: "MTEB directly measures grounding/faithfulness, so the pipeline is proven correct" }
+    - { text: "MTEB replaces the need for any labeled golden set" }
+    - { text: "A high MTEB score guarantees out-of-domain retrieval quality" }
+  explanation: >-
+    MTEB (Muennighoff et al., 2022) benchmarks embeddings across tasks but grades the embedding, not the
+    end-to-end RAG answer — necessary, not sufficient. BEIR (Thakur et al., 2021) exists precisely because
+    a retriever winning on one corpus can lose out-of-domain; generalization, not a single number, is the point.
+
+- id: mc-ops-reval-miss-vs-grounding
+  type: multiple_choice
+  tags: [metrics, ops]
+  difficulty: 4
+  prompt: >-
+    In production, answer quality drops but recall@k holds steady while your grounding/faithfulness rate
+    falls. What does this operational signal localize, and why does watching both matter?
+  options:
+    - { text: "A grounding failure, not a retrieval miss — the right context was retrieved but the answer isn't entailed by it; gating on recall@k and faithfulness rate together keeps the two distinguishable with different fixes", correct: true }
+    - { text: "A retrieval miss, because faithfulness and recall always move together" }
+    - { text: "Nothing actionable, since a single end-to-end score is enough" }
+    - { text: "An embedding-model outage, which is the only cause of quality drops" }
+  explanation: >-
+    Recall@k holding while faithfulness rate drops means the passage was in context but the answer ignored
+    or contradicted it — a grounding failure, not a retrieval miss. The two have different fixes, and an
+    end-to-end number can't tell them apart, which is why you gate on both signals together.
+
+- id: mc-ops-reval-label-drift
+  type: multiple_choice
+  tags: [metrics, ops]
+  difficulty: 4
+  prompt: >-
+    Your golden-set scores have stayed high for months, but production complaints are rising. Which two
+    operational checks most directly explain and fix this?
+  options:
+    - { text: "Audit label quality (judge-vs-human agreement over time) and check eval-set drift — a stale set the system overfits to, or drifting labels, makes passing scores stop predicting production quality; refresh the set and keep an adversarial slice", correct: true }
+    - { text: "Increase k until recall@k reaches 100%" }
+    - { text: "Delete the golden set and grade on vibes going forward" }
+    - { text: "Add more GPUs to the retriever to raise throughput" }
+  explanation: >-
+    A static golden set the system silently overfits to (teaching to the test) rots — scores stop
+    predicting production quality — and drifting judge-vs-human agreement means the labels themselves are
+    unreliable. The fix is periodic label-quality audits plus refreshing the set with an adversarial slice.
+
+- id: mc-reval-attribution-scale-1
+  type: multiple_choice
+  tags: [grounding, frontier]
+  difficulty: 4
+  prompt: >-
+    Attribution correctness is a per-claim, span-entailment property. Why doesn't running that reliable
+    per-claim span check on every production answer scale — and why is it still called an OPEN problem?
+  options:
+    - { text: "Reliable per-claim labels are expensive — trustworthy human review of every cited span doesn't scale, and the cheaper LLM-judge substitute suffers judge-agreement drift, so there's no settled way to get correctness at scale", correct: true }
+    - { text: "Span-entailment checks are mathematically impossible to compute" }
+    - { text: "Attribution can be read off the raw citation count, so per-claim checks are unnecessary" }
+    - { text: "The check scales fine; teams simply forget to run it" }
+  explanation: >-
+    Per-claim span/entailment checks are the right idea, but the reliable version — human review of every
+    cited span — is too costly to run at production volume, and the cheap substitute (an LLM-judge)
+    drifts: inter-judge agreement degrades over time and across domains. Cheap reliable labels at scale
+    remain unsolved, which is exactly why attribution-correctness-at-scale is an open problem, not a
+    settled metric.
+
+- id: mc-reval-attribution-scale-2
+  type: multiple_choice
+  tags: [grounding, frontier]
+  difficulty: 4
+  prompt: >-
+    Given that attribution-at-scale is unsolved, what is the current best-effort recipe a strong team
+    uses — while being honest that it is a mitigation, not a solution?
+  options:
+    - { text: "Automate the span check with an LLM-judge, track inter-judge agreement, route low-agreement cases to sampled human audits, and monitor for judge/label drift — accepting this bounds the risk rather than closing the open problem", correct: true }
+    - { text: "Declare the problem solved once the LLM-judge reports high faithfulness, and stop auditing" }
+    - { text: "Replace attribution entirely with a single end-to-end pass/fail score" }
+    - { text: "Report the raw number of citations per answer as the attribution metric" }
+  explanation: >-
+    The honest best-effort stack is: automate per-claim span checks with an LLM-judge, measure
+    inter-judge agreement, sample low-agreement (and random) cases into human audits, and monitor
+    judge/label drift over time. This bounds the error but does not eliminate it — attribution
+    correctness at scale stays an open problem, so treating a confident judge score as proof is the
+    antipattern.
+
+- id: code-reval-grounding
+  type: code
+  language: typescript
+  tags: [grounding, review]
+  difficulty: 4
+  prompt: >-
+    Implement `isGrounded(claim, sources)`, a per-claim supported-vs-fabricated grounding check.
+    Normalize the claim and each source by lowercasing, trimming, and collapsing every run of internal
+    whitespace to a single space. Return `true` iff the normalized claim appears as a substring of ANY
+    normalized source (supported), else `false` (fabricated/unsupported). Empty `sources` → false. This
+    is the per-claim core of a grounding/faithfulness eval: an answer is grounded only when each claim is
+    entailed by some retrieved passage.
+  starter_file: exercises/grounding-check/starter.ts
+  test_file: exercises/grounding-check/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-retrievalevals-code
+  concept_checks:
+    must_use: ["normalize claim and sources (lowercase, trim, collapse whitespace)", "substring match against any source", "empty sources returns false"]
+    avoid_antipattern: ["comparing without normalizing", "requiring a match in every source instead of any", "counting matches instead of returning a boolean"]
+
+- id: code-reval-ndcg
+  type: code
+  language: typescript
+  tags: [metrics, review]
+  difficulty: 4
+  prompt: >-
+    Implement `ndcgAtK(gains, k)` for graded, position-discounted nDCG. `gains[i]` is the graded
+    relevance of the result at rank `i` (0-based). `DCG@k` = sum over `i` in `[0, min(k, gains.length))`
+    of `gains[i] / Math.log2(i + 2)`. `IDCG@k` is the same formula applied to `gains` sorted DESCENDING.
+    Return `DCG@k / IDCG@k`; if `IDCG@k === 0`, return `0`. This is the metric for "buried but present"
+    that recall@k can't see — a good result low in the ranking still costs you.
+  starter_file: exercises/ndcg/starter.ts
+  test_file: exercises/ndcg/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-retrievalevals-code
+  concept_checks:
+    must_use: ["position discount gains[i] / log2(i + 2)", "IDCG from gains sorted descending", "truncate DCG and IDCG at k", "return 0 when IDCG is 0"]
+    avoid_antipattern: ["forgetting the +2 in log2(i + 2)", "dividing by zero when all gains are 0", "computing IDCG without re-sorting", "applying k to only one of DCG/IDCG"]

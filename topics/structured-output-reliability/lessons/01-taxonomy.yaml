@@ -1,0 +1,12 @@
+id: lesson-taxonomy
+title: "Failure taxonomy of structured output"
+material: 01-taxonomy.md
+segments:
+  - present: why-structured-output-fails
+  - present: the-failure-classes
+  - check: mc-enum-violation-class
+  - check: fe-failure-class
+  - present: truncation
+  - check: mc-truncation-cause
+  - check: fe-truncation-setting
+  - apply: essay-taxonomy-explain

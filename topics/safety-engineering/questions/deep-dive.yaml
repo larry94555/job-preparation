@@ -1,0 +1,76 @@
+# Deep-dive — architecture judgment (code-review MCs + an L4 essay)
+
+- id: mc-review-safety-single-filter
+  type: multiple_choice
+  tags: [boundary, review]
+  difficulty: 4
+  prompt: >-
+    A design doc says: "We block prompt injection with an input classifier that rejects any request
+    containing 'ignore previous instructions' and similar phrases; once shipped, injection is handled."
+    Reviewing it, what is the most important problem?
+  options:
+    - { text: "There is no robust general injection classifier — attacks can be rephrased, encoded, or split to evade any fixed filter, so filtering must be one layer among several (fencing, least privilege, egress control)", correct: true }
+    - { text: "The classifier is too slow to run on every request and should be sampled instead" }
+    - { text: "The phrase list should be case-insensitive and that fully closes the gap" }
+    - { text: "Nothing — a well-tuned input filter is a complete defense against prompt injection" }
+  explanation: >-
+    Detection alone is not a boundary. A determined attacker evades any single filter by rephrasing,
+    encoding (base64/homoglyphs), or splitting the payload. Filtering is worth doing but must sit inside
+    defense-in-depth alongside controls that limit what an attack can do once it lands.
+
+- id: mc-review-safety-tool-content
+  type: multiple_choice
+  tags: [boundary, review]
+  difficulty: 4
+  prompt: >-
+    A summarization agent fetches a web page and inserts the page text directly into the system-prompt
+    region, unlabeled, then asks the model to act on it. Rate this design and pick the best fix.
+  options:
+    - { text: "Toy-grade: it pastes untrusted content straight into the instruction channel — the direct line for indirect injection; fence the page as labeled data and track its provenance as untrusted", correct: true }
+    - { text: "Production-ready: putting content in the system prompt gives the model the most authoritative view of the data" }
+    - { text: "Fine as-is, but truncate the page to fit the context window" }
+    - { text: "The problem is latency; cache the fetched page and reuse it across requests" }
+  explanation: >-
+    Promoting retrieved content to the instruction channel hands the attacker a direct line into the
+    model's authority. The fix is a trust boundary: fence the untrusted span as data-to-analyze and tag
+    its provenance so it can never silently authorize a privileged action. Truncation and caching do not
+    address the injection path.
+
+- id: mc-review-safety-egress
+  type: multiple_choice
+  tags: [boundary, review]
+  difficulty: 4
+  prompt: >-
+    An email agent holds a broadly scoped token and can issue arbitrary outbound HTTP requests. The team
+    argues "our injection filter will catch any malicious instruction before it reaches a tool." What is
+    the strongest objection?
+  options:
+    - { text: "This is a confused-deputy exfiltration path: filtering is evadable, so an injection that lands can drive the privileged agent to send secrets to an attacker URL — bound the token (least privilege) and allow-list/confirm every egress step", correct: true }
+    - { text: "Outbound HTTP is always faster than email, so the design will not scale" }
+    - { text: "The token should be rotated more frequently and that removes the risk" }
+    - { text: "Injection only affects open-source models, so a hosted model makes this safe" }
+  explanation: >-
+    The agent has legitimate authority; an injection that slips past the filter makes it misuse that
+    authority (confused deputy). Because detection is not a boundary, containment is: least-privilege
+    tokens shrink the blast radius and an egress allow-list or human confirmation stops the data-out step
+    even after injection succeeds.
+
+- id: essay-safety-deep-dive
+  type: essay
+  length: long
+  tags: [boundary, review]
+  difficulty: 4
+  prompt: >-
+    You are the reviewer on a safety design for an agent that reads untrusted content (web pages,
+    retrieved documents, tool outputs) and can call external tools on a user's behalf. Write a design
+    review: walk the layers (provenance/trust tagging, fencing, filtering, least privilege, egress
+    control), give an explicit tradeoff for each, and state what would move the design from demo-ready to
+    production-ready. Call out at least two antipatterns and explain why no single filter can be the
+    boundary.
+  eval_skill: eval-safety-essay
+  reference_points:
+    - "No robust general injection defense exists: detection is evadable by rephrasing/encoding/splitting, so filtering is one layer, never the boundary — defense-in-depth."
+    - "Provenance/trust tagging plus fencing keeps untrusted content in the data lane and out of the instruction channel; trusting retrieved/tool content is a core antipattern."
+    - "Least privilege bounds the blast radius of a hijacked turn; egress allow-lists and/or human confirmation stop exfiltration even after a successful injection."
+    - "The confused-deputy risk: the agent holds legitimate authority, so authorization for high-risk actions must depend on provenance/policy, not on what the model was told; over-privileged agents and single-filter defenses are antipatterns."
+    - "Production-ready means each layer assumes the others may fail — a successful injection still cannot exfiltrate or take a high-risk action."

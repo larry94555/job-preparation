@@ -1,0 +1,10 @@
+id: lesson-expert-context
+title: "Expert context: papers, frontier & interview"
+material: expert-context.md
+segments:
+  - present: papers-people-and-the-frontier
+  - check: mc-canon-fc-leaderboard
+  - present: interviewing-on-function-calling-reliability
+  - check: mc-interview-fc-signal
+  - apply: essay-fc-literature
+  - apply: essay-fc-interview

@@ -1,0 +1,10 @@
+id: lesson-build-bounded-loop
+title: "Build it: a bounded agent loop"
+material: build-bounded-loop.md
+segments:
+  - present: the-loop-and-its-three-stop-conditions
+  - check: mc-three-stop-conditions
+  - present: detecting-no-progress
+  - check: mc-no-progress-signal
+  - apply: code-bounded-loop
+  - apply: essay-guardrail-policy

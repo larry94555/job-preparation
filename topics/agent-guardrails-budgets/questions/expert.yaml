@@ -1,0 +1,59 @@
+# Literature/canon (WS1) + interview (WS2) — tags [canon]/[interview] are NOT in any section's
+# from_tags, so these don't enter the deterministic section-assessment pools.
+- id: mc-canon-guard-react
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "The reason-then-act agent pattern — where the model interleaves reasoning steps with tool actions — is called?"
+  options:
+    - { text: "ReAct", correct: true }
+    - { text: "NeMo Guardrails" }
+    - { text: "Guardrails AI" }
+    - { text: "Reflexion" }
+  explanation: "ReAct is the reason-then-act loop that interleaves thinking with tool actions. Reflexion adds self-reflection and retry on top; NeMo Guardrails and Guardrails AI are enforcement frameworks, not agent loops."
+
+- id: mc-interview-guard-signal
+  type: multiple_choice
+  tags: [interview]
+  difficulty: 3
+  prompt: "In an agent-reliability interview, the answer that most separates strong candidates on budgets and termination is:"
+  options:
+    - { text: "Enumerating the full set of termination conditions and explaining why budgets matter even for a correct agent", correct: true }
+    - { text: "Naming the model's tokenizer library" }
+    - { text: "Reciting the transformer block diagram" }
+    - { text: "Listing prompt-engineering tips for the system prompt" }
+  explanation: "The signal is enumerating termination conditions (success, failure/no-progress, and every budget exit) and explaining that even a correct agent can loop, hang, or blow a cost ceiling — so budgets aren't only for buggy agents."
+
+- id: essay-guard-literature
+  type: essay
+  length: long
+  tags: [canon]
+  difficulty: 4
+  prompt: >-
+    Summarize the influential work behind agent guardrails and budgets — the ReAct/Reflexion agent
+    loops, Anthropic's "Building Effective Agents" guidance, and the guardrail frameworks
+    (NeMo Guardrails, Guardrails AI). For each, say what it contributed and name the tools that
+    implement these ideas today.
+  eval_skill: eval-guardrails-essay
+  reference_points:
+    - "ReAct: reason-then-act loop interleaving thinking with tool actions; the loop that budgets/termination must bound. Reflexion adds self-reflection and retry so a failed attempt informs the next."
+    - "Anthropic 'Building Effective Agents': practitioner guidance favoring simple, composable, well-bounded agent patterns with verification and limits as first-class."
+    - "NeMo Guardrails (NVIDIA) and Guardrails AI: programmable guardrail frameworks that constrain agent actions and validate inputs/outputs against policy."
+    - "Tools that implement these: Guardrails AI, NeMo Guardrails, and budget features built into agent SDKs."
+
+- id: essay-guard-interview
+  type: essay
+  length: long
+  tags: [interview]
+  difficulty: 4
+  prompt: >-
+    You're in a senior agent-reliability interview. You're asked to design the guardrails and budgets
+    for an autonomous agent runner. Explain the termination conditions and budgets you'd add, why
+    budgets matter even for a "correct" agent, and how you'd guard high-risk actions. Show the depth
+    that reads as senior.
+  eval_skill: eval-guardrails-essay
+  reference_points:
+    - "Termination conditions: stop on success, on detected failure/no-progress (repeated actions or revisited states), and on any budget exhaustion — success-only is the antipattern."
+    - "Budgets across steps/iterations, per-tool calls, tokens, cost, and a separate wall-clock timeout (a single step can hang, which step/token caps don't bound); terminate gracefully with the best partial result."
+    - "Budgets matter even for a correct agent: it can still loop, hang on a slow tool, or blow a cost ceiling on the one hard task, so limits aren't only for buggy agents."
+    - "High-risk guardrails: allow-list (deny-by-default) over deny-list, human-in-the-loop confirmation before irreversible actions, and a circuit breaker that halts/escalates when a risk signal crosses a threshold. Name ReAct/Reflexion and NeMo Guardrails/Guardrails AI as prior art."

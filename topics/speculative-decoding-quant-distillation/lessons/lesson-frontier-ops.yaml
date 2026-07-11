@@ -1,0 +1,12 @@
+id: lesson-frontier-ops
+title: "Frontier & operations: self-speculative heads, cross-domain acceptance, and the signals to watch"
+material: frontier-ops.md
+segments:
+  - present: the-speculative-decoding-quant-distillation-frontier
+  - check: mc-frontier-spec-selfspec
+  - check: mc-frontier-spec-acceptance-domain
+  - check: mc-frontier-spec-stack-lossless
+  - present: operating-these-speedups-in-production
+  - check: mc-ops-spec-acceptance-signal
+  - check: mc-ops-spec-speedup-quality
+  - apply: code-spec-draft-verify

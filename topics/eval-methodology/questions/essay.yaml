@@ -1,0 +1,38 @@
+# Essay
+- id: essay-why-evals
+  type: essay
+  length: short
+  tags: [golden]
+  difficulty: 3
+  prompt: "A teammate wants to ship a prompt change because 'the outputs look better.' Explain why evals — a golden set plus a regression gate — are the core discipline instead."
+  eval_skill: eval-evals-essay
+  reference_points:
+    - "'Looks better' isn't repeatable or comparable; an eval turns quality into a measurable, versioned signal."
+    - "A golden set of curated inputs with known-good outputs is ground truth to score against."
+    - "A regression gate runs on every change and blocks a drop, so fixing one case can't silently break others."
+
+- id: essay-adversarial-design
+  type: essay
+  length: short
+  tags: [adversarial]
+  difficulty: 3
+  prompt: "Your golden set passes at 95% but the feature still breaks in production. Explain what an adversarial / edge-case suite adds and how you'd build one."
+  eval_skill: eval-evals-essay
+  reference_points:
+    - "Golden sets cover happy-path/typical inputs; production failures cluster in edge cases they don't sample."
+    - "An adversarial suite deliberately targets injection, ambiguity, boundary and edge cases, and known failure modes."
+    - "Build it from real production failures and red-team probes, track catch-rate, and gate on it alongside the golden set."
+
+- id: essay-judge-calibration
+  type: essay
+  length: long
+  tags: [judge]
+  difficulty: 4
+  prompt: "Design an LLM-as-judge grading setup for open-ended outputs: when it's appropriate, the rubric, the biases you must control, and how you calibrate it against humans before gating on it."
+  eval_skill: eval-evals-essay
+  reference_points:
+    - "Appropriate when outputs are open-ended and exact-match fails; prefer deterministic checks where they work (cheaper, unbiased)."
+    - "Decompose grading into a rubric of independent true/false checks rather than one holistic score."
+    - "Control known biases: position (randomize order), verbosity (don't reward length), self-preference."
+    - "Calibrate against a human-labeled set and measure agreement (e.g. κ); re-grade borderline/unstable cases and flag for human review."
+    - "Only gate on the judge once its agreement with humans is high enough to trust; otherwise it's an opinion, not a gate."

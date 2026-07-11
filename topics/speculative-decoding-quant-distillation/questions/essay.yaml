@@ -1,0 +1,37 @@
+# Essay
+- id: essay-wrong-tool
+  type: essay
+  length: short
+  tags: [tradeoffs]
+  difficulty: 3
+  prompt: "A teammate says 'our inference is too expensive, so let's add speculative decoding.' Explain when speculative decoding is the WRONG tool for a cost problem and what lever fits instead."
+  eval_skill: eval-specdec-essay
+  reference_points:
+    - "Speculative decoding targets latency, not memory or serving cost; it adds a draft model and does not shrink the model's footprint."
+    - "If the problem is memory/cost (e.g. the model barely fits, or cost-per-token is too high), quantization or distillation are the right levers because they reduce the footprint or model size."
+    - "Speculative decoding is lossless and worth it for latency, but only when the draft model's acceptance rate is high enough to pay for the extra drafting/verification work."
+
+- id: essay-match-levers
+  type: essay
+  length: short
+  tags: [tradeoffs, quantization, distillation]
+  difficulty: 3
+  prompt: "Explain the three levers — speculative decoding, quantization, distillation — by matching each to its primary goal and naming which one is lossless."
+  eval_skill: eval-specdec-essay
+  reference_points:
+    - "Speculative decoding targets latency and is lossless: it produces exactly the target model's outputs, only faster."
+    - "Quantization targets memory/compute cost by storing weights in lower precision, at the risk of some quality loss."
+    - "Distillation trains a smaller student model to mimic a teacher, giving a permanently smaller/cheaper model but requiring upfront training."
+
+- id: essay-specdec-flow
+  type: essay
+  length: long
+  tags: [speculative]
+  difficulty: 4
+  prompt: "Explain how speculative decoding works end to end — draft, verify, acceptance — and explain what determines whether it actually delivers a speedup."
+  eval_skill: eval-specdec-essay
+  reference_points:
+    - "A small, cheap draft model proposes several candidate tokens ahead of the target model."
+    - "The large target model verifies the whole drafted run in a single parallel forward pass, accepting the longest correct prefix and rejecting the rest."
+    - "The acceptance rate — the fraction of drafted tokens accepted — drives the speedup; high acceptance means many tokens land per verification pass."
+    - "It is lossless (the output matches the target model), but a poor draft with low acceptance yields little speedup or even a slowdown, because rejected drafts waste verification work."

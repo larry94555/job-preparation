@@ -1,0 +1,10 @@
+id: lesson-build-paged-allocator
+title: "Build it: a paged KV allocator"
+material: build-paged-allocator.md
+segments:
+  - present: why-fixed-size-blocks
+  - check: mc-blocks-needed
+  - present: allocating-and-freeing-blocks
+  - check: mc-fragmentation-eliminated
+  - apply: code-paged-allocator
+  - apply: essay-kv-manager

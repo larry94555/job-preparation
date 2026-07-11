@@ -1,0 +1,109 @@
+# Frontier & operations drill — closes D2 (sub-4-bit/FP8 frontier drill) and D6 (eval-gating ops drill).
+
+- id: mc-frontier-quant-fp8-range
+  type: multiple_choice
+  tags: [methods, frontier]
+  difficulty: 4
+  prompt: >-
+    On new hardware the frontier reaches for FP8 to quantize weights *and* activations at 8 bits, rather
+    than INT8. What does the float format buy that integer levels do not, and why does it matter here?
+  options:
+    - { text: "Floating-point spends bits on dynamic range, which is exactly what activation outlier features stress — so FP8 tolerates activations better than uniform INT8 levels", correct: true }
+    - { text: "FP8 is lossless, so no evaluation is needed after quantizing to it" }
+    - { text: "FP8 halves the weight count, unlike INT8 which keeps all weights" }
+    - { text: "FP8 only applies to the KV cache and never to weights or activations" }
+  explanation: >-
+    Activations carry outlier features with large dynamic range; a float format allocates bits to range,
+    so FP8 handles those outliers more gracefully than fixed integer levels. This is why FP8 is the
+    activation-friendly 8-bit target on capable hardware. It is not lossless, and it still needs a task eval.
+
+- id: mc-frontier-quant-smoothquant-move
+  type: multiple_choice
+  tags: [methods, frontier]
+  difficulty: 4
+  prompt: >-
+    Quantizing activations is far harder than quantizing weights. What is SmoothQuant's load-bearing idea
+    for making INT8 activations survive?
+  options:
+    - { text: "It migrates the quantization difficulty from activations into the weights via a per-channel smoothing transform, so both can go INT8 — the outliers are moved, not destroyed", correct: true }
+    - { text: "It keeps the outlier activation channels in FP16 while running the rest in INT8" }
+    - { text: "It uses approximate Hessian information to reconstruct each weight layer" }
+    - { text: "It protects the salient weight channels tied to large activations by scaling them" }
+  explanation: >-
+    SmoothQuant moves activation-outlier difficulty into the weights (which tolerate it) via a per-channel
+    smoothing transform, enabling W8A8. Keeping outlier features in higher precision is LLM.int8();
+    Hessian-guided layerwise reconstruction is GPTQ; protecting salient weight channels is AWQ.
+
+- id: mc-frontier-quant-low-bit-prediction
+  type: multiple_choice
+  tags: [methods, frontier]
+  difficulty: 4
+  prompt: >-
+    A teammate proposes shipping an INT3 build because "sub-4-bit is the frontier now." What is the
+    actual open problem that makes this claim premature?
+  options:
+    - { text: "Reliable low-bit quality prediction is unsolved — you cannot yet know in advance whether a given model at a given bit-width holds quality, so adoption must be eval-gated per case", correct: true }
+    - { text: "Sub-4-bit formats cannot be represented on any current hardware" }
+    - { text: "INT3 always improves quality over INT4, so there is nothing to check" }
+    - { text: "Perplexity is the only metric that matters at sub-4-bit and it is always fine there" }
+  explanation: >-
+    Making the bytes smaller is easy; knowing whether the smaller format holds task quality is the open
+    problem. Until reliable low-bit quality prediction exists, sub-4-bit adoption is empirical and
+    eval-gated — blanket "N-bit is fine" claims are the tell of not having shipped one.
+
+- id: mc-ops-quant-perplexity-gap
+  type: multiple_choice
+  tags: [quality, ops]
+  difficulty: 4
+  prompt: >-
+    Your quantized build shows a tiny perplexity delta versus FP16 but a large drop on GSM8K and a code
+    suite. What does this pattern mean operationally?
+  options:
+    - { text: "It is the expected signature of low-bit damage — perplexity averages over easy tokens and hides the reasoning/code regression, so the task-eval delta is the gate, not perplexity", correct: true }
+    - { text: "It is a contradiction, so one of the measurements must be a bug" }
+    - { text: "Perplexity is authoritative, so the build is fine to ship" }
+    - { text: "The weights failed to load, since a real quantization would move perplexity a lot" }
+  explanation: >-
+    Perplexity is an averaged next-token loss that dilutes the reasoning tokens quantization damages, so a
+    flat perplexity alongside a large task-eval drop is the normal signature of low-bit damage — not a
+    contradiction. Gate on the per-task delta against the FP16 baseline, never on perplexity alone.
+
+- id: mc-ops-quant-eval-gate
+  type: multiple_choice
+  tags: [quality, ops]
+  difficulty: 4
+  prompt: >-
+    You are setting up the operational workflow for shipping quantized builds. Which practice is the
+    leading indicator that catches a silent regression before it reaches users?
+  options:
+    - { text: "A CI eval gate that runs the real task suite against the FP16 baseline; its pass rate over time flags a regression on a task you were not otherwise watching", correct: true }
+    - { text: "Tracking total GPU power draw before and after quantizing" }
+    - { text: "Confirming the quantized weight file is smaller on disk" }
+    - { text: "Checking that the model loads without throwing an error" }
+  explanation: >-
+    The quantized build must pass a real task suite against the FP16 baseline before shipping; the eval-gate
+    pass rate is the leading indicator for silent regressions. Memory win and successful loading confirm the
+    benefit and basic health, but neither detects a task-quality regression.
+
+- id: code-quant-per-channel
+  type: code
+  language: typescript
+  tags: [methods, review]
+  difficulty: 4
+  prompt: >-
+    Implement `quantizePerChannel(matrix)` — per-CHANNEL (per-column) signed int8 quantization. `matrix`
+    is rows×cols; quantize each column independently so it gets its own scale (the granularity that
+    rescues outlier channels). For each column c: `scale[c] = max(|value|) over column c / 127` (if the
+    column is all zeros, use scale 1 to avoid divide-by-zero), and each `code = clamp(round(value /
+    scale[c]), -127, 127)`. Return `{ codes, scales }` where `codes` matches the matrix shape and
+    `scales` has one entry per column. A column with a large outlier gets a coarse scale while a
+    small-magnitude column keeps full int8 resolution — that is the per-channel win over one per-tensor scale.
+  starter_file: exercises/per-channel-quant/starter.ts
+  test_file: exercises/per-channel-quant/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-quant-code
+  concept_checks:
+    must_use: ["per-column scale = max(|value|)/127", "clamp codes to [-127,127] integers", "guard all-zeros column (scale 1, no divide by zero)"]
+    avoid_antipattern: ["a single per-tensor scale that crushes small columns", "unclamped codes that overflow int8", "NaN when a column is all zeros"]

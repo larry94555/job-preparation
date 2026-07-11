@@ -1,0 +1,36 @@
+# Free entry (short answer)
+- id: fe-static-waste
+  type: text_input
+  tags: [batching]
+  difficulty: 2
+  prompt: "In static batching, the whole batch waits for which request to finish? (a few words)"
+  answer:
+    regex: '^(the )?(longest|slowest)( request| one| output| sequence)?$'
+    normalize: true
+
+- id: fe-hol-name
+  type: text_input
+  tags: [scheduling]
+  difficulty: 3
+  prompt: "Name the problem where a long request blocks short ones in the same fixed batch (a few words)."
+  answer:
+    regex: '^head(-| )of(-| )line( blocking)?$'
+    normalize: true
+
+- id: fe-paged-benefit
+  type: text_input
+  tags: [paged-attention]
+  difficulty: 3
+  prompt: "What KV-cache problem does paged attention mainly reduce? (one word)"
+  answer:
+    regex: '^(fragmentation|waste|over-?reservation)$'
+    normalize: true
+
+- id: fe-throughput-metric
+  type: text_input
+  tags: [throughput]
+  difficulty: 2
+  prompt: "Name the metric for request/token completion rate that still meets the latency SLO (one word)."
+  answer:
+    regex: '^goodput$'
+    normalize: true

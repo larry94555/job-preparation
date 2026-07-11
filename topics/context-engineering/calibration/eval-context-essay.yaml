@@ -1,0 +1,30 @@
+# Calibration for eval-context-essay (exemplars target essay-budget-explain).
+skill: eval-context-essay
+cases:
+  - answer: >-
+      The window is a finite token budget, so every token spent on a marginally-relevant doc crowds
+      out something more useful and adds cost and latency. Dumping all the docs dilutes the signal and
+      usually lowers task quality. Instead I'd rank the candidate chunks by relevance to the query and
+      greedily fit the top ones to the budget, dropping or summarizing the rest.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  - answer: "Prompts should be clear and you should include as much as you can."
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, concrete: false }
+
+  - answer: >-
+      Pasting everything isn't ideal because the window has limits, so it's better to be selective
+      about what you include.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
+
+  - answer: >-
+      Just paste it all — bigger context always improves accuracy and there's no downside, since the
+      model reads the middle of long inputs best anyway.
+    expect:
+      verdict: fail
+      checks: { technically_correct: false }

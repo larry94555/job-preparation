@@ -1,0 +1,107 @@
+# Frontier & operations drill — closes D2 (frontier paper drill) and D6 (ops metrics drill).
+
+- id: mc-frontier-eval-judge-bias
+  type: multiple_choice
+  tags: [judge, frontier]
+  difficulty: 4
+  prompt: >-
+    Zheng et al. (LMSYS) legitimized LLM-as-judge but documented the biases that became its central
+    caveat. Which set of biases must a frontier practitioner control for before trusting a judge to gate?
+  options:
+    - { text: "Position bias (order alone), verbosity bias (rewarding length), and self-enhancement/self-preference (favoring its own model family)", correct: true }
+    - { text: "Only position bias — verbosity and self-preference are folklore" }
+    - { text: "Tokenizer bias and quantization bias in the judge's weights" }
+    - { text: "None — a strong enough judge is unbiased and needs no controls" }
+  explanation: >-
+    Zheng et al. named position, verbosity, and self-enhancement/self-preference bias. The honest fix is
+    to measure judge-vs-human agreement, swap answer positions to cancel position bias, and control for
+    length before letting a judge gate. "Strong judge, no calibration needed" is the frontier red flag.
+
+- id: mc-frontier-eval-arena-elo
+  type: multiple_choice
+  tags: [judge, frontier]
+  difficulty: 4
+  prompt: >-
+    Chatbot Arena became the de-facto frontier leaderboard. What is the load-bearing distinction between
+    what it measures and an MT-Bench-style score?
+  options:
+    - { text: "Arena is crowd-sourced *pairwise* preference ranked by Elo/Bradley-Terry; MT-Bench is *absolute* per-answer scoring — they answer different questions", correct: true }
+    - { text: "Arena is fully deterministic; MT-Bench is model-graded and therefore noisier" }
+    - { text: "Arena measures latency and cost; MT-Bench measures quality" }
+    - { text: "They are the same method under two names" }
+  explanation: >-
+    Chatbot Arena turns crowd-sourced pairwise preference into an Elo / Bradley-Terry ranking, whereas
+    MT-Bench does absolute per-answer scoring. The pairwise + Bradley-Terry machinery aged well; treating
+    one Overall arena number as procurement-grade truth is what drew methodological fire.
+
+- id: mc-frontier-eval-contamination
+  type: multiple_choice
+  tags: [judge, frontier]
+  difficulty: 4
+  prompt: >-
+    A public benchmark shows a model improving month over month, but the team suspects the gains aren't
+    real capability. Which pair of frontier concerns is this, and what is the standard mitigation?
+  options:
+    - { text: "Contamination (benchmark leaked into training → memorization) and construct validity (does it measure the claimed capability); mitigate with private, rotating held-out sets", correct: true }
+    - { text: "Judge verbosity bias; mitigate by shortening the reference answers" }
+    - { text: "Position bias; mitigate by always putting the model's answer second" }
+    - { text: "Elo inflation; mitigate by resetting the leaderboard each month" }
+  explanation: >-
+    Apparent gains from a leaked benchmark are contamination (memorization), and whether the benchmark
+    measures the claimed capability at all is construct validity. HELM's breadth exposes validity gaps;
+    the operational answer is private, rotating golden sets rather than chasing a public leaderboard.
+
+- id: mc-ops-eval-judge-agreement
+  type: multiple_choice
+  tags: [regression, ops]
+  difficulty: 4
+  prompt: >-
+    Your LLM judge gates the CI pass rate. Which operational signal tells you whether that gated number
+    can still be trusted, and what does a drop in it mean?
+  options:
+    - { text: "Judge–human agreement rate (κ / agreement % on a held-out calibration set); a drop means the judge drifted from human intent, so its pass rate no longer means what you think", correct: true }
+    - { text: "Total judge token spend; a drop means the judge is more efficient and thus more trustworthy" }
+    - { text: "The number of golden-set cases; more cases automatically means a more trustworthy judge" }
+    - { text: "Wall-clock time of the eval run; faster runs indicate a better-calibrated judge" }
+  explanation: >-
+    Judge–human agreement on a held-out calibration set is what earns the judge the right to gate. Falling
+    agreement means the judge has drifted from human intent and its pass rate is no longer a trustworthy
+    signal — re-calibrate before trusting the next gated run. Token spend and case count are not calibration.
+
+- id: mc-ops-eval-drift-gate
+  type: multiple_choice
+  tags: [regression, ops]
+  difficulty: 4
+  prompt: >-
+    Offline regression-gate pass rate has crept up over two months while a production canary shows quality
+    flat or worse. What is the most likely operational diagnosis?
+  options:
+    - { text: "Eval-set drift / teaching-to-the-test — the static set is stale or contaminated, so the offline number rises while real capability doesn't; rotate held-out cases and feed production failures back in", correct: true }
+    - { text: "The gate is working perfectly; ship faster because the offline number is up" }
+    - { text: "The judge became cheaper, which mechanically raised the pass rate" }
+    - { text: "Golden-set coverage is too high and should be reduced to match the canary" }
+  explanation: >-
+    A widening gap between offline pass rate and canary outcomes is the leading indicator of eval-set drift
+    or teaching-to-the-test: the set is stale or contaminated so the score rises without real gains. The fix
+    is the freshness loop — held-out/rotating cases plus production failures fed back in and de-duplicated.
+
+- id: code-eval-kappa
+  type: code
+  language: typescript
+  tags: [judge, review]
+  difficulty: 4
+  prompt: >-
+    Implement `cohenKappa(a, b)`: Cohen's kappa (chance-corrected agreement) for two binary raters —
+    e.g. an LLM judge vs. a human — over paired boolean judgments a[i]/b[i]. Let `po` be the fraction of
+    indices where they agree. Let `pTrue = (frac a true)*(frac b true)`, `pFalse = (frac a false)*(frac b
+    false)`, and `pe = pTrue + pFalse`. Return `(po - pe) / (1 - pe)`; if `pe === 1`, return `1`. Assume
+    `a.length === b.length > 0`.
+  starter_file: exercises/cohen-kappa/starter.ts
+  test_file: exercises/cohen-kappa/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-evals-code
+  concept_checks:
+    must_use: ["observed agreement po = fraction of matching indices", "expected/chance agreement pe from each rater's true/false rates", "chance-correct: (po - pe) / (1 - pe)", "guard pe === 1 by returning 1"]
+    avoid_antipattern: ["returning raw agreement po without chance correction", "dividing by zero when pe === 1"]

@@ -1,0 +1,37 @@
+# Essay
+- id: essay-metrics-choice
+  type: essay
+  length: short
+  tags: [metrics]
+  difficulty: 3
+  prompt: "Your RAG system usually surfaces the right passage but often buries it several ranks down, so the answer quality is inconsistent. Which retrieval metric would you track to catch this, and why — and how does it differ from recall@k?"
+  eval_skill: eval-retrievalevals-essay
+  reference_points:
+    - "MRR (mean reciprocal rank) is the right metric: it averages 1/(rank of the first relevant result), so burying the right passage at rank 4 instead of rank 1 shows up as a lower score."
+    - "recall@k only checks whether the relevant doc is somewhere in the top-k; it is blind to WHERE in the window it lands, so a passage at rank 1 and rank k score the same for recall."
+    - "Because the complaint is about position/order rather than presence, an order-sensitive metric (MRR, or nDCG) is the diagnostic, and the fix is often reranking."
+
+- id: essay-grounding-vs-retrieval
+  type: essay
+  length: short
+  tags: [grounding]
+  difficulty: 4
+  prompt: "A user reports a wrong answer. Explain how you would determine whether this is a RETRIEVAL failure or a GROUNDING failure, and why the fix differs for each."
+  eval_skill: eval-retrievalevals-essay
+  reference_points:
+    - "First check whether the supporting passage was actually in the retrieved context: if it never made it into the window, recall@k is low and it is a retrieval failure — fix retrieval (chunking, hybrid search, larger k, reranking)."
+    - "If the correct passage WAS in context but the answer contradicts or is unsupported by it, that is a grounding/faithfulness failure — fix generation (prompting, faithfulness constraints, a grounding check), not the retriever."
+    - "Isolating the component matters because end-to-end-only evals conflate the two, and applying the retrieval fix to a grounding bug (or vice versa) wastes effort and does not move the metric."
+
+- id: essay-attribution-eval
+  type: essay
+  length: long
+  tags: [attribution, grounding]
+  difficulty: 4
+  prompt: "Design an evaluation for citation/attribution quality in a RAG system that must cite its sources. Explain what a fabricated citation is, how you would detect one at scale, and how attribution quality relates to grounding."
+  eval_skill: eval-retrievalevals-essay
+  reference_points:
+    - "A fabricated (hallucinated) citation points at a source that does not exist or does not actually support the claim it is attached to — the prose may look authoritative but the attribution is false."
+    - "Detect per-claim: for each cited claim, verify (via an entailment/span check, often an LLM-judge or NLI model) that the referenced span actually supports the claim; count fabricated vs. supported citations rather than just counting citations."
+    - "Attribution quality is a stricter form of grounding: grounding asks whether claims are supported by the retrieved context, while attribution additionally requires that the SPECIFIC cited source is the correct support — so an answer can be grounded overall yet still cite the wrong or nonexistent span."
+    - "At scale, sample queries with a labeled/relevance-judged set, automate the span-entailment check, and flag low-agreement cases for human review to keep the judge honest."

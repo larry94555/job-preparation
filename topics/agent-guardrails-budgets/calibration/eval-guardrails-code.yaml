@@ -1,0 +1,46 @@
+skill: eval-guardrails-code
+# Calibration for eval-guardrails-code.
+# 'answer' summarizes the submitted approach + provided signals (the grader sees extracted evidence,
+# not raw code). Exemplars target the bounded-loop exercise (agent guardrails / budgets / stop
+# conditions). enforces_budget is the gate: no hard step cap is the runaway-agent failure.
+cases:
+  - answer: >-
+      tests_passed=true. enforces_budget: the loop runs `for (let steps=1; steps<=maxSteps; steps++)`
+      so it cannot exceed maxSteps — a hard step cap. detects_no_progress: compares next===prev and
+      stops with no-progress. stops_on_done: stops with complete when the step reports done.
+      returns_reason: returns { steps, stoppedBy, state } naming complete/no-progress/budget.
+      signals.must_use=[hard step cap, no-progress check, done check, stop reason]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { enforces_budget: true, detects_no_progress: true, stops_on_done: true, returns_reason: true }
+
+  - answer: >-
+      tests_passed=true. enforces_budget: a hard maxSteps cap bounds the loop and it stops with budget
+      when the cap is hit. stops_on_done: stops with complete on the done signal. returns_reason:
+      returns stoppedBy = complete or budget. detects_no_progress: never compares the new state to the
+      previous one, so a stuck agent is not caught early. signals.must_use=[hard step cap, done check,
+      stop reason]; avoid=[missing no-progress detection].
+    expect:
+      verdict: pass
+      checks: { enforces_budget: true, detects_no_progress: false, stops_on_done: true, returns_reason: true }
+
+  - answer: >-
+      tests_passed=true. enforces_budget: NO hard cap — a `while (!done)` loop with no maxSteps, so a
+      non-completing step would run forever (the tests happen to complete). returns_reason: does not
+      report why it stopped, it just returns the final state with no stoppedBy. detects_no_progress:
+      compares next===prev and stops when the state is unchanged. stops_on_done: stops with complete on
+      the done signal. signals.must_use=[no-progress check, done check]; avoid=[unbounded loop, no stop
+      reason].
+    expect:
+      verdict: fail
+      checks: { enforces_budget: false, detects_no_progress: true, stops_on_done: true, returns_reason: false }
+
+  - answer: >-
+      tests_passed=true. enforces_budget: NO hard cap — the loop only exits via the done and
+      no-progress checks, with no maxSteps backstop. detects_no_progress: compares next===prev and
+      stops with no-progress. stops_on_done: stops with complete on the done signal. returns_reason:
+      returns stoppedBy naming complete or no-progress. signals.must_use=[no-progress check, done
+      check, stop reason]; avoid=[missing budget backstop].
+    expect:
+      verdict: borderline
+      checks: { enforces_budget: false, detects_no_progress: true, stops_on_done: true, returns_reason: true }

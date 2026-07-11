@@ -1,0 +1,35 @@
+# Calibration for eval-caching-essay (exemplars target essay-two-caches).
+skill: eval-caching-essay
+cases:
+  - answer: >-
+      They are two different caches. Prefix (prompt) caching reuses the model's already-computed
+      attention state for identical leading tokens — it only hits on an exact-prefix match, and it
+      saves the prefill compute for those shared tokens while the model still generates a fresh
+      completion. Semantic caching instead embeds the request and hits when the embedding is within a
+      similarity threshold of a stored request; on a hit it returns the stored response and skips the
+      model call entirely, so it saves the whole generation. So they differ in hit condition (exact
+      leading tokens vs. embedding similarity) and in what they save (prefill vs. full generation).
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  - answer: "Caching just makes things faster because the computer remembers stuff."
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: true, concrete: false }
+
+  - answer: >-
+      One kind reuses work when the start of the prompt is the same, and the other returns an old
+      answer when the new question is close enough to a previous one. They save different amounts of
+      work.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: false }
+
+  - answer: >-
+      Prefix caching returns a stored response whenever two requests are semantically similar, and
+      semantic caching only reuses the prefill for identical leading tokens. Both save exactly the
+      same amount of compute.
+    expect:
+      verdict: fail
+      checks: { technically_correct: false }

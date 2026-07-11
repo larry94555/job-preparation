@@ -1,0 +1,10 @@
+id: lesson-expert-context
+title: "Expert context: papers, frontier & interview"
+material: expert-context.md
+segments:
+  - present: papers-people-and-the-frontier
+  - check: mc-canon-ist-cascades
+  - present: interviewing-on-inference-stack-tradeoffs
+  - check: mc-interview-ist-red-flag
+  - apply: essay-ist-literature
+  - apply: essay-ist-interview

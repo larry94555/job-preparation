@@ -1,0 +1,20 @@
+# Coding exercise — engine type: code (graded by tests + concept skill)
+- id: code-run-safely
+  type: code
+  language: typescript
+  tags: [mitigation]
+  difficulty: 3
+  prompt: >-
+    Implement `runSafely(produce, opts)` where opts is `{ guards, maxAttempts, fallback }`. Call
+    `produce()` up to `maxAttempts` times. Return `{ ok:true, value, attempts }` for the first output
+    that passes ALL guards. If none pass within the budget, return `{ ok:false, value:fallback,
+    attempts:maxAttempts }`. The retry MUST be bounded by maxAttempts.
+  starter_file: exercises/run-safely/starter.ts
+  test_file: exercises/run-safely/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-failuremodes-code
+  concept_checks:
+    must_use: ["bounded by maxAttempts", "accept only when ALL guards pass", "return fallback with ok:false when exhausted"]
+    avoid_antipattern: ["unbounded retry loop", "accepting output that fails a guard"]

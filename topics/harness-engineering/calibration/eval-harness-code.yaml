@@ -1,0 +1,44 @@
+# Calibration for eval-harness-code.
+# 'answer' summarizes the submitted approach + provided signals (the grader sees extracted evidence,
+# not raw code). Exemplars target the harness-loop exercise. duplicate_call_guard is the gate.
+skill: eval-harness-code
+cases:
+  - answer: >-
+      tests_passed=true. duplicate_call_guard holds: it tracks the previous action and returns
+      "duplicate-call" when the current action equals the previous one. max_steps_budget holds: a hard
+      maxSteps cap returns "budget" once steps>=maxSteps. stops_on_done holds: it returns "complete"
+      when a step reports done. returns_reason holds: it returns { steps, stoppedBy } naming why it
+      stopped. signals.must_use=[previous-action compare, maxSteps cap, done stop, stop reason]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { duplicate_call_guard: true, max_steps_budget: true, stops_on_done: true, returns_reason: true }
+
+  - answer: >-
+      tests_passed=true. duplicate_call_guard holds: it compares each action to the previous one and
+      stops with "duplicate-call" on a repeat. max_steps_budget holds: a maxSteps cap guarantees
+      termination. stops_on_done holds: it stops with "complete" when a step is done. returns_reason
+      does not hold: it returns only the step count and never reports which condition stopped the loop.
+      signals.must_use=[previous-action compare, maxSteps cap, done stop]; avoid=[silent stop].
+    expect:
+      verdict: pass
+      checks: { duplicate_call_guard: true, max_steps_budget: false, stops_on_done: true, returns_reason: true }
+
+  - answer: >-
+      tests_passed=true. duplicate_call_guard does not hold: it never compares the current action to
+      the previous one, so a model repeating the same action just runs to the cap. max_steps_budget
+      does not hold: there is no maxSteps cap, so distinct non-terminating actions loop forever.
+      stops_on_done holds: it stops with "complete" when a step reports done. returns_reason holds: it
+      reports the stop reason. signals.must_use=[done stop, stop reason]; avoid=[unbounded loop, no dedup guard].
+    expect:
+      verdict: fail
+      checks: { duplicate_call_guard: false, max_steps_budget: false, stops_on_done: true, returns_reason: true }
+
+  - answer: >-
+      tests_passed=true. duplicate_call_guard does not hold: it never tracks the previous action, so a
+      repeated action is not caught and only the budget stops it. max_steps_budget holds: a hard
+      maxSteps cap returns "budget" and guarantees termination. stops_on_done holds: it returns
+      "complete" when a step reports done. returns_reason holds: it returns { steps, stoppedBy } naming
+      why it stopped. signals.must_use=[maxSteps cap, done stop, stop reason]; avoid=[missing dedup guard].
+    expect:
+      verdict: borderline
+      checks: { duplicate_call_guard: false, max_steps_budget: true, stops_on_done: true, returns_reason: true }

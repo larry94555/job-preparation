@@ -1,0 +1,12 @@
+id: lesson-frontier-ops
+title: "Frontier & operations: rails as code, principled termination, and the signals to watch"
+material: frontier-ops.md
+segments:
+  - present: the-agent-guardrails-budgets-frontier
+  - check: mc-frontier-guard-frameworks
+  - check: mc-frontier-guard-principled-termination
+  - check: mc-frontier-guard-longhorizon
+  - present: operating-agent-guardrails-in-production
+  - check: mc-ops-guard-exhaustion
+  - check: mc-ops-guard-degradation
+  - apply: code-guard-action-gate

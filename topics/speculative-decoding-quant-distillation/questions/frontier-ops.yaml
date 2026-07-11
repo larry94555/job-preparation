@@ -1,0 +1,114 @@
+# Frontier & operations drill — closes D2 (frontier drill) and D6 (ops metrics drill).
+
+- id: mc-frontier-spec-selfspec
+  type: multiple_choice
+  tags: [speculative, frontier]
+  difficulty: 4
+  prompt: >-
+    The first speculative decoding (Leviathan et al., Google; Chen et al., DeepMind, 2023) needed a
+    separate draft model. Self-speculative heads (Medusa, EAGLE) changed that. What did they actually do?
+  options:
+    - { text: "Folded the drafter into the target — extra prediction heads (Medusa) or feature-level drafting (EAGLE) — so there is no separate draft model to serve or keep aligned", correct: true }
+    - { text: "Made speculative decoding lossy in exchange for a much larger speedup" }
+    - { text: "Replaced verification with a lossy codec that compresses the KV cache" }
+    - { text: "Swapped the target model for a permanently distilled student at serve time" }
+  explanation: >-
+    Medusa (Cai et al., 2024) attaches extra prediction heads to the target; EAGLE drafts from the
+    target's own features. The shared move is that the drafter is part of the target, not a standalone
+    model — no second model to serve or drift out of sync, and often higher in-domain acceptance. It
+    stays lossless.
+
+- id: mc-frontier-spec-acceptance-domain
+  type: multiple_choice
+  tags: [speculative, frontier]
+  difficulty: 4
+  prompt: >-
+    Why is "high acceptance across domains" a live frontier open problem for speculative decoding rather
+    than a solved detail?
+  options:
+    - { text: "Speedup is acceptance-bound and acceptance is domain-dependent, so a drafter that accepts well on one workload (e.g. code) can accept poorly on another (prose, long-tail reasoning) — one number doesn't generalize", correct: true }
+    - { text: "Acceptance rate is fixed by the target model and never varies by workload" }
+    - { text: "Higher acceptance would make the output lossy, so the field avoids it deliberately" }
+    - { text: "Acceptance only matters for quantization, not for speculative decoding" }
+  explanation: >-
+    Effective speedup scales with accepted tokens per verification pass, not with how small the drafter
+    is, and acceptance depends on the domain. A single acceptance measurement from one workload does not
+    generalize, so holding acceptance up across code, reasoning, and the long tail is the open problem
+    that decides whether the technique pays off.
+
+- id: mc-frontier-spec-stack-lossless
+  type: multiple_choice
+  tags: [speculative, frontier]
+  difficulty: 4
+  prompt: >-
+    A team stacks the levers in the frontier order distill → quantize → speculate and asks which stages
+    can degrade quality. What is the correct answer?
+  options:
+    - { text: "Distill and quantize are lossy and can degrade quality; the speculate stage is lossless and adds latency wins at zero quality cost — so gate the two lossy stages behind a task eval", correct: true }
+    - { text: "All three stages are lossy, so the whole stack is a quality gamble with no way to attribute regressions" }
+    - { text: "Only speculative decoding is lossy; distillation and quantization are exact" }
+    - { text: "None of the stages can degrade quality because they are all inference-time config flags" }
+  explanation: >-
+    Speculative decoding is lossless — the accepted output is exactly what the target would have produced.
+    Distillation and quantization are lossy. The frontier discipline is eval-gated stacking: prove each
+    lossy stage behind a task eval before the next lands, so a regression is attributable to the stage
+    that caused it.
+
+- id: mc-ops-spec-acceptance-signal
+  type: multiple_choice
+  tags: [tradeoffs, ops]
+  difficulty: 4
+  prompt: >-
+    You run speculative decoding in production and want the earliest signal that your latency speedup is
+    evaporating — before aggregate wall-clock latency looks bad. Which metric leads?
+  options:
+    - { text: "Draft acceptance rate — a falling acceptance rate (often from a traffic shift to a domain the drafter is weak on) is the leading indicator that the speedup is decaying", correct: true }
+    - { text: "Total model weight size on disk" }
+    - { text: "The number of CUDA kernels compiled at startup" }
+    - { text: "GPU fan speed" }
+  explanation: >-
+    Speculative speedup is acceptance-bound, so acceptance rate moves first. It falls when traffic shifts
+    to a domain the drafter accepts poorly on, and it shows up before aggregate wall-clock latency does.
+    Accepted tokens per verification step and throughput-under-load are the companion signals.
+
+- id: mc-ops-spec-speedup-quality
+  type: multiple_choice
+  tags: [tradeoffs, ops]
+  difficulty: 4
+  prompt: >-
+    Your dashboard reports a wall-clock speedup from enabling speculative decoding *and* a non-zero
+    quality delta on the eval set. Since speculative decoding is lossless, what should you conclude?
+  options:
+    - { text: "Something is wrong — a bug or a lossy verification relaxation crept in; a purely speculative change must show speedup with a zero quality delta", correct: true }
+    - { text: "This is expected — speculative decoding always trades a little quality for speed" }
+    - { text: "The quality delta proves the drafter is well-matched to the domain" }
+    - { text: "Nothing to investigate; wall-clock speedup is the only metric that matters" }
+  explanation: >-
+    Speculative decoding is lossless: the accepted output is exactly what the target would have produced,
+    so a correct implementation shows speedup with a zero quality delta. A measured quality change means a
+    bug or a deliberately lossy verification relaxation — read wall-clock speedup and quality delta
+    together, never speedup alone.
+
+- id: code-spec-draft-verify
+  type: code
+  language: typescript
+  tags: [speculative, review]
+  difficulty: 4
+  prompt: >-
+    Implement `speculate(draft, target)` — the lossless draft-and-verify emit step. `draft` is the
+    drafter's proposed tokens; `target(i)` returns the target model's true token at position `i`.
+    Compare the draft left to right against the target: accept the longest leading run where
+    `draft[i] === target(i)` (call that accepted length `m`), then emit the `m` accepted tokens PLUS
+    exactly one correction/bonus token `target(m)` (the target's token at the first mismatch, or the
+    next token if the whole draft was accepted). Return the emitted array (length `m + 1`). This is
+    lossless: the output always equals what the target alone would have produced for those `m + 1`
+    positions.
+  starter_file: exercises/draft-verify/starter.ts
+  test_file: exercises/draft-verify/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-specdec-code
+  concept_checks:
+    must_use: ["accept the longest leading run where draft[i] === target(i)", "stop at the first mismatch", "always emit exactly one correction/bonus token target(m)"]
+    avoid_antipattern: ["comparing tokens after a mismatch", "omitting the bonus token when the whole draft is accepted", "emitting a draft token instead of target(m) at the mismatch (lossy)"]

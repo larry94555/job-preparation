@@ -1,0 +1,14 @@
+id: lesson-budgets
+title: "Budgets: steps, tools, tokens, cost, time"
+material: budgets.md
+segments:
+  - present: the-dimensions-of-an-agent-budget
+  - check: mc-budget-dimensions
+  - check: mc-tool-budget
+  - check: cloze-loop-budget
+  - check: fe-budget-dimension
+  - present: why-wall-clock-is-its-own-budget
+  - check: mc-wall-clock-why
+  - check: cloze-wall-clock
+  - present: budgets-and-graceful-termination
+  - apply: essay-design-budgets

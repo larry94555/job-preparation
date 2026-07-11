@@ -1,0 +1,21 @@
+# Coding exercise — engine type: code (graded by tests + concept skill)
+- id: code-continuous-batching
+  type: code
+  language: typescript
+  tags: [throughput]
+  difficulty: 4
+  prompt: >-
+    Implement `continuousBatchMakespan(lengths, batchSize)`. `lengths[i]` is the number of output
+    tokens for request i (all available at the start). Keep an active set of at most `batchSize`
+    requests. Each step, every active request emits one token; requests with 0 remaining finish and
+    free their slot; then admit waiting requests (in order) to refill up to `batchSize`. Return the
+    step count at which the last request finishes.
+  starter_file: exercises/continuous-batching/starter.ts
+  test_file: exercises/continuous-batching/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-batching-code
+  concept_checks:
+    must_use: ["one token per active request per step", "free a slot and refill when a request finishes", "never exceed batchSize active"]
+    avoid_antipattern: ["waiting for the whole batch before admitting", "exceeding the batch size"]

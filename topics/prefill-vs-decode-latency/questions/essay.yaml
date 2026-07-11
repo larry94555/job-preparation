@@ -1,0 +1,37 @@
+# Essay
+- id: essay-two-phases
+  type: essay
+  length: short
+  tags: [phases]
+  difficulty: 3
+  prompt: "Explain the two phases of LLM inference and why they have opposite hardware profiles."
+  eval_skill: eval-prefill-essay
+  reference_points:
+    - "Prefill processes the whole prompt in one parallel forward pass, doing heavy arithmetic per weight read, so it is compute-bound (limited by FLOPs)."
+    - "Decode generates output tokens one at a time; each step re-reads the full weights (and KV cache) to produce a single token, so it is memory-bandwidth-bound."
+    - "Prefill is parallel because all prompt tokens are known up front; decode is sequential because each token depends on the previous one."
+
+- id: essay-batching
+  type: essay
+  length: short
+  tags: [optimization]
+  difficulty: 4
+  prompt: "A colleague sees that batching requests together dramatically increases decode throughput and assumes it will speed up prefill just as much. Explain why batching helps decode but not prefill."
+  eval_skill: eval-prefill-essay
+  reference_points:
+    - "Decode is memory-bandwidth-bound: each step reads the full weights to emit one token, so the arithmetic units sit idle. Batching many requests reuses that single weight read across all of them, raising throughput."
+    - "Prefill is already compute-bound: each request does a large parallel matmul over its prompt, so the GPU's FLOPs are already saturated and adding more requests just queues more compute."
+    - "So batching amortizes a bandwidth cost (decode) but cannot amortize a compute cost that is already the bottleneck (prefill)."
+
+- id: essay-metrics-slo
+  type: essay
+  length: long
+  tags: [metrics, optimization]
+  difficulty: 4
+  prompt: "You are setting latency SLOs for a chat product. Explain TTFT and TPOT, map each to its inference phase, and describe how prompt length, output length, and batching affect them. Mention one optimization for keeping decode latency low under load."
+  eval_skill: eval-prefill-essay
+  reference_points:
+    - "TTFT (time to first token) is set by prefill and scales with prompt length; TPOT (time per output token / inter-token latency) is set by decode and determines the steady-state generation speed."
+    - "A longer prompt raises TTFT (more to prefill) but barely changes TPOT; a longer output raises total latency through TPOT (more decode steps) without changing TTFT."
+    - "Batching lifts decode throughput (amortizing the bandwidth-bound weight read) but can hurt TTFT if a big prefill blocks other requests, so TTFT and TPOT deserve separate SLOs."
+    - "Chunked prefill (split a long prompt into chunks interleaved with decode) or prefill/decode disaggregation keeps TPOT low by preventing a large prefill from stalling in-flight decode."

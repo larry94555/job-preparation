@@ -1,0 +1,52 @@
+# Essay — engine type: essay (length: short | long)
+- id: essay-why-validate
+  type: essay
+  length: short
+  tags: [validation, constrained-decoding]
+  difficulty: 3
+  prompt: "Even when you use constrained/grammar decoding, why should you STILL validate the output against a schema? Give a concrete reason."
+  eval_skill: eval-structured-output-essay
+  reference_points:
+    - "Constrained decoding guarantees syntax/shape, not semantic correctness of values."
+    - "Values can still be wrong, out-of-range, or violate business rules / enums."
+    - "Validation is defense-in-depth; it catches semantic errors decoding cannot."
+    - "Bonus: constraints can degrade quality, so an independent check is warranted."
+
+- id: essay-taxonomy-explain
+  type: essay
+  length: short
+  tags: [taxonomy]
+  difficulty: 2
+  prompt: "Explain to a junior engineer the difference between a 'malformed JSON' failure and a 'schema violation' failure — including how each is detected."
+  eval_skill: eval-structured-output-essay
+  reference_points:
+    - "Malformed JSON = not parseable (syntax error); detected by the JSON parser."
+    - "Schema violation = parses, but wrong shape/types/values; detected by the validator."
+    - "Different fixes: reprompt/repair vs. coerce/repair against the schema."
+
+- id: essay-design-chain
+  type: essay
+  length: long
+  tags: [validation, repair, fallback]
+  difficulty: 4
+  prompt: "Design a complete reliability chain for extracting structured data from an LLM. Cover prevention, validation, bounded repair, and fallback, and specify the budgets and what happens at each stage."
+  eval_skill: eval-structured-output-essay
+  reference_points:
+    - "Prevention: constrained decoding / response_format / clear schema in the prompt."
+    - "Validation: parse then validate against an explicit schema (the contract)."
+    - "Repair: bounded loop feeding the validation error back; a max-attempts budget."
+    - "Fallback: simpler schema → deterministic default → human review, in that order."
+    - "Budgets/limits on attempts, latency, and cost; observability/logging of failures."
+
+- id: essay-usually-valid-antipattern
+  type: essay
+  length: long
+  tags: [validation, fallback]
+  difficulty: 4
+  prompt: "In an interview, explain why 'the model usually returns valid JSON' is not a production strategy, and what a senior engineer does instead."
+  eval_skill: eval-structured-output-essay
+  reference_points:
+    - "'Usually' means a nonzero tail failure rate that becomes frequent at scale."
+    - "Seniors treat output as untrusted: parse+validate, bounded repair, fallback chain."
+    - "They measure valid-output rate and add observability, not hope."
+    - "They design for the failure, including safe defaults and human escalation."

@@ -1,0 +1,11 @@
+id: lesson-throughput
+title: "Throughput, latency & goodput"
+material: throughput.md
+segments:
+  - present: the-throughput-vs-latency-tradeoff
+  - check: mc-throughput-latency-tradeoff
+  - present: goodput-under-an-slo
+  - check: mc-goodput-def
+  - check: cloze-goodput
+  - check: fe-throughput-metric
+  - apply: essay-throughput-goodput

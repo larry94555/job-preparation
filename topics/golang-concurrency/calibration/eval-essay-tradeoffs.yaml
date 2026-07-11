@@ -1,29 +1,47 @@
 skill: eval-essay-tradeoffs
 cases:
+  # PASS #1 — both sides, a real & specific tradeoff, all claims correct.
   - answer: >-
-      Use a mutex when you're guarding a small piece of shared state, like a counter or a map,
-      where a short critical section is simplest and cheapest. Reach for a channel when you're
-      handing ownership of data between goroutines or orchestrating a pipeline. The trade-off is
-      overhead and clarity: mutexes are lighter but easy to misuse (forgotten unlocks, deadlocks),
-      while channels express intent but add scheduling overhead.
+      Reach for a mutex when several goroutines touch one piece of shared state and each access is a
+      short critical section — for example incrementing a request counter or updating a shared map.
+      sync.Mutex just guards the memory: Lock, mutate, Unlock. Reach for a channel when you are
+      transferring ownership of a value between goroutines or wiring up a pipeline, so that only one
+      goroutine owns the data at a time ("share memory by communicating"). The concrete trade-off is
+      overhead versus contention and safety: a mutex is a few nanoseconds and allocates nothing, but a
+      forgotten Unlock or lock taken in the wrong order deadlocks, and hot locks serialize goroutines
+      under contention. A channel makes the hand-off explicit and composes with select, but every send
+      and receive touches the scheduler, so it costs more per operation.
     expect:
       verdict: pass
       checks: { both_sides: true, real_tradeoff: true, correct: true, specific: true }
 
-  - answer: "Mutexes are always better than channels because they are faster."
-    expect:
-      verdict: fail
-      checks: { both_sides: false, correct: false }
-
+  # PASS #2 — both sides, a real & specific tradeoff (deadlock vs scheduler cost), correct.
   - answer: >-
-      A mutex protects shared memory and a channel passes messages. You pick whichever fits.
-    expect:
-      verdict: borderline
-      checks: { both_sides: true, real_tradeoff: false, specific: false }
-
-  - answer: >-
-      Use a mutex for simple shared state and a channel to transfer ownership between goroutines.
-      Mutexes have lower overhead but risk deadlock if you forget to unlock.
+      Use a mutex when you are protecting simple shared state behind a short critical section — a cache
+      map, a counter, a config struct — because sync.Mutex has very low overhead and the code stays
+      easy to read. Use a channel when you need to move a value from one goroutine to another or fan
+      work out across a worker pool, so ownership passes cleanly and back-pressure falls out of a
+      bounded buffer. The trade-off is concrete: the mutex is cheaper per operation but you carry the
+      risk of forgetting to Unlock or acquiring two locks in the wrong order, which deadlocks; the
+      channel prevents that class of bug and makes the data flow explicit, but each send/receive pays
+      scheduler overhead and an unbuffered channel blocks the sender until a receiver is ready.
     expect:
       verdict: pass
-      checks: { both_sides: true, real_tradeoff: true, correct: true }
+      checks: { both_sides: true, real_tradeoff: true, correct: true, specific: true }
+
+  # FAIL — one-sided and technically wrong (no mutex>channel absolute; unlock/deadlock claim reversed).
+  - answer: >-
+      Mutexes are always the better choice and you should never use channels, because channels can
+      never deadlock and a mutex never needs to be unlocked. Just use a mutex everywhere and you are
+      done.
+    expect:
+      verdict: fail
+      checks: { both_sides: false, real_tradeoff: false, correct: false, specific: false }
+
+  # BORDERLINE — names both sides correctly but stays vague: no real, specific tradeoff.
+  - answer: >-
+      A mutex protects shared memory and a channel passes messages between goroutines. Both are fine
+      ways to coordinate, so you just pick whichever one feels right for your program.
+    expect:
+      verdict: borderline
+      checks: { both_sides: true, real_tradeoff: false, correct: true, specific: false }

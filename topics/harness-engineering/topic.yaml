@@ -1,0 +1,9 @@
+id: harness-engineering
+title: "Harness Engineering"
+description: "Reliability lives in the code around the model — tools, state, retries, verification, permissions, control flow — not in the prompt string."
+pass_threshold: 0.8
+tag_weights:
+  boundary: 1.0
+  loop: 1.0
+  verification: 1.2
+  control: 1.2

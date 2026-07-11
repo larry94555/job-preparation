@@ -1,0 +1,13 @@
+id: lesson-deep-dive
+title: "Architecture & tradeoffs: reviewing a batching design"
+material: deep-dive.md
+segments:
+  - present: the-batching-paged-attention-throughput-design-space
+  - present: a-tradeoff-table-for-batching-paged-attention-throughput
+  - check: mc-review-batch-static-variable
+  - check: mc-review-batch-contiguous-kv
+  - present: common-sota-and-antipattern
+  - check: mc-review-batch-slo-blind
+  - present: scaling-performance-and-the-token-budget
+  - present: reviewing-a-batching-paged-attention-throughput-design
+  - apply: essay-batch-deep-dive

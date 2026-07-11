@@ -1,0 +1,36 @@
+# Free entry (short answer)
+- id: fe-budget-tradeoff
+  type: text_input
+  tags: [budget]
+  difficulty: 2
+  prompt: "Name one cost of stuffing marginally-relevant tokens into the window. (one word)"
+  answer:
+    regex: '^(dilution|cost|latency|noise|distraction)$'
+    normalize: true
+
+- id: fe-position-fix
+  type: text_input
+  tags: [position]
+  difficulty: 2
+  prompt: "To beat the lost-in-the-middle effect, where in the window should key evidence go? (one word)"
+  answer:
+    regex: '^(start|beginning|top|end|edges?|front)$'
+    normalize: true
+
+- id: fe-selection-method
+  type: text_input
+  tags: [selection]
+  difficulty: 2
+  prompt: "Name the two-step pattern for filling the window: rank, then ____ to budget. (one word)"
+  answer:
+    regex: '^(fit|pack)$'
+    normalize: true
+
+- id: fe-selection-signal
+  type: text_input
+  tags: [selection]
+  difficulty: 3
+  prompt: "By what property do you primarily order candidate chunks before fitting them to the budget? (one word)"
+  answer:
+    regex: '^(relevance|relevancy|score|similarity)$'
+    normalize: true

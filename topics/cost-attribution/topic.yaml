@@ -1,0 +1,9 @@
+id: cost-attribution
+title: "Cost Attribution"
+description: "Attribute LLM spend to the dimensions the business cares about — feature, workflow, tenant, user journey — not just per model. Cost per successful task, tag propagation, and hidden costs decide where you can actually optimize."
+pass_threshold: 0.8
+tag_weights:
+  drivers: 1.2
+  attribution: 1.2
+  economics: 1.0
+  hidden: 1.0

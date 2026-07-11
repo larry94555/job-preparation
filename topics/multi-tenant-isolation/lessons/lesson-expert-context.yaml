@@ -1,0 +1,10 @@
+id: lesson-expert-context
+title: "Expert context: papers, frontier & interview"
+material: expert-context.md
+segments:
+  - present: papers-people-and-the-frontier
+  - check: mc-canon-mti-rls
+  - present: interviewing-on-multi-tenant-isolation
+  - check: mc-interview-mti-signal
+  - apply: essay-mti-literature
+  - apply: essay-mti-interview

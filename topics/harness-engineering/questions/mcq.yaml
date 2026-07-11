@@ -1,0 +1,96 @@
+# Multiple choice
+- id: mc-responsibility
+  type: multiple_choice
+  tags: [boundary]
+  difficulty: 2
+  prompt: "Which of these is the *harness's* responsibility, not the model's?"
+  options:
+    - { text: "Validating tool arguments and executing the tool", correct: true }
+    - { text: "Deciding what the next reasoning step should be" }
+    - { text: "Choosing which tokens to generate" }
+    - { text: "Interpreting the user's phrasing" }
+  explanation: "The model reasons and emits tool calls; the harness owns tool execution, argument validation, and everything around it."
+
+- id: mc-prompt-cant-fix
+  type: multiple_choice
+  tags: [boundary]
+  difficulty: 3
+  prompt: "Which problem can a better prompt NOT reliably fix?"
+  options:
+    - { text: "The model occasionally emitting invalid tool-call JSON at scale", correct: true }
+    - { text: "A slightly unclear instruction" }
+    - { text: "A missing worked example" }
+    - { text: "Ambiguous wording in the task" }
+  explanation: "Tail failures like invalid tool JSON are structural — they need harness-side validation, repair, and retries, not rewording."
+
+- id: mc-loop-phases
+  type: multiple_choice
+  tags: [loop]
+  difficulty: 1
+  prompt: "The agent loop is best described as:"
+  options:
+    - { text: "think → act → observe, repeated", correct: true }
+    - { text: "plan → compile → ship" }
+    - { text: "encode → decode" }
+    - { text: "map → shuffle → reduce" }
+  explanation: "The model thinks (proposes an action), the harness acts (executes) and observes (feeds the result back), then repeats."
+
+- id: mc-duplicate-guard
+  type: multiple_choice
+  tags: [loop]
+  difficulty: 2
+  prompt: "A duplicate-call guard in the agent loop prevents:"
+  options:
+    - { text: "The agent repeating the same tool call over and over", correct: true }
+    - { text: "The model using more than one tool" }
+    - { text: "Two users sharing a session" }
+    - { text: "The prompt being cached" }
+  explanation: "It detects repeated identical calls — a common way loops get stuck — and breaks the cycle."
+
+- id: mc-verify-who
+  type: multiple_choice
+  tags: [verification]
+  difficulty: 2
+  prompt: "Verifying that an edit actually worked is whose job?"
+  options:
+    - { text: "The harness — run tests / diff / checks", correct: true }
+    - { text: "The model, by re-reading its own output" }
+    - { text: "Nobody — trust the model" }
+    - { text: "The user, after shipping" }
+  explanation: "Deterministic verification belongs to the harness; the model's self-review is unreliable."
+
+- id: mc-plan-execute
+  type: multiple_choice
+  tags: [control]
+  difficulty: 3
+  prompt: "A benefit of plan-then-execute orchestration is that:"
+  options:
+    - { text: "Each step can be verified and re-planned independently", correct: true }
+    - { text: "It removes the need for any tools" }
+    - { text: "It guarantees the model never errs" }
+    - { text: "It eliminates the need for budgets" }
+  explanation: "Separating planning from doing makes steps checkable and lets the harness re-plan on failure."
+
+- id: mc-antipattern-trust
+  type: multiple_choice
+  tags: [verification]
+  difficulty: 2
+  prompt: "Which is a harness antipattern?"
+  options:
+    - { text: "Applying the model's tool output with no verification", correct: true }
+    - { text: "Running tests after an edit" }
+    - { text: "Capping the number of steps" }
+    - { text: "Validating tool arguments before executing" }
+  explanation: "Trusting unverified output is the classic way flaky agents ship broken changes."
+
+- id: mc-multiagent-when
+  type: multiple_choice
+  tags: [control]
+  difficulty: 4
+  prompt: "Adding more agents is usually the WRONG move when:"
+  options:
+    - { text: "A single bounded loop with good tools would do the job", correct: true }
+    - { text: "The task genuinely decomposes into independent parallel parts" }
+    - { text: "You need isolation between untrusted sub-tasks" }
+    - { text: "Different steps need very different tools and permissions" }
+  explanation: "More agents add coordination-failure surface; reach for them only when the task truly needs decomposition or isolation."

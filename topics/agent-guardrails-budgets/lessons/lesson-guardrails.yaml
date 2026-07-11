@@ -1,0 +1,14 @@
+id: lesson-guardrails
+title: "Guardrails for high-risk actions"
+material: guardrails.md
+segments:
+  - present: allow-lists-and-deny-by-default
+  - check: mc-allow-list
+  - check: cloze-allow-list
+  - present: confirmation-hitl-and-circuit-breakers
+  - check: mc-hitl-gate
+  - check: mc-circuit-breaker
+  - check: cloze-hitl
+  - check: fe-risky-action-guard
+  - present: the-tradeoff
+  - apply: essay-highrisk-guardrails

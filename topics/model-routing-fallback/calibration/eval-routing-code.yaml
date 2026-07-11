@@ -1,0 +1,49 @@
+# Calibration for eval-routing-code.
+# 'answer' summarizes the submitted approach + provided signals (the grader sees extracted evidence,
+# not raw code). Exemplars target a fallback router + circuit breaker.
+skill: eval-routing-code
+cases:
+  - answer: >-
+      tests_passed=true. fallback_on_error holds: each call() is wrapped in try/catch and on a throw the
+      router falls through to the next provider instead of propagating. tries_in_order holds: providers
+      are attempted in the given order and the first success is returned. breaker_skips_open holds: a
+      provider whose consecutive fails reached the threshold is skipped without being called, and a
+      success resets its count. returns_all_failed holds: when every provider is exhausted it returns a
+      structured {ok:false,error:"all_failed"} rather than throwing.
+      signals.must_use=[try/catch fallthrough, in-order iteration, circuit breaker skip, structured all_failed]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { fallback_on_error: true, tries_in_order: true, breaker_skips_open: true, returns_all_failed: true }
+
+  - answer: >-
+      tests_passed=true. fallback_on_error holds: on a provider throw the router catches it and continues
+      to the next provider. tries_in_order holds: providers are tried in the given order and the first
+      success returns. returns_all_failed holds: when all providers fail it returns a structured
+      all_failed result instead of throwing. breaker_skips_open does not hold: it never tracks
+      consecutive failures, so a provider that is already down is still called on every request.
+      signals.must_use=[try/catch fallthrough, in-order iteration, structured all_failed]; avoid=[no failure counting].
+    expect:
+      verdict: pass
+      checks: { fallback_on_error: true, tries_in_order: true, breaker_skips_open: false, returns_all_failed: true }
+
+  - answer: >-
+      tests_passed=true. fallback_on_error does not hold: it calls only the first provider and rethrows
+      the error, never falling through to the next one. tries_in_order holds: it does begin with the
+      first provider in order. breaker_skips_open does not hold: no failure counts are kept and no open
+      provider is skipped. returns_all_failed does not hold: on failure it throws the raw error rather
+      than returning a structured all_failed.
+      signals.must_use=[in-order start]; avoid=[rethrow instead of fallback, no breaker, throws on exhaustion].
+    expect:
+      verdict: fail
+      checks: { fallback_on_error: false, tries_in_order: true, breaker_skips_open: false, returns_all_failed: false }
+
+  - answer: >-
+      tests_passed=true. fallback_on_error does not hold: it iterates the providers but on a throw it
+      breaks out of the loop instead of trying the next one, so it never actually falls over. tries_in_order
+      holds: providers are visited in the given order. breaker_skips_open holds: it tracks consecutive
+      fails per provider and skips one whose count reached the threshold, resetting on success.
+      returns_all_failed holds: when the loop ends without a success it returns a structured all_failed.
+      signals.must_use=[in-order iteration, circuit breaker skip, structured all_failed]; avoid=[breaks on error instead of continuing].
+    expect:
+      verdict: borderline
+      checks: { fallback_on_error: false, tries_in_order: true, breaker_skips_open: true, returns_all_failed: true }

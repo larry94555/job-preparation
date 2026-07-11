@@ -1,0 +1,50 @@
+skill: eval-context-code
+cases:
+  # PASS #1 — all four checks true (4/4 = 1.0, gate true → pass)
+  - answer: >-
+      tests_passed=true. respects_budget: keeps a running total and only pushes a section when
+      total+tokens<=tokenBudget, so it never overflows. sorts_by_priority: ranks a copy of the
+      sections by priority descending before fitting. keeps_scanning: on a section that doesn't fit
+      it skips and continues instead of breaking, so a smaller lower-priority section can still be
+      admitted. returns_included_ids: returns the ids of the admitted sections in priority order.
+      signals.must_use=[running token total, priority sort, continue-on-skip, included ids]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { respects_budget: true, sorts_by_priority: true, keeps_scanning: true, returns_included_ids: true }
+
+  # PASS #2 — gate true + two others true, keeps_scanning false (3/4 = 0.75, gate true → pass)
+  - answer: >-
+      tests_passed=true. respects_budget: guards each push with total+tokens<=tokenBudget and never
+      exceeds the budget. sorts_by_priority: sorts by priority descending before the fit loop.
+      keeps_scanning: NOT satisfied — it breaks out of the loop at the first section that doesn't fit,
+      so a smaller lower-priority section that would have fit is skipped. returns_included_ids:
+      returns the admitted ids in priority order. signals.must_use=[running token total, priority
+      sort, included ids]; avoid=[break-on-first-overflow].
+    expect:
+      verdict: pass
+      checks: { respects_budget: true, sorts_by_priority: false, keeps_scanning: false, returns_included_ids: true }
+
+  # FAIL — gate false + one more false (2/4 = 0.5 borderline, gate false caps down → fail)
+  - answer: >-
+      tests_passed=true. respects_budget: NOT satisfied — it concatenates section ids without ever
+      comparing a running total to tokenBudget, so the assembled context can exceed the budget.
+      sorts_by_priority: does rank sections by priority descending first. keeps_scanning: never
+      applies because nothing is skipped for size. returns_included_ids: NOT satisfied — it returns
+      the full section objects, not the included ids. signals.must_use=[priority sort];
+      avoid=[no budget check, returns objects instead of ids].
+    expect:
+      verdict: fail
+      checks: { respects_budget: false, sorts_by_priority: true, keeps_scanning: false, returns_included_ids: false }
+
+  # BORDERLINE — only the gate false (3/4 = 0.75 pass, gate false caps down → borderline)
+  - answer: >-
+      tests_passed=true. respects_budget: NOT satisfied — it uses total+tokens<budget with a strict
+      less-than, so a section landing exactly on the budget is still admitted and the running total
+      overflows past tokenBudget. sorts_by_priority: sorts a copy by priority descending before
+      fitting. keeps_scanning: skips a too-large section and continues so a smaller lower-priority
+      one can still be admitted. returns_included_ids: returns the admitted ids in priority order.
+      signals.must_use=[priority sort, continue-on-skip, included ids]; avoid=[off-by-one budget
+      comparison].
+    expect:
+      verdict: borderline
+      checks: { respects_budget: false, sorts_by_priority: true, keeps_scanning: true, returns_included_ids: true }

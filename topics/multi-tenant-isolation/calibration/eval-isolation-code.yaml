@@ -1,0 +1,44 @@
+skill: eval-isolation-code
+cases:
+  - answer: >-
+      tests_passed=true. key_includes_tenant: the storage key is scoped by tenant, built as
+      `${tenant}\x00${key}` before hitting the Map. no_cross_tenant_leak: a get for a different
+      tenant under the same key returns null, never the other tenant's value. same_tenant_hit: get
+      returns the value the same tenant stored under that key. miss_returns_null: an unknown
+      (tenant, key) returns null. signals.must_use=[tenant-scoped key, tenant isolation, null on
+      miss]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { key_includes_tenant: true, no_cross_tenant_leak: true, same_tenant_hit: true, miss_returns_null: true }
+
+  - answer: >-
+      tests_passed=true. key_includes_tenant: the internal key includes the tenant, composed as
+      `tenant + "|" + key`, so identical keys from different tenants can't collide. no_cross_tenant_leak:
+      another tenant reading the same key misses and gets null. same_tenant_hit: the same tenant reads
+      back its stored value. miss_returns_null: a missing key returns undefined rather than null, so
+      this case is not satisfied. signals.must_use=[tenant-scoped key, tenant isolation];
+      avoid=[undefined on miss].
+    expect:
+      verdict: pass
+      checks: { key_includes_tenant: true, no_cross_tenant_leak: false, same_tenant_hit: true, miss_returns_null: true }
+
+  - answer: >-
+      tests_passed=true. key_includes_tenant: the key ignores the tenant and is just `key`, so it is
+      not tenant-scoped. no_cross_tenant_leak: because the tenant is dropped, a second tenant reading
+      the same key gets the first tenant's value, which is a cross-tenant leak, so this is not satisfied.
+      same_tenant_hit: the same tenant still reads back its own value. miss_returns_null: a missing key
+      returns null. signals.must_use=[]; avoid=[unscoped key, cross-tenant leak].
+    expect:
+      verdict: fail
+      checks: { key_includes_tenant: false, no_cross_tenant_leak: false, same_tenant_hit: true, miss_returns_null: true }
+
+  - answer: >-
+      tests_passed=true. key_includes_tenant: the key is derived only from `key` and the tenant is not
+      folded in, so it is not tenant-scoped. no_cross_tenant_leak: each tenant is stored in its own
+      per-tenant Map, so a different tenant reading the same key still misses and gets null, so
+      isolation holds. same_tenant_hit: the same tenant reads back its stored value. miss_returns_null:
+      an unknown key returns null. signals.must_use=[tenant isolation, null on miss];
+      avoid=[unscoped key].
+    expect:
+      verdict: borderline
+      checks: { key_includes_tenant: false, no_cross_tenant_leak: true, same_tenant_hit: true, miss_returns_null: true }

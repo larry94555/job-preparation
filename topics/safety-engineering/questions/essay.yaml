@@ -1,0 +1,37 @@
+# Essay
+- id: essay-injection-defense
+  type: essay
+  length: short
+  tags: [injection]
+  difficulty: 3
+  prompt: "Distinguish direct from indirect prompt injection, and explain why a single input/output filter is not a sufficient defense."
+  eval_skill: eval-safety-essay
+  reference_points:
+    - "Direct injection comes from the user's own input; indirect injection is planted in retrieved content or tool output the system later reads into context."
+    - "No robust general injection classifier exists — attacks can be rephrased, encoded, or split to evade any fixed filter."
+    - "Because filtering is imperfect, it must be one layer among several (fencing untrusted content, least privilege, egress gating) — defense-in-depth."
+
+- id: essay-trust-boundary
+  type: essay
+  length: short
+  tags: [boundary]
+  difficulty: 3
+  prompt: "What is a trust boundary in an LLM system, and how does fencing untrusted content enforce it?"
+  eval_skill: eval-safety-essay
+  reference_points:
+    - "A trust boundary is where data crosses from a less-trusted source (web, tool output, user upload) into the more-trusted instruction context."
+    - "Fencing delimits the untrusted span and instructs the model to treat it strictly as data to analyze, never as instructions to obey."
+    - "Provenance/trust tagging tracks where content came from so untrusted spans are never promoted to authoritative instructions."
+
+- id: essay-permission-leakage
+  type: essay
+  length: long
+  tags: [permission, leakage]
+  difficulty: 4
+  prompt: "Design the permission and data-flow boundaries for an agent that reads user email and can call external tools, so that a successful indirect injection cannot exfiltrate private data. Cover least privilege, egress control, and the confused-deputy risk."
+  eval_skill: eval-safety-essay
+  reference_points:
+    - "Least privilege: scope each tool to the minimum access it needs (read-only where possible, narrowly scoped tokens) to shrink the blast radius of a compromised turn."
+    - "Egress control: gate any data-out step (send, POST, external write) with an allow-list and/or human confirmation so exfiltration is blocked even if injection succeeds."
+    - "Confused deputy: the agent holds legitimate authority; injected instructions try to make it misuse that authority on the attacker's behalf, so authorization must depend on provenance/policy, not just on what the model was told."
+    - "Defense-in-depth: fence untrusted email content as data, tag provenance, and never let untrusted content silently authorize privileged actions."

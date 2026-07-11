@@ -1,0 +1,20 @@
+# Coding exercise — engine type: code (graded by tests + concept skill)
+- id: code-rrf
+  type: code
+  language: typescript
+  tags: [retrieval]
+  difficulty: 3
+  prompt: >-
+    Implement `reciprocalRankFusion(rankings, k = 60)` that fuses several ranked id-lists into one.
+    For each list, a document at 1-based rank r contributes 1/(k + r); sum these across lists; return
+    the document ids sorted by total score descending, breaking ties by id ascending. A document
+    present in only some lists still scores from those it appears in.
+  starter_file: exercises/rrf/starter.ts
+  test_file: exercises/rrf/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-rag-code
+  concept_checks:
+    must_use: ["1/(k + rank) contribution", "sum across all lists", "sort by score descending"]
+    avoid_antipattern: ["normalizing or using raw scores", "dropping items missing from a list"]

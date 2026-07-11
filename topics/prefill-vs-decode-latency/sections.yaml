@@ -1,0 +1,18 @@
+sections:
+  - id: sec-phases-metrics
+    title: "Foundations: phases & metrics"
+    lessons: [lesson-phases, lesson-metrics, lesson-expert-context]
+    assessment:
+      title: "Section 1 — Phases & metrics"
+      from_tags: [phases, metrics]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-optimization
+    title: "Optimization: batching, chunked prefill & disaggregation"
+    lessons: [lesson-batching, lesson-build-latency-model, lesson-deep-dive, lesson-frontier-ops]
+    assessment:
+      title: "Section 2 — Batching & scheduling"
+      from_tags: [optimization]
+      count: 5
+      pass_threshold: 0.8

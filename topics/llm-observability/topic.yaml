@@ -1,0 +1,9 @@
+id: llm-observability
+title: "LLM Observability"
+description: "Observability is a first-class discipline for LLM systems: structured traces of multi-step calls tied together by correlation IDs, the core signals (tokens, latency TTFT/TPOT, errors/retries, cost), drift detection with canaries, and capture/replay under privacy redaction."
+pass_threshold: 0.8
+tag_weights:
+  tracing: 1.2
+  signals: 1.2
+  drift: 1.0
+  capture: 1.0

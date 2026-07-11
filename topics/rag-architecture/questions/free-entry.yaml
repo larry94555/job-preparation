@@ -1,0 +1,36 @@
+# Free entry (short answer)
+- id: fe-when-rag
+  type: text_input
+  tags: [pipeline]
+  difficulty: 2
+  prompt: "Name one situation where RAG is a better fit than fine-tuning. (a few words)"
+  answer:
+    regex: '^(private data|current|fresh|up-?to-?date|changing (data|corpus)|new data|proprietary data|citations?|source attribution|frequently updated)$'
+    normalize: true
+
+- id: fe-chunk-structure
+  type: text_input
+  tags: [chunking]
+  difficulty: 3
+  prompt: "Instead of fixed-size character splitting, chunk on document ____ (one word) like headings and paragraphs."
+  answer:
+    regex: '^(structure|boundaries|headings|sections|semantics|semantic)$'
+    normalize: true
+
+- id: fe-sparse-name
+  type: text_input
+  tags: [retrieval]
+  difficulty: 2
+  prompt: "Name a sparse / lexical retrieval method (one term)."
+  answer:
+    regex: '^(bm25|tf-?idf|keyword( search)?|lexical|okapi bm25)$'
+    normalize: true
+
+- id: fe-rerank-cost
+  type: text_input
+  tags: [reranking]
+  difficulty: 3
+  prompt: "What is the main cost of adding a cross-encoder reranker? (one word)"
+  answer:
+    regex: '^(latency|slow(er|ness)?|cost|compute|time)$'
+    normalize: true

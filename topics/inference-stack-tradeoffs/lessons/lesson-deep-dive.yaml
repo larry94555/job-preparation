@@ -1,0 +1,13 @@
+id: lesson-deep-dive
+title: "Architecture & tradeoffs: reviewing an inference-stack design"
+material: deep-dive.md
+segments:
+  - present: the-inference-stack-tradeoffs-design-space
+  - present: a-tradeoff-table-for-inference-stack-tradeoffs
+  - check: mc-review-ist-free-lunch
+  - check: mc-review-ist-single-metric
+  - present: common-sota-and-antipattern
+  - check: mc-review-ist-quant-noeval
+  - present: scaling-performance-and-the-token-budget
+  - present: reviewing-an-inference-stack-tradeoffs-design
+  - apply: essay-ist-deep-dive

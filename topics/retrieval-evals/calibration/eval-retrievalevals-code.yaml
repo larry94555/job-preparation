@@ -1,0 +1,49 @@
+# Calibration for eval-retrievalevals-code. 'answer' summarizes the approach + evidence the grader sees.
+skill: eval-retrievalevals-code
+cases:
+  # PASS: all four checks true -> score 4/4=1.0 (pass); gate correct_denominators true -> pass.
+  - answer: >-
+      tests_passed=true. correct_denominators: recall divides by relevant.size while precision divides
+      by k (two distinct denominators). mrr_first_relevant: scans retrieved for the first relevant id
+      and returns 1/(rank) else 0. guards_zero_division: returns 0 for recall when relevant is empty.
+      uses_membership: builds a Set from relevant and tests hits by has(). signals.must_use=[relevant-set
+      denominator, k denominator, first-relevant mrr, empty-set guard, Set membership]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { correct_denominators: true, mrr_first_relevant: true, guards_zero_division: true, uses_membership: true }
+
+  # PASS: three checks true incl. gate -> score 3/4=0.75 (pass); gate true -> pass.
+  - answer: >-
+      tests_passed=true. correct_denominators: recall over relevant.length and precision over k, kept
+      separate. mrr_first_relevant: returns 1/(index+1) of the first relevant hit, 0 when none appear.
+      guards_zero_division: guards the empty relevant set and returns 0 instead of NaN. uses_membership:
+      does NOT use a Set -- runs a nested indexOf scan of retrieved against relevant for each item.
+      signals.must_use=[relevant-set denominator, k denominator, first-relevant mrr, empty-set guard];
+      avoid=[nested indexOf scan].
+    expect:
+      verdict: pass
+      checks: { correct_denominators: true, mrr_first_relevant: true, guards_zero_division: true, uses_membership: false }
+
+  # FAIL: gate false + one more false -> score 2/4=0.5 (borderline); gate false caps down -> fail.
+  - answer: >-
+      tests_passed=true. correct_denominators: FAILS -- divides both recall and precision by k, so the
+      recall denominator should be the relevant-set size but reuses k instead. mrr_first_relevant:
+      returns 1/rank of the first relevant item and 0 when absent (correct). guards_zero_division: FAILS
+      -- returns NaN when the relevant set is empty because the divide is unguarded. uses_membership:
+      builds a Set and tests hits with has() (correct). signals.must_use=[first-relevant mrr, Set
+      membership]; avoid=[shared k denominator, unguarded empty-set divide].
+    expect:
+      verdict: fail
+      checks: { correct_denominators: false, mrr_first_relevant: true, guards_zero_division: false, uses_membership: true }
+
+  # BORDERLINE: only the gate false -> score 3/4=0.75 (pass); gate false caps down -> borderline.
+  - answer: >-
+      tests_passed=true. correct_denominators: FAILS -- divides recall by k instead of the relevant-set
+      size, collapsing the two denominators into one. mrr_first_relevant: returns 1/(rank) of the first
+      relevant id and 0 when none match (correct). guards_zero_division: guards the empty relevant set
+      and returns 0 rather than NaN (correct). uses_membership: builds a Set from relevant and checks
+      hits via has() (correct). signals.must_use=[first-relevant mrr, empty-set guard, Set membership];
+      avoid=[recall divided by k].
+    expect:
+      verdict: borderline
+      checks: { correct_denominators: false, mrr_first_relevant: true, guards_zero_division: true, uses_membership: true }

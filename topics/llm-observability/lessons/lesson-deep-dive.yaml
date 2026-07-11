@@ -1,0 +1,13 @@
+id: lesson-deep-dive
+title: "Architecture & tradeoffs: reviewing an observability design"
+material: deep-dive.md
+segments:
+  - present: the-llm-observability-design-space
+  - present: a-tradeoff-table-for-llm-observability
+  - check: mc-review-obs-request-only
+  - check: mc-review-obs-raw-capture
+  - present: common-sota-and-antipattern
+  - check: mc-review-obs-no-version-drift
+  - present: scaling-performance-and-the-token-budget
+  - present: reviewing-an-llm-observability-design
+  - apply: essay-obs-deep-dive

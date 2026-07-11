@@ -1,0 +1,18 @@
+sections:
+  - id: sec-metrics
+    title: "Retrieval metrics"
+    lessons: [lesson-metrics, lesson-build-metrics, lesson-expert-context, lesson-deep-dive, lesson-frontier-ops]
+    assessment:
+      title: "Section 1 — recall@k, precision@k, MRR"
+      from_tags: [metrics]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-grounding-attribution
+    title: "Grounding & attribution"
+    lessons: [lesson-grounding, lesson-attribution, lesson-frontier-ops]
+    assessment:
+      title: "Section 2 — Grounding & citation quality"
+      from_tags: [grounding, attribution]
+      count: 5
+      pass_threshold: 0.8

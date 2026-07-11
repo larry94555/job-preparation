@@ -1,0 +1,16 @@
+id: lesson-frontier-ops
+title: "Frontier & operations: stabilizing OTel semantics, privacy-preserving traces, drift detection, and the signals to watch"
+material: frontier-ops.md
+segments:
+  - present: the-llm-observability-frontier
+  - check: mc-frontier-obs-otel-stabilizing
+  - check: mc-frontier-obs-privacy-capture
+  - check: mc-frontier-obs-silent-drift
+  - present: operating-llm-observability-in-production
+  - check: mc-ops-obs-per-route-rollup
+  - check: mc-ops-obs-pii-leak-drift-rate
+  - check: mc-obs-drift-literature
+  - check: mc-obs-silent-diagnosis-1
+  - check: mc-obs-silent-diagnosis-2
+  - apply: code-obs-redact
+  - apply: code-obs-span-tree

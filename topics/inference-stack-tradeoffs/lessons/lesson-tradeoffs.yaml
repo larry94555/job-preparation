@@ -1,0 +1,12 @@
+id: lesson-tradeoffs
+title: "The four-way tradeoff & no free lunch"
+material: four-way-tradeoff.md
+segments:
+  - present: the-four-axes-and-no-free-lunch
+  - check: mc-four-axes
+  - check: mc-no-free-lunch
+  - check: cloze-pareto
+  - check: cloze-tail
+  - present: why-single-metric-optimization-fails
+  - check: mc-single-metric
+  - apply: essay-no-free-lunch

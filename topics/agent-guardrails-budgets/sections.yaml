@@ -1,0 +1,18 @@
+sections:
+  - id: sec-bounding
+    title: "Bounding the loop: termination & budgets"
+    lessons: [lesson-termination, lesson-budgets, lesson-build-bounded-loop, lesson-expert-context, lesson-deep-dive, lesson-frontier-ops]
+    assessment:
+      title: "Section 1 — Termination & budgets"
+      from_tags: [termination, budgets]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-guardrails
+    title: "Guardrails for high-risk actions"
+    lessons: [lesson-guardrails]
+    assessment:
+      title: "Section 2 — Guardrails"
+      from_tags: [guardrails]
+      count: 5
+      pass_threshold: 0.8

@@ -1,0 +1,61 @@
+# Literature/canon (WS1) + interview (WS2) — tags [canon]/[interview] are NOT in any section's
+# from_tags, so these don't enter the deterministic section-assessment pools.
+- id: mc-canon-harness-react
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Which work introduced the reason-then-act agent loop that interleaves chain-of-thought reasoning with tool actions?"
+  options:
+    - { text: "ReAct (Yao et al., 2022)", correct: true }
+    - { text: "Reflexion (Shinn et al., 2023)" }
+    - { text: "Toolformer (Schick et al., 2023)" }
+    - { text: "AutoGPT" }
+  explanation: "ReAct (Yao et al.) established the reason-then-act loop; Reflexion adds self-reflection/retry, Toolformer showed models learning to call tools, and AutoGPT is the cautionary unbounded-loop example."
+
+- id: mc-interview-harness-unbounded
+  type: multiple_choice
+  tags: [interview]
+  difficulty: 3
+  prompt: "Which answer is a red flag that should worry a senior interviewer assessing harness-engineering judgment?"
+  options:
+    - { text: "Proposing an unbounded loop with no step, tool, token, or cost ceiling", correct: true }
+    - { text: "Splitting model responsibilities from harness responsibilities" }
+    - { text: "Verifying the agent's output instead of trusting it" }
+    - { text: "Enumerating explicit termination conditions" }
+  explanation: "Unbounded loops (like reaching for 'just improve the prompt' or trusting model output unverified) are classic red flags; bounding, verifying, and splitting model vs. harness responsibilities are the signals of strong judgment."
+
+- id: essay-harness-literature
+  type: essay
+  length: long
+  tags: [canon]
+  difficulty: 4
+  prompt: >-
+    Summarize the influential work on harness/agent engineering and how the field received it.
+    Cover the reason-then-act loop (ReAct), self-reflection/retry (Reflexion), tool use as a model
+    capability (Toolformer), and the practitioner guidance in Anthropic's "Building Effective Agents".
+    Say what each contributed and name the tools that implement these ideas today.
+  eval_skill: eval-harness-essay
+  reference_points:
+    - "ReAct (Yao et al., 2022): reason-then-act loop interleaving reasoning with tool actions; the default agent-loop mental model."
+    - "Reflexion (Shinn et al., 2023): self-reflection/retry — the agent critiques a failed attempt and revises."
+    - "Toolformer (Schick et al., Meta, 2023): models learn to call tools/APIs; tool use as a first-class model capability."
+    - "Anthropic 'Building Effective Agents' (2024): practitioner guidance favoring simple, composable patterns."
+    - "Tools: Claude Agent SDK, OpenAI Agents SDK, LangChain/LlamaIndex, smolagents; AutoGPT as the cautionary case."
+    - "SOTA: structured agent loops with verification + budgets; SWE-bench-style agentic coding harnesses."
+
+- id: essay-harness-interview
+  type: essay
+  length: long
+  tags: [interview]
+  difficulty: 4
+  prompt: >-
+    You're in a senior interview. Explain harness engineering and defend your design: split model vs.
+    harness responsibilities, describe the loop, and show how you bound and verify the agent. Make
+    clear what reads as senior and which antipatterns you're deliberately avoiding.
+  eval_skill: eval-harness-essay
+  reference_points:
+    - "Split model vs. harness responsibilities: the model decides, the harness guarantees retries, verification, budgets, and state."
+    - "Design: model/harness boundary, then a ReAct-style loop with verification, then budgets and termination conditions."
+    - "Bound the agent (steps/tools/tokens/cost/time) and verify output rather than trusting it."
+    - "Cite Reflexion for self-correction and Anthropic's 'Building Effective Agents' for keeping it simple."
+    - "Red flags to avoid: 'just improve the prompt' for structural failures, trusting model output unverified, unbounded loops."

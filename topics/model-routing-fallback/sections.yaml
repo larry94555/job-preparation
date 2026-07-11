@@ -1,0 +1,18 @@
+sections:
+  - id: sec-routing
+    title: "Routing & fallback fundamentals"
+    lessons: [lesson-routing, lesson-build-router, lesson-expert-context, lesson-frontier-ops]
+    assessment:
+      title: "Section 1 — Routing & fallback"
+      from_tags: [routing, fallback]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-resilience
+    title: "Resilience & degraded-mode UX"
+    lessons: [lesson-resilience, lesson-degraded, lesson-deep-dive]
+    assessment:
+      title: "Section 2 — Resilience & degraded UX"
+      from_tags: [resilience, degraded]
+      count: 5
+      pass_threshold: 0.8

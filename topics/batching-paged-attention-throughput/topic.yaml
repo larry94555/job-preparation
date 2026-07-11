@@ -1,0 +1,9 @@
+id: batching-paged-attention-throughput
+title: "Batching, Paged Attention & Throughput"
+description: "How LLM serving turns one GPU into a high-throughput multi-request engine: static → dynamic → continuous batching, iteration-level scheduling that kills head-of-line blocking, paged attention as the memory substrate, and the throughput-vs-latency tradeoff measured by goodput."
+pass_threshold: 0.8
+tag_weights:
+  batching: 1.2
+  scheduling: 1.2
+  paged-attention: 1.0
+  throughput: 1.0

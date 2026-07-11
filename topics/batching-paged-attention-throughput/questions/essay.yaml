@@ -1,0 +1,37 @@
+# Essay
+- id: essay-continuous-vs-static
+  type: essay
+  length: short
+  tags: [batching, scheduling]
+  difficulty: 3
+  prompt: "A teammate serves an LLM with static batching and notices short requests are slow when the batch also contains long ones. Explain what continuous batching changes and why it helps."
+  eval_skill: eval-batching-essay
+  reference_points:
+    - "In static batching the whole batch runs until the longest request finishes, so short requests are stuck behind the long one — head-of-line blocking that idles the GPU slot."
+    - "Continuous (in-flight) batching schedules at the iteration/token-step level: a request that emits its end-of-sequence token leaves the batch immediately and a queued request takes its slot."
+    - "Because slots free up per iteration instead of per batch, short requests no longer wait for the longest one, GPU occupancy stays high, and both latency for short requests and overall throughput improve."
+
+- id: essay-paged-enabler
+  type: essay
+  length: short
+  tags: [paged-attention]
+  difficulty: 4
+  prompt: "Explain how paged attention works and why it is described as the enabler for high-throughput continuous batching."
+  eval_skill: eval-batching-essay
+  reference_points:
+    - "Paged attention stores each sequence's KV cache in fixed-size non-contiguous blocks addressed through a per-sequence block table, analogous to OS virtual-memory paging."
+    - "It nearly eliminates KV-cache fragmentation and worst-case max-length over-reservation, so more concurrent sequences fit in GPU memory and effective batch size grows."
+    - "Continuous batching mixes sequences of varying, still-growing lengths; on-demand block allocation lets requests be admitted and evicted each iteration without contiguous-buffer reshuffling, which is what makes high occupancy practical — hence the enabler."
+
+- id: essay-throughput-goodput
+  type: essay
+  length: long
+  tags: [throughput, scheduling]
+  difficulty: 4
+  prompt: "You are tuning a serving engine and can raise the batch size. Explain the throughput-vs-latency tradeoff and how goodput should guide the decision under a latency SLO."
+  eval_skill: eval-batching-essay
+  reference_points:
+    - "Larger batches amortize weight loading and improve GPU utilization, raising aggregate throughput (tokens/sec)."
+    - "But each request now shares the GPU with more peers, so per-request latency such as time-per-output-token (TPOT) and tail/p95 latency rise."
+    - "Goodput counts only requests completed within their latency SLO, unlike raw throughput which counts all completed work regardless of latency."
+    - "So you push batch size up only until goodput stops improving: beyond that point extra throughput comes from requests that miss their SLO, so the right operating point maximizes goodput, not raw throughput."

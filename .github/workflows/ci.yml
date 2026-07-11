@@ -1,0 +1,34 @@
+name: ci
+
+# Content + certification gate. Every push/PR must keep the config the source of
+# truth: schemas valid, answer keys self-consistent, packages type-clean, unit
+# tests green. The eval-gate (meta-eval) self-skips when no grading model is
+# reachable — in CI it runs as a no-op pass; run it locally against Ollama /
+# llama-server to actually certify the eval-skills (see README / EVALUATION.md).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - name: Validate content (schemas, present-before-test, draw pools)
+        run: npm run validate
+      - name: Self-check answer keys (deterministic MC/text + regex compile)
+        run: npm run selfcheck
+      - name: Typecheck (all packages)
+        run: npm run typecheck
+      - name: Unit tests
+        run: npm run test
+      - name: Eval-gate (meta-eval; self-skips without a grading model)
+        run: npm run eval-gate

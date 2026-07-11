@@ -1,0 +1,45 @@
+skill: eval-rag-code
+cases:
+  # PASS: all four checks true → score 4/4 = 1.0 (pass), gate rrf_formula true → pass
+  - answer: >-
+      tests_passed=true. rrf_formula uses 1/(k + rank) with a 1-based rank per list.
+      sums_across_lists accumulates each document's score across every list it appears in.
+      includes_partial keeps documents present in only some lists. sorted_descending orders
+      results by total score descending with an id-asc tie-break.
+      signals.must_use=[reciprocal rank fusion, 1/(k+rank), accumulate across lists]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { rrf_formula: true, sums_across_lists: true, includes_partial: true, sorted_descending: true }
+
+  # PASS: gate + 2 others true, 1 false → score 3/4 = 0.75 (pass), gate rrf_formula true → pass
+  - answer: >-
+      tests_passed=true. rrf_formula correctly contributes 1/(k + rank) with a 1-based rank.
+      sums_across_lists adds a document's contributions across all lists. includes_partial retains
+      documents that appear in only some of the lists. sorted_descending is NOT satisfied: it returns
+      the accumulated Map in insertion order without sorting by score.
+      signals.must_use=[reciprocal rank fusion, 1/(k+rank), include partial matches]; avoid=[return unsorted results].
+    expect:
+      verdict: pass
+      checks: { rrf_formula: true, sums_across_lists: true, includes_partial: true, sorted_descending: false }
+
+  # FAIL: gate false + 1 more false → score 2/4 = 0.5 (borderline base), gate false caps down → fail
+  - answer: >-
+      tests_passed=true. rrf_formula is WRONG: it uses 1/rank and ignores k entirely.
+      sums_across_lists is NOT done: it overwrites each id's score with the last list seen instead of
+      accumulating. includes_partial does keep documents from only some lists. sorted_descending sorts
+      the results by total score descending.
+      signals.must_use=[reciprocal rank fusion]; avoid=[1/rank without k, overwrite instead of sum].
+    expect:
+      verdict: fail
+      checks: { rrf_formula: false, sums_across_lists: false, includes_partial: true, sorted_descending: true }
+
+  # BORDERLINE: only the gate false → score 3/4 = 0.75 (pass base), gate false caps down → borderline
+  - answer: >-
+      tests_passed=true. rrf_formula is WRONG: it contributes the raw retriever score instead of
+      1/(k + rank). sums_across_lists correctly accumulates each document across every list.
+      includes_partial keeps documents present in only some lists. sorted_descending orders results by
+      total score descending.
+      signals.must_use=[accumulate across lists, include partial matches, sort descending]; avoid=[use raw scores instead of reciprocal rank].
+    expect:
+      verdict: borderline
+      checks: { rrf_formula: false, sums_across_lists: true, includes_partial: true, sorted_descending: true }
