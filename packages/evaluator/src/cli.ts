@@ -54,7 +54,9 @@ async function main(argv: string[]): Promise<number> {
       // overriding the CLI default. Keeps the sweep fast (1 sample) for the many
       // skills whose judge is comfortably above threshold.
       const effSamples = Math.max(samples, skill.frontmatter.grader_samples ?? 1);
-      const routed = skill.frontmatter.grader_model ? ` [judge: ${skill.frontmatter.grader_model}]` : "";
+      // Label the RESOLVED judge model (from model_configuration.yaml) for skills
+      // routed to the stronger tier, so the output reflects what actually graded.
+      const routed = skill.frontmatter.grader_model ? ` [judge: ${judge.model}]` : "";
       const voted = effSamples > 1 ? ` [best-of-${effSamples}]` : "";
       let agree = 0;
       for (const c of cal.cases) {

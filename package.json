@@ -24,7 +24,7 @@
     "eval-gate:escalate": "tsx packages/evaluator/src/cli.ts meta-eval topics --threshold 0.7 --samples 3",
     "mastery": "tsx scripts/mastery-index.ts",
     "certify": "npm run validate && npm run selfcheck && npm run typecheck && npm run test && npm run eval-gate",
-    "test": "tsx --test packages/engine/src/grade.test.ts packages/evaluator/src/aggregate.test.ts packages/evaluator/src/routing.test.ts packages/lesson/src/review.test.ts packages/store/src/file.test.ts packages/store/src/content.test.ts packages/store/src/pglite.test.ts packages/store/src/queue.test.ts packages/grading/src/worker.test.ts",
+    "test": "tsx --test packages/engine/src/grade.test.ts packages/evaluator/src/aggregate.test.ts packages/evaluator/src/routing.test.ts packages/evaluator/src/model-config.test.ts packages/lesson/src/review.test.ts packages/store/src/file.test.ts packages/store/src/content.test.ts packages/store/src/pglite.test.ts packages/store/src/queue.test.ts packages/grading/src/worker.test.ts",
     "typecheck": "tsc --noEmit -p packages/schema/tsconfig.json && tsc --noEmit -p packages/engine/tsconfig.json && tsc --noEmit -p packages/lesson/tsconfig.json && tsc --noEmit -p packages/evaluator/tsconfig.json && tsc --noEmit -p packages/sandbox/tsconfig.json && tsc --noEmit -p packages/store/tsconfig.json && tsc --noEmit -p packages/grading/tsconfig.json",
     "worker": "tsx packages/grading/bin/worker.ts",
     "sandbox-service": "tsx services/sandbox/server.ts",

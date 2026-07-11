@@ -1,6 +1,14 @@
 import assert from "node:assert/strict";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { test } from "node:test";
 import { clientForSkill } from "./evaluator.js";
+
+// Pin to LEGACY mode (no model_configuration.yaml) so these assertions exercise
+// the fallback path — the literal `grader_model` / env default — independent of
+// the repo's real config. Config-driven resolution is covered in
+// model-config.test.ts.
+process.env.MODEL_CONFIG_PATH = join(tmpdir(), "job-prep-no-model-config-xyz.yaml");
 
 // Per-skill judge routing (DESIGN §7 stronger-judge tier). A skill with a
 // `grader_model` is graded by that model; without one it uses the pinned default.

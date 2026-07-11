@@ -2,16 +2,33 @@ import type { LoadedSkill } from "@job-prep/engine";
 import type { CalibrationSet } from "@job-prep/schema";
 import { type Aggregated, aggregateChecks } from "./aggregate.js";
 import { type ChatMessage, LlamaClient } from "./llama.js";
+import { getModelConfig, resolveModels } from "./model-config.js";
 
 /**
- * Pick the judge client for a skill. If the skill declares a `grader_model`
- * (per-skill judge override, DESIGN §7 "stronger judge tier"), grade it with
- * that model on the same LLAMA_BASE_URL; otherwise use the pinned default judge.
+ * Pick the judge client for a skill.
+ *
+ * A skill that declares `grader_model` is opting into the STRONGER (secondary)
+ * judge tier. When `model_configuration.yaml` is present it is the source of
+ * truth: such a skill grades with the configured `secondary` model (or the
+ * `primary` if the secondary tier is disabled), and every other skill grades
+ * with the configured `primary`. When no config file exists we fall back to the
+ * legacy behavior — the skill's literal `grader_model`, else the env default
+ * (`LLAMA_MODEL`). Base URL always comes from env (`LLAMA_BASE_URL`).
+ *
  * Clients are cached by model name so a sweep reuses one connection per judge.
  */
 const judgeCache = new Map<string, LlamaClient>();
 export function clientForSkill(skill: { frontmatter?: { grader_model?: string } }): LlamaClient {
-  const model = skill.frontmatter?.grader_model;
+  const wantsSecondary = Boolean(skill.frontmatter?.grader_model);
+  const cfg = getModelConfig();
+  let model: string | undefined;
+  if (cfg) {
+    const { primary, secondary } = resolveModels(cfg);
+    model = wantsSecondary && secondary ? secondary : primary;
+  } else {
+    // Legacy (no config): literal grader_model, else env default.
+    model = skill.frontmatter?.grader_model;
+  }
   const key = model ?? "__default__";
   let c = judgeCache.get(key);
   if (!c) {

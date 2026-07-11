@@ -40,10 +40,31 @@ Shared: `DATABASE_URL` (managed Postgres), `AUTH_SECRET` (`openssl rand -base64 
 | `SANDBOX`         | `http`                                   | code grading runs via the sandbox      |
 | `SANDBOX_URL`     | `http://sandbox:4500`                    | sandbox address                        |
 | `LLAMA_BASE_URL`  | `http://llama:8080/v1`                   | this replica's model slot              |
-| `LLAMA_MODEL`     | `local`                                  | small/first-pass grading model         |
-| `LLAMA_BIG_MODEL` | (optional)                               | escalation model for low-confidence    |
+| `MODEL_CONFIG_PATH` | `/app/model_configuration.yaml`        | catalog of grader models (primary/secondary tiers) |
+| `LLAMA_MODEL`     | `local`                                  | fallback grader model when no config file |
+| `LLAMA_BIG_MODEL` | (optional)                               | fallback escalation model when no config file |
 
 **sandbox** — `PORT=4500` only. No `DATABASE_URL`, no secrets: it just runs code.
+
+### Choosing the grader model(s)
+
+`model_configuration.yaml` (validated on load) is the source of truth for which
+local open-source LLM fills each grader tier — **primary** (faster, less reliable;
+the default judge) and **secondary** (slower, more reliable; used by opt-in skills
+and as the escalation tiebreaker). It also carries each model's footprint (RAM,
+GPU/CPU-only, disk) and a Hugging Face reference, and an allow-list per tier.
+
+- The **/models** page (linked from the home page, opens in a new tab) lets a
+  signed-in user switch between **allowed** models for each tier and shows the
+  requirements. A tier with a single allowed model is shown read-only. When
+  `secondary_model_allowed: false`, only the primary model is ever used.
+- To add a model: add a catalog entry (`status: allowed`), then `ollama pull <id>`
+  (or import its GGUF) so the model host can serve it. The `id` is the runtime tag;
+  the base URL stays in `LLAMA_BASE_URL`.
+- If the file is absent/invalid the grader falls back to `LLAMA_MODEL` /
+  `LLAMA_BIG_MODEL`, so the zero-config path still works.
+- Like `.env`, this file is **node-local**. On a multi-instance deploy, bake it
+  into the image or mount it from a shared volume so every replica agrees.
 
 **db** — `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` (default `jobprep`).
 

@@ -40,6 +40,9 @@ export default async function HomePage() {
           <Link className="btn ghost" href="/analytics">
             Analytics →
           </Link>
+          <Link className="btn ghost" href="/models" target="_blank" rel="noopener noreferrer">
+            Grader model ↗
+          </Link>
         </div>
       </div>
 

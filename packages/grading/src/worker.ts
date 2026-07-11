@@ -3,10 +3,12 @@ import type { CalibrationSet } from "@job-prep/schema";
 import {
   clientForSkill,
   type EscalationGrade,
+  getModelConfig,
   type GradeOpts,
   gradeOpen,
   gradeWithEscalation,
   LlamaClient,
+  resolveModels,
   type Verdict,
 } from "@job-prep/evaluator";
 import { type CodeRunner, createCodeRunner } from "@job-prep/sandbox";
@@ -151,7 +153,11 @@ export async function runWorker(
  * is contacted and no code is run until a job is actually graded.
  */
 export function wireDefaults(): WorkerDeps {
-  const bigModel = process.env.LLAMA_BIG_MODEL;
+  // The escalation tiebreaker (bigGrade) is the configured secondary model when
+  // model_configuration.yaml is present and the secondary tier is enabled;
+  // otherwise the legacy LLAMA_BIG_MODEL env var.
+  const cfg = getModelConfig();
+  const bigModel = cfg ? resolveModels(cfg).secondary : process.env.LLAMA_BIG_MODEL;
 
   // Grade with the client chosen for `opts.skill` when `client` is omitted:
   // that routes each skill to its `grader_model` (stronger-judge tier, DESIGN §7)
