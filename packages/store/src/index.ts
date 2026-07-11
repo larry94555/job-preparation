@@ -3,6 +3,11 @@ export * from "./file-io.js";
 export * from "./file.js";
 export * from "./schema.js";
 export * from "./pg.js";
+export * from "./content-hash.js";
+export * from "./db-ops.js";
+export * from "./content.js";
+export * from "./content-import.js";
+export * from "./queue.js";
 
 import { FileProgressStore } from "./file.js";
 import { PgProgressStore } from "./pg.js";

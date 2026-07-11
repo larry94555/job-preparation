@@ -1,5 +1,5 @@
 {
-  "name": "@job-prep/store",
+  "name": "@job-prep/grading",
   "version": "0.0.0",
   "type": "module",
   "main": "./src/index.ts",
@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "@job-prep/engine": "*",
-    "drizzle-orm": "^0.36.4",
-    "pg": "^8.13.1"
+    "@job-prep/evaluator": "*",
+    "@job-prep/sandbox": "*",
+    "@job-prep/store": "*"
   }
 }

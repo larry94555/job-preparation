@@ -2,6 +2,7 @@
 import { resolve } from "node:path";
 import { loadAllTopics } from "@job-prep/engine";
 import { gradeOpen } from "./evaluator.js";
+import { gradeWithEscalation } from "./escalation.js";
 import { LlamaClient } from "./llama.js";
 
 /**
@@ -20,6 +21,10 @@ async function main(argv: string[]): Promise<number> {
   const topicsDir = resolve(rest.find((a) => !a.startsWith("--")) ?? "topics");
   const thIdx = rest.indexOf("--threshold");
   const threshold = thIdx >= 0 ? Number(rest[thIdx + 1]) : 0.7;
+  // --samples N (default 1): with N>1, grade each case best-of-N and take the
+  // majority verdict (DESIGN §7 confidence escalation). Costs N model calls/case.
+  const sIdx = rest.indexOf("--samples");
+  const samples = sIdx >= 0 ? Math.max(1, Number(rest[sIdx + 1])) : 1;
 
   const client = new LlamaClient();
   if (!(await client.health())) {
@@ -40,8 +45,19 @@ async function main(argv: string[]): Promise<number> {
       for (const c of cal.cases) {
         // Exclude the case under test from its own few-shot to avoid leakage.
         const others = { ...cal, cases: cal.cases.filter((x) => x !== c) };
-        const r = await gradeOpen({ skill, answer: c.answer, calibration: others });
-        if (r.graded && r.aggregate.verdict === c.expect.verdict) agree++;
+        if (samples > 1) {
+          // Best-of-N over the same (skill, answer, calibration); the closure
+          // carries the real LoadedSkill so the escalation grade fn stays generic.
+          const grade = async () => {
+            const rr = await gradeOpen({ skill, answer: c.answer, calibration: others });
+            return { verdict: rr.graded ? rr.aggregate.verdict : ("fail" as const) };
+          };
+          const esc = await gradeWithEscalation({ grade, skill, answer: c.answer, calibration: others, samples });
+          if (esc.verdict === c.expect.verdict) agree++;
+        } else {
+          const r = await gradeOpen({ skill, answer: c.answer, calibration: others });
+          if (r.graded && r.aggregate.verdict === c.expect.verdict) agree++;
+        }
       }
       const rate = cal.cases.length ? agree / cal.cases.length : 0;
       const ok = rate >= threshold;

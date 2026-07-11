@@ -1,7 +1,7 @@
-import { and, eq } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { Pool as PgPool } from "pg";
-import { lessonProgress, users } from "./schema.js";
+import type { Db } from "./db-ops.js";
+import { getProgress, listProgress, setProgress } from "./db-ops.js";
 import type { ProgressStore } from "./types.js";
 
 /**
@@ -9,6 +9,10 @@ import type { ProgressStore } from "./types.js";
  * drizzle's node-postgres adapter) are loaded via dynamic import() the first
  * time the store is used — so importing this module (or the store package)
  * never pulls in `pg`. Only instantiating and calling this store does.
+ *
+ * The actual queries live in `db-ops.ts` as pure, dependency-injected functions;
+ * this class just builds the node-postgres drizzle db and delegates to them, so
+ * the same query code is exercised by the in-process pglite tests.
  *
  * This preserves the hard requirement: the file path has ZERO required runtime
  * deps; `pg` is only touched when STORE=pg is explicitly selected.
@@ -35,45 +39,20 @@ export class PgProgressStore implements ProgressStore {
     await this.initialized;
   }
 
-  private async database(): Promise<NodePgDatabase> {
+  private async database(): Promise<Db> {
     await this.init();
-    return this.db!;
-  }
-
-  /** Ensure a users row exists so lesson_progress writes never dangle. */
-  private async ensureUser(userId: string): Promise<void> {
-    const db = await this.database();
-    await db.insert(users).values({ id: userId }).onConflictDoNothing();
+    return this.db! as unknown as Db;
   }
 
   async get(userId: string, topicId: string): Promise<unknown | null> {
-    const db = await this.database();
-    const rows = await db
-      .select({ data: lessonProgress.data })
-      .from(lessonProgress)
-      .where(and(eq(lessonProgress.userId, userId), eq(lessonProgress.topicId, topicId)))
-      .limit(1);
-    return rows.length ? (rows[0].data ?? null) : null;
+    return getProgress(await this.database(), userId, topicId);
   }
 
   async set(userId: string, topicId: string, data: unknown): Promise<void> {
-    const db = await this.database();
-    await this.ensureUser(userId);
-    await db
-      .insert(lessonProgress)
-      .values({ userId, topicId, data, updatedAt: new Date() })
-      .onConflictDoUpdate({
-        target: [lessonProgress.userId, lessonProgress.topicId],
-        set: { data, updatedAt: new Date() },
-      });
+    await setProgress(await this.database(), userId, topicId, data);
   }
 
   async list(userId: string): Promise<{ topicId: string; data: unknown }[]> {
-    const db = await this.database();
-    const rows = await db
-      .select({ topicId: lessonProgress.topicId, data: lessonProgress.data })
-      .from(lessonProgress)
-      .where(eq(lessonProgress.userId, userId));
-    return rows.map((r) => ({ topicId: r.topicId, data: r.data ?? null }));
+    return listProgress(await this.database(), userId);
   }
 }

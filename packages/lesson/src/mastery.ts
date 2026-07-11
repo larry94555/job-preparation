@@ -15,6 +15,11 @@ export interface Progress {
   review: Record<string, ReviewState>; // questionId -> spaced-repetition state
   cumulativeBest?: number; // best topic-wide cumulative assessment score
   history?: MasteryPoint[]; // mastery-over-time snapshots (retention analytics)
+  // Async grading (DESIGN §8): open-ended apply tasks are graded off-request by a
+  // worker. We record the in-flight job per question so a reload shows "grading
+  // in progress" and the client can resume polling. This is a resume aid, not a
+  // score — it never moves mastery.
+  pending?: Record<string, { jobId: string; at: number }>;
 }
 
 /** A dated snapshot of a topic's mastery — recorded only when it changes. */
