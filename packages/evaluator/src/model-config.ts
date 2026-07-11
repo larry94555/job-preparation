@@ -1,6 +1,13 @@
 import { existsSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { type ModelConfig, ModelConfig as ModelConfigSchema, type ModelEntry, type ModelRole } from "@job-prep/schema";
+import {
+  type BackendEntry,
+  type DeployEnv,
+  type ModelConfig,
+  ModelConfig as ModelConfigSchema,
+  type ModelEntry,
+  type ModelRole,
+} from "@job-prep/schema";
 import YAML from "yaml";
 
 /**
@@ -70,6 +77,94 @@ export function resolveModels(cfg: ModelConfig): ResolvedModels {
   return { primary, secondary };
 }
 
+// ---- Backends (where the model is served) --------------------------------
+
+/** The current deployment environment (DEPLOY_ENV=hosted ⇒ hosted, else local). */
+export function currentDeployEnv(): DeployEnv {
+  return process.env.DEPLOY_ENV === "hosted" ? "hosted" : "local";
+}
+
+/** Backends eligible in the given environment. */
+export function eligibleBackends(cfg: ModelConfig, env: DeployEnv): BackendEntry[] {
+  return (cfg.backends ?? []).filter((b) => b.environments.includes(env));
+}
+
+/**
+ * Resolve the active backend. In `hosted` the hosted-eligible backend is forced
+ * (the `backend` selection is ignored) — so a deploy always uses the single
+ * intended service. In `local` the `backend` selection wins when it's eligible,
+ * else the first eligible backend. Returns null when no backends are configured
+ * (callers then fall back to the LLAMA_BASE_URL env / client default).
+ */
+export function resolveBackend(
+  cfg: ModelConfig,
+  env: DeployEnv = currentDeployEnv(),
+): BackendEntry | null {
+  const eligible = eligibleBackends(cfg, env);
+  if (eligible.length === 0) return null;
+  if (env === "hosted") {
+    // Forced: prefer the recorded selection only if it is itself hosted-eligible.
+    return eligible.find((b) => b.id === cfg.backend) ?? eligible[0];
+  }
+  return eligible.find((b) => b.id === cfg.backend) ?? eligible[0];
+}
+
+export interface ResolvedGrader {
+  /** Deployment environment this was resolved for. */
+  env: DeployEnv;
+  /** The active backend, or null if none configured. */
+  backend: BackendEntry | null;
+  /** OpenAI-compatible base URL (LLAMA_BASE_URL overrides the backend's). */
+  baseUrl: string | undefined;
+  /** Effective primary model id. */
+  primary: string;
+  /** Effective secondary model id, or null (disabled, or single-model backend). */
+  secondary: string | null;
+}
+
+/**
+ * Fully resolve how grading should talk to a model: the active backend, the base
+ * URL, and the effective primary/secondary model ids. A `single_model` backend
+ * (e.g. llama-server hosting one GGUF, as on Oracle Cloud) forces the secondary
+ * tier off — there is only one model to grade with.
+ */
+export function resolveGrader(
+  cfg: ModelConfig,
+  env: DeployEnv = currentDeployEnv(),
+): ResolvedGrader {
+  const backend = resolveBackend(cfg, env);
+  const { primary, secondary } = resolveModels(cfg);
+  const baseUrl = process.env.LLAMA_BASE_URL ?? backend?.base_url;
+  return {
+    env,
+    backend,
+    baseUrl,
+    primary,
+    secondary: backend?.single_model ? null : secondary,
+  };
+}
+
+/**
+ * Persist a new backend selection (local/dev only). Rejects an ineligible backend
+ * and refuses to write in a hosted environment (the hosted backend is fixed at
+ * deploy time). Preserves comments. Returns the reloaded config.
+ */
+export function saveBackendSelection(id: string, path: string = modelConfigPath()): ModelConfig {
+  const cfg = getModelConfig(path);
+  if (!cfg) throw new Error(`no valid model configuration at ${path}`);
+  if (currentDeployEnv() === "hosted") {
+    throw new Error("the backend is fixed in a hosted environment and cannot be changed here");
+  }
+  if (!eligibleBackends(cfg, "local").some((b) => b.id === id)) {
+    throw new Error(`"${id}" is not a backend available in the local environment`);
+  }
+  const doc = YAML.parseDocument(readFileSync(path, "utf8"));
+  doc.set("backend", id);
+  writeFileSync(path, String(doc));
+  cache = null;
+  return getModelConfig(path)!;
+}
+
 /**
  * Persist a new tier selection, validating each pick against the allowed catalog,
  * and preserving the file's comments/formatting (edits the YAML document in
@@ -81,6 +176,9 @@ export function saveModelSelection(
 ): ModelConfig {
   const cfg = getModelConfig(path);
   if (!cfg) throw new Error(`no valid model configuration at ${path}`);
+  if (currentDeployEnv() === "hosted") {
+    throw new Error("the model is fixed in a hosted environment and cannot be changed here");
+  }
   const doc = YAML.parseDocument(readFileSync(path, "utf8"));
 
   if (sel.primary !== undefined) {

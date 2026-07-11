@@ -8,7 +8,7 @@ import {
   gradeOpen,
   gradeWithEscalation,
   LlamaClient,
-  resolveModels,
+  resolveGrader,
   type Verdict,
 } from "@job-prep/evaluator";
 import { type CodeRunner, createCodeRunner } from "@job-prep/sandbox";
@@ -154,10 +154,14 @@ export async function runWorker(
  */
 export function wireDefaults(): WorkerDeps {
   // The escalation tiebreaker (bigGrade) is the configured secondary model when
-  // model_configuration.yaml is present and the secondary tier is enabled;
-  // otherwise the legacy LLAMA_BIG_MODEL env var.
+  // model_configuration.yaml is present and the active backend has one (a
+  // single-model backend, e.g. hosted Oracle llama-server, reports secondary=null
+  // ⇒ no tiebreaker); otherwise the legacy LLAMA_BIG_MODEL env var. The base URL
+  // comes from the resolved backend (LLAMA_BASE_URL still overrides).
   const cfg = getModelConfig();
-  const bigModel = cfg ? resolveModels(cfg).secondary : process.env.LLAMA_BIG_MODEL;
+  const g = cfg ? resolveGrader(cfg) : null;
+  const bigModel = g ? g.secondary : process.env.LLAMA_BIG_MODEL;
+  const bigBaseUrl = g?.baseUrl;
 
   // Grade with the client chosen for `opts.skill` when `client` is omitted:
   // that routes each skill to its `grader_model` (stronger-judge tier, DESIGN §7)
@@ -178,7 +182,9 @@ export function wireDefaults(): WorkerDeps {
     };
 
   const grade = wrap();
-  const bigGrade = bigModel ? wrap(new LlamaClient({ model: bigModel })) : undefined;
+  const bigGrade = bigModel
+    ? wrap(new LlamaClient({ model: bigModel, ...(bigBaseUrl ? { baseUrl: bigBaseUrl } : {}) }))
+    : undefined;
   const runner = createCodeRunner();
   return { grade, bigGrade, run: (opts) => runner.run(opts) };
 }

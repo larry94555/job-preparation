@@ -66,6 +66,43 @@ GPU/CPU-only, disk) and a Hugging Face reference, and an allow-list per tier.
 - Like `.env`, this file is **node-local**. On a multi-instance deploy, bake it
   into the image or mount it from a shared volume so every replica agrees.
 
+### Backends: where the model runs (llama.cpp / Oracle Cloud)
+
+`model_configuration.yaml` also lists **backends** — the service that hosts the
+model behind an OpenAI-compatible endpoint. `environments` gates each backend to
+`local` and/or `hosted`, and `DEPLOY_ENV` selects which set applies:
+
+| `DEPLOY_ENV` | Behavior |
+| --- | --- |
+| `local` (default) | All `local`-eligible backends are offered in **/models**; pick one. Two grader tiers available. |
+| `hosted` | The single `hosted`-eligible backend is **forced**, the config is **read-only**, and a `single_model` backend collapses to the primary model only. |
+
+The shipped catalog has three backends:
+
+- **`ollama-local`** — Ollama at `:11434` (multi-model; the two-tier dev default).
+- **`llamacpp-local`** — a local llama.cpp `llama-server` at `:8080`, single-model.
+  Use it to rehearse the hosted setup on your machine:
+  ```bash
+  # from a llama.cpp build; serves ONE gguf as the primary model
+  llama-server -m /models/qwen2.5-3b-instruct-q4_k_m.gguf --host 0.0.0.0 --port 8080 -c 4096
+  ```
+  Then select "llama.cpp server (local)" in /models — the secondary tier disables.
+- **`oracle-llamacpp`** — `hosted`-only. The single model deployed to Oracle Cloud.
+
+**Deploying the model to Oracle Cloud (single model, CPU-only):**
+
+1. Create an Oracle Cloud compute instance — an Always-Free/Standard shape (12 GB
+   RAM) fits models up to ~8B Q4; a PAYG 24 GB shape fits Phi-3-Medium-14B. No GPU
+   needed (all catalog models are `cpu_only`).
+2. Build llama.cpp and download one GGUF (the model you selected as `primary`,
+   from its `huggingface` repo).
+3. Run `llama-server -m <model>.gguf --host 0.0.0.0 --port 8080 -c 4096` (behind
+   the firewall / a reverse proxy; restrict the port to the app).
+4. Deploy the app with `DEPLOY_ENV=hosted` and either set the Oracle backend's
+   `base_url` to the instance address or inject it at runtime via `LLAMA_BASE_URL`.
+   The app now grades every answer with that one model, and /models shows it
+   read-only.
+
 **db** — `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` (default `jobprep`).
 
 ## Deploy sequence

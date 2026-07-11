@@ -19,12 +19,27 @@ interface ModelEntry {
   status: "allowed" | "disallowed";
   requirements?: Requirements;
 }
+interface BackendEntry {
+  id: string;
+  name: string;
+  kind: "ollama" | "llamacpp";
+  provider?: string;
+  base_url: string;
+  environments: string[];
+  single_model?: boolean;
+  notes?: string;
+}
 interface TierView {
   selected: string | null;
   options: ModelEntry[];
   locked: boolean;
 }
 export interface ModelConfigView {
+  env: "local" | "hosted";
+  readOnly: boolean;
+  backend: { selected: string | null; entry: BackendEntry | null; options: BackendEntry[]; locked: boolean };
+  baseUrl: string | null;
+  singleModel: boolean;
   secondaryAllowed: boolean;
   catalog: ModelEntry[];
   primary: TierView;
@@ -61,13 +76,10 @@ function Tier({
       <div className="eyebrow">{label}</div>
       <p className="muted" style={{ marginTop: 2 }}>{hint}</p>
       {tier.locked ? (
-        // A single (or no) allowed option ⇒ not changeable; just show it.
         <div style={{ marginTop: 8 }}>
           <strong>{current?.name ?? tier.selected ?? "—"}</strong>{" "}
           <span className="muted">({current?.id ?? tier.selected})</span>
-          <div className="muted" style={{ fontSize: 13 }}>
-            Only one model is allowed for this tier, so it can’t be changed here.
-          </div>
+          <div className="muted" style={{ fontSize: 13 }}>Fixed — can’t be changed here.</div>
         </div>
       ) : (
         <select
@@ -87,12 +99,7 @@ function Tier({
         <div className="muted" style={{ marginTop: 8, fontSize: 13 }}>
           {reqSummary(current.requirements)}
           {current.requirements?.notes ? ` · ${current.requirements.notes}` : ""}
-          {current.huggingface ? (
-            <>
-              {" · "}
-              <span>HF: {current.huggingface}</span>
-            </>
-          ) : null}
+          {current.huggingface ? ` · HF: ${current.huggingface}` : ""}
         </div>
       ) : null}
     </div>
@@ -101,21 +108,28 @@ function Tier({
 
 export default function ModelConfigClient({ initial }: { initial: ModelConfigView }) {
   const [view, setView] = useState<ModelConfigView>(initial);
+  const [backend, setBackend] = useState(initial.backend.selected ?? "");
   const [primary, setPrimary] = useState(initial.primary.selected ?? "");
   const [secondary, setSecondary] = useState(initial.secondary.selected ?? "");
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<{ ok: boolean; msg: string } | null>(null);
 
-  const secEditable = view.secondary.enabled && !view.secondary.locked;
+  const backendEditable = !view.readOnly && !view.backend.locked;
+  const secEditable = !view.readOnly && view.secondary.enabled && !view.secondary.locked;
+  const primEditable = !view.readOnly && !view.primary.locked;
+  const activeBackend = view.backend.options.find((b) => b.id === backend) ?? view.backend.entry;
+
   const dirty =
-    (!view.primary.locked && primary !== (view.primary.selected ?? "")) ||
+    (backendEditable && backend !== (view.backend.selected ?? "")) ||
+    (primEditable && primary !== (view.primary.selected ?? "")) ||
     (secEditable && secondary !== (view.secondary.selected ?? ""));
 
   async function save() {
     setSaving(true);
     setStatus(null);
-    const payload: { primary?: string; secondary?: string } = {};
-    if (!view.primary.locked) payload.primary = primary;
+    const payload: { primary?: string; secondary?: string; backend?: string } = {};
+    if (backendEditable) payload.backend = backend;
+    if (primEditable) payload.primary = primary;
     if (secEditable) payload.secondary = secondary;
     try {
       const res = await fetch("/api/models", {
@@ -127,10 +141,12 @@ export default function ModelConfigClient({ initial }: { initial: ModelConfigVie
       if (!res.ok) {
         setStatus({ ok: false, msg: data.error ?? "Save failed." });
       } else {
-        setView(data as ModelConfigView);
-        setPrimary(data.primary.selected ?? "");
-        setSecondary(data.secondary.selected ?? "");
-        setStatus({ ok: true, msg: "Saved. New gradings use the selected model(s)." });
+        const v = data as ModelConfigView;
+        setView(v);
+        setBackend(v.backend.selected ?? "");
+        setPrimary(v.primary.selected ?? "");
+        setSecondary(v.secondary.selected ?? "");
+        setStatus({ ok: true, msg: "Saved. New gradings use the selected backend/model(s)." });
       }
     } catch (e) {
       setStatus({ ok: false, msg: (e as Error).message });
@@ -143,24 +159,79 @@ export default function ModelConfigClient({ initial }: { initial: ModelConfigVie
     <main className="wrap">
       <div className="row" style={{ justifyContent: "space-between" }}>
         <div className="eyebrow">Configuration</div>
-        <Link className="btn ghost mini" href="/">
-          ← Home
-        </Link>
+        <Link className="btn ghost mini" href="/">← Home</Link>
       </div>
-      <h1>Grader model</h1>
+      <h1>Grader backend &amp; model</h1>
       <p className="muted">
-        Choose which local open-source model grades your answers. The catalog and what’s allowed are
-        set in <code>model_configuration.yaml</code>; this page changes only the selection.
+        Choose the backend that hosts the model and which local open-source model grades answers. The
+        catalog and what’s allowed live in <code>model_configuration.yaml</code>; this page changes only
+        the selection.
       </p>
 
+      {view.readOnly ? (
+        <div className="panel" style={{ borderLeft: "3px solid #b8860b" }}>
+          <strong>Hosted environment (read-only).</strong>{" "}
+          <span className="muted">
+            The backend and model are fixed at deploy time (<code>DEPLOY_ENV=hosted</code>). This page shows
+            the active configuration.
+          </span>
+        </div>
+      ) : null}
+
+      {/* ---- Backend ---- */}
+      <div className="panel">
+        <div className="eyebrow">Backend service</div>
+        <p className="muted" style={{ marginTop: 2 }}>
+          Where the model is served (OpenAI-compatible endpoint). Environment: <strong>{view.env}</strong>.
+        </p>
+        {view.backend.locked || !backendEditable ? (
+          <div style={{ marginTop: 8 }}>
+            <strong>{activeBackend?.name ?? backend}</strong>{" "}
+            <span className="muted">({activeBackend?.id})</span>
+            <div className="muted" style={{ fontSize: 13 }}>
+              {view.readOnly
+                ? "Forced in the hosted environment — the only choice."
+                : "Only one backend is available here."}
+            </div>
+          </div>
+        ) : (
+          <select
+            value={backend}
+            onChange={(e) => setBackend(e.target.value)}
+            style={{ marginTop: 8, padding: "6px 8px", minWidth: 320, maxWidth: "100%" }}
+          >
+            {view.backend.options.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.name} — {b.kind}
+                {b.single_model ? " · single-model" : ""}
+              </option>
+            ))}
+          </select>
+        )}
+        {activeBackend ? (
+          <div className="muted" style={{ marginTop: 8, fontSize: 13 }}>
+            <div>
+              kind: <code>{activeBackend.kind}</code>
+              {activeBackend.provider ? ` · provider: ${activeBackend.provider}` : ""} · url:{" "}
+              <code>{view.baseUrl ?? activeBackend.base_url}</code>
+              {activeBackend.single_model ? " · single-model" : " · multi-model"}
+            </div>
+            {activeBackend.notes ? <div style={{ marginTop: 4 }}>{activeBackend.notes}</div> : null}
+          </div>
+        ) : null}
+      </div>
+
+      {/* ---- Primary tier ---- */}
       <Tier
         label="Primary model"
         hint="Faster, less reliable. The default judge for every skill."
         tier={view.primary}
         value={primary}
         onChange={setPrimary}
+        disabled={!primEditable}
       />
 
+      {/* ---- Secondary tier ---- */}
       {view.secondary.enabled ? (
         <Tier
           label="Secondary model"
@@ -168,34 +239,39 @@ export default function ModelConfigClient({ initial }: { initial: ModelConfigVie
           tier={view.secondary}
           value={secondary}
           onChange={setSecondary}
+          disabled={!secEditable}
         />
       ) : (
         <div className="panel">
           <div className="eyebrow">Secondary model</div>
           <p className="muted" style={{ marginTop: 6 }}>
-            Disabled in <code>model_configuration.yaml</code> (<code>secondary_model_allowed: false</code>).
-            Every skill is graded by the primary model only.
+            {view.singleModel
+              ? "Disabled — the active backend hosts a single model, so every skill uses the primary model only."
+              : "Disabled in model_configuration.yaml (secondary_model_allowed: false). Every skill uses the primary model only."}
           </p>
         </div>
       )}
 
-      <div className="row" style={{ marginTop: 12, gap: 12, alignItems: "center" }}>
-        <button className="btn" onClick={save} disabled={!dirty || saving}>
-          {saving ? "Saving…" : "Save selection"}
-        </button>
-        {status ? (
-          <span className="muted" style={{ color: status.ok ? "inherit" : "#c0392b" }}>
-            {status.msg}
-          </span>
-        ) : (
-          <span className="muted">{dirty ? "Unsaved changes" : "Up to date"}</span>
-        )}
-      </div>
+      {!view.readOnly ? (
+        <div className="row" style={{ marginTop: 12, gap: 12, alignItems: "center" }}>
+          <button className="btn" onClick={save} disabled={!dirty || saving}>
+            {saving ? "Saving…" : "Save selection"}
+          </button>
+          {status ? (
+            <span className="muted" style={{ color: status.ok ? "inherit" : "#c0392b" }}>
+              {status.msg}
+            </span>
+          ) : (
+            <span className="muted">{dirty ? "Unsaved changes" : "Up to date"}</span>
+          )}
+        </div>
+      ) : null}
 
       <h2 style={{ marginTop: 28 }}>Model catalog</h2>
       <p className="muted">
-        Every known model and its footprint. <strong>Allowed</strong> models are selectable above;
-        pull one into your model host (e.g. <code>ollama pull &lt;id&gt;</code>) before selecting it.
+        Every known model and its footprint. <strong>Allowed</strong> models are selectable above; pull one
+        into the active backend (e.g. <code>ollama pull &lt;id&gt;</code>, or load the GGUF into llama-server)
+        before selecting it.
       </p>
       <div style={{ overflowX: "auto" }}>
         <table style={{ borderCollapse: "collapse", width: "100%", fontSize: 14 }}>
@@ -210,10 +286,7 @@ export default function ModelConfigClient({ initial }: { initial: ModelConfigVie
           </thead>
           <tbody>
             {view.catalog.map((m) => (
-              <tr
-                key={m.id}
-                style={{ borderBottom: "1px solid #eee", opacity: m.status === "allowed" ? 1 : 0.5 }}
-              >
+              <tr key={m.id} style={{ borderBottom: "1px solid #eee", opacity: m.status === "allowed" ? 1 : 0.5 }}>
                 <td style={{ padding: "6px 10px" }}>{m.name}</td>
                 <td style={{ padding: "6px 10px", fontFamily: "monospace" }}>{m.id}</td>
                 <td style={{ padding: "6px 10px" }}>{m.roles.join(", ")}</td>

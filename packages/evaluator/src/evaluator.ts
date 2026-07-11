@@ -2,7 +2,7 @@ import type { LoadedSkill } from "@job-prep/engine";
 import type { CalibrationSet } from "@job-prep/schema";
 import { type Aggregated, aggregateChecks } from "./aggregate.js";
 import { type ChatMessage, LlamaClient } from "./llama.js";
-import { getModelConfig, resolveModels } from "./model-config.js";
+import { getModelConfig, resolveGrader } from "./model-config.js";
 
 /**
  * Pick the judge client for a skill.
@@ -22,17 +22,22 @@ export function clientForSkill(skill: { frontmatter?: { grader_model?: string } 
   const wantsSecondary = Boolean(skill.frontmatter?.grader_model);
   const cfg = getModelConfig();
   let model: string | undefined;
+  let baseUrl: string | undefined;
   if (cfg) {
-    const { primary, secondary } = resolveModels(cfg);
-    model = wantsSecondary && secondary ? secondary : primary;
+    // Resolve the active backend + tiers. A single-model backend (e.g. Oracle
+    // llama-server) reports secondary=null, so every skill uses the one model.
+    const g = resolveGrader(cfg);
+    model = wantsSecondary && g.secondary ? g.secondary : g.primary;
+    baseUrl = g.baseUrl;
   } else {
     // Legacy (no config): literal grader_model, else env default.
     model = skill.frontmatter?.grader_model;
   }
-  const key = model ?? "__default__";
+  // Cache per (baseUrl, model): the backend can differ between environments.
+  const key = `${baseUrl ?? ""}::${model ?? "__default__"}`;
   let c = judgeCache.get(key);
   if (!c) {
-    c = new LlamaClient(model ? { model } : {});
+    c = new LlamaClient({ ...(model ? { model } : {}), ...(baseUrl ? { baseUrl } : {}) });
     judgeCache.set(key, c);
   }
   return c;

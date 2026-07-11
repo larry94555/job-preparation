@@ -48,6 +48,42 @@ export const ModelEntry = z.object({
 });
 export type ModelEntry = z.infer<typeof ModelEntry>;
 
+/**
+ * Deployment environment. `local` = a dev machine (multiple backends may be
+ * available). `hosted` = the deployed app (e.g. Oracle Cloud) where exactly one
+ * backend serves a single model. Set at runtime via `DEPLOY_ENV`.
+ */
+export const DeployEnv = z.enum(["local", "hosted"]);
+export type DeployEnv = z.infer<typeof DeployEnv>;
+
+/** The kind of model server a backend runs. */
+export const BackendKind = z.enum(["ollama", "llamacpp"]);
+export type BackendKind = z.infer<typeof BackendKind>;
+
+/**
+ * A backend service that hosts the model(s) behind an OpenAI-compatible endpoint
+ * (both Ollama and llama.cpp's `llama-server` expose one). `environments` gates
+ * where a backend may be used: a backend usable in `hosted` is a candidate when
+ * the app runs with `DEPLOY_ENV=hosted`; if it's the only such candidate it is
+ * forced. `single_model: true` (llama-server loads ONE GGUF) means only the
+ * primary tier applies — the secondary tier is disabled for that backend.
+ */
+export const BackendEntry = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  kind: BackendKind,
+  /** Optional cloud/provider tag, e.g. "oracle". */
+  provider: z.string().optional(),
+  /** OpenAI-compatible base URL. Overridable at runtime by LLAMA_BASE_URL. */
+  base_url: z.string().min(1),
+  /** Environments this backend may serve in. */
+  environments: z.array(DeployEnv).min(1),
+  /** True for a server that hosts exactly one model (e.g. llama-server). */
+  single_model: z.boolean().optional(),
+  notes: z.string().optional(),
+});
+export type BackendEntry = z.infer<typeof BackendEntry>;
+
 export const ModelConfig = z.object({
   /** Master switch: when false, only the primary model is ever used. */
   secondary_model_allowed: z.boolean(),
@@ -58,5 +94,9 @@ export const ModelConfig = z.object({
   }),
   /** The catalog of known models. */
   models: z.array(ModelEntry).min(1),
+  /** Active backend id for local/dev use (ignored when DEPLOY_ENV=hosted). */
+  backend: z.string().min(1).optional(),
+  /** Catalog of backend services that can host the model(s). */
+  backends: z.array(BackendEntry).min(1).optional(),
 });
 export type ModelConfig = z.infer<typeof ModelConfig>;

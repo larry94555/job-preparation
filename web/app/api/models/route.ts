@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { saveModelSelection } from "@job-prep/evaluator";
+import { currentDeployEnv, saveBackendSelection, saveModelSelection } from "@job-prep/evaluator";
 import { modelConfigView } from "@/lib/model-config-view";
 import { currentUserId } from "@/lib/session";
 
@@ -31,18 +31,34 @@ export async function POST(req: NextRequest) {
   const userId = await currentUserId();
   if (!userId) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
 
-  const body = (await req.json().catch(() => ({}))) as { primary?: unknown; secondary?: unknown };
+  // The config is fixed at deploy time in a hosted environment.
+  if (currentDeployEnv() === "hosted") {
+    return NextResponse.json(
+      { error: "configuration is read-only in a hosted environment" },
+      { status: 403 },
+    );
+  }
+
+  const body = (await req.json().catch(() => ({}))) as {
+    primary?: unknown;
+    secondary?: unknown;
+    backend?: unknown;
+  };
   const sel: { primary?: string; secondary?: string } = {};
   if (typeof body.primary === "string") sel.primary = body.primary;
   if (typeof body.secondary === "string") sel.secondary = body.secondary;
-  if (sel.primary === undefined && sel.secondary === undefined) {
+  const backend = typeof body.backend === "string" ? body.backend : undefined;
+
+  if (sel.primary === undefined && sel.secondary === undefined && backend === undefined) {
     return NextResponse.json({ error: "nothing to update" }, { status: 400 });
   }
 
   try {
-    saveModelSelection(sel);
+    // Change the backend first — it can flip whether the secondary tier applies.
+    if (backend !== undefined) saveBackendSelection(backend);
+    if (sel.primary !== undefined || sel.secondary !== undefined) saveModelSelection(sel);
   } catch (e) {
-    // Invalid pick (not allowed for the tier, or secondary disabled).
+    // Invalid pick (not allowed for the tier/env, or secondary disabled).
     return NextResponse.json({ error: (e as Error).message }, { status: 400 });
   }
   return NextResponse.json(modelConfigView());

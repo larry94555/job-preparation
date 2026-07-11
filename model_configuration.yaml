@@ -26,6 +26,55 @@ selection:
   primary: qwen2.5:3b-instruct
   secondary: llama3:8b
 
+# ---- Backends: WHERE the model(s) are served -----------------------------
+#
+# Every backend exposes an OpenAI-compatible endpoint (Ollama and llama.cpp's
+# `llama-server` both do). `environments` gates where a backend may run:
+#   local  — a dev machine (multiple backends can be offered; pick one below).
+#   hosted — the deployed app. When the app runs with DEPLOY_ENV=hosted, the
+#            hosted-eligible backend is FORCED and is the only choice.
+#
+# `single_model: true` means the server hosts exactly one loaded GGUF (llama.cpp),
+# so only the PRIMARY tier applies — the secondary tier is disabled for it.
+# LLAMA_BASE_URL, if set, overrides a backend's base_url at runtime.
+
+# Active backend for LOCAL/dev use (ignored under DEPLOY_ENV=hosted).
+backend: ollama-local
+
+backends:
+  - id: ollama-local
+    name: Ollama (local)
+    kind: ollama
+    base_url: http://localhost:11434/v1
+    environments: [ local ]
+    single_model: false
+    notes: "Default local dev host; serves any pulled model (supports two tiers)."
+
+  - id: llamacpp-local
+    name: llama.cpp server (local)
+    kind: llamacpp
+    base_url: http://localhost:8080/v1
+    environments: [ local ]
+    single_model: true
+    notes: >-
+      Test the hosted setup locally. Start it with: llama-server -m <model>.gguf
+      --host 0.0.0.0 --port 8080 -c 4096 (from a llama.cpp build). Serves ONE
+      model = the selected primary.
+
+  - id: oracle-llamacpp
+    name: Oracle Cloud (llama.cpp)
+    kind: llamacpp
+    provider: oracle
+    base_url: http://ORACLE_HOST:8080/v1
+    environments: [ hosted ]
+    single_model: true
+    notes: >-
+      llama-server on an Oracle Cloud compute instance (single model). Set
+      base_url to the instance address, or inject it at deploy time via
+      LLAMA_BASE_URL. This is the ONLY backend used when DEPLOY_ENV=hosted. Fits
+      an Always-Free/Standard (12 GB RAM) or PAYG (24 GB RAM) shape, CPU-only,
+      per the selected model's requirements below.
+
 models:
   # ---- Currently installed / in use ----
   - id: qwen2.5:3b-instruct
