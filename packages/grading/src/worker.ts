@@ -1,6 +1,7 @@
 import type { LoadedSkill } from "@job-prep/engine";
 import type { CalibrationSet } from "@job-prep/schema";
 import {
+  clientForSkill,
   type EscalationGrade,
   type GradeOpts,
   gradeOpen,
@@ -150,16 +151,18 @@ export async function runWorker(
  * is contacted and no code is run until a job is actually graded.
  */
 export function wireDefaults(): WorkerDeps {
-  const smallModel = process.env.LLAMA_MODEL;
   const bigModel = process.env.LLAMA_BIG_MODEL;
 
+  // Grade with the client chosen for `opts.skill` when `client` is omitted:
+  // that routes each skill to its `grader_model` (stronger-judge tier, DESIGN §7)
+  // or the pinned default. Pass an explicit client for the fixed big-model tiebreak.
   const wrap =
-    (client: LlamaClient) =>
+    (client?: LlamaClient) =>
     async (opts: GradeOpts): Promise<EscalationGrade> => {
       const skill = opts.skill as LoadedSkill;
       const r = await gradeOpen(
         { skill, answer: opts.answer, calibration: opts.calibration },
-        client,
+        client ?? clientForSkill(skill),
       );
       if (!r.graded) {
         // Model unusable/offline → borderline so escalation/human-review kicks in.
@@ -168,7 +171,7 @@ export function wireDefaults(): WorkerDeps {
       return { verdict: r.aggregate.verdict, score: r.aggregate.score, feedback: r.feedback };
     };
 
-  const grade = wrap(new LlamaClient(smallModel ? { model: smallModel } : {}));
+  const grade = wrap();
   const bigGrade = bigModel ? wrap(new LlamaClient({ model: bigModel })) : undefined;
   const runner = createCodeRunner();
   return { grade, bigGrade, run: (opts) => runner.run(opts) };

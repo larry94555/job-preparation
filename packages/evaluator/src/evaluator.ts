@@ -3,6 +3,24 @@ import type { CalibrationSet } from "@job-prep/schema";
 import { type Aggregated, aggregateChecks } from "./aggregate.js";
 import { type ChatMessage, LlamaClient } from "./llama.js";
 
+/**
+ * Pick the judge client for a skill. If the skill declares a `grader_model`
+ * (per-skill judge override, DESIGN §7 "stronger judge tier"), grade it with
+ * that model on the same LLAMA_BASE_URL; otherwise use the pinned default judge.
+ * Clients are cached by model name so a sweep reuses one connection per judge.
+ */
+const judgeCache = new Map<string, LlamaClient>();
+export function clientForSkill(skill: { frontmatter?: { grader_model?: string } }): LlamaClient {
+  const model = skill.frontmatter?.grader_model;
+  const key = model ?? "__default__";
+  let c = judgeCache.get(key);
+  if (!c) {
+    c = new LlamaClient(model ? { model } : {});
+    judgeCache.set(key, c);
+  }
+  return c;
+}
+
 export interface GradeInput {
   skill: LoadedSkill;
   answer: string;
