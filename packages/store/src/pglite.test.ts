@@ -8,6 +8,7 @@ import {
   listProgress,
   loadContentRows,
   setProgress,
+  updateProgress,
 } from "./db-ops.js";
 import { importContentWithDb } from "./content-import.js";
 
@@ -84,4 +85,32 @@ test("pglite: content projection imports idempotently and reads back", async () 
   const known = topics.find((t) => t.topic?.id === "kv-cache-management");
   assert.ok(known, "kv-cache-management topic present in projected rows");
   assert.equal(known!.topic?.id, "kv-cache-management");
+});
+
+test("pglite: updateProgress does transactional read-modify-write with FOR UPDATE", async () => {
+  const db = await makeDb();
+
+  // First write: row absent → mutator sees null, row is created, value returned.
+  const first = await updateProgress(db, "u1", "kv-cache-management", (prev) => {
+    assert.equal(prev, null);
+    return { items: [0] };
+  });
+  assert.deepEqual(first, { items: [0] });
+  assert.deepEqual(await getProgress(db, "u1", "kv-cache-management"), { items: [0] });
+
+  // Subsequent updates accumulate off the freshest stored value (the FOR UPDATE
+  // path reads, mutates, and writes within one transaction). pglite is a single
+  // in-process connection, so this validates the read-modify-write query path;
+  // the row lock provides the same guarantee across instances on real Postgres.
+  for (let i = 1; i < 10; i++) {
+    await updateProgress(db, "u1", "kv-cache-management", (prev) => {
+      const cur = (prev as { items: number[] }).items;
+      return { items: [...cur, i] };
+    });
+  }
+  const saved = (await getProgress(db, "u1", "kv-cache-management")) as { items: number[] };
+  assert.deepEqual(saved.items, Array.from({ length: 10 }, (_, i) => i));
+
+  // A different user's row is untouched.
+  assert.equal(await getProgress(db, "u2", "kv-cache-management"), null);
 });

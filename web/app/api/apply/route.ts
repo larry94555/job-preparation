@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import type { GradingPayload } from "@job-prep/grading";
 import { createJobQueue } from "@job-prep/store";
-import { loadContext, readTestFile, saveProgress } from "@/lib/lesson-service";
+import { loadContext, mutateProgress, readTestFile } from "@/lib/lesson-service";
 import { currentUserId } from "@/lib/session";
 
 export const runtime = "nodejs";
@@ -59,9 +59,12 @@ export async function POST(req: NextRequest) {
     payload,
   });
 
-  // Persist the attempt as pending so a reload shows "grading in progress".
-  progress.pending = { ...(progress.pending ?? {}), [q.id]: { jobId, at: Date.now() } };
-  await saveProgress(userId, topicId, progress);
+  // Record the attempt as pending (atomically) so a reload shows "grading in
+  // progress" without clobbering a concurrent write for this user+topic.
+  const at = Date.now();
+  await mutateProgress(userId, topicId, (p) => {
+    p.pending = { ...(p.pending ?? {}), [q.id]: { jobId, at } };
+  });
 
   return NextResponse.json({ jobId, status: "queued" });
 }

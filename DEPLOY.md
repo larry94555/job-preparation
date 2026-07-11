@@ -80,10 +80,30 @@ docker compose -f docker-compose.prod.yml up -d web worker sandbox
   grade concurrently, so scale = more workers, each pinned to its own
   `LLAMA_BASE_URL`. `docker compose -f docker-compose.prod.yml up -d --scale worker=N`.
 - **Web:** stateless behind Postgres; scale replicas freely behind a load balancer.
+  **Multiple web replicas REQUIRE `STORE=pg`.** The file store (`STORE=file`) keeps
+  progress on the instance's local disk, so replica B never sees the progress a
+  user saved on replica A — use it only for single-instance/local. The Postgres
+  store shares state across all replicas.
 - **Sandbox:** the only tier facing untrusted code. Run it under
   gVisor/Firecracker with **no network egress**, dropped capabilities, a
   read-only + ephemeral filesystem, and CPU/memory/wall-clock limits (see
   `services/sandbox/Dockerfile`). Scale it independently of grading concurrency.
+
+## Progress writes are concurrency-safe
+
+Every request handler mutates progress through the store's atomic
+`update(userId, topicId, mutator)` (read-modify-write), never a blind
+load-then-overwrite — so two in-flight writes for the same user+topic (two tabs,
+a double-submit, or two web replicas) can't lose each other's accumulation:
+
+- **`STORE=pg` (hosted, multi-node):** the update runs in a transaction that
+  `SELECT … FOR UPDATE` row-locks the `lesson_progress` row, so writes across
+  *any* number of web instances serialize on the row. This is the correct choice
+  for a hosted multi-user deploy.
+- **`STORE=file` (single node):** the update serializes on a process-global
+  per-key lock and writes atomically (temp file + `rename`), so a crash or
+  concurrent write never leaves a torn JSON file that would silently reset
+  progress. Single-node only — see the Web scaling note above.
 
 ## Local-first still holds
 

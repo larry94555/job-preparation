@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { gradeMultipleChoice, gradeTextInput } from "@job-prep/engine";
 import { BANDS, recordSnapshot, scheduleReview, sectionBand } from "@job-prep/lesson";
-import { loadContext, saveProgress } from "@/lib/lesson-service";
+import { loadContext, mutateProgress } from "@/lib/lesson-service";
 import { currentUserId } from "@/lib/session";
 
 export const runtime = "nodejs";
@@ -26,31 +26,31 @@ export async function POST(req: NextRequest) {
   const answers = body.answers ?? {};
   const now = Date.now();
 
+  // Grade each item purely (deterministic MC/text_input by construction).
   const review = cur.items.map((it) => {
     const a = String(answers[it.question.id] ?? "");
-    // Assessment items are deterministic (MC or text_input) by construction —
-    // buildPlaythrough filters the pool to those two types. Narrow explicitly so
-    // the grader sees the concrete question shape.
     const correct =
       it.question.type === "multiple_choice"
         ? gradeMultipleChoice(it.question, a)
         : it.question.type === "text_input"
           ? gradeTextInput(it.question, a, it.params)
           : false;
-    progress.review[it.question.id] = scheduleReview(progress.review[it.question.id], correct, now);
     return { id: it.question.id, correct };
   });
 
   const correct = review.filter((r) => r.correct).length;
   const score = cur.items.length ? correct / cur.items.length : 0;
-  progress.assessmentBest[cur.sectionId] = Math.max(
-    progress.assessmentBest[cur.sectionId] ?? 0,
-    score,
-  );
-  recordSnapshot(progress, pt, now);
-  await saveProgress(userId, topicId, progress);
 
-  const band = sectionBand(pt, progress, cur.sectionId);
+  // Apply review schedules + best score + snapshot atomically.
+  const saved = await mutateProgress(userId, topicId, (p) => {
+    for (const r of review) {
+      p.review[r.id] = scheduleReview(p.review[r.id], r.correct, now);
+    }
+    p.assessmentBest[cur.sectionId] = Math.max(p.assessmentBest[cur.sectionId] ?? 0, score);
+    recordSnapshot(p, pt, now);
+  });
+
+  const band = sectionBand(pt, saved, cur.sectionId);
   return NextResponse.json({
     correct,
     total: cur.items.length,

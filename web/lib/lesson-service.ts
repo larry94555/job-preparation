@@ -117,6 +117,32 @@ export async function saveProgress(
   await store.set(userId, topicId, progress);
 }
 
+/**
+ * Atomically read-modify-write a user's Progress for one topic. The store reads
+ * the freshest stored value under a lock, we re-merge it onto the defaults (same
+ * shape as `loadProgress`), run `mutator` to accumulate the change, and the store
+ * writes it back — with no concurrent writer for this (user, topic) in between.
+ * This is the write path every request handler should use so two in-flight
+ * requests (two tabs, a double-submit, a hosted multi-instance deploy) can't lose
+ * each other's updates. Returns the merged, mutated Progress for building the
+ * response. `mutator` may run more than once and must not have side effects.
+ */
+export async function mutateProgress(
+  userId: string,
+  topicId: string,
+  mutator: (progress: Progress) => void,
+): Promise<Progress> {
+  const store = createStore();
+  const base = freshProgress(seedFromString(topicId));
+  const updated = await store.update(userId, topicId, (saved) => {
+    const progress =
+      saved && typeof saved === "object" ? { ...base, ...(saved as Partial<Progress>) } : base;
+    mutator(progress);
+    return progress;
+  });
+  return updated as Progress;
+}
+
 /** A topic + its playthrough + this user's progress, clamped to a valid index. */
 export interface LessonContext {
   topic: LoadedTopic;
@@ -445,17 +471,9 @@ export async function gradePractice(
   if (items.length === 0) return { error: "no active practice" };
 
   const gradedNow = Date.now();
-  // Load each involved topic's Progress once so SM-2 updates accumulate.
-  const touched = new Map<string, Progress>();
-  const progressFor = async (id: string): Promise<Progress> => {
-    let p = touched.get(id);
-    if (!p) {
-      p = await loadProgress(userId, id);
-      touched.set(id, p);
-    }
-    return p;
-  };
-
+  // Grade purely, collecting the SM-2 review updates grouped by topic so each
+  // topic's Progress can be written in one atomic read-modify-write.
+  const updatesByTopic = new Map<string, { qid: string; ok: boolean }[]>();
   let correct = 0;
   const review: { id: string; correct: boolean; topicId: string }[] = [];
   for (const it of items) {
@@ -467,21 +485,32 @@ export async function gradePractice(
           ? gradeTextInput(it.question, a, it.params)
           : false;
     if (ok) correct++;
-    const p = await progressFor(it.topicId);
-    p.review[it.question.id] = scheduleReview(p.review[it.question.id], ok, gradedNow);
+    const list = updatesByTopic.get(it.topicId) ?? [];
+    list.push({ qid: it.question.id, ok });
+    updatesByTopic.set(it.topicId, list);
     review.push({ id: it.question.id, correct: ok, topicId: it.topicId });
   }
 
   const total = items.length;
   const score = total ? correct / total : 0;
 
-  if (kind === "cumulative" && topicId) {
-    const p = await progressFor(topicId);
-    p.cumulativeBest = Math.max(p.cumulativeBest ?? 0, score);
+  // A cumulative round also records a best score on its topic, even if that
+  // topic contributed no review items this round.
+  if (kind === "cumulative" && topicId && !updatesByTopic.has(topicId)) {
+    updatesByTopic.set(topicId, []);
   }
 
-  // Persist every touched topic's Progress.
-  for (const [id, p] of touched) await saveProgress(userId, id, p);
+  // Persist each touched topic atomically (no lost updates under concurrency).
+  for (const [id, ups] of updatesByTopic) {
+    await mutateProgress(userId, id, (p) => {
+      for (const u of ups) {
+        p.review[u.qid] = scheduleReview(p.review[u.qid], u.ok, gradedNow);
+      }
+      if (kind === "cumulative" && id === topicId) {
+        p.cumulativeBest = Math.max(p.cumulativeBest ?? 0, score);
+      }
+    });
+  }
 
   return { kind, correct, total, score, passed: score >= 0.8, review };
 }

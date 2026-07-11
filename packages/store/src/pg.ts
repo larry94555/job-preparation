@@ -1,7 +1,7 @@
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { Pool as PgPool } from "pg";
 import type { Db } from "./db-ops.js";
-import { getProgress, listProgress, setProgress } from "./db-ops.js";
+import { getProgress, listProgress, setProgress, updateProgress } from "./db-ops.js";
 import type { ProgressStore } from "./types.js";
 
 /**
@@ -54,5 +54,13 @@ export class PgProgressStore implements ProgressStore {
 
   async list(userId: string): Promise<{ topicId: string; data: unknown }[]> {
     return listProgress(await this.database(), userId);
+  }
+
+  async update(
+    userId: string,
+    topicId: string,
+    mutator: (prev: unknown | null) => unknown,
+  ): Promise<unknown> {
+    return updateProgress(await this.database(), userId, topicId, mutator);
   }
 }

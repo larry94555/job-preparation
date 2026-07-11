@@ -63,6 +63,41 @@ export async function setProgress(
     });
 }
 
+/**
+ * Atomically read-modify-write a user's progress for one topic inside a
+ * transaction. Ensures the row exists (`ON CONFLICT DO NOTHING`), takes a
+ * `SELECT … FOR UPDATE` row lock, applies `mutator` to the current value, and
+ * writes the result — so two app instances updating the same (userId, topicId)
+ * serialize on the row and neither loses its accumulation. Returns the new value.
+ */
+export async function updateProgress(
+  db: Db,
+  userId: string,
+  topicId: string,
+  mutator: (prev: unknown | null) => unknown,
+): Promise<unknown> {
+  await ensureUser(db, userId);
+  return db.transaction(async (tx) => {
+    // Guarantee a row to lock (closes the concurrent-first-write race).
+    await tx
+      .insert(lessonProgress)
+      .values({ userId, topicId, data: null, updatedAt: new Date() })
+      .onConflictDoNothing();
+    const rows = await tx
+      .select({ data: lessonProgress.data })
+      .from(lessonProgress)
+      .where(and(eq(lessonProgress.userId, userId), eq(lessonProgress.topicId, topicId)))
+      .for("update");
+    const prev = rows.length ? (rows[0].data ?? null) : null;
+    const updated = mutator(prev);
+    await tx
+      .update(lessonProgress)
+      .set({ data: updated, updatedAt: new Date() })
+      .where(and(eq(lessonProgress.userId, userId), eq(lessonProgress.topicId, topicId)));
+    return updated;
+  });
+}
+
 /** List all saved topic progress for a user. */
 export async function listProgress(
   db: Db,

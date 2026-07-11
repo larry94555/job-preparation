@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { gradeMultipleChoice, gradeTextInput } from "@job-prep/engine";
 import { recordSnapshot, scheduleReview } from "@job-prep/lesson";
-import { loadContext, saveProgress } from "@/lib/lesson-service";
+import { loadContext, mutateProgress } from "@/lib/lesson-service";
 import { currentUserId } from "@/lib/session";
 
 export const runtime = "nodejs";
@@ -33,13 +33,16 @@ export async function POST(req: NextRequest) {
         ? gradeTextInput(cur.question, answer, cur.params)
         : false;
 
-  if (!progress.seenChecks.includes(cur.question.id)) progress.seenChecks.push(cur.question.id);
-  if (correct && !progress.correctChecks.includes(cur.question.id)) {
-    progress.correctChecks.push(cur.question.id);
-  }
-  progress.review[cur.question.id] = scheduleReview(progress.review[cur.question.id], correct, now);
-  recordSnapshot(progress, pt, now);
-  await saveProgress(userId, topicId, progress);
+  // Accumulate seen/correct + review + snapshot atomically against the freshest
+  // stored progress, so a concurrent write for this user+topic isn't lost.
+  await mutateProgress(userId, topicId, (p) => {
+    if (!p.seenChecks.includes(cur.question.id)) p.seenChecks.push(cur.question.id);
+    if (correct && !p.correctChecks.includes(cur.question.id)) {
+      p.correctChecks.push(cur.question.id);
+    }
+    p.review[cur.question.id] = scheduleReview(p.review[cur.question.id], correct, now);
+    recordSnapshot(p, pt, now);
+  });
 
   return NextResponse.json({
     correct,
