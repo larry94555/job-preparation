@@ -47,6 +47,7 @@ export async function POST(req: NextRequest) {
     referencePoints,
     calibration,
     testCode,
+    language: q.type === "code" ? q.language : undefined,
   };
 
   // Enqueue the grading job. Deterministic types never reach here.

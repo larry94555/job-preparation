@@ -1,0 +1,54 @@
+# Free entry (short answer)
+- id: fe-stop-reason
+  type: text_input
+  tags: [toolloop]
+  difficulty: 2
+  prompt: "What stop_reason signals the model wants to use a tool? (one token)"
+  answer:
+    regex: '^tool_use$'
+    normalize: true
+
+- id: fe-tool-result-id
+  type: text_input
+  tags: [toolloop]
+  difficulty: 3
+  prompt: "What field ties a tool_result back to the call that produced it?"
+  answer:
+    regex: '^tool_use_id$'
+    normalize: true
+
+- id: fe-schema-required
+  type: text_input
+  tags: [schema]
+  difficulty: 2
+  prompt: "Which JSON-schema key lists the mandatory arguments? (one word)"
+  answer:
+    regex: '^required$'
+    normalize: true
+
+- id: fe-validate-lib
+  type: text_input
+  tags: [structured]
+  difficulty: 2
+  prompt: "Which Python library is the standard for validating structured LLM output? (one word)"
+  answer:
+    regex: '^pydantic$'
+    normalize: true
+
+- id: fe-unknown-tool
+  type: text_input
+  tags: [recovery]
+  difficulty: 2
+  prompt: "The model calls a tool that isn't registered. The harness should ____ the call (one word)."
+  answer:
+    regex: '^(reject|refuse|deny|error|drop)$'
+    normalize: true
+
+- id: fe-recover-action
+  type: text_input
+  tags: [recovery]
+  difficulty: 3
+  prompt: "After a bad tool call, what do you return so the model can fix it? (one word or two)"
+  answer:
+    regex: '^(a |an )?(structured |model-facing )?error( message)?$'
+    normalize: true

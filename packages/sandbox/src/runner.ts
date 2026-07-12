@@ -1,4 +1,4 @@
-import { type RunResult, runTypeScript } from "./run.js";
+import { type RunResult, runPython, runTypeScript } from "./run.js";
 
 /**
  * The isolated code-execution seam (DESIGN §9). Grading talks to a `CodeRunner`
@@ -32,12 +32,16 @@ export class LocalRunner implements CodeRunner {
     language?: string;
     timeoutMs?: number;
   }): Promise<RunResult> {
-    return runTypeScript({
+    const common = {
       solutionCode: opts.solutionCode,
       testCode: opts.testCode,
       timeoutMs: opts.timeoutMs,
       repoRoot: process.cwd(),
-    });
+    };
+    // Dispatch by language: the agentic track's exercises are Python.
+    return (opts.language ?? "").toLowerCase() === "python"
+      ? runPython(common)
+      : runTypeScript(common);
   }
 }
 

@@ -1,0 +1,120 @@
+# Multiple choice
+- id: mc-talk-vs-act
+  type: multiple_choice
+  tags: [toolloop]
+  difficulty: 2
+  prompt: "What is the difference between a model that only produces text and one wired for tool calling?"
+  options:
+    - { text: "A talking model is a chatbot; a model that can call tools to act on the world is an agent", correct: true }
+    - { text: "There is none — tool calling is just a longer prompt" }
+    - { text: "A talking model is always more accurate because it never touches external state" }
+    - { text: "An agent is simply a model with a bigger context window" }
+  explanation: "A model that can only emit text is a chatbot. The moment it can request tools that read or change the world — and a harness runs them — it becomes an agent."
+
+- id: mc-stop-reason
+  type: multiple_choice
+  tags: [toolloop]
+  difficulty: 2
+  prompt: "The model returns with `stop_reason == \"tool_use\"`. What does that tell the harness?"
+  options:
+    - { text: "The model wants a tool run; the loop must execute it and call the model again", correct: true }
+    - { text: "The conversation is finished and the final text is ready" }
+    - { text: "The model failed and the request should be retried unchanged" }
+    - { text: "The harness should return the raw tool block to the end user" }
+  explanation: "`tool_use` means the turn ended because the model requested a tool. The loop runs the tool, feeds the result back, and calls the model again — it does not stop."
+
+- id: mc-tool-result-role
+  type: multiple_choice
+  tags: [toolloop]
+  difficulty: 3
+  prompt: "After the harness runs a tool, how is the output returned to the model?"
+  options:
+    - { text: "As a user-role message containing a tool_result block", correct: true }
+    - { text: "As a new system prompt prepended to the conversation" }
+    - { text: "As an assistant-role message so the model thinks it said it" }
+    - { text: "It is not returned; the model infers the result from context" }
+  explanation: "Tool output goes back as a user-role message whose content is a tool_result block. That is the channel the loop uses to feed execution results into the next model turn."
+
+- id: mc-tool-schema-why
+  type: multiple_choice
+  tags: [schema]
+  difficulty: 2
+  prompt: "Why give a tool a typed `input_schema` rather than accepting free-form arguments?"
+  options:
+    - { text: "So the harness can validate and coerce the model's arguments against the contract before executing", correct: true }
+    - { text: "So the model runs faster at inference time" }
+    - { text: "So the tool never needs any error handling" }
+    - { text: "So the system prompt can be shorter" }
+  explanation: "A typed input_schema is a contract: the harness checks the model's proposed arguments against it, coerces types, and rejects malformed calls before any side effect happens."
+
+- id: mc-required-field
+  type: multiple_choice
+  tags: [schema]
+  difficulty: 2
+  prompt: "What does the `required` list in a tool's input_schema do?"
+  options:
+    - { text: "It names the arguments the model must supply; the harness rejects a call that omits any of them", correct: true }
+    - { text: "It ranks arguments by how often the model uses them" }
+    - { text: "It tells the model which arguments are optional and safe to skip" }
+    - { text: "It makes every argument default to null when missing" }
+  explanation: "`required` is the schema's list of mandatory arguments. A call missing one fails validation, so the harness rejects it instead of running the tool with a hole in its input."
+
+- id: mc-pydantic-why
+  type: multiple_choice
+  tags: [structured]
+  difficulty: 3
+  prompt: "Why parse the model's JSON into a Pydantic model instead of using the dict directly?"
+  options:
+    - { text: "Parsing plus validation makes bad output fail loudly at the boundary instead of corrupting state silently downstream", correct: true }
+    - { text: "Pydantic makes the model emit JSON faster" }
+    - { text: "A Pydantic model removes the need to prompt for JSON at all" }
+    - { text: "It guarantees the model can never return invalid JSON" }
+  explanation: "Validating into a typed model turns a malformed or out-of-range field into an immediate, localized error — far better than a wrong value flowing silently into the rest of the program."
+
+- id: mc-validate-not-trust
+  type: multiple_choice
+  tags: [structured]
+  difficulty: 2
+  prompt: "The model returns a JSON string that looks correct. What should you do with it?"
+  options:
+    - { text: "Never trust the raw string — validate it against a schema before using any field", correct: true }
+    - { text: "Trust it; if it parses as JSON the values are guaranteed correct" }
+    - { text: "Use it directly and only validate if a later step crashes" }
+    - { text: "Ask the model whether its own output is valid" }
+  explanation: "Well-formed JSON is not correct JSON: fields can be missing, the wrong type, or out of range. Always validate the parsed object against the schema before trusting any value."
+
+- id: mc-json-mode
+  type: multiple_choice
+  tags: [structured]
+  difficulty: 3
+  prompt: "What does a JSON-schema / `response_format` structured-outputs mode give you?"
+  options:
+    - { text: "It constrains decoding so the model's output is guaranteed to match the JSON schema", correct: true }
+    - { text: "It speeds up token generation by skipping punctuation" }
+    - { text: "It lets the model return prose that you parse with a regex later" }
+    - { text: "It replaces the need to define a schema at all" }
+  explanation: "Structured-outputs / JSON-schema mode constrains the decoder to only emit tokens consistent with the schema, so the returned text is guaranteed to parse and match — you no longer hope the model returns valid JSON."
+
+- id: mc-wrong-tool-recover
+  type: multiple_choice
+  tags: [recovery]
+  difficulty: 3
+  prompt: "The model emits a call to a tool that is malformed or not registered. The harness should:"
+  options:
+    - { text: "Return a structured error the model can read, not crash the loop", correct: true }
+    - { text: "Throw an unhandled exception and end the session" }
+    - { text: "Guess the closest real tool and run that instead" }
+    - { text: "Silently drop the call and continue with no feedback" }
+  explanation: "A bad tool call is expected input, not a fatal event. Return a structured, model-facing error so the loop stays alive; never crash, guess, or drop silently."
+
+- id: mc-loop-continues
+  type: multiple_choice
+  tags: [recovery]
+  difficulty: 3
+  prompt: "You have returned a structured error for a bad tool call. Why feed it back into the loop?"
+  options:
+    - { text: "So the model can read the error and self-correct with a fixed call on the next turn", correct: true }
+    - { text: "So the user has to fix the arguments manually" }
+    - { text: "Errors should never be shown to the model; feeding it back leaks internals" }
+    - { text: "To pad the context so the model slows down and is more careful" }
+  explanation: "The error is only useful if the model sees it. Feeding a model-facing error back turns a failed call into a self-correcting step: the model reads what was wrong and retries correctly."

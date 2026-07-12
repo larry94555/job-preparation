@@ -1,0 +1,7 @@
+id: lesson-expert-context
+title: "Expert context: the tool-calling canon"
+material: expert-context.md
+segments:
+  - present: the-tool-calling-canon
+  - check: expert-mcp
+  - check: expert-structured-outputs

@@ -1,0 +1,12 @@
+id: lesson-recovery
+title: "Recovering from bad tool calls"
+material: recovery.md
+segments:
+  - present: the-model-will-call-tools-wrong
+  - check: mc-wrong-tool-recover
+  - check: fe-unknown-tool
+  - present: recover-instead-of-crashing
+  - check: mc-loop-continues
+  - check: cloze-recover
+  - check: fe-recover-action
+  - apply: essay-validate-recover

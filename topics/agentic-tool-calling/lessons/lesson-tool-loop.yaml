@@ -1,0 +1,11 @@
+id: lesson-tool-loop
+title: "The agent loop"
+material: tool-loop.md
+segments:
+  - present: the-agent-loop
+  - check: mc-stop-reason
+  - check: fe-stop-reason
+  - present: feeding-results-back
+  - check: mc-tool-result-role
+  - check: cloze-tool-result
+  - check: fe-tool-result-id

@@ -1,0 +1,9 @@
+id: lesson-why-tools
+title: "Why a talking model is not an agent"
+material: why-tools.md
+segments:
+  - present: why-a-model-that-talks-is-not-an-agent
+  - check: mc-talk-vs-act
+  - present: tools-turn-words-into-actions
+  - check: cloze-tool-use
+  - apply: essay-talk-vs-act

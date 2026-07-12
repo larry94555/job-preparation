@@ -38,6 +38,8 @@ export interface GradingPayload {
   calibration?: CalibrationSet;
   /** For code jobs: the test file to gate correctness. */
   testCode?: string;
+  /** For code jobs: the exercise language (e.g. "typescript" | "python"). */
+  language?: string;
 }
 
 export interface WorkerDeps {
@@ -83,6 +85,7 @@ export async function gradeJob(job: Job, deps: WorkerDeps): Promise<JobResult> {
       const res = await deps.run({
         solutionCode: payload.answer ?? "",
         testCode: payload.testCode,
+        language: payload.language,
         timeoutMs: 15000,
       });
       testsPassed = res.passed;

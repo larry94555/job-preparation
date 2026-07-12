@@ -1,0 +1,49 @@
+# Calibration for eval-agentic-tools-code (exemplars target the tool-recovery / tool-loop exercises).
+skill: eval-agentic-tools-code
+cases:
+  - answer: >-
+      tests_passed=true. technically_correct holds: safe_call looks the tool up first, returns a
+      structured unknown_tool error for a missing name without raising, runs validate before the handler,
+      and only calls the handler on valid args. validates_input holds: the validator is checked before the
+      handler runs. handles_errors holds: unknown tool and invalid args each return a structured error
+      instead of throwing. matches_intent holds: it returns {"ok": True, "value": handler(args)} on
+      success exactly as asked.
+      signals.must_use=[structured error for unknown tool, validate before handler, return handler value];
+      avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, validates_input: true, handles_errors: true, matches_intent: true }
+
+  - answer: >-
+      tests_passed=true. technically_correct holds: the tool loop continues while stop_reason is tool_use,
+      runs the requested tool, appends the result, and returns text on end_turn, with a 10-step cap.
+      validates_input holds: it guards the step count and only indexes tools that the model named.
+      handles_errors is weaker: it does not wrap a missing tool key, but the exercise did not require that
+      and the tests pass. matches_intent holds: the tool result is fed back before the next model call and
+      the final text is returned on end_turn.
+      signals.must_use=[loop on tool_use, feed result back, step cap]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, validates_input: true, handles_errors: false, matches_intent: true }
+
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: parse_report returns the parsed dict after only
+      checking that json.loads succeeded, so it never validates field types or the confidence range and
+      would accept a confidence of 1.7. validates_input does NOT hold: no type or range checks are
+      performed. handles_errors does NOT hold: bad input returns silently instead of raising ValueError.
+      matches_intent does NOT hold: the prompt asked for validation and it does none.
+      signals.must_use=[parse JSON]; avoid=[trusting the parsed dict without checking, returning silently on bad input].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, validates_input: false, handles_errors: false, matches_intent: false }
+
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: parse_report validates the string fields and
+      raises ValueError on wrong types, but it forgets the confidence range check, so an out-of-range
+      confidence slips through — a conceptually wrong gap for the exercise. validates_input holds for the
+      type checks it does perform. handles_errors holds: it raises ValueError on the violations it does
+      catch. matches_intent mostly holds: it returns the dict on valid input and validates most fields.
+      signals.must_use=[parse JSON, validate field types]; avoid=[skipping the confidence range check].
+    expect:
+      verdict: borderline
+      checks: { technically_correct: false, validates_input: true, handles_errors: true, matches_intent: true }

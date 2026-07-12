@@ -1,0 +1,12 @@
+id: lesson-structured
+title: "Structured outputs & validation"
+material: structured-outputs.md
+segments:
+  - present: validate-everything-the-model-returns
+  - check: mc-pydantic-why
+  - check: mc-validate-not-trust
+  - check: cloze-structured
+  - check: cloze-validate
+  - present: forcing-valid-output
+  - check: mc-json-mode
+  - check: fe-validate-lib

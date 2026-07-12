@@ -1,0 +1,24 @@
+# Essay
+- id: essay-talk-vs-act
+  type: essay
+  length: short
+  tags: [toolloop]
+  difficulty: 3
+  prompt: "Explain the shift from a model that only talks to an agent that acts via tool calling, and describe the tool_use → execute → tool_result loop that makes it work."
+  eval_skill: eval-agentic-tools-essay
+  reference_points:
+    - "A model that only emits text is a chatbot; giving it tools it can request — and a harness that runs them — turns it into an agent that acts on the world."
+    - "The loop: the model returns stop_reason == \"tool_use\" with a tool name and input; the harness executes the tool and appends the output as a tool_result block."
+    - "The result is fed back as a user-role message and the model is called again, looping until stop_reason == \"end_turn\", when the final text is returned."
+
+- id: essay-validate-recover
+  type: essay
+  length: short
+  tags: [recovery]
+  difficulty: 3
+  prompt: "The model emits a call to a tool that isn't registered, and another call to a known tool with a required field missing. Describe how a good harness validates and recovers from each, and why."
+  eval_skill: eval-agentic-tools-essay
+  reference_points:
+    - "Unknown tool: the harness rejects the call rather than guessing or executing it — an unregistered name is a hallucinated call."
+    - "Missing required field: the call fails schema validation before the handler runs; the harness does not silently default or coerce the argument."
+    - "In both cases return a structured, model-facing error and feed it back into the loop so the model can self-correct on the next turn — never crash or run unvalidated input."

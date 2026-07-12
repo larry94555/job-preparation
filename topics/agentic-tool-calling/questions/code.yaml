@@ -1,0 +1,62 @@
+# Coding exercises — engine type: code (graded by tests + concept skill)
+- id: code-tool-loop
+  type: code
+  language: python
+  tags: [toolloop]
+  difficulty: 3
+  prompt: >-
+    Implement `run_agent(client, user_message, tools) -> str`. `client.create(messages)` returns an
+    object with `.stop_reason` ("tool_use" or "end_turn"), `.tool_name`, `.tool_input`, and `.text`.
+    Loop: while `stop_reason == "tool_use"`, run `tools[tool_name](tool_input)`, append the result to
+    `messages`, and call `client.create` again; on `"end_turn"` return `.text`. Cap the loop at 10 steps
+    so a misbehaving model can't spin forever.
+  starter_file: exercises/tool-loop/starter.py
+  test_file: exercises/tool-loop/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-tools-code
+  concept_checks:
+    must_use: ["loop while stop_reason is tool_use", "run the requested tool and feed its result back", "return the text on end_turn", "cap the number of steps"]
+    avoid_antipattern: ["returning after a single model call", "looping without a step cap"]
+
+- id: code-pydantic-parse
+  type: code
+  language: python
+  tags: [structured]
+  difficulty: 3
+  prompt: >-
+    Implement `parse_report(raw: str) -> dict`. json-load `raw` and validate it: `topic` is a str,
+    `summary` is a str, `key_findings` is a list of str, and `confidence` is a float in [0, 1]. Raise
+    `ValueError` on any violation — a missing key, a wrong type, or an out-of-range confidence. Return the
+    parsed dict when everything is valid. (This is the validation Pydantic would do for you.)
+  starter_file: exercises/pydantic-parse/starter.py
+  test_file: exercises/pydantic-parse/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-tools-code
+  concept_checks:
+    must_use: ["parse the raw string as JSON", "validate every field's type", "range-check confidence in [0,1]", "raise ValueError on any violation"]
+    avoid_antipattern: ["trusting the parsed dict without checking types", "returning silently on bad input"]
+
+- id: code-tool-recovery
+  type: code
+  language: python
+  tags: [recovery]
+  difficulty: 3
+  prompt: >-
+    Implement `safe_call(registry, name, args) -> dict`. `registry` maps a name to
+    `{"handler": fn, "validate": fn-or-None}`. Rules: an unknown `name` returns
+    `{"ok": False, "error": "unknown_tool"}` (do NOT raise); if `validate` is present and
+    `validate(args)` is False, return `{"ok": False, "error": "invalid_args"}` and do NOT run the handler;
+    otherwise return `{"ok": True, "value": handler(args)}`.
+  starter_file: exercises/tool-recovery/starter.py
+  test_file: exercises/tool-recovery/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-tools-code
+  concept_checks:
+    must_use: ["structured error for an unknown tool", "validate args before running the handler", "return the handler value on success"]
+    avoid_antipattern: ["raising on an unknown tool", "running the handler when validation fails"]

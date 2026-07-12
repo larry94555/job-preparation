@@ -1,0 +1,10 @@
+id: agentic-tool-calling
+title: "Tool Calling & Structured Outputs"
+description: "A model that only talks is a chatbot; a model that can call tools is an agent. Define tools as typed contracts, run the tool-use loop, force structured outputs with Pydantic, and recover when the model calls a tool wrong."
+track: agentic
+pass_threshold: 0.8
+tag_weights:
+  toolloop: 1.0
+  schema: 1.0
+  structured: 1.2
+  recovery: 1.2
