@@ -83,8 +83,8 @@ The shipped catalog has three backends:
 - **`llamacpp-local`** — a local llama.cpp `llama-server` at `:8080`, single-model.
   Use it to rehearse the hosted setup on your machine:
   ```bash
-  # from a llama.cpp build; serves ONE gguf as the primary model
-  llama-server -m /models/qwen2.5-3b-instruct-q4_k_m.gguf --host 0.0.0.0 --port 8080 -c 4096
+  # from a llama.cpp build; serves ONE gguf as the primary model, single-slot
+  llama-server -m /models/llama-3.1-8b-instruct-q4_k_m.gguf --host 0.0.0.0 --port 8080 -c 16384 --parallel 1
   ```
   Then select "llama.cpp server (local)" in /models — the secondary tier disables.
 - **`oracle-llamacpp`** — `hosted`-only. The single model deployed to Oracle Cloud.
@@ -95,13 +95,28 @@ The shipped catalog has three backends:
    RAM) fits models up to ~8B Q4; a PAYG 24 GB shape fits Phi-3-Medium-14B. No GPU
    needed (all catalog models are `cpu_only`).
 2. Build llama.cpp and download one GGUF (the model you selected as `primary`,
-   from its `huggingface` repo).
-3. Run `llama-server -m <model>.gguf --host 0.0.0.0 --port 8080 -c 4096` (behind
-   the firewall / a reverse proxy; restrict the port to the app).
+   from its `huggingface` repo). Llama-3.1-8B-Instruct-Q4_K_M is the current pick.
+3. Run llama-server **single-slot** with a generous context and the API key:
+   ```bash
+   llama-server -m <model>.gguf --host 0.0.0.0 --port 8080 \
+     -c 16384 --parallel 1 --api-key "$LLAMA_API_KEY"
+   ```
+   - **`--parallel 1` is REQUIRED for correctness.** With more than one slot,
+     llama-server batches requests continuously, which reorders floating-point
+     reductions and makes output **non-deterministic even at `temperature: 0`** —
+     grades then wobble run-to-run and quality drops. Grading is sequential, so
+     one slot costs nothing. (The eval-gate and worker warn if `/props` reports
+     `total_slots > 1`.)
+   - **`-c 16384`** is comfortable headroom — grading prompts are ~1.3k tokens;
+     the KV cache is ~2 GB for the 8B, trivial on 24 GB. `-c 8192` is also fine.
+   - `--api-key` protects `/v1/chat/completions` (note: `/v1/models` and `/props`
+     stay public by design — a 200 there does not mean the key is unset).
 4. Deploy the app with `DEPLOY_ENV=hosted` and either set the Oracle backend's
    `base_url` to the instance address or inject it at runtime via `LLAMA_BASE_URL`.
    The app now grades every answer with that one model, and /models shows it
-   read-only.
+   read-only. The grader pins `temperature: 0`, `top_k: 1`, `seed`, and a
+   `max_tokens` cap (overridable via `LLAMA_SEED` / `LLAMA_MAX_TOKENS` /
+   `LLAMA_TIMEOUT_MS`) so grades are reproducible regardless of server defaults.
 
 **Securing the model + secrets.** The endpoint should not stay open. Generate a
 key, restart `llama-server` with `--api-key "<key>"`, and give the same key to the
