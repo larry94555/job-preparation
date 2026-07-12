@@ -1,0 +1,18 @@
+sections:
+  - id: sec-toolloop
+    title: "Tool schemas & the tool-use loop"
+    lessons: [lesson-why-tools, lesson-tool-schema, lesson-tool-loop, lesson-expert-context]
+    assessment:
+      title: "Section 1 — Tool schemas & the tool-use loop"
+      from_tags: [toolloop, schema]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-structured
+    title: "Structured outputs & recovery"
+    lessons: [lesson-structured, lesson-recovery, lesson-frontier-ops]
+    assessment:
+      title: "Section 2 — Structured outputs & recovery"
+      from_tags: [structured, recovery]
+      count: 5
+      pass_threshold: 0.8

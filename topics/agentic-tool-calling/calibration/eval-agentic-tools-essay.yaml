@@ -1,0 +1,59 @@
+# Calibration for eval-agentic-tools-essay (exemplars target essay-validate-recover).
+skill: eval-agentic-tools-essay
+cases:
+  # PASS — answers the question, hits every reference point, all claims correct,
+  # names concrete mechanisms. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      An unregistered tool name is a hallucinated call, so the harness rejects it instead of guessing the
+      closest real tool — it returns a structured error like {"ok": false, "error": "unknown_tool"} rather
+      than raising. The known tool with a missing required field fails schema validation before the handler
+      runs, so it never executes on garbage input; the harness returns {"ok": false, "error":
+      "invalid_args"} and does not silently default or coerce the field. In both cases the structured,
+      model-facing error is fed back into the loop as a tool_result so the model reads exactly what was
+      wrong and retries with a corrected call on the next turn. Nothing crashes and no unvalidated input
+      ever reaches a tool.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # PASS — a second strong, correct, specific answer using different wording.
+  # 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      For the unknown tool, the dispatcher looks it up in the registry, finds nothing, and returns an
+      error object naming the problem instead of throwing or running some similarly named tool — an
+      unregistered name is a hallucinated call and must not execute. For the call missing a required
+      field, validation against the tool's input_schema fails before the handler is invoked, so the
+      harness reports invalid_args and refuses to default the field or blindly coerce a type. Both errors
+      are model-facing and go back into the conversation as a tool_result, which lets the model self-correct
+      on its next turn. The reason is the same in both cases: the model is an untrusted caller, so you
+      validate first and turn a bad call into a recoverable step rather than a crash.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — off-topic and technically wrong: says to run the closest tool and default
+  # the missing field, and to crash on error. Fails the gate (technically_correct)
+  # plus every other check. 0/4 = 0.0 → fail; gate false caps fail→fail.
+  - answer: >-
+      If the tool name is unknown the harness should just run whichever registered tool is closest, since
+      the model clearly meant that one, and if a required field is missing it should fill in a sensible
+      default so the call never fails. There is no need to send anything back to the model — if something
+      still goes wrong the cleanest thing is to raise an exception and end the session so a human can look
+      at it.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # BORDERLINE — on-topic, hits the key points, but contains a wrong claim (says a
+  # tool_use turn is the final answer so no loop is needed), so it misses ONLY the gate.
+  # 3/4 = 0.75 → base pass; gate technically_correct=false caps pass→borderline.
+  - answer: >-
+      The unknown tool is a hallucinated call, so the harness rejects it and returns a structured
+      unknown_tool error rather than executing anything, and the call missing a required field fails schema
+      validation before the handler runs so it never executes on bad input, returning invalid_args. Both
+      are returned as model-facing errors so the model can fix them. The one thing to note is that a
+      tool_use turn is already the model's final answer, so there is no loop to feed the error back into —
+      you just return the error to the user and the interaction ends there.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: false, concrete: true }

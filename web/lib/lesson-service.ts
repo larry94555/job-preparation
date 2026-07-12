@@ -62,6 +62,34 @@ const ORDER = [
   "production-failure-modes",
 ];
 
+// The independent "Becoming an Agentic AI Engineer in 6 Months" track. The full
+// 12-topic plan is shown on the home page grouped into six monthly phases; a
+// topic that hasn't been authored yet renders as a muted "Planned" card, so the
+// whole roadmap is visible from day one. Titles here are the roadmap's titles.
+const AGENTIC_TITLES: Record<string, string> = {
+  "agentic-async-foundations": "Python & Async Foundations",
+  "agentic-llm-mechanics": "LLM Fundamentals for Agents",
+  "agentic-tool-calling": "Tool Calling & Structured Outputs",
+  "agentic-memory-state": "Memory & State Management",
+  "agentic-react-loop": "Single-Agent Workflows (ReAct)",
+  "agentic-multi-agent": "Multi-Agent Orchestration",
+  "agentic-human-in-the-loop": "Human-in-the-Loop",
+  "agentic-evaluation": "Evaluation & Quality",
+  "agentic-observability": "Observability & Tracing",
+  "agentic-security": "Security & Guardrails",
+  "agentic-deployment": "Production Deployment",
+  "agentic-ship-in-public": "Ship in Public (Capstone)",
+};
+const AGENTIC_PHASES: { title: string; slugs: string[] }[] = [
+  { title: "Month 1 — Foundation", slugs: ["agentic-async-foundations", "agentic-llm-mechanics"] },
+  { title: "Month 2 — Agent Core", slugs: ["agentic-tool-calling", "agentic-memory-state"] },
+  { title: "Month 3 — Building Agents", slugs: ["agentic-react-loop", "agentic-multi-agent"] },
+  { title: "Month 4 — Production Skills", slugs: ["agentic-human-in-the-loop", "agentic-evaluation"] },
+  { title: "Month 5 — Ship It", slugs: ["agentic-observability", "agentic-security"] },
+  { title: "Month 6 — Real World", slugs: ["agentic-deployment", "agentic-ship-in-public"] },
+];
+const AGENTIC_TOTAL = Object.keys(AGENTIC_TITLES).length;
+
 // Content is loaded once per server process and cached (it's derived purely
 // from the git-tracked topics/ configs). Progress is never cached — it's read
 // per request from the store so the app stays stateless.
@@ -206,36 +234,55 @@ export function stateFor(ctx: LessonContext) {
 }
 
 // ---- home hub data --------------------------------------------------------
+
+/** Build the home-page card (progress + mastery dashboard) for one loaded topic. */
+async function buildHomeCard(userId: string, t: LoadedTopic) {
+  const id = t.topic!.id;
+  const progress = await loadProgress(userId, id);
+  const pt = buildPlaythrough(t, progress.seed);
+  const index = Math.min(progress.index, pt.steps.length);
+  const dash = dashboard(pt, progress);
+  const done = index >= pt.steps.length;
+  const fullyMastered = dash.length > 0 && dash.every((d) => d.band >= 3);
+  const activity =
+    index === 0
+      ? "Not started"
+      : done
+        ? "Played through"
+        : `In progress — step ${index + 1} of ${pt.steps.length}`;
+  return {
+    id,
+    title: t.topic!.title,
+    description: t.topic!.description,
+    total: pt.steps.length,
+    index,
+    done,
+    fullyMastered,
+    activity,
+    dashboard: dash,
+    track: t.topic!.track ?? "core",
+    built: true as const,
+  };
+}
+
 export async function homeData(userId: string) {
   const lessons = await allLessons();
-  const items = await Promise.all(
-    lessons.map(async (t) => {
-      const id = t.topic!.id;
-      const progress = await loadProgress(userId, id);
-      const pt = buildPlaythrough(t, progress.seed);
-      const index = Math.min(progress.index, pt.steps.length);
-      const dash = dashboard(pt, progress);
-      const done = index >= pt.steps.length;
-      const fullyMastered = dash.length > 0 && dash.every((d) => d.band >= 3);
-      const activity =
-        index === 0
-          ? "Not started"
-          : done
-            ? "Played through"
-            : `In progress — step ${index + 1} of ${pt.steps.length}`;
-      return {
-        id,
-        title: t.topic!.title,
-        description: t.topic!.description,
-        total: pt.steps.length,
-        index,
-        done,
-        fullyMastered,
-        activity,
-        dashboard: dash,
-      };
+  const cards = await Promise.all(lessons.map((t) => buildHomeCard(userId, t)));
+  const byId = new Map(cards.map((c) => [c.id, c]));
+
+  // Core track (the original curriculum) — the top grid + the readiness stats.
+  const items = cards.filter((c) => c.track !== "agentic");
+
+  // Agentic track — the six monthly phases; unbuilt topics render as "Planned".
+  const agenticPhases = AGENTIC_PHASES.map((ph) => ({
+    title: ph.title,
+    items: ph.slugs.map((slug) => {
+      const card = byId.get(slug);
+      return card ?? { id: slug, title: AGENTIC_TITLES[slug] ?? slug, built: false as const };
     }),
-  );
+  }));
+  const agenticBuilt = cards.filter((c) => c.track === "agentic").length;
+
   const cont =
     items.find((i) => i.index < i.total)?.id ??
     items.find((i) => !i.fullyMastered)?.id ??
@@ -250,6 +297,7 @@ export async function homeData(userId: string) {
   const due = (await reviewCandidates(userId, Date.now())).length;
   return {
     items,
+    agentic: { phases: agenticPhases, built: agenticBuilt, total: AGENTIC_TOTAL },
     continueTopic: cont,
     legend: BANDS,
     readinessPct,

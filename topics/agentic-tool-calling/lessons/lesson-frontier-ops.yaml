@@ -1,0 +1,6 @@
+id: lesson-frontier-ops
+title: "The frontier of agent tool use"
+material: frontier-ops.md
+segments:
+  - present: the-frontier-of-tool-use
+  - check: frontier-multitool

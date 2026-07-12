@@ -1,0 +1,24 @@
+# Expert canon (L3) — MCP and structured-outputs mode.
+- id: expert-mcp
+  type: multiple_choice
+  tags: [schema]
+  difficulty: 3
+  prompt: "What is MCP (Model Context Protocol, Anthropic, 2024) in the tool-calling stack?"
+  options:
+    - { text: "The open standard for the tool boundary — a common interface between models/agents and tools, so a tool built once works across hosts", correct: true }
+    - { text: "A Python library that validates the model's JSON output" }
+    - { text: "A decoding mode that constrains output to a JSON schema" }
+    - { text: "A leaderboard that scores a model's tool-calling accuracy" }
+  explanation: "MCP (Anthropic, 2024) standardizes where the tool contract lives: discovery, scoping, and validation move to one shared seam, so a tool implemented once is reusable across hosts instead of re-wired per vendor. It is the interface standard, not a validator, a decoding mode, or a benchmark."
+
+- id: expert-structured-outputs
+  type: multiple_choice
+  tags: [structured]
+  difficulty: 3
+  prompt: "Constrained decoding / JSON-schema \"structured outputs\" mode differs from just asking for JSON in the prompt because it:"
+  options:
+    - { text: "Constrains the decoder to the schema so output is GUARANTEED schema-valid, rather than hoping the model returns valid JSON", correct: true }
+    - { text: "Makes the model reason longer before answering, improving accuracy" }
+    - { text: "Removes the need to validate the output afterward for missing fields" }
+    - { text: "Is a prompt-engineering trick with no effect on decoding" }
+  explanation: "Structured-outputs mode restricts the decoder at each step to tokens consistent with the JSON schema, so the result is guaranteed to parse and match the shape — a hard guarantee, unlike prompting for JSON and hoping. (Semantic validation of values can still matter.)"

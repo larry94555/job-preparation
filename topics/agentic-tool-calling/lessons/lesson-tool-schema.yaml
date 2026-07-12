@@ -1,0 +1,10 @@
+id: lesson-tool-schema
+title: "Tools are typed contracts"
+material: tool-schema.md
+segments:
+  - present: tools-are-typed-contracts
+  - check: mc-tool-schema-why
+  - check: mc-required-field
+  - present: the-anatomy-of-a-tool-schema
+  - check: cloze-schema
+  - check: fe-schema-required

@@ -87,6 +87,56 @@ export default async function HomePage() {
           </span>
         ))}
       </div>
+
+      {/* ---- Independent track: Agentic AI Engineer ---- */}
+      <section style={{ marginTop: 48 }}>
+        <div className="eyebrow">Independent track</div>
+        <h2>Becoming an Agentic AI Engineer in 6 Months</h2>
+        <p className="muted">
+          A complete, standalone path from Python async foundations to shipping a real agent — build
+          systems that decide what to do, not just do what they&apos;re told. {data.agentic.built} of{" "}
+          {data.agentic.total} topics built.
+        </p>
+
+        {data.agentic.phases.map((phase) => (
+          <div key={phase.title} style={{ marginTop: 20 }}>
+            <div className="eyebrow" style={{ marginBottom: 8 }}>{phase.title}</div>
+            <div className="tgrid">
+              {phase.items.map((it) =>
+                it.built ? (
+                  <div key={it.id} className="tcard">
+                    <Link className="tcard-body" href={`/lesson/${it.id}`}>
+                      <h3>{it.title}</h3>
+                      <p className="desc">{it.description}</p>
+                      <div className="activity">
+                        {it.activity}
+                        {it.fullyMastered ? " · mastered" : ""}
+                      </div>
+                      <div className="bands" aria-label="section mastery">
+                        {it.dashboard.map((d) => (
+                          <span
+                            key={d.id}
+                            className="band"
+                            style={{ background: d.color }}
+                            title={`${d.title}: ${d.name}`}
+                          />
+                        ))}
+                      </div>
+                    </Link>
+                  </div>
+                ) : (
+                  <div key={it.id} className="tcard" style={{ opacity: 0.5 }}>
+                    <div className="tcard-body">
+                      <h3>{it.title}</h3>
+                      <div className="activity">Planned</div>
+                    </div>
+                  </div>
+                ),
+              )}
+            </div>
+          </div>
+        ))}
+      </section>
     </main>
   );
 }

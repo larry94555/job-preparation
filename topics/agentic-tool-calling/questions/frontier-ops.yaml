@@ -1,0 +1,19 @@
+# Frontier drill (L4) — open problems in agent tool use.
+- id: frontier-multitool
+  type: multiple_choice
+  tags: [toolloop]
+  difficulty: 4
+  prompt: >-
+    A frontier agent chains a dozen tools per task and its reliability collapses as the sequence grows,
+    with arguments occasionally grounded in hallucinated rather than real state. Which named open problem
+    is this, and what is the honest read?
+  options:
+    - { text: "Reliable multi-tool orchestration and robust argument grounding at scale — an open problem: orchestration failures are silent and compound, and typed contracts are necessary but not sufficient", correct: true }
+    - { text: "It is fully solved by sending every tool schema on every request" }
+    - { text: "It is a latency problem; a faster model makes long tool chains correct" }
+    - { text: "It is not a real problem — a single tool call never fails, so chains of them never do either" }
+  explanation: >-
+    Keeping a long tool sequence correct (multi-tool orchestration) while every argument stays tied to
+    real state (argument grounding) is a genuine frontier open problem: failures across a chain are silent
+    and compound, and a typed contract validates shape but cannot guarantee the argument is grounded in
+    reality. Larger schemas or faster models do not close it.

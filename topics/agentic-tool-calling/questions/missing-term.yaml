@@ -1,0 +1,54 @@
+# Missing term (cloze)
+- id: cloze-tool-use
+  type: text_input
+  tags: [toolloop]
+  difficulty: 1
+  prompt: "When the model wants to call a tool, its stop_reason is ____."
+  answer:
+    regex: '^tool_use$'
+    normalize: true
+
+- id: cloze-tool-result
+  type: text_input
+  tags: [toolloop]
+  difficulty: 2
+  prompt: "Tool output is returned to the model in a ____ block."
+  answer:
+    regex: '^tool_result$'
+    normalize: true
+
+- id: cloze-schema
+  type: text_input
+  tags: [schema]
+  difficulty: 1
+  prompt: "The typed description of a tool's arguments is its input ____."
+  answer:
+    regex: '^schema$'
+    normalize: true
+
+- id: cloze-structured
+  type: text_input
+  tags: [structured]
+  difficulty: 2
+  prompt: "Forcing the model into a typed object gives you ____ output."
+  answer:
+    regex: '^structured$'
+    normalize: true
+
+- id: cloze-validate
+  type: text_input
+  tags: [structured]
+  difficulty: 2
+  prompt: "Never trust the raw string — ____ it against the schema."
+  answer:
+    regex: '^validate$'
+    normalize: true
+
+- id: cloze-recover
+  type: text_input
+  tags: [recovery]
+  difficulty: 2
+  prompt: "When a tool call fails, return a ____ error the model can read."
+  answer:
+    regex: '^structured$'
+    normalize: true

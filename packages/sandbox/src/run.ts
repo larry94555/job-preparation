@@ -68,3 +68,52 @@ export function runTypeScript(opts: {
     child.on("error", () => done(false));
   });
 }
+
+/**
+ * Run a Python submission against a test file, locally — the Python sibling of
+ * `runTypeScript` for the agentic track (asyncio/pydantic/agent exercises). The
+ * submission is written as `solution.py`; the test file (`test_solution.py`)
+ * imports it and asserts. Executed as a plain script (`python test_solution.py`)
+ * so it needs only a Python interpreter — no pytest/third-party install — and an
+ * `AssertionError` yields a non-zero exit = fail. Override the interpreter with
+ * the PYTHON env var (default "python"). Same wall-clock-timeout / NOT-a-security-
+ * boundary caveats as the TS runner; hosting uses the isolated sandbox service.
+ */
+export function runPython(opts: {
+  solutionCode: string;
+  testCode: string;
+  timeoutMs?: number;
+  repoRoot?: string;
+}): Promise<RunResult> {
+  const repoRoot = opts.repoRoot ?? process.cwd();
+  const base = join(repoRoot, ".sandbox");
+  if (!existsSync(base)) mkdirSync(base, { recursive: true });
+  const dir = mkdtempSync(join(base, "py-"));
+  writeFileSync(join(dir, "solution.py"), opts.solutionCode);
+  writeFileSync(join(dir, "test_solution.py"), opts.testCode);
+  const python = process.env.PYTHON ?? "python";
+
+  return new Promise((resolve) => {
+    const child = spawn(python, ["test_solution.py"], { cwd: dir, env: process.env });
+    let out = "";
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      child.kill("SIGKILL");
+    }, opts.timeoutMs ?? 15000);
+
+    child.stdout.on("data", (d) => (out += d));
+    child.stderr.on("data", (d) => (out += d));
+    const done = (passed: boolean) => {
+      clearTimeout(timer);
+      try {
+        rmSync(dir, { recursive: true, force: true });
+      } catch {
+        /* best effort cleanup */
+      }
+      resolve({ passed, timedOut, output: out.slice(-4000) });
+    };
+    child.on("close", (code) => done(!timedOut && code === 0));
+    child.on("error", () => done(false));
+  });
+}
