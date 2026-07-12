@@ -39,7 +39,7 @@ selection:
 # LLAMA_BASE_URL, if set, overrides a backend's base_url at runtime.
 
 # Active backend for LOCAL/dev use (ignored under DEPLOY_ENV=hosted).
-backend: ollama-local
+backend: oracle-llamacpp
 
 backends:
   - id: ollama-local
