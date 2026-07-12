@@ -37,8 +37,13 @@ async function main(argv: string[]): Promise<number> {
   const cfg = getModelConfig();
   const healthBaseUrl = cfg ? resolveGrader(cfg).baseUrl : undefined;
   const client = new LlamaClient(healthBaseUrl ? { baseUrl: healthBaseUrl } : {});
-  if (!(await client.health())) {
-    console.log(`llama-server not reachable at ${client.baseUrl} — skipping meta-eval (set LLAMA_BASE_URL).`);
+  // Skip unless we can ACTUALLY grade — reachable AND authenticated. Probing the
+  // grading endpoint (not the public /models) means CI (no API key) self-skips as
+  // a no-op instead of failing every skill at 0%.
+  if (!(await client.canGrade())) {
+    console.log(
+      `grading model at ${client.baseUrl} not usable (unreachable or unauthorized) — skipping meta-eval.`,
+    );
     return 0; // self-skip, like imini's eval gate
   }
 

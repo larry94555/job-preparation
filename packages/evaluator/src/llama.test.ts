@@ -80,3 +80,19 @@ test("health reflects response.ok", async () => {
   mockFetch(() => ({ ok: true }));
   assert.equal(await new LlamaClient({ baseUrl: "http://x/v1" }).health(), true);
 });
+
+test("canGrade posts to the auth-protected chat endpoint; false on 401 (CI without key)", async () => {
+  // 401 (no/invalid key) → not gradable → caller self-skips.
+  mockFetch((url) => {
+    assert.ok(url.endsWith("/chat/completions"), url);
+    return { ok: false, status: 401 };
+  });
+  assert.equal(await new LlamaClient({ baseUrl: "http://x/v1", model: "m" }).canGrade(), false);
+
+  // 200 (authorized) → gradable.
+  mockFetch(() => ({ ok: true, body: { choices: [{ message: { content: "" } }] } }));
+  assert.equal(
+    await new LlamaClient({ baseUrl: "http://x/v1", model: "m", apiKey: "K" }).canGrade(),
+    true,
+  );
+});

@@ -82,6 +82,36 @@ export class LlamaClient {
     }
   }
 
+  /**
+   * True if the grading endpoint (`/chat/completions`) accepts an authenticated
+   * request. Unlike `health()` (which probes the PUBLIC `/models`), this verifies
+   * the grader can ACTUALLY grade — so callers self-skip when the model is
+   * unreachable OR the API key is missing/wrong (e.g. in CI), instead of grading
+   * everything as 0%. Sends a 1-token no-op completion.
+   */
+  async canGrade(): Promise<boolean> {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), Math.min(this.timeoutMs, 15000));
+    try {
+      const res = await fetch(`${this.baseUrl}/chat/completions`, {
+        method: "POST",
+        headers: { "content-type": "application/json", ...this.authHeaders() },
+        body: JSON.stringify({
+          model: this.model,
+          messages: [{ role: "user", content: "ping" }],
+          max_tokens: 1,
+          temperature: 0,
+        }),
+        signal: ctrl.signal,
+      });
+      return res.ok;
+    } catch {
+      return false;
+    } finally {
+      clearTimeout(t);
+    }
+  }
+
   /** Chat completion constrained to JSON output. Throws on network/HTTP error. */
   async chatJson(messages: ChatMessage[]): Promise<string> {
     const ctrl = new AbortController();
