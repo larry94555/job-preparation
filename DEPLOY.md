@@ -103,6 +103,13 @@ The shipped catalog has three backends:
    The app now grades every answer with that one model, and /models shows it
    read-only.
 
+**Securing the model + secrets.** The endpoint should not stay open. Generate a
+key, restart `llama-server` with `--api-key "<key>"`, and give the same key to the
+grader as `LLAMA_API_KEY`. Secrets live in a gitignored `secrets/secrets.env`
+locally, or as real environment variables outside GitHub (CI, the instance) —
+externally-set values always win. See [utils/README.md](utils/README.md) for the
+key generator (`npm run gen-api-key`) and the loader (`npm run secrets:check`).
+
 **db** — `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` (default `jobprep`).
 
 ## Deploy sequence
