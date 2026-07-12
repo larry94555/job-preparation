@@ -4,6 +4,7 @@ import { loadAllTopics } from "@job-prep/engine";
 import { clientForSkill, gradeOpen } from "./evaluator.js";
 import { gradeWithEscalation } from "./escalation.js";
 import { LlamaClient } from "./llama.js";
+import { getModelConfig, resolveGrader } from "./model-config.js";
 
 /**
  * Meta-eval gate (DESIGN §7): grade each skill's calibration cases with the
@@ -30,10 +31,25 @@ async function main(argv: string[]): Promise<number> {
   const oIdx = rest.indexOf("--only");
   const only = oIdx >= 0 ? rest[oIdx + 1] : undefined;
 
-  const client = new LlamaClient();
+  // Probe the SAME backend the grader will use (the resolved model_configuration
+  // backend / LLAMA_BASE_URL), not the bare default, so the gate doesn't self-skip
+  // against localhost when a remote backend (e.g. Oracle Cloud) is configured.
+  const cfg = getModelConfig();
+  const healthBaseUrl = cfg ? resolveGrader(cfg).baseUrl : undefined;
+  const client = new LlamaClient(healthBaseUrl ? { baseUrl: healthBaseUrl } : {});
   if (!(await client.health())) {
     console.log(`llama-server not reachable at ${client.baseUrl} — skipping meta-eval (set LLAMA_BASE_URL).`);
     return 0; // self-skip, like imini's eval gate
+  }
+
+  // Preflight: a multi-slot backend batches requests, which is non-deterministic
+  // even at temperature 0 — grades then wobble run-to-run and can't be certified.
+  const slots = await client.slotCount();
+  if (slots !== null && slots > 1) {
+    console.log(
+      `⚠️  backend at ${client.baseUrl} reports ${slots} parallel slots — grading is NON-DETERMINISTIC ` +
+        `(continuous batching reorders FP reductions). Restart llama-server with --parallel 1 before certifying.`,
+    );
   }
 
   const { topics } = loadAllTopics(topicsDir);

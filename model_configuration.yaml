@@ -23,7 +23,7 @@ secondary_model_allowed: true
 
 # Currently selected model per tier (this is what the UI writes).
 selection:
-  primary: qwen2.5:3b-instruct
+  primary: llama3.1:8b-instruct-q4_K_M
   secondary: llama3:8b
 
 # ---- Backends: WHERE the model(s) are served -----------------------------

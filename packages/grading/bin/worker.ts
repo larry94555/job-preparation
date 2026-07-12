@@ -6,6 +6,7 @@
  *
  *   npm run worker
  */
+import { getModelConfig, LlamaClient, resolveGrader } from "@job-prep/evaluator";
 import { createJobQueue } from "@job-prep/store";
 import { runWorker, wireDefaults } from "../src/worker.js";
 
@@ -17,6 +18,15 @@ async function main(): Promise<void> {
   const deps = wireDefaults();
   const once = process.argv.includes("--once");
   console.log(`[worker] started (queue=${process.env.QUEUE ?? "memory"})`);
+
+  // Warn if the model backend batches across slots — grading must be single-slot
+  // to be deterministic (see llama.cpp --parallel).
+  const cfg = getModelConfig();
+  const baseUrl = cfg ? resolveGrader(cfg).baseUrl : undefined;
+  const slots = await new LlamaClient(baseUrl ? { baseUrl } : {}).slotCount();
+  if (slots !== null && slots > 1) {
+    console.log(`[worker] ⚠️  backend reports ${slots} parallel slots — grades will be non-deterministic; use --parallel 1`);
+  }
 
   for (;;) {
     const n = await runWorker(queue, deps, {});
