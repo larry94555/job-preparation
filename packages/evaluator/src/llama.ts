@@ -7,6 +7,8 @@ export interface LlamaOptions {
   baseUrl?: string;
   model?: string;
   timeoutMs?: number;
+  /** Bearer token sent as `Authorization` (for a llama-server started with --api-key). */
+  apiKey?: string;
 }
 
 /**
@@ -17,11 +19,18 @@ export class LlamaClient {
   baseUrl: string;
   model: string;
   timeoutMs: number;
+  apiKey?: string;
 
   constructor(o: LlamaOptions = {}) {
     this.baseUrl = o.baseUrl ?? process.env.LLAMA_BASE_URL ?? "http://localhost:8080/v1";
     this.model = o.model ?? process.env.LLAMA_MODEL ?? "local";
     this.timeoutMs = o.timeoutMs ?? 60000;
+    this.apiKey = o.apiKey ?? process.env.LLAMA_API_KEY;
+  }
+
+  /** Auth header for a secured llama-server (--api-key); empty when open. */
+  private authHeaders(): Record<string, string> {
+    return this.apiKey ? { authorization: `Bearer ${this.apiKey}` } : {};
   }
 
   /** Returns true if the server answers a models/health probe quickly. */
@@ -29,7 +38,10 @@ export class LlamaClient {
     try {
       const ctrl = new AbortController();
       const t = setTimeout(() => ctrl.abort(), 3000);
-      const r = await fetch(`${this.baseUrl}/models`, { signal: ctrl.signal });
+      const r = await fetch(`${this.baseUrl}/models`, {
+        signal: ctrl.signal,
+        headers: this.authHeaders(),
+      });
       clearTimeout(t);
       return r.ok;
     } catch {
@@ -44,7 +56,7 @@ export class LlamaClient {
     try {
       const res = await fetch(`${this.baseUrl}/chat/completions`, {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", ...this.authHeaders() },
         body: JSON.stringify({
           model: this.model,
           messages,

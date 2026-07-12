@@ -8,4 +8,8 @@ coverage/
 *.log
 .env
 .env.local
+# Local secrets — never commit. The *.example template IS committed.
+secrets/*.env
+!secrets/*.env.example
+.secrets.env
 .DS_Store

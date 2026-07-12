@@ -65,15 +65,15 @@ backends:
     name: Oracle Cloud (llama.cpp)
     kind: llamacpp
     provider: oracle
-    base_url: http://ORACLE_HOST:8080/v1
-    environments: [ hosted ]
+    base_url: http://165.1.79.248:8080/v1
+    environments: [local, hosted]
     single_model: true
     notes: >-
-      llama-server on an Oracle Cloud compute instance (single model). Set
-      base_url to the instance address, or inject it at deploy time via
-      LLAMA_BASE_URL. This is the ONLY backend used when DEPLOY_ENV=hosted. Fits
-      an Always-Free/Standard (12 GB RAM) or PAYG (24 GB RAM) shape, CPU-only,
-      per the selected model's requirements below.
+      llama-server on an Oracle Cloud compute instance serving one GGUF
+      (DeepSeek-R1-Distill-Qwen-7B-Q4_K_M). It ignores the model field and grades
+      with that loaded model. Selectable locally (to test the cloud model) and
+      FORCED when DEPLOY_ENV=hosted. Override base_url at deploy time via
+      LLAMA_BASE_URL, and secure it with a llama-server --api-key + LLAMA_API_KEY.
 
 models:
   # ---- Currently installed / in use ----
