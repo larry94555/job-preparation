@@ -1,0 +1,7 @@
+id: lesson-expert-context
+title: "Expert context: the memory canon"
+material: expert-context.md
+segments:
+  - present: the-memory-canon
+  - check: expert-memgpt
+  - check: expert-vector-store

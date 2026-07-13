@@ -1,0 +1,12 @@
+# Expert canon (L3) — what a hiring portfolio actually signals.
+- id: expert-portfolio
+  type: multiple_choice
+  tags: [portfolio]
+  difficulty: 3
+  prompt: "Once the buzzwords are stripped out, what does a strong reviewer actually read an agentic-engineering portfolio for?"
+  options:
+    - { text: "Real, self-designed projects, defensible architecture decisions, and an eval suite that proves you measured the agent", correct: true }
+    - { text: "The number of AI keywords listed in the skills section" }
+    - { text: "How many popular tutorials the candidate reproduced exactly" }
+    - { text: "The length of the README, regardless of what it says" }
+  explanation: "Reviewers read a portfolio for engineering signal: a project you scoped and designed, a README that defends an architecture decision (an architecture-decision-record in spirit), and evals that prove measurement. That is the signal a self-designed agent sends and a buzzword list or a tutorial clone cannot."

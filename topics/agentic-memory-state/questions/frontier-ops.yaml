@@ -1,0 +1,19 @@
+# Frontier drill (L4) — an open problem in agent memory.
+- id: frontier-forget
+  type: multiple_choice
+  tags: [recall]
+  difficulty: 4
+  prompt: >-
+    An agent runs for weeks across many sessions; its memory store keeps growing, some stored facts have
+    since changed, and recalling them confidently makes the model reason from a falsehood. Which named open
+    problems are these, and what is the honest read?
+  options:
+    - { text: "Eviction/forgetting policy and context poisoning from stale memories — genuine open problems: there is no settled rule for what to forget, and no reliable way to detect and quarantine stale or wrong memories before they poison the context", correct: true }
+    - { text: "Both are fully solved by making the context window larger" }
+    - { text: "Neither is real — a stored memory is always correct, so recalling it can never mislead the model" }
+    - { text: "It is only a latency problem; a faster embedding model makes old memories correct again" }
+  explanation: >-
+    Deciding what to evict (forgetting) and preventing stale or wrong memories from poisoning the current
+    context are active, unsolved problems. Recency/importance heuristics trade recall against noise, and a
+    once-true fact recalled after it changed makes the model reason from a falsehood — bigger windows and
+    faster models do not fix either.

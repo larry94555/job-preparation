@@ -1,0 +1,12 @@
+# Expert canon (L3) — task queues, worker pools, background jobs.
+- id: expert-deploy-patterns
+  type: multiple_choice
+  tags: [asyncapi]
+  difficulty: 3
+  prompt: "In the deployment stack, what are Celery / RQ and a worker pool?"
+  options:
+    - { text: "Distributed task queues: you enqueue a task and get a handle, and a pool of worker processes pulls tasks off a broker and runs them — the same submit → job_id → poll shape, made durable", correct: true }
+    - { text: "Python web frameworks that replace FastAPI for serving requests" }
+    - { text: "Decoding modes that constrain the model's output to a schema" }
+    - { text: "Load balancers that route HTTP requests across servers" }
+  explanation: "Celery and RQ are the Python-standard distributed task queues: enqueue returns a handle (AsyncResult / job id) and a pool of worker processes drains tasks from a broker. It is exactly the async job API this topic teaches — background jobs off the request thread — backed by a durable broker and many workers, not a web framework, a decoder, or a load balancer."

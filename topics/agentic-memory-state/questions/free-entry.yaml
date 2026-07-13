@@ -1,0 +1,36 @@
+# Free entry (short answer)
+- id: fe-longterm-store
+  type: text_input
+  tags: [memory]
+  difficulty: 2
+  prompt: "What kind of external store holds long-term memory for semantic recall across sessions? (one word)"
+  answer:
+    regex: '^vector$'
+    normalize: true
+
+- id: fe-external-memory
+  type: text_input
+  tags: [types]
+  difficulty: 2
+  prompt: "The short-term buffer and scratchpad live in-context; the vector store and episodic log live where? (one word)"
+  answer:
+    regex: '^(external|externally|outside)$'
+    normalize: true
+
+- id: fe-token-budget
+  type: text_input
+  tags: [compression]
+  difficulty: 2
+  prompt: "Compression is triggered when the buffer would exceed its token ____ (one word)."
+  answer:
+    regex: '^budget$'
+    normalize: true
+
+- id: fe-topk
+  type: text_input
+  tags: [recall]
+  difficulty: 2
+  prompt: "After ranking recalled memories by relevance, you inject only the top-____ items (one letter or word)."
+  answer:
+    regex: '^k$'
+    normalize: true

@@ -1,0 +1,10 @@
+id: agentic-memory-state
+title: "Memory & State Management"
+description: "An agent with no memory repeats itself forever. Give it the four memories every agent needs — short-term buffer, working state, long-term (vector) store, and episodic history — and keep the context window from overflowing by compressing old turns into summaries, while recalling what matters across sessions."
+track: agentic
+pass_threshold: 0.8
+tag_weights:
+  memory: 1.2
+  types: 1.0
+  compression: 1.2
+  recall: 1.0

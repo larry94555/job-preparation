@@ -1,0 +1,24 @@
+# Essay
+- id: essay-four-memories
+  type: essay
+  length: short
+  tags: [memory]
+  difficulty: 3
+  prompt: "Name the four memories an agent needs, say what each is for, and explain what breaks when an agent has none of them."
+  eval_skill: eval-agentic-memory-essay
+  reference_points:
+    - "The four memories are: the short-term conversation buffer (recent turns, in-context and capped), the working state/scratchpad (structured task state read and written mid-task), the long-term (vector) store (external, for semantic recall across sessions), and the episodic history (a durable log of past runs)."
+    - "Two live in-context (buffer, scratchpad) and are read for free on the next call; two live externally (vector store, episodic log) and are pulled in on demand — trading unbounded capacity for retrieval latency and possible staleness."
+    - "An agent with no memory is stateless and repeats itself forever: it re-asks answered questions, re-runs tools whose results it has seen, and loses everything learned when the session ends."
+
+- id: essay-compression-recall
+  type: essay
+  length: short
+  tags: [compression]
+  difficulty: 3
+  prompt: "The context window is finite. Explain how compression keeps the buffer under budget and how relevance-ranked recall brings back what matters — and name the risk in each."
+  eval_skill: eval-agentic-memory-essay
+  reference_points:
+    - "Compression: when the buffer exceeds its token budget, the oldest turns are collapsed into a running summary that keeps decisions, facts/constraints, and open tasks while dropping chit-chat; the risk is that it is lossy, so you can summarize away something you later need."
+    - "Recall: keep everything in the external store and retrieve-then-inject only the items most relevant to the current query (ranked by a relevance/similarity score), rather than dumping the whole store back into context."
+    - "The risk in recall is that irrelevant recalled items waste context tokens and distract or mislead the model, so ranking and taking only the top-k relevant items is what makes long-term memory useful."

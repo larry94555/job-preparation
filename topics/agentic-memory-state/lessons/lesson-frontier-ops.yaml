@@ -1,0 +1,6 @@
+id: lesson-frontier-ops
+title: "The frontier of agent memory"
+material: frontier-ops.md
+segments:
+  - present: the-frontier-of-agent-memory
+  - check: frontier-forget

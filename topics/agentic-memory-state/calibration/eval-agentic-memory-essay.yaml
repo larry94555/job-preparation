@@ -1,0 +1,63 @@
+# Calibration for eval-agentic-memory-essay (exemplars target essay-compression-recall).
+skill: eval-agentic-memory-essay
+cases:
+  # PASS — answers the question, hits every reference point, all claims correct,
+  # names concrete mechanisms. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      The context window has a hard token budget, so when the short-term buffer would overflow it, the
+      oldest turns are collapsed into a single running summary that keeps the load-bearing content —
+      decisions, established facts and constraints, and open tasks — while chit-chat and already-captured
+      reasoning are dropped. The risk is that this is lossy: you can summarize away a detail that turns out
+      to matter three turns later. For long-term memory across sessions you do not dump the whole store
+      back into context; you keep everything in the external vector store and retrieve-then-inject, pulling
+      in only the items most relevant to the current query, ranked by a relevance/similarity score, and
+      injecting just the top-k. The risk there is that irrelevant recalled items waste context tokens and
+      distract or mislead the model, which is exactly why ranking and taking only the top-k relevant items
+      matters.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # PASS — a second strong, correct, specific answer using different wording.
+  # 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      Compression triggers on a budget threshold: once the buffer's word/token count would exceed the
+      window, the earliest messages are consolidated into a compact summary that preserves the decisions
+      made, the facts and preferences established, and the tasks still open, and the raw tokens for the
+      small talk are discarded. Because summarization is lossy, the standing danger is forgetting something
+      later needed, so you keep decisions and open tasks as verbatim as you can. Recall works the opposite
+      way: the durable store is far bigger than the window, so instead of re-injecting all of it you score
+      each stored item's relevance to the current query, rank them, and inject only the top few. Skipping
+      the ranking is harmful, not just wasteful, because off-topic memories eat context and pull the model
+      off the current goal.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — off-topic and technically wrong: denies memory is needed, calls compression
+  # lossless, and says to dump the whole store into context. Fails the gate plus every
+  # other check. 0/4 = 0.0 → fail.
+  - answer: >-
+      An agent does not really need memory management at all — the simplest and most reliable approach is
+      to resend the entire conversation history on every single request, so nothing is ever lost. There is
+      no need to compress anything, and compression is safe anyway because summarizing text is lossless and
+      never drops information. For long-term memory you should just load the whole store back into the
+      context window at the start of every session so the model has access to everything; picking out only
+      some items would just risk missing something.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # FAIL — off-topic and technically wrong: compresses by deleting recent turns and
+  # keeping greetings, and recalls in insertion order. Fails the gate plus every other
+  # check. 0/4 = 0.0 → fail.
+  - answer: >-
+      To stay under the budget you should throw away the most recent messages first, since the older
+      greetings and pleasantries are what give the conversation its friendly tone and must be preserved.
+      A summary should keep the small talk and drop the decisions, because decisions can always be
+      re-derived later. For recall, the right thing is to return stored memories in the order they were
+      written and stop once the context is full — relevance to the query does not matter, and ranking is an
+      unnecessary complication.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }

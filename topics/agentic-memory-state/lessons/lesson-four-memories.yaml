@@ -1,0 +1,10 @@
+id: lesson-four-memories
+title: "The four memories every agent needs"
+material: four-memories.md
+segments:
+  - present: why-an-agent-needs-memory
+  - check: mc-no-memory
+  - present: the-four-memories
+  - check: mc-four-memories
+  - check: cloze-buffer
+  - apply: essay-four-memories

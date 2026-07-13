@@ -1,0 +1,10 @@
+id: agentic-ship-in-public
+title: "Ship in Public (Capstone)"
+description: "The last stage is the one that gets you hired: ship one real agent — designed by you, not a tutorial clone — with a README that explains your architecture decisions, an eval suite, and a short demo. Then communicate it: the problem, one surprising decision, one thing that broke and how you fixed it. Proof beats a polished resume."
+track: agentic
+pass_threshold: 0.8
+tag_weights:
+  portfolio: 1.2
+  ship: 1.0
+  communicate: 1.2
+  proof: 1.0

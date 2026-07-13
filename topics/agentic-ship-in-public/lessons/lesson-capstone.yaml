@@ -1,0 +1,7 @@
+id: lesson-capstone
+title: "Build the capstone agent"
+material: capstone.md
+segments:
+  - present: build-the-capstone-agent
+  - apply: code-capstone-agent
+  - apply: code-portfolio-check

@@ -1,0 +1,10 @@
+id: lesson-get-hired
+title: "Ship in public to get hired"
+material: get-hired.md
+segments:
+  - present: ship-in-public-to-get-hired
+  - check: mc-ship-public
+  - check: mc-working-agents
+  - check: cloze-ship
+  - apply: essay-portfolio
+  - apply: code-eval-harness

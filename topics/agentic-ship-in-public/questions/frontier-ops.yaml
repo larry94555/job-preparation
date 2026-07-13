@@ -1,0 +1,18 @@
+# Frontier drill (L4) — the agentic-engineer job market.
+- id: frontier-career
+  type: multiple_choice
+  tags: [proof]
+  difficulty: 4
+  prompt: >-
+    The agentic-engineer job market is new and the title means different things at different companies.
+    As more people ship agents, what differentiates candidates, and what is the honest read?
+  options:
+    - { text: "Shipped, measured, well-communicated agents — the bar rises from 'I built an agent' to 'I measured it, found where it breaks, and can defend the architecture'; the title is unstable, so proof-of-work travels better than the title", correct: true }
+    - { text: "The exact job title on the resume, since the role is now fully standardized across companies" }
+    - { text: "The number of frameworks and model names listed, because tooling is the durable signal" }
+    - { text: "Nothing differentiates candidates anymore — any shipped agent stands out equally, as it did early on" }
+  explanation: >-
+    The role is still being defined in public, so a portfolio that shows what you do beats an unstable title.
+    As shipping becomes common the differentiator moves up the stack to measured, defensible, well-communicated
+    agents. The honest read: judgment and communication compound while models and frameworks churn — and the bar
+    keeps rising.

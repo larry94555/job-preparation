@@ -1,0 +1,10 @@
+id: lesson-recall
+title: "Recalling what matters across sessions"
+material: recall.md
+segments:
+  - present: store-everything-recall-only-whats-relevant
+  - check: mc-retrieve-inject
+  - check: cloze-relevance
+  - present: why-ranking-matters
+  - check: mc-ranking-matters
+  - check: fe-topk

@@ -1,0 +1,12 @@
+id: lesson-communicate
+title: "Write up the work"
+material: communicate.md
+segments:
+  - present: write-up-the-work
+  - check: mc-write-up
+  - check: mc-surprise
+  - check: mc-break-fix
+  - check: cloze-thread
+  - check: fe-thread
+  - check: fe-loom
+  - apply: essay-what-broke

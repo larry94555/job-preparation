@@ -1,0 +1,10 @@
+id: lesson-jobs
+title: "Poll for the result"
+material: jobs.md
+segments:
+  - present: poll-for-the-result
+  - check: mc-poll
+  - check: mc-job-status
+  - check: cloze-poll
+  - check: fe-poll
+  - apply: code-job-queue

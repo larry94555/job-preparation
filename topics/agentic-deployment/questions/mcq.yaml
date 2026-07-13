@@ -1,0 +1,120 @@
+# Multiple choice
+- id: mc-async-api
+  type: multiple_choice
+  tags: [asyncapi]
+  difficulty: 2
+  prompt: "How should a service turn a slow agent run into an HTTP endpoint?"
+  options:
+    - { text: "Accept the request, enqueue the work, and return a job id immediately — run the agent on a background worker", correct: true }
+    - { text: "Run the agent inline in the handler and return the result when it finishes" }
+    - { text: "Hold the connection open and stream partial tokens until the run completes" }
+    - { text: "Reject any request that would take longer than one second" }
+  explanation: "An agent run is slow, so the handler must not do it inline. It enqueues the work and returns a job id right away; a background worker does the actual run and writes the result back."
+
+- id: mc-not-block
+  type: multiple_choice
+  tags: [asyncapi]
+  difficulty: 2
+  prompt: "Why must the submit handler never block on the agent run?"
+  options:
+    - { text: "Blocking pins a request thread for the whole run, so a few slow users exhaust the pool and callers time out", correct: true }
+    - { text: "Blocking makes the model produce lower-quality output" }
+    - { text: "Blocking is fine as long as the run is under ten minutes" }
+    - { text: "The HTTP spec forbids a handler from calling a model at all" }
+  explanation: "The request thread is a scarce, latency-sensitive resource. Doing a multi-second agent run inline holds the connection open and pins a worker thread, so under load the server runs out of threads and clients time out."
+
+- id: mc-background-job
+  type: multiple_choice
+  tags: [jobs]
+  difficulty: 2
+  prompt: "What does `submit(task)` return, and in what state is the job?"
+  options:
+    - { text: "A job id for a newly stored job with status \"queued\" — the run has not happened yet", correct: true }
+    - { text: "The finished agent result, computed synchronously" }
+    - { text: "Nothing; the caller must guess the job id from the timestamp" }
+    - { text: "A job already marked \"done\", so no polling is needed" }
+  explanation: "Submitting is a fast write: it creates a job record with status \"queued\", stores it, and returns the id. The response is 202 Accepted — the work is accepted, not yet done."
+
+- id: mc-poll
+  type: multiple_choice
+  tags: [jobs]
+  difficulty: 2
+  prompt: "After submitting and getting a job id, how does the caller get the result?"
+  options:
+    - { text: "It polls a status endpoint with the job id until the job reaches a terminal state", correct: true }
+    - { text: "The server pushes the result back over the original submit connection" }
+    - { text: "It re-submits the same task until one call happens to return the answer" }
+    - { text: "It reads the result directly from the worker's memory" }
+  explanation: "The caller polls: it calls the status endpoint with the job id, and loops — ask, wait a little, ask again — until the status is done or failed, then reads the attached result."
+
+- id: mc-job-status
+  type: multiple_choice
+  tags: [jobs]
+  difficulty: 3
+  prompt: "Which describes a job's status lifecycle correctly?"
+  options:
+    - { text: "queued → running → (done | failed); done and failed are terminal and carry the result or error", correct: true }
+    - { text: "running → queued → done, cycling forever until the caller stops it" }
+    - { text: "There is only one status, \"done\", set the moment the job is submitted" }
+    - { text: "The status is whatever HTTP code the submit call returned" }
+  explanation: "A job is a small state machine: it starts queued, a worker moves it to running, and it ends in a terminal done (with result) or failed (with error). Polling reads that status off the job record."
+
+- id: mc-rate-limit
+  type: multiple_choice
+  tags: [ratelimit]
+  difficulty: 2
+  prompt: "Why rate limit every user of the agent service?"
+  options:
+    - { text: "So one caller can't drain the worker pool and burn the token budget while everyone else waits", correct: true }
+    - { text: "So the model returns answers in a fixed order" }
+    - { text: "So you never have to run more than one worker" }
+    - { text: "Because rate limiting makes each individual agent run faster" }
+  explanation: "Every user shares one worker pool and one budget. Without a per-user limit, a single buggy or hostile caller can flood the queue, starve other tenants, and run up the bill — rate limiting enforces fairness."
+
+- id: mc-token-bucket
+  type: multiple_choice
+  tags: [ratelimit]
+  difficulty: 3
+  prompt: "How does a token bucket rate limiter behave?"
+  options:
+    - { text: "It holds up to `capacity` tokens, refills at a steady rate, and allows a request only if a token is available — permitting bursts but capping the average rate", correct: true }
+    - { text: "It allows exactly one request per second and rejects all others, with no bursts ever" }
+    - { text: "It counts total requests and blocks the user permanently once a threshold is hit" }
+    - { text: "It slows the model down so requests naturally arrive less often" }
+  explanation: "A token bucket refills tokens over time up to a capacity and consumes one per request. It lets a user burst up to `capacity` back-to-back, then throttles them to the sustainable `refill_per_sec` average."
+
+- id: mc-canary
+  type: multiple_choice
+  tags: [rollout]
+  difficulty: 2
+  prompt: "What is a canary rollout of a new agent version?"
+  options:
+    - { text: "Routing a small, deterministic slice of users to the new version first while everyone else stays on stable", correct: true }
+    - { text: "Deploying the new version to 100% of users and watching the dashboards" }
+    - { text: "Running the new and old versions on the same request and comparing outputs live" }
+    - { text: "A load test you run before any real users see the new version" }
+  explanation: "A canary sends a fraction of traffic to the new version — sticky per user via a stable hash — so a bad change hits a slice, not everyone. You then widen the rollout or pull it back."
+
+- id: mc-rollback
+  type: multiple_choice
+  tags: [rollout]
+  difficulty: 2
+  prompt: "The canary shows a worse error rate than stable. What is the right move?"
+  options:
+    - { text: "Rollback — switch traffic back to the last known-good version with one command", correct: true }
+    - { text: "Roll forward: write a fix and deploy it mid-incident before touching the canary" }
+    - { text: "Widen the canary to 100% so more data confirms the regression" }
+    - { text: "Leave it; error rate on a canary is expected and not actionable" }
+  explanation: "Rolling back to something that already worked is instant; rolling forward with a fix takes time you don't have mid-incident. A rollback must be one fast command — set the canary back to 0 or repoint to the previous version."
+
+- id: mc-watch-errors
+  type: multiple_choice
+  tags: [rollout]
+  difficulty: 3
+  prompt: "While a canary is live, what tells you whether to widen or roll back?"
+  options:
+    - { text: "Watching the new slice's error rate, latency, and failed jobs against the stable slice", correct: true }
+    - { text: "Whether the deploy command exited zero" }
+    - { text: "How many lines of code the new version changed" }
+    - { text: "Whether the model is a newer release than the old one" }
+  explanation: "A canary is only useful if you watch it. You compare the new slice's live signals — error rate, latency, failed jobs — against the stable slice, and let that decide whether to grow the rollout or roll it back."

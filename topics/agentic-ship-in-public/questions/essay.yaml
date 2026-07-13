@@ -1,0 +1,36 @@
+# Essay
+- id: essay-architecture
+  type: essay
+  length: short
+  tags: [portfolio]
+  difficulty: 3
+  prompt: "Describe the architecture of the agent you would ship as your capstone — its task, its loop, and the tools it calls — then name one design decision you made and explain why."
+  eval_skill: eval-agentic-ship-essay
+  reference_points:
+    - "States a concrete task the agent does end to end and the shape of the agent — a bounded reason–act loop that calls tools, reads observations, and returns a result."
+    - "Names the specific tools (or capabilities) the agent uses and where the harness validates observations or tool calls, rather than describing a single one-shot model call."
+    - "Names one concrete design decision (e.g. a step cap, a validation boundary, cutting a tool, constraining output) and defends it with a why — a clear 'chose X over Y because Z'."
+
+- id: essay-what-broke
+  type: essay
+  length: short
+  tags: [communicate]
+  difficulty: 3
+  prompt: "Describe one concrete thing that broke while building your agent and exactly how you fixed it — the symptom, the cause, and the change you made."
+  eval_skill: eval-agentic-ship-essay
+  reference_points:
+    - "Describes a concrete, specific failure (e.g. the loop never terminated, a tool returned garbage the model trusted, an eval case surfaced a wrong answer) rather than a vague 'it had bugs'."
+    - "Identifies the cause of the break — why it happened — not just that it happened."
+    - "Explains the specific fix that resolved it (e.g. added a step cap, validated the observation before trusting it, corrected the tool contract or prompt) and why that fix addresses the cause."
+
+- id: essay-portfolio
+  type: essay
+  length: short
+  tags: [proof]
+  difficulty: 3
+  prompt: "What makes a portfolio that actually gets an agentic engineer hired? Explain why proof of working agents beats listing \"AI\" as a skill."
+  eval_skill: eval-agentic-ship-essay
+  reference_points:
+    - "A hiring portfolio is proof a stranger can verify: real, self-designed working agents someone can open, read, and run — not a list of buzzwords."
+    - "Each shipped agent carries the artifacts that make it legible: a README that defends an architecture decision, an eval suite that measures it, and a demo that shows it running."
+    - "Explains why proof beats a claim: a working agent is falsifiable evidence a reviewer trusts, while a skills list is an unverifiable claim — two more shipped agents beat two more buzzwords."

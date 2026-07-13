@@ -1,0 +1,24 @@
+# Expert canon (L3) — MemGPT/Letta memory paging and vector-store long-term memory.
+- id: expert-memgpt
+  type: multiple_choice
+  tags: [types]
+  difficulty: 3
+  prompt: "What is the load-bearing idea of MemGPT / Letta (virtual context management)?"
+  options:
+    - { text: "Treat the finite context window like RAM and an external store like disk, paging memory between them as it becomes relevant or stale", correct: true }
+    - { text: "Fine-tune the model on the whole conversation after every turn" }
+    - { text: "Make the context window infinite so nothing ever has to be evicted" }
+    - { text: "Store memory only in the system prompt and never write to an external store" }
+  explanation: "MemGPT/Letta reframe the context window as one tier of a memory hierarchy the agent manages: evict older content to an external store when context fills, and page it back in when it becomes relevant again — the direct ancestor of the buffer-plus-external-store split."
+
+- id: expert-vector-store
+  type: multiple_choice
+  tags: [memory]
+  difficulty: 3
+  prompt: "Why is a vector database the standard implementation of an agent's long-term memory?"
+  options:
+    - { text: "It embeds stored text and looks it up by semantic similarity, so the agent can recall a fact from a past session by meaning rather than by position in a transcript", correct: true }
+    - { text: "It guarantees every stored memory is always correct and never becomes stale" }
+    - { text: "It keeps all memory inside the context window so no retrieval is needed" }
+    - { text: "It is the only place a short-term conversation buffer can be stored" }
+  explanation: "Long-term recall across sessions is a semantic-lookup problem: text is embedded and retrieved by meaning. Vector stores (FAISS, pgvector, Pinecone, Chroma) are the standard home for that, distinct from the in-context short-term buffer."

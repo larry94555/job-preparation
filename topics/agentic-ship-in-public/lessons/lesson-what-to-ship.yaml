@@ -1,0 +1,20 @@
+id: lesson-what-to-ship
+title: "What to ship, and why proof beats a resume"
+material: what-to-ship.md
+segments:
+  - present: proof-beats-a-resume
+  - check: mc-proof
+  - check: fe-proof
+  - check: cloze-proof
+  - present: what-to-ship
+  - check: mc-real-agent
+  - check: mc-readme
+  - check: mc-evals
+  - check: mc-demo
+  - check: cloze-portfolio
+  - check: cloze-readme
+  - check: cloze-demo
+  - check: fe-readme
+  - check: fe-evals
+  - check: fe-demo
+  - apply: essay-architecture

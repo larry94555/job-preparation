@@ -1,0 +1,19 @@
+# Frontier drill (L4) — open problems in deploying agents.
+- id: frontier-deploy
+  type: multiple_choice
+  tags: [rollout]
+  difficulty: 4
+  prompt: >-
+    You want to ramp a new agent version automatically — 1% to 100% — gated on live metrics, with a pool
+    of workers that grows and shrinks with the queue. Which named practice is this, and what is the honest
+    read?
+  options:
+    - { text: "Progressive delivery with feature flags and autoscaling workers — an open problem for agents: what to gate the ramp on (agent quality isn't a simple error rate) and how to autoscale a spiky, expensive pool are unsolved", correct: true }
+    - { text: "It is fully solved by turning on a green unit-test suite as the deploy gate" }
+    - { text: "It is a networking problem; a faster load balancer makes the ramp safe" }
+    - { text: "It is not a real problem — once the canary passes, ship to 100% with no metrics" }
+  explanation: >-
+    Progressive delivery generalizes the canary into an automated, metric-gated ramp behind feature flags,
+    with worker pools autoscaling on queue depth. For agents it is a genuine frontier problem: agent quality
+    is not a simple 500-rate, so what to gate the ramp on is unsolved, and autoscaling a pool whose per-job
+    cost and duration vary wildly is hard. A green unit-test suite does not prove a version safe to widen.

@@ -1,0 +1,24 @@
+# Essay
+- id: essay-deploy
+  type: essay
+  length: short
+  tags: [asyncapi]
+  difficulty: 3
+  prompt: "You have a working agent that takes tens of seconds per run. Explain how to turn it into an HTTP service without blocking the request thread — describe the submit → job id → poll flow and why each part is shaped that way."
+  eval_skill: eval-agentic-deploy-essay
+  reference_points:
+    - "Never block the request thread on the agent run: a multi-second run done inline pins a thread and times callers out, so the handler must do only fast work."
+    - "Submit is a fast write that enqueues the task and returns a job id immediately with status queued (202 Accepted); a background worker does the actual run off the request."
+    - "The caller polls a status endpoint with the job id until the job reaches a terminal state (done with result, or failed with error), which decouples request latency from run latency."
+
+- id: essay-operability
+  type: essay
+  length: short
+  tags: [rollout]
+  difficulty: 3
+  prompt: "You are about to ship a new agent version to production. Walk through the deployment checklist — rate limiting, canary rollout, watching for errors, and rollback — and explain why each step is there."
+  eval_skill: eval-agentic-deploy-essay
+  reference_points:
+    - "Rate limit every user (e.g. a per-user token bucket) so one caller can't drain the worker pool or burn the token budget and take everyone else down."
+    - "Canary the new version to a small, deterministic slice of traffic first (sticky per user via a stable hash) instead of shipping to 100% at once, then watch the canary's error rate and latency against stable."
+    - "Keep rollback to one fast command back to the last known-good version, because rolling back to something that worked is instant while rolling forward with a fix costs time you don't have mid-incident."

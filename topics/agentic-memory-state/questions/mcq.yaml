@@ -1,0 +1,84 @@
+# Multiple choice
+- id: mc-no-memory
+  type: multiple_choice
+  tags: [memory]
+  difficulty: 2
+  prompt: "What is the characteristic failure of an agent built with no memory of its own?"
+  options:
+    - { text: "It repeats itself forever — re-asking answered questions and re-running tools whose results it has already seen", correct: true }
+    - { text: "It runs faster because it never has to look anything up" }
+    - { text: "It becomes more accurate because nothing stale can mislead it" }
+    - { text: "It can only ever answer a single question and then halts" }
+  explanation: "A model call is stateless. An agent with no memory has no record of what it tried or learned, so it loops — re-asking, re-running, and re-deriving the same things."
+
+- id: mc-four-memories
+  type: multiple_choice
+  tags: [memory]
+  difficulty: 2
+  prompt: "Which set correctly names the four memories an agent needs?"
+  options:
+    - { text: "Short-term conversation buffer, working state/scratchpad, long-term (vector) store, and episodic history", correct: true }
+    - { text: "System prompt, user prompt, assistant prompt, and tool prompt" }
+    - { text: "CPU cache, RAM, disk, and network" }
+    - { text: "Training data, fine-tuning data, RLHF data, and eval data" }
+  explanation: "The four memories are the recent-turns buffer, the mid-task working scratchpad, the durable long-term (vector) store for cross-session recall, and the episodic log of past runs."
+
+- id: mc-choose-memory
+  type: multiple_choice
+  tags: [types]
+  difficulty: 3
+  prompt: "You need to track where you are in a multi-step task — the plan, what's done, the current intermediate result. Which memory is that?"
+  options:
+    - { text: "The working state / scratchpad — structured, in-context state the agent reads and writes mid-task", correct: true }
+    - { text: "The long-term vector store, queried by semantic similarity" }
+    - { text: "The episodic history log, queried by run id" }
+    - { text: "The short-term conversation buffer of raw recent turns" }
+  explanation: "Task progress is structured working state the agent maintains mid-task — the scratchpad. It is in-context but distilled, not the raw transcript and not an external store."
+
+- id: mc-when-compress
+  type: multiple_choice
+  tags: [compression]
+  difficulty: 2
+  prompt: "When should an agent compress the conversation buffer into a running summary?"
+  options:
+    - { text: "When the buffer would exceed its token budget — the oldest turns are summarized so the essentials survive and raw tokens are dropped", correct: true }
+    - { text: "On every single turn, regardless of how full the context is" }
+    - { text: "Never — you should keep every raw turn in context indefinitely" }
+    - { text: "Only after the conversation has completely ended" }
+  explanation: "Compression is triggered by a budget threshold: when the buffer would overflow the context window, collapse the oldest turns into a summary rather than dropping them raw or keeping everything."
+
+- id: mc-keep-drop
+  type: multiple_choice
+  tags: [compression]
+  difficulty: 3
+  prompt: "When compressing old turns into a summary, what should you keep versus drop?"
+  options:
+    - { text: "Keep decisions, established facts/constraints, and open tasks; drop chit-chat and restated reasoning whose conclusion you already captured", correct: true }
+    - { text: "Keep the greetings and small talk; drop the decisions and constraints" }
+    - { text: "Keep everything verbatim — a summary must never lose a single word" }
+    - { text: "Drop everything; a summary should be empty to save the most tokens" }
+  explanation: "A good summary is the minutes, not the transcript: preserve load-bearing content (decisions, facts, open tasks) and discard chit-chat. The risk is that compression is lossy — you can summarize away something you later need."
+
+- id: mc-retrieve-inject
+  type: multiple_choice
+  tags: [recall]
+  difficulty: 3
+  prompt: "What is the right pattern for using a large long-term memory store across sessions?"
+  options:
+    - { text: "Retrieve-then-inject — keep everything in the store and pull only the most relevant items into context on demand", correct: true }
+    - { text: "Dump the entire store back into the context window at the start of every session" }
+    - { text: "Never read from the store; long-term memory is write-only" }
+    - { text: "Inject items in insertion order until the context window is full" }
+  explanation: "The store is far larger than the window and mostly irrelevant to any one task. Retrieve-then-inject brings in only the relevant items on demand, rather than stuffing everything back into context."
+
+- id: mc-ranking-matters
+  type: multiple_choice
+  tags: [recall]
+  difficulty: 3
+  prompt: "Why is relevance ranking essential when recalling from long-term memory, rather than just returning nearby items?"
+  options:
+    - { text: "Irrelevant recall wastes context tokens and distracts the model — so you must rank and take the top-k most relevant", correct: true }
+    - { text: "Ranking makes the embedding model train faster" }
+    - { text: "Without ranking the vector store cannot store any items at all" }
+    - { text: "Ranking guarantees the recalled facts are always correct and never stale" }
+  explanation: "Every injected item costs tokens and off-topic recall distracts the model away from the goal. Recall is a ranking problem: score items and inject only the top-k relevant ones."

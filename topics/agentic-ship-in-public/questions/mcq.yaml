@@ -1,0 +1,120 @@
+# Multiple choice
+- id: mc-proof
+  type: multiple_choice
+  tags: [portfolio]
+  difficulty: 2
+  prompt: "Why does a shipped, working agent beat a resume that lists \"AI engineering\" as a skill?"
+  options:
+    - { text: "It is falsifiable proof a stranger can open, read, and run — a skills list is only a claim", correct: true }
+    - { text: "It isn't — a well-worded resume line is stronger because it is easier to scan" }
+    - { text: "Because a working agent means you never have to explain how it works" }
+    - { text: "Because hiring managers only read resumes, never repositories" }
+  explanation: "A working agent is proof someone can verify; a buzzword list is an unverifiable claim. Reviewers trust what they can open and run."
+
+- id: mc-real-agent
+  type: multiple_choice
+  tags: [ship]
+  difficulty: 2
+  prompt: "What makes the capstone a \"real agent\" rather than a chatbot wrapper?"
+  options:
+    - { text: "A bounded loop that calls tools, reads observations, and produces a result on one useful task", correct: true }
+    - { text: "A larger system prompt that describes many features" }
+    - { text: "A single model call that returns a long, well-formatted answer" }
+    - { text: "The fact that it was copied step-by-step from a popular tutorial" }
+  explanation: "A real agent runs a bounded reason–act loop over tools and observations to do a task end to end — not a one-shot prompt or a tutorial clone."
+
+- id: mc-readme
+  type: multiple_choice
+  tags: [portfolio]
+  difficulty: 2
+  prompt: "What is the README's job in a portfolio agent?"
+  options:
+    - { text: "Explain what the agent does, how it is built, and one architecture decision and why", correct: true }
+    - { text: "List every function and class in the codebase" }
+    - { text: "Repeat the resume's skills section in more words" }
+    - { text: "Hide the architecture so reviewers focus only on the demo" }
+  explanation: "The README is where you show judgment: what the agent does, how it is built, and a defended architecture decision. A repo with no README is unreadable proof."
+
+- id: mc-evals
+  type: multiple_choice
+  tags: [portfolio]
+  difficulty: 2
+  prompt: "Why ship an eval suite with the agent instead of just a demo?"
+  options:
+    - { text: "Cases plus a judge plus a pass rate prove you measured it, separating a lucky demo from a verified agent", correct: true }
+    - { text: "Evals make the agent run faster in production" }
+    - { text: "A demo already guarantees the agent is correct, so evals are redundant" }
+    - { text: "Evals replace the need for a README" }
+  explanation: "An eval suite turns \"it seemed to work\" into \"it passes N of M.\" It is proof of measurement, which is exactly what a one-off demo can't give."
+
+- id: mc-demo
+  type: multiple_choice
+  tags: [ship]
+  difficulty: 1
+  prompt: "What does a short demo (a Loom-style clip or runnable script) add to a portfolio agent?"
+  options:
+    - { text: "It turns a claim into something a reviewer can see working in about ninety seconds", correct: true }
+    - { text: "It removes the need for the agent to actually run" }
+    - { text: "It is only useful for front-end projects, not agents" }
+    - { text: "It proves the architecture is correct without any evals" }
+  explanation: "A demo shows the agent working on a real input fast. It makes \"it actually runs\" visible — the complement to the README (architecture) and evals (measurement)."
+
+- id: mc-write-up
+  type: multiple_choice
+  tags: [communicate]
+  difficulty: 2
+  prompt: "What three beats make a capstone write-up read as real engineering?"
+  options:
+    - { text: "The problem you chose, one surprising decision, and one thing that broke and how you fixed it", correct: true }
+    - { text: "A feature list, a pricing table, and a roadmap" }
+    - { text: "The model name, the token count, and the framework version" }
+    - { text: "Three unrelated screenshots with no explanation" }
+  explanation: "A short narrative — the problem, one surprise, and one break-and-fix — proves you were actually in the code, unlike a marketing-style feature list."
+
+- id: mc-surprise
+  type: multiple_choice
+  tags: [communicate]
+  difficulty: 2
+  prompt: "Why include \"one surprising decision\" in the write-up of your agent?"
+  options:
+    - { text: "A surprise is credible because tutorials never have them — it proves you were actually building", correct: true }
+    - { text: "Surprises make the agent look unreliable, which lowers expectations" }
+    - { text: "It pads the write-up so it looks longer" }
+    - { text: "Reviewers ignore surprises, so it is a safe thing to add" }
+  explanation: "A genuine surprise — a tool you cut, a constraint you had to add — signals real engagement with the build, which a tutorial reproduction never shows."
+
+- id: mc-break-fix
+  type: multiple_choice
+  tags: [communicate]
+  difficulty: 2
+  prompt: "Why is \"one thing that broke and how you fixed it\" the most convincing beat in a write-up?"
+  options:
+    - { text: "Debugging is the job — a concrete break and fix proves you can diagnose and repair a real agent", correct: true }
+    - { text: "It shows the agent has no bugs left" }
+    - { text: "It lets you avoid describing the architecture" }
+    - { text: "Interviewers prefer candidates whose agents never broke" }
+  explanation: "A concrete failure and the exact fix is the strongest signal you can send, because diagnosing and repairing a real agent is the everyday work of the job."
+
+- id: mc-ship-public
+  type: multiple_choice
+  tags: [proof]
+  difficulty: 2
+  prompt: "What does it mean to \"ship in public\"?"
+  options:
+    - { text: "Make the work linkable — a repo, README, demo, and evals a stranger can open, read, watch, and rerun", correct: true }
+    - { text: "Post a screenshot of your terminal with the code hidden" }
+    - { text: "Wait until the agent is perfect before showing anyone" }
+    - { text: "Describe the agent in a resume line without linking to it" }
+  explanation: "Shipping in public means the work argues for you while you sleep: linkable, openable, runnable proof — not a private repo or an unlinked claim."
+
+- id: mc-working-agents
+  type: multiple_choice
+  tags: [proof]
+  difficulty: 2
+  prompt: "A candidate lists \"LLMs, RAG, agents, fine-tuning\" on a resume. Another links two real agents with READMEs, evals, and demos. Who has the edge, and why?"
+  options:
+    - { text: "The one who links working agents — falsifiable proof beats an unverifiable skills list", correct: true }
+    - { text: "The one with the longer skills list, because it covers more topics" }
+    - { text: "They are equivalent; a skills list and a working agent carry the same weight" }
+    - { text: "The skills list wins because it is faster to read" }
+  explanation: "Working agents are proof a reviewer can verify; a skills list is a claim. Two more shipped agents beat two more buzzwords every time."
