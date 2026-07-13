@@ -1,0 +1,6 @@
+id: lesson-frontier-ops
+title: "The frontier of routing"
+material: frontier-ops.md
+segments:
+  - present: the-frontier-of-routing
+  - check: frontier-routing

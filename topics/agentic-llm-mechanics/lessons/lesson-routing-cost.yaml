@@ -1,0 +1,14 @@
+id: lesson-routing-cost
+title: "Routing to the cheapest capable model"
+material: routing-cost.md
+segments:
+  - present: not-every-task-needs-the-best-model
+  - check: mc-routing-why
+  - check: mc-cheap-tasks
+  - check: mc-hard-tasks
+  - check: cloze-routing
+  - check: fe-cheapest
+  - check: fe-route-classify
+  - present: think-like-a-shopkeeper
+  - apply: code-cost-estimator
+  - apply: essay-routing

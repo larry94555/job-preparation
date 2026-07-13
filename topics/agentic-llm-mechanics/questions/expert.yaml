@@ -1,0 +1,12 @@
+# Expert canon (L3) — long-context retrieval and the "lost in the middle" finding.
+- id: expert-lost-middle
+  type: multiple_choice
+  tags: [context]
+  difficulty: 3
+  prompt: "What does 'Lost in the Middle' (Liu et al., 2023) establish about how models use long context?"
+  options:
+    - { text: "Accuracy is U-shaped over position — models use information at the start and end of the context well but degrade on information in the middle, so put key facts at the start or end", correct: true }
+    - { text: "A bigger context window guarantees uniformly reliable retrieval at every position" }
+    - { text: "Models always ignore the beginning of the context and read only the end" }
+    - { text: "Retrieval accuracy depends only on total token count, never on position" }
+  explanation: "Liu et al. (2023) measured retrieval accuracy as a function of where the relevant fact sits in a long context and found a U-shaped curve: performance is high at the beginning and end and dips in the middle. The practical takeaway is positional — place load-bearing information at the start or end, and don't assume a larger window fixes it."

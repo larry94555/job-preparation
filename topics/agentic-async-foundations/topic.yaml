@@ -1,0 +1,10 @@
+id: agentic-async-foundations
+title: "Python & Async Foundations"
+description: "Agents spend most of their lives waiting — on models, APIs, and tools. Learn async Python that fans out concurrent calls instead of blocking, and make every call resilient with timeouts, retries with backoff, and error isolation."
+track: agentic
+pass_threshold: 0.8
+tag_weights:
+  concurrency: 1.2
+  eventloop: 1.0
+  resilience: 1.2
+  errors: 1.0

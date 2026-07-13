@@ -1,0 +1,120 @@
+# Multiple choice
+- id: mc-context-window
+  type: multiple_choice
+  tags: [context]
+  difficulty: 2
+  prompt: "What is a model's context window?"
+  options:
+    - { text: "The hard limit on how many tokens (prompt + output) the model can attend to in a single call", correct: true }
+    - { text: "The amount of RAM the model weights occupy on the GPU" }
+    - { text: "How long the model has been trained, measured in tokens" }
+    - { text: "The maximum number of tool calls an agent may make per turn" }
+  explanation: "The context window is a fixed token budget for one request: everything the model sees — system prompt, history, retrieved documents, and the tokens it generates — must fit inside it. Overflow is dropped or errors; it is not about weights, training length, or tool count."
+
+- id: mc-context-fill
+  type: multiple_choice
+  tags: [context]
+  difficulty: 2
+  prompt: "An agent's conversation keeps growing and eventually every request errors or silently drops the oldest messages. What happened?"
+  options:
+    - { text: "The accumulated history exceeded the context window, so it no longer fits in a single call", correct: true }
+    - { text: "The model forgot how to read English and needs retraining" }
+    - { text: "The tokenizer changed mid-conversation" }
+    - { text: "The temperature setting was too high" }
+  explanation: "A long-running agent accumulates tokens (system prompt + every turn + tool results). Once the total passes the window limit, the request can't fit — the harness must trim or summarize history. This is a budget problem, not a temperature or tokenizer problem."
+
+- id: mc-token-cost
+  type: multiple_choice
+  tags: [tokens]
+  difficulty: 2
+  prompt: "Why do tokens — not requests — drive both cost and latency?"
+  options:
+    - { text: "Providers bill per token and the model generates one token at a time, so more tokens means more dollars and more time", correct: true }
+    - { text: "Each request is a flat fee regardless of length" }
+    - { text: "Tokens only affect cost; latency depends solely on network distance" }
+    - { text: "Output tokens are free; only the prompt is billed" }
+  explanation: "Pricing is per-token (usually with input and output priced separately), and autoregressive decoding emits one token per step — so a longer prompt or answer costs more money and takes more wall-clock time. Both input and output tokens are billed."
+
+- id: mc-track-spend
+  type: multiple_choice
+  tags: [tokens]
+  difficulty: 2
+  prompt: "You want to know what a single agent run actually cost. What do you track?"
+  options:
+    - { text: "Input and output tokens per call, multiplied by the per-token price for each, summed over the run", correct: true }
+    - { text: "Only the number of API calls, since price is per call" }
+    - { text: "Wall-clock time only; tokens are irrelevant to cost" }
+    - { text: "The size of the model in parameters" }
+  explanation: "Cost per run = sum over calls of (input_tokens × input_price + output_tokens × output_price). Input and output are usually priced differently, so you track both. Call count and model size don't give you dollars."
+
+- id: mc-lost-middle
+  type: multiple_choice
+  tags: [context]
+  difficulty: 3
+  prompt: "You stuff a long document into the prompt and the model reliably misses a key fact. Where was that fact most likely placed?"
+  options:
+    - { text: "In the middle of the long context — models attend best to the start and end", correct: true }
+    - { text: "At the very beginning, which models always ignore" }
+    - { text: "At the very end, which models always ignore" }
+    - { text: "Placement never matters; long context is uniformly reliable" }
+  explanation: "Retrieval accuracy over position is U-shaped: information at the start and end of a long context is used well, while information buried in the middle is the most likely to be missed. This is the 'lost in the middle' effect."
+
+- id: mc-routing-why
+  type: multiple_choice
+  tags: [routing]
+  difficulty: 2
+  prompt: "Why route different tasks to different model tiers instead of sending everything to the most capable model?"
+  options:
+    - { text: "The best model is the most expensive and slowest; many tasks are handled correctly by a cheaper, faster tier", correct: true }
+    - { text: "Cheaper models are always more accurate on every task" }
+    - { text: "Routing is required by the API; you cannot call one model for everything" }
+    - { text: "The best model refuses to answer simple questions" }
+  explanation: "The frontier model is the priciest and highest-latency option. Routing sends easy, high-volume work to a cheaper tier that handles it fine, and reserves the expensive model for the hard cases — saving money and time without losing quality where it matters."
+
+- id: mc-cheap-tasks
+  type: multiple_choice
+  tags: [routing]
+  difficulty: 2
+  prompt: "Which kind of task is the best candidate for the cheapest model tier?"
+  options:
+    - { text: "High-volume, well-scoped work like classification, extraction, or short summaries", correct: true }
+    - { text: "Multi-step architectural reasoning about an unfamiliar system" }
+    - { text: "Open-ended research requiring synthesis across many sources" }
+    - { text: "Anything where a single wrong token is catastrophic and unrecoverable" }
+  explanation: "Classify / extract / summarize are narrow, high-volume, and forgiving — exactly what a small fast model does reliably and cheaply. Deep reasoning and high-stakes synthesis are where you pay for the top tier."
+
+- id: mc-hard-tasks
+  type: multiple_choice
+  tags: [routing]
+  difficulty: 2
+  prompt: "Which task justifies paying for the most capable (most expensive) tier?"
+  options:
+    - { text: "Multi-step reasoning or architecture decisions where a weaker model's errors compound", correct: true }
+    - { text: "Detecting the language of a one-line message" }
+    - { text: "Extracting a phone number from a form" }
+    - { text: "Tagging a support ticket with one of five categories" }
+  explanation: "Hard reasoning, planning, and design tasks are where a weaker model's small mistakes cascade into a wrong result. Those are worth the top tier; language detection, extraction, and tagging are not."
+
+- id: mc-hallucination
+  type: multiple_choice
+  tags: [failure]
+  difficulty: 2
+  prompt: "A model confidently returns a plausible-sounding fact that is simply false. This failure mode is called:"
+  options:
+    - { text: "Hallucination — fluent, confident output that is not grounded in any real source", correct: true }
+    - { text: "Instruction drift — the model wandering off the task over a long conversation" }
+    - { text: "Lost in the middle — a fact buried in a long context being missed" }
+    - { text: "A context-window overflow" }
+  explanation: "Hallucination is fabricated-but-fluent output the model states with confidence. It's distinct from instruction drift (losing the task), lost-in-the-middle (positional retrieval failure), and overflow (running out of token budget)."
+
+- id: mc-drift
+  type: multiple_choice
+  tags: [failure]
+  difficulty: 3
+  prompt: "Over a long multi-turn agent session the model gradually stops following its original system instructions. What is this, and a standard mitigation?"
+  options:
+    - { text: "Instruction drift — re-assert the key instructions (or re-inject the system prompt) periodically so they stay salient", correct: true }
+    - { text: "Hallucination — lower the temperature to zero to prevent it" }
+    - { text: "A tokenizer bug — switch to a different tokenizer" }
+    - { text: "Context overflow — always solved by a bigger model" }
+  explanation: "Instruction drift is the slow erosion of adherence to the original instructions as the conversation grows and competing context accumulates. A common fix is to periodically re-assert or re-inject the governing instructions so they remain salient near the model's attention."

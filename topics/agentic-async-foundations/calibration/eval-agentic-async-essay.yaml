@@ -1,0 +1,61 @@
+# Calibration for eval-agentic-async-essay (exemplars target essay-resilience).
+skill: eval-agentic-async-essay
+cases:
+  # PASS — answers the question, hits every reference point, all claims correct,
+  # names concrete mechanisms. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      A timeout (asyncio.wait_for) bounds each call so a hung request becomes a catchable TimeoutError
+      instead of freezing the agent forever — that error is what a retry can act on. Retries with
+      exponential backoff recover transient failures and timeouts without hammering an overloaded service,
+      and adding jitter stops many clients from retrying in lockstep; the retries stay bounded so they
+      eventually give up. Error isolation with asyncio.gather(..., return_exceptions=True) keeps one failed
+      call from sinking the whole fan-out — each result is inspected individually. The three compose: the
+      timeout bounds the wait, backoff retries the transient failure, and isolation contains whatever still
+      fails so the other calls in the batch still return their values.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # PASS — a second strong, correct, specific answer using different wording.
+  # 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      Because a flaky API sometimes hangs, you wrap each call in wait_for so an unbounded await turns into
+      a bounded, catchable error rather than a permanent stall. On a transient failure or timeout you retry,
+      but with exponentially growing delays (1s, 2s, 4s) plus random jitter so a fleet of clients doesn't
+      retry in synchronized waves and overwhelm a recovering service; the retry count is capped so you give
+      up eventually. When you fan several of these calls out with gather you pass return_exceptions=True so
+      one raising call is returned as an exception in its slot instead of aborting the batch. They interact
+      as layers: timeout triggers the retry, backoff-with-jitter spaces the retries safely, and isolation
+      makes sure a call that still fails doesn't take the successful siblings down with it.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — off-topic and technically wrong: says retry forever, skip timeouts, and
+  # that gather isolates by default. Fails the gate plus every other check.
+  # 0/4 = 0.0 → fail; gate false caps fail→fail.
+  - answer: >-
+      If a call hangs you don't really need a timeout — you can just keep awaiting it and it will finish
+      eventually. When something fails the safest thing is to retry it in a tight loop forever until it
+      works, with the same short delay every time. And you don't have to worry about one call failing in a
+      batch, because asyncio.gather already isolates every failure by default and returns the good results,
+      so return_exceptions isn't needed. Async also runs all the calls on separate CPU cores, which is
+      where the speedup comes from.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # BORDERLINE — on-topic, hits the key points, but contains a wrong claim (says
+  # gather isolates failures by default so return_exceptions isn't needed), so it
+  # misses ONLY the gate. 3/4 = 0.75 → base pass; gate false caps pass→borderline.
+  - answer: >-
+      You wrap each call in a timeout so a hang becomes a catchable error, and you retry transient failures
+      with exponential backoff plus jitter, bounded so it eventually gives up — that keeps you from
+      hammering an overloaded service or retrying in lockstep. When you fan the calls out, one failure
+      shouldn't sink the rest. The thing to note is that asyncio.gather already isolates failures by
+      default and returns the successful results alongside the errors, so you don't actually need to pass
+      return_exceptions. The three techniques still compose: timeout triggers a retry, backoff spaces the
+      retries, and the batch keeps going.
+    expect:
+      verdict: borderline
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: false, concrete: true }

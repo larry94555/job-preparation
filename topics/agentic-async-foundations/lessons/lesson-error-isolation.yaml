@@ -1,0 +1,9 @@
+id: lesson-error-isolation
+title: "Isolating failures in a fan-out"
+material: error-isolation.md
+segments:
+  - present: one-failure-should-not-sink-the-batch
+  - check: mc-isolate
+  - check: cloze-isolate
+  - check: fe-return-exceptions
+  - apply: essay-resilience

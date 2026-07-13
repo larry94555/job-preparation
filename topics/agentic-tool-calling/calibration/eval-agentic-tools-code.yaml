@@ -38,12 +38,13 @@ cases:
       checks: { technically_correct: false, validates_input: false, handles_errors: false, matches_intent: false }
 
   - answer: >-
-      tests_passed=true. technically_correct does NOT hold: parse_report validates the string fields and
-      raises ValueError on wrong types, but it forgets the confidence range check, so an out-of-range
-      confidence slips through — a conceptually wrong gap for the exercise. validates_input holds for the
-      type checks it does perform. handles_errors holds: it raises ValueError on the violations it does
-      catch. matches_intent mostly holds: it returns the dict on valid input and validates most fields.
-      signals.must_use=[parse JSON, validate field types]; avoid=[skipping the confidence range check].
+      tests_passed=true. validates_input holds: it checks that topic and summary are strings and raises
+      ValueError on wrong types. handles_errors holds: it raises ValueError on the type violations it
+      catches. matches_intent holds: it returns the dict on valid input. But technically_correct does NOT
+      hold: it accepts a confidence of 2.5 as valid because it only checks `confidence > 0` instead of
+      `0.0 <= confidence <= 1.0`, so a clearly out-of-range probability passes validation — a wrong range
+      check for the exercise.
+      signals.must_use=[parse JSON, validate field types]; avoid=[accepting an out-of-range confidence].
     expect:
       verdict: borderline
       checks: { technically_correct: false, validates_input: true, handles_errors: true, matches_intent: true }

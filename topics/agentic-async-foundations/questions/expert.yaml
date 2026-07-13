@@ -1,0 +1,12 @@
+# Expert canon (L3) — the single-threaded cooperative event loop.
+- id: expert-event-loop
+  type: multiple_choice
+  tags: [eventloop]
+  difficulty: 3
+  prompt: "In CPython's asyncio, how does the single-threaded cooperative event loop differ from using threads, and why is concurrency not the same as parallelism here?"
+  options:
+    - { text: "One thread runs coroutines that cooperatively yield at await points, so many I/O waits overlap without OS threads or the GIL contention that plagues CPU-bound threading — concurrency (interleaving progress) is achieved, but not parallelism (simultaneous CPU execution)", correct: true }
+    - { text: "The event loop runs each coroutine on its own OS thread, so async code sidesteps the GIL and executes Python bytecode in parallel" }
+    - { text: "Concurrency and parallelism are the same thing; asyncio simply renames threads as coroutines" }
+    - { text: "The event loop preemptively interrupts coroutines at any instruction, exactly like OS thread scheduling" }
+  explanation: "asyncio runs on one thread with a cooperative scheduler: coroutines yield only at await, so I/O waits interleave without spawning threads or fighting the GIL. That gives concurrency — many operations making progress by overlapping their waits — but not parallelism, since only one Python instruction runs at a time. CPU-bound work still needs processes or a real parallel backend."

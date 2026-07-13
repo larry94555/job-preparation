@@ -1,0 +1,18 @@
+sections:
+  - id: sec-concurrency
+    title: "Concurrency & the event loop"
+    lessons: [lesson-why-async, lesson-async-patterns, lesson-expert-context]
+    assessment:
+      title: "Section 1 — Concurrency & the event loop"
+      from_tags: [concurrency, eventloop]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-resilience
+    title: "Resilient calls"
+    lessons: [lesson-resilient-calls, lesson-error-isolation, lesson-frontier-ops]
+    assessment:
+      title: "Section 2 — Resilient calls"
+      from_tags: [resilience, errors]
+      count: 5
+      pass_threshold: 0.8

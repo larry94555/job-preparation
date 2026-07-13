@@ -1,0 +1,24 @@
+# Essay
+- id: essay-why-async
+  type: essay
+  length: short
+  tags: [concurrency]
+  difficulty: 3
+  prompt: "Explain why async is foundational for building agents. Cover why an agent is I/O-bound, what fan-out with gather buys you, and give a concrete example of the speedup."
+  eval_skill: eval-agentic-async-essay
+  reference_points:
+    - "An agent is I/O-bound: it spends most of its time waiting on model responses, HTTP APIs, and tool calls rather than using the CPU, so throughput is limited by waiting, not compute."
+    - "Async lets a single-threaded event loop overlap those waits — fanning independent calls out with asyncio.gather starts them all at once and collects results in order instead of blocking on each in turn."
+    - "Concrete example: ten independent tool calls that each wait ~1s take ~10s sequentially but ~1s fanned out, because the waits overlap and total time approaches the slowest single call."
+
+- id: essay-resilience
+  type: essay
+  length: short
+  tags: [resilience]
+  difficulty: 3
+  prompt: "A model API is flaky and sometimes hangs. Explain why you need timeouts, retries with backoff, and error isolation, and how these three techniques interact in a fan-out of calls."
+  eval_skill: eval-agentic-async-essay
+  reference_points:
+    - "A timeout bounds each call so a hung request turns into a catchable error instead of blocking the agent forever — it's the trigger that a retry can act on."
+    - "Retries with exponential backoff (plus jitter) recover from transient failures and timeouts without hammering an overloaded service or retrying in lockstep, but must be bounded so they eventually give up."
+    - "Error isolation (gather with return_exceptions=True, or per-task try/except) keeps one failed call from sinking the whole batch; the three compose — timeout bounds the wait, backoff retries the transient failure, isolation contains what still fails so the rest of the fan-out succeeds."

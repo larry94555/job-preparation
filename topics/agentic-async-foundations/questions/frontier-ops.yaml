@@ -1,0 +1,19 @@
+# Frontier drill (L4) — running async agents at scale.
+- id: frontier-scaling
+  type: multiple_choice
+  tags: [resilience]
+  difficulty: 4
+  prompt: >-
+    An agent fleet fans out thousands of concurrent model and tool calls and starts hitting rate limits,
+    exhausted connection pools, and cascading timeouts. Which read of the situation is the honest one?
+  options:
+    - { text: "Unbounded fan-out is the problem: at scale you need backpressure and semaphore-bounded concurrency, connection pooling with sane limits, and rate-limit awareness — gather alone will happily overwhelm both your client and the upstream service", correct: true }
+    - { text: "Just call asyncio.gather on everything at once; the event loop automatically throttles to a safe rate" }
+    - { text: "The fix is always a bigger connection pool; concurrency limits and rate-limit handling are unnecessary" }
+    - { text: "Rate limits and pool exhaustion are impossible in single-threaded async code" }
+  explanation: >-
+    asyncio makes it trivial to launch unbounded concurrency, and that is exactly the trap at scale:
+    thousands of in-flight calls exhaust connection pools, trip rate limits, and cause timeouts to
+    cascade. The disciplined answer is bounded concurrency (a semaphore or worker pool) applying
+    backpressure, a pooled/limited HTTP client, and explicit rate-limit awareness with backoff — not a
+    single unbounded gather. More connections alone does not fix a coordination problem.

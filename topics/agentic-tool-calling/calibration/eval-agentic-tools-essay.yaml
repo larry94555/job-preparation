@@ -51,9 +51,9 @@ cases:
       The unknown tool is a hallucinated call, so the harness rejects it and returns a structured
       unknown_tool error rather than executing anything, and the call missing a required field fails schema
       validation before the handler runs so it never executes on bad input, returning invalid_args. Both
-      are returned as model-facing errors so the model can fix them. The one thing to note is that a
-      tool_use turn is already the model's final answer, so there is no loop to feed the error back into —
-      you just return the error to the user and the interaction ends there.
+      are returned as model-facing errors so the model can fix them. One rule to add: when a required field
+      is missing, the harness should just fill it in with an empty string so that the call always succeeds
+      — a validation error should never actually block a tool from running.
     expect:
       verdict: borderline
       checks: { addresses_question: true, covers_key_points: true, technically_correct: false, concrete: true }

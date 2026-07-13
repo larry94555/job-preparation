@@ -1,0 +1,46 @@
+# Calibration for eval-agentic-llm-code (exemplars target the model-router / cost-estimator / context-budget exercises).
+skill: eval-agentic-llm-code
+cases:
+  - answer: >-
+      tests_passed=true. technically_correct holds: route_to_model maps classify/summarize/extract to
+      "cheap", draft/analyze to "balanced", reason/architecture to "best", and uses dict.get(task,
+      "balanced") so an unknown task defaults to balanced. correct_logic holds: the mapping and default are
+      exactly the required tiers. handles_edge_cases holds: an unknown or empty task returns balanced
+      instead of raising. matches_intent holds: it returns the tier string as asked.
+      signals.must_use=[simple->cheap, hard->best, unknown->balanced]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, correct_logic: true, handles_edge_cases: true, matches_intent: true }
+
+  - answer: >-
+      tests_passed=true. technically_correct holds: estimate_cost prices input and output tokens
+      separately, dividing each count by 1000 and multiplying by its own per-1k price, then rounds the sum
+      to 6 decimals. correct_logic holds: the arithmetic matches (in/1000*price_in + out/1000*price_out).
+      handles_edge_cases holds: zero tokens returns 0.0. matches_intent holds: it returns the rounded
+      dollar figure the prompt asked for.
+      signals.must_use=[price in and out separately, per-1k division, round to 6dp]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, correct_logic: true, handles_edge_cases: true, matches_intent: true }
+
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: estimate_cost bills input and output at the
+      same single price and never divides by 1000, so every figure is off by 1000x and input/output are
+      not separated. correct_logic does NOT hold: the arithmetic is wrong. handles_edge_cases does NOT
+      hold: it also skips the zero-token guard. matches_intent does NOT hold: the returned number is not
+      the cost the prompt defined.
+      signals.must_use=[price input]; avoid=[billing input and output at the same price, forgetting per-1k division].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, correct_logic: false, handles_edge_cases: false, matches_intent: false }
+
+  - answer: >-
+      tests_passed=false. technically_correct does NOT hold: fit_messages returns the full message list
+      unchanged and ignores max_tokens entirely, so it never trims to the budget and the tests fail.
+      correct_logic does NOT hold: there is no keep-recent-under-budget decision at all. handles_edge_cases
+      does NOT hold: it never handles the over-budget case, which is the whole point of the exercise.
+      matches_intent does NOT hold: the prompt asked to fit messages under a token budget and it does
+      nothing of the sort.
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, correct_logic: false, handles_edge_cases: false, matches_intent: false }

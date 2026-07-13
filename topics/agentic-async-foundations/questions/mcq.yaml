@@ -1,0 +1,120 @@
+# Multiple choice
+- id: mc-why-async
+  type: multiple_choice
+  tags: [concurrency]
+  difficulty: 2
+  prompt: "Why is async the natural fit for an agent that calls models, APIs, and tools?"
+  options:
+    - { text: "An agent is I/O-bound — it spends most of its time waiting on network calls, and async lets it wait on many at once instead of one at a time", correct: true }
+    - { text: "Async makes the CPU run the model's math faster" }
+    - { text: "Async removes the need to ever handle errors from a call" }
+    - { text: "Async is only about writing shorter code, not about performance" }
+  explanation: "Agent work is dominated by waiting on I/O — model responses, HTTP APIs, tool calls. Async lets a single thread start many of those waits concurrently and make progress on whichever finishes, instead of blocking on each in turn."
+
+- id: mc-gather
+  type: multiple_choice
+  tags: [concurrency]
+  difficulty: 2
+  prompt: "You have ten independent `await client.fetch(q)` calls. What does `asyncio.gather(*coros)` do?"
+  options:
+    - { text: "Schedules all of them concurrently and returns their results as a list in the original order", correct: true }
+    - { text: "Runs them one after another and returns the last result only" }
+    - { text: "Runs them on ten separate OS threads to get real parallelism" }
+    - { text: "Returns immediately without waiting for any of them to finish" }
+  explanation: "`gather` schedules every awaitable on the event loop at once and waits for all to complete, returning results positionally in the order you passed them — the total time is roughly the slowest call, not the sum."
+
+- id: mc-blocking
+  type: multiple_choice
+  tags: [eventloop]
+  difficulty: 3
+  prompt: "Inside a coroutine you call `time.sleep(5)` instead of `await asyncio.sleep(5)`. What happens?"
+  options:
+    - { text: "It blocks the single event-loop thread for 5 seconds, freezing every other task", correct: true }
+    - { text: "Nothing changes — both sleep the same way in async code" }
+    - { text: "It runs on a background thread so other tasks keep going" }
+    - { text: "The event loop automatically converts it into an await" }
+  explanation: "The event loop is single-threaded and cooperative. A blocking call like `time.sleep` never yields control, so no other task can run until it returns — it stalls the whole loop. Use `await asyncio.sleep` (or run blocking work in an executor)."
+
+- id: mc-await
+  type: multiple_choice
+  tags: [eventloop]
+  difficulty: 2
+  prompt: "What does the `await` keyword do at an `await something()` point?"
+  options:
+    - { text: "Suspends the coroutine and yields control back to the event loop so other tasks can run until the awaitable is ready", correct: true }
+    - { text: "Immediately spawns a new operating-system thread" }
+    - { text: "Blocks the thread until the result is ready, running nothing else" }
+    - { text: "Marks the function as faster without changing execution" }
+  explanation: "`await` is the cooperative yield point: it pauses this coroutine and hands the event loop the chance to advance other ready tasks, resuming here once the awaited operation completes."
+
+- id: mc-fanout-speedup
+  type: multiple_choice
+  tags: [concurrency]
+  difficulty: 3
+  prompt: "Ten tool calls each take ~1s of network wait. Roughly how long do they take sequentially vs. fanned out with `gather`?"
+  options:
+    - { text: "~10s sequentially vs. ~1s concurrently — the waits overlap", correct: true }
+    - { text: "~10s both ways — async can't speed up I/O" }
+    - { text: "~1s sequentially vs. ~10s concurrently — gather adds overhead" }
+    - { text: "~100s concurrently because ten tasks contend for the CPU" }
+  explanation: "Because the time is spent waiting, not computing, fanning the calls out overlaps the waits: total time collapses from the sum (~10s) to about the slowest single call (~1s). That fan-out speedup is why async matters for agents."
+
+- id: mc-retry-transient
+  type: multiple_choice
+  tags: [resilience]
+  difficulty: 2
+  prompt: "A model API returns a transient 503. What is the right resilience response?"
+  options:
+    - { text: "Retry the call a bounded number of times before giving up, since the failure is likely temporary", correct: true }
+    - { text: "Fail the whole agent run immediately on the first error" }
+    - { text: "Retry forever in a tight loop until it eventually succeeds" }
+    - { text: "Swallow the error and pretend the call returned an empty result" }
+  explanation: "Transient failures (503s, timeouts, resets) often succeed on a later attempt. A bounded retry recovers from them without hanging forever; retrying forever or crashing immediately are both wrong."
+
+- id: mc-backoff
+  type: multiple_choice
+  tags: [resilience]
+  difficulty: 3
+  prompt: "Why increase the wait *exponentially* between retries instead of retrying at a fixed interval?"
+  options:
+    - { text: "Exponential backoff gives an overloaded service time to recover and stops your retries from hammering it", correct: true }
+    - { text: "It makes each individual retry return faster" }
+    - { text: "Fixed intervals are impossible to implement in asyncio" }
+    - { text: "Exponential backoff guarantees the call can never fail again" }
+  explanation: "If a service is failing because it's overloaded, retrying immediately (or at a tight fixed interval) makes it worse. Growing the delay exponentially (1s, 2s, 4s, …) backs off pressure and gives it room to recover."
+
+- id: mc-jitter
+  type: multiple_choice
+  tags: [resilience]
+  difficulty: 3
+  prompt: "Many clients back off on the same exponential schedule and all retry at second 2, then 4, then 8. What does adding jitter fix?"
+  options:
+    - { text: "It randomizes each client's delay so they don't retry in lockstep and create synchronized load spikes (the thundering herd)", correct: true }
+    - { text: "It makes the average delay shorter for everyone" }
+    - { text: "It removes the need to cap the number of retries" }
+    - { text: "It guarantees every client retries at exactly the same instant" }
+  explanation: "Pure exponential backoff makes many clients retry in sync, hammering the service in coordinated waves. Jitter adds randomness to each delay so retries spread out, smoothing the load and avoiding the thundering-herd spike."
+
+- id: mc-isolate
+  type: multiple_choice
+  tags: [errors]
+  difficulty: 3
+  prompt: "You fan out a batch of calls with `gather` and one raises. With default settings, what happens to the others?"
+  options:
+    - { text: "gather propagates the first exception and you lose the results of the other calls — so you pass return_exceptions=True to isolate failures", correct: true }
+    - { text: "gather always returns partial results and swallows every error automatically" }
+    - { text: "The other calls are guaranteed to have their results returned regardless" }
+    - { text: "gather retries the failed call transparently until it succeeds" }
+  explanation: "By default `gather` raises the first exception, discarding the sibling results. Passing `return_exceptions=True` makes it return exception objects in place, so one bad call no longer sinks the whole batch — you inspect each result and handle failures per item."
+
+- id: mc-timeout
+  type: multiple_choice
+  tags: [resilience]
+  difficulty: 2
+  prompt: "Why wrap a model or tool call in a timeout (e.g. asyncio.wait_for) rather than awaiting it unbounded?"
+  options:
+    - { text: "A hung call would otherwise block progress forever; a timeout bounds the wait and turns a hang into a handleable error", correct: true }
+    - { text: "Timeouts make the call return its result faster" }
+    - { text: "Timeouts are only needed for CPU-bound work, not I/O" }
+    - { text: "An unbounded await automatically cancels itself after a while" }
+  explanation: "Networks stall and services hang. Without a timeout an await can wait indefinitely, freezing the agent. A timeout converts an unbounded hang into a bounded, catchable error you can retry or surface."

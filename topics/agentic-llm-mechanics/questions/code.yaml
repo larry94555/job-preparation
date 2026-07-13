@@ -1,0 +1,61 @@
+# Coding exercises — engine type: code (graded by tests + concept skill)
+- id: code-model-router
+  type: code
+  language: python
+  tags: [routing]
+  difficulty: 3
+  prompt: >-
+    Implement `route_to_model(task: str, complexity: str) -> str` returning a TIER string. Simple tasks
+    ("classify", "summarize", "extract") route to "cheap"; medium tasks ("draft", "analyze") route to
+    "balanced"; hard tasks ("reason", "architecture") route to "best". Any unknown task name falls back
+    to "balanced". Route on the task name; treat `complexity` as an available hint you may consult but
+    the named-task mapping decides the tier.
+  starter_file: exercises/model-router/starter.py
+  test_file: exercises/model-router/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-llm-code
+  concept_checks:
+    must_use: ["map simple tasks to the cheap tier", "map hard tasks to the best tier", "fall back to balanced for an unknown task"]
+    avoid_antipattern: ["routing every task to the best tier", "raising on an unknown task instead of defaulting"]
+
+- id: code-cost-estimator
+  type: code
+  language: python
+  tags: [cost]
+  difficulty: 3
+  prompt: >-
+    Implement `estimate_cost(input_tokens, output_tokens, price_per_1k_in, price_per_1k_out) -> float`.
+    Return the dollar cost of one call: input tokens priced at `price_per_1k_in` per 1000 tokens and
+    output tokens at `price_per_1k_out` per 1000 tokens, summed and rounded to 6 decimal places. Zero
+    tokens must return 0.0.
+  starter_file: exercises/cost-estimator/starter.py
+  test_file: exercises/cost-estimator/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-llm-code
+  concept_checks:
+    must_use: ["price input and output tokens separately", "divide token counts by 1000 for the per-1k price", "round the total to 6 decimal places"]
+    avoid_antipattern: ["billing input and output at the same price", "forgetting the zero-token case returns 0.0"]
+
+- id: code-context-budget
+  type: code
+  language: python
+  tags: [context]
+  difficulty: 3
+  prompt: >-
+    Implement `fit_messages(messages, max_tokens, count_tokens) -> list`. Keep a leading system message
+    (role == "system") if present, plus the MOST-RECENT messages whose combined token count (via the
+    injected `count_tokens(message)`) fits under `max_tokens`. Drop the oldest non-system messages first.
+    Return the kept messages in their ORIGINAL order.
+  starter_file: exercises/context-budget/starter.py
+  test_file: exercises/context-budget/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-llm-code
+  concept_checks:
+    must_use: ["always keep a leading system message if present", "keep the most recent messages that fit under the budget", "drop the oldest non-system messages first", "return kept messages in original order"]
+    avoid_antipattern: ["dropping the system message to save tokens", "returning messages out of their original order"]

@@ -1,0 +1,19 @@
+# Frontier drill (L4) — the moving edge of model routing.
+- id: frontier-routing
+  type: multiple_choice
+  tags: [routing]
+  difficulty: 4
+  prompt: >-
+    Beyond a hand-written "if simple → cheap model" rule, where is the routing frontier moving,
+    and what is the honest read?
+  options:
+    - { text: "Learned routers, model cascades, and confidence-based escalation (e.g. FrugalGPT) — send to the cheapest tier first and escalate only when confidence is low, but the router itself must be trained and evaluated and can misroute", correct: true }
+    - { text: "It is fully solved: always send everything to the largest model, which is both cheapest and best" }
+    - { text: "Routing is a latency problem only; a faster network removes the need to choose a tier" }
+    - { text: "The frontier is to stop routing entirely because tiers no longer differ in price or quality" }
+  explanation: >-
+    The frontier moves from static rules to learned routing: a cascade tries a cheap model first and a
+    confidence signal (or a trained router) decides whether to escalate to a stronger tier — the pattern
+    popularized by FrugalGPT. It is a real cost/quality lever, not a solved problem: the router is itself a
+    model that must be trained, calibrated, and evaluated, and it can misroute. Bigger-is-always-cheaper and
+    "latency only" are wrong reads.

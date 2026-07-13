@@ -1,0 +1,49 @@
+# Calibration for eval-agentic-async-code (exemplars target the async-fanout / retry-backoff exercises).
+skill: eval-agentic-async-code
+cases:
+  - answer: >-
+      tests_passed=true. technically_correct holds: gather_calls builds a coroutine per query and awaits
+      asyncio.gather(*coros), so the fetches overlap and results come back in input order.
+      concurrent_not_sequential holds: it hands the coroutine objects to gather rather than awaiting each
+      one in a loop. handles_failures is not the focus of this exercise but nothing is swallowed or
+      crashed. matches_intent holds: it returns the results as a list in the same order as queries.
+      signals.must_use=[coroutine per query, asyncio.gather, preserve order]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, concurrent_not_sequential: true, handles_failures: true, matches_intent: true }
+
+  - answer: >-
+      tests_passed=true. technically_correct holds: retry_call awaits fn and returns on success, catches
+      the exception, and retries up to `attempts` with exponential 2**i delays via the injected sleep,
+      re-raising the last exception on exhaustion. concurrent_not_sequential is not applicable to a single
+      retried call and does not detract. handles_failures holds: the retry is bounded by attempts and uses
+      backoff instead of retrying forever, and it re-raises when exhausted. matches_intent holds: it uses
+      the injected async sleep rather than real time and re-raises the final error.
+      signals.must_use=[await fn and return, retry with exponential backoff, re-raise on exhaustion]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, concurrent_not_sequential: true, handles_failures: true, matches_intent: true }
+
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: gather_calls awaits each fetch inside a for
+      loop (result = await client.fetch(q)) and appends it, so the calls run strictly one after another —
+      the fan-out speedup is lost even though order happens to be preserved. concurrent_not_sequential does
+      NOT hold: it is a sequential loop, the exact antipattern the exercise warns against. handles_failures
+      does NOT hold: a single failing fetch aborts the whole loop with nothing isolated. matches_intent
+      does NOT hold: the prompt required concurrent execution and this is sequential.
+      signals.must_use=[preserve order]; avoid=[awaiting each fetch in a sequential loop].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, concurrent_not_sequential: false, handles_failures: false, matches_intent: false }
+
+  - answer: >-
+      tests_passed=true. concurrent_not_sequential is not applicable to a single retried call and does not
+      detract. handles_failures holds: it bounds the retries and backs off between them. matches_intent
+      holds: it awaits the injected sleep with exponential delays and retries the right number of times.
+      But technically_correct does NOT hold: on the final failed attempt it returns the string "ok" as if
+      the call had succeeded, so a call that fails on every attempt is reported as a success instead of
+      re-raising the last exception — a clearly wrong outcome for the exercise.
+      signals.must_use=[retry with exponential backoff, use injected sleep]; avoid=[reporting a fully-failed call as a success].
+    expect:
+      verdict: borderline
+      checks: { technically_correct: false, concurrent_not_sequential: true, handles_failures: true, matches_intent: true }

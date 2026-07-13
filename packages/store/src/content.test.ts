@@ -25,9 +25,9 @@ test("contentHash is stable across key reorderings and changes when data changes
   assert.notEqual(contentHash(a), contentHash(d));
 });
 
-test("FileContentSource().loadTopics() returns 24 topics with non-empty ids", async () => {
+test("FileContentSource().loadTopics() returns 26 topics with non-empty ids", async () => {
   const topics = await new FileContentSource(topicsDir).loadTopics();
-  assert.equal(topics.length, 24);
+  assert.equal(topics.length, 26);
   for (const t of topics) {
     const id = t.topic?.id;
     assert.ok(id && id.length > 0, `topic in ${t.dir} has a non-empty id`);

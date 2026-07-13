@@ -1,0 +1,6 @@
+id: lesson-expert-context
+title: "Expert context: concurrency is not parallelism"
+material: expert-context.md
+segments:
+  - present: concurrency-is-not-parallelism
+  - check: expert-event-loop

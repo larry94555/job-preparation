@@ -1,0 +1,24 @@
+# Essay
+- id: essay-routing
+  type: essay
+  length: short
+  tags: [routing]
+  difficulty: 3
+  prompt: "Explain why routing tasks across model tiers saves money without losing quality, and describe how you decide which tier a given task goes to. Give a concrete example of a task at each of two tiers."
+  eval_skill: eval-agentic-llm-essay
+  reference_points:
+    - "The best model is the most expensive and highest-latency; most tasks are handled correctly by a cheaper, faster tier, so sending everything to the top model overpays for work a small model does fine."
+    - "You pick a tier by task difficulty: narrow, high-volume, forgiving work (classify / extract / short summary) goes to the cheap tier; multi-step reasoning, planning, or architecture — where a weaker model's errors compound — goes to the best tier; ambiguous cases can escalate on low confidence."
+    - "Concrete example: tag a support ticket with one of five labels → cheap/small model; design a migration plan across an unfamiliar codebase → the top-tier reasoning model."
+
+- id: essay-failure-modes
+  type: essay
+  length: short
+  tags: [failure]
+  difficulty: 3
+  prompt: "Name the main ways an LLM fails inside an agent — hallucination, lost-in-the-middle, instruction drift, and latency — and for each describe one concrete way an agent mitigates it."
+  eval_skill: eval-agentic-llm-essay
+  reference_points:
+    - "Hallucination is fluent, confident output not grounded in a real source; mitigate by grounding in retrieved/tool-fetched facts and validating claims against sources rather than trusting the model's memory."
+    - "Lost-in-the-middle is a positional retrieval failure where facts buried in the middle of a long context are missed; mitigate by putting the key information at the start or end and keeping the context tight instead of stuffing it."
+    - "Instruction drift is the slow erosion of instruction-following over a long session; mitigate by re-asserting or re-injecting the governing instructions periodically. Latency is per-token wall-clock cost; mitigate by routing to a faster/cheaper tier and trimming the token budget."
