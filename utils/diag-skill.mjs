@@ -18,11 +18,24 @@ for (const topic of topics) {
     const skill = topic.skills.find((s) => s.frontmatter.id === cal.skill);
     if (!skill) continue;
     const judge = clientForSkill(skill);
-    console.log(`# ${topic.topic?.id}/${cal.skill}  (judge ${judge.model})`);
+    // Mirror cli.ts: essay skills get the union of their essays' reference_points.
+    const referencePoints =
+      skill.frontmatter.applies_to === "essay"
+        ? [
+            ...new Set(
+              topic.questions.flatMap((q) =>
+                q.type === "essay" && q.eval_skill === skill.frontmatter.id
+                  ? (q.reference_points ?? [])
+                  : [],
+              ),
+            ),
+          ].slice(0, 4)
+        : [];
+    console.log(`# ${topic.topic?.id}/${cal.skill}  (judge ${judge.model}, refPts=${referencePoints.length})`);
     let i = 0;
     for (const c of cal.cases) {
       const others = { ...cal, cases: cal.cases.filter((x) => x !== c) };
-      const r = await gradeOpen({ skill, answer: c.answer, calibration: others }, judge);
+      const r = await gradeOpen({ skill, answer: c.answer, calibration: others, referencePoints }, judge);
       const got = r.graded ? r.aggregate.verdict : "NOGRADE";
       const ok = got === c.expect.verdict ? "OK " : "MISS";
       const checks = r.graded ? JSON.stringify(r.aggregate.checks ?? r.checks ?? {}) : "-";

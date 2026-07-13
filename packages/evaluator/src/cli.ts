@@ -79,6 +79,28 @@ async function main(argv: string[]): Promise<number> {
       // routed to the stronger tier, so the output reflects what actually graded.
       const routed = skill.frontmatter.grader_model ? ` [judge: ${judge.model}]` : "";
       const voted = effSamples > 1 ? ` [best-of-${effSamples}]` : "";
+      // Reference key: in production the judge is handed each essay's
+      // `reference_points` as ground truth (apply/route.ts). The gate must grade
+      // the judge the SAME way, or it measures a harder task than real users hit
+      // and understates accuracy. Supply the union of reference_points across the
+      // essays this skill grades. Code skills have no reference key (they grade
+      // from test evidence), so this is empty for them.
+      // Cap the key: it is repeated in every few-shot exemplar, so a long union
+      // (5 essays × 3 pts = 15) bloats the prompt and the 8B starts emitting
+      // non-JSON. A compact ~4-point domain key is what fixes the mis-grades
+      // without breaking output; production passes one essay's ~3 points.
+      const referencePoints =
+        skill.frontmatter.applies_to === "essay"
+          ? [
+              ...new Set(
+                topic.questions.flatMap((q) =>
+                  q.type === "essay" && q.eval_skill === skill.frontmatter.id
+                    ? (q.reference_points ?? [])
+                    : [],
+                ),
+              ),
+            ].slice(0, 4)
+          : [];
       let agree = 0;
       for (const c of cal.cases) {
         // Exclude the case under test from its own few-shot to avoid leakage.
@@ -87,13 +109,13 @@ async function main(argv: string[]): Promise<number> {
           // Best-of-N over the same (skill, answer, calibration); the closure
           // carries the real LoadedSkill so the escalation grade fn stays generic.
           const grade = async () => {
-            const rr = await gradeOpen({ skill, answer: c.answer, calibration: others }, judge);
+            const rr = await gradeOpen({ skill, answer: c.answer, calibration: others, referencePoints }, judge);
             return { verdict: rr.graded ? rr.aggregate.verdict : ("fail" as const) };
           };
           const esc = await gradeWithEscalation({ grade, skill, answer: c.answer, calibration: others, samples: effSamples });
           if (esc.verdict === c.expect.verdict) agree++;
         } else {
-          const r = await gradeOpen({ skill, answer: c.answer, calibration: others }, judge);
+          const r = await gradeOpen({ skill, answer: c.answer, calibration: others, referencePoints }, judge);
           if (r.graded && r.aggregate.verdict === c.expect.verdict) agree++;
         }
       }
