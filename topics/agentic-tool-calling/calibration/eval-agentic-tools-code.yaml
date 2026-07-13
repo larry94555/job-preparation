@@ -38,13 +38,38 @@ cases:
       checks: { technically_correct: false, validates_input: false, handles_errors: false, matches_intent: false }
 
   - answer: >-
-      tests_passed=true. validates_input holds: it checks that topic and summary are strings and raises
-      ValueError on wrong types. handles_errors holds: it raises ValueError on the type violations it
-      catches. matches_intent holds: it returns the dict on valid input. But technically_correct does NOT
-      hold: it accepts a confidence of 2.5 as valid because it only checks `confidence > 0` instead of
-      `0.0 <= confidence <= 1.0`, so a clearly out-of-range probability passes validation — a wrong range
-      check for the exercise.
-      signals.must_use=[parse JSON, validate field types]; avoid=[accepting an out-of-range confidence].
+      tests_passed=true. technically_correct holds: safe_call rejects an unknown name with
+      {"ok": False, "error": "unknown_tool"} without raising, runs the validator before the handler, returns
+      {"ok": False, "error": "invalid_args"} when validation fails, and otherwise returns
+      {"ok": True, "value": handler(args)}. validates_input holds: the validator gates the handler.
+      handles_errors holds: both the unknown-tool and invalid-args paths return a structured error rather
+      than throwing. matches_intent holds: the success and both error shapes match the prompt exactly.
+      signals.must_use=[structured error for unknown tool, validate before handler, return handler value];
+      avoid=[].
     expect:
-      verdict: borderline
-      checks: { technically_correct: false, validates_input: true, handles_errors: true, matches_intent: true }
+      verdict: pass
+      checks: { technically_correct: true, validates_input: true, handles_errors: true, matches_intent: true }
+
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: run_agent calls client.create once, returns
+      resp.text immediately, and never checks stop_reason, so it treats a tool_use turn as the final answer
+      and never runs the requested tool or loops. validates_input does NOT hold: it has no step cap and does
+      not guard the tool lookup. handles_errors does NOT hold: a tool_use turn silently returns whatever text
+      is present instead of executing the tool. matches_intent does NOT hold: the prompt asked for a loop
+      that feeds tool results back, and it does none of that.
+      signals.must_use=[loop on tool_use, feed result back, step cap]; avoid=[returning after a single model call].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, validates_input: false, handles_errors: false, matches_intent: false }
+
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: safe_call raises a KeyError on an unknown tool
+      name instead of returning {"ok": False, "error": "unknown_tool"}, and it calls the handler before
+      checking the validator, so it runs on invalid args. validates_input does NOT hold: the validator is
+      only consulted after the handler has already executed. handles_errors does NOT hold: the unknown-tool
+      path crashes rather than returning a structured error. matches_intent does NOT hold: the prompt
+      required reject-before-run and a validate-then-execute order, and it does the opposite.
+      signals.must_use=[]; avoid=[raising on an unknown tool, running the handler when validation fails].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, validates_input: false, handles_errors: false, matches_intent: false }

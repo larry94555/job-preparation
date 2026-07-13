@@ -52,3 +52,12 @@
   answer:
     regex: '^cost$'
     normalize: true
+
+- id: fe-tail
+  type: text_input
+  tags: [metrics]
+  difficulty: 2
+  prompt: "Median latency looks fine but p95/p99 is what users feel. What is that slow part of the distribution called? (one word)"
+  answer:
+    regex: '^tail$'
+    normalize: true

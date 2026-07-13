@@ -1,0 +1,17 @@
+id: lesson-tiered-gating
+title: "Tiering risk & designing the approval surface"
+material: tiered-gating.md
+segments:
+  - present: where-the-tier-boundary-sits
+  - check: mc-medium-risk
+  - check: mc-risk-cost-axis
+  - check: expert-risk-tiering
+  - present: why-over-gating-breaks-the-gate
+  - check: mc-tiered-gating
+  - present: making-the-approval-real
+  - check: mc-approval-context
+  - check: mc-batch-approval
+  - check: mc-who-approves
+  - check: expert-approval-habituation
+  - apply: essay-tiered-gating
+  - apply: essay-approval-ux

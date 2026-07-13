@@ -22,3 +22,27 @@
     - { text: "It keeps all memory inside the context window so no retrieval is needed" }
     - { text: "It is the only place a short-term conversation buffer can be stored" }
   explanation: "Long-term recall across sessions is a semantic-lookup problem: text is embedded and retrieved by meaning. Vector stores (FAISS, pgvector, Pinecone, Chroma) are the standard home for that, distinct from the in-context short-term buffer."
+
+- id: expert-paging-vs-window
+  type: multiple_choice
+  tags: [compression]
+  difficulty: 3
+  prompt: "In the MemGPT/Letta framing, when the context window fills, what is the correct move — and why is 'just use a bigger window' not the frontier answer?"
+  options:
+    - { text: "Evict older content to the external store and page it back in when it becomes relevant again — a bigger window only defers the overflow and still pays to carry stale content it does not need", correct: true }
+    - { text: "Fine-tune the model on the overflowing context so it memorizes it and the window can be cleared" }
+    - { text: "Delete the oldest content permanently, since anything evicted is never useful again" }
+    - { text: "Stop the agent, because a full window is an unrecoverable error" }
+  explanation: "Virtual context management treats the window as one tier of a hierarchy: evict to the external store, page back on relevance. A larger window raises the ceiling but still fills, and carrying content the step does not need wastes tokens (and KV-cache) — paging, not size, is the durable answer."
+
+- id: expert-rag-vs-memory
+  type: multiple_choice
+  tags: [recall]
+  difficulty: 3
+  prompt: "How does an agent's long-term MEMORY differ from classic document RAG, even though both retrieve-then-inject from a vector store?"
+  options:
+    - { text: "RAG retrieves from a mostly-static external knowledge corpus; agent memory retrieves from a store the agent itself WROTE over prior sessions — its own facts, decisions, and preferences — so writing, staleness, and forgetting are first-class concerns", correct: true }
+    - { text: "They are identical in every respect; 'agent memory' is just a rebranding of RAG with no real difference" }
+    - { text: "RAG never uses embeddings, whereas agent memory always does" }
+    - { text: "Agent memory keeps everything in the context window while RAG uses an external store" }
+  explanation: "Both share the retrieve-then-inject mechanism, but RAG reads a curated, mostly-static knowledge base, while agent memory reads back what the agent itself recorded across sessions. That self-authored, evolving store is why write policy, staleness, and eviction/forgetting are central to memory but marginal to classic RAG."

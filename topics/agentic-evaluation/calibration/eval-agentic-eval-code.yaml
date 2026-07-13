@@ -55,3 +55,32 @@ cases:
     expect:
       verdict: fail
       checks: { technically_correct: false, computes_metrics: false, handles_edge_cases: false, matches_intent: false }
+
+  # PASS — the deploy-gate exercise done right: compares pass_rate to min_pass_rate with >=, returns a
+  # bool, treats the on-the-bar run as passing. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      tests_passed=true. technically_correct holds: gate reads results["pass_rate"], compares it to
+      min_pass_rate with >=, and returns the boolean result without mutating results or deploying anything.
+      computes_metrics holds: it uses the pass_rate the suite computed rather than recomputing or hard-coding
+      a stand-in. handles_edge_cases holds: a run landing exactly on the bar passes because the comparison is
+      >= and not strict >, and a run just under the bar returns False. matches_intent holds: it is a pure
+      threshold check returning a bool, exactly as the prompt asked.
+      signals.must_use=[compare pass_rate against min_pass_rate, use >= so the boundary passes, return a bool]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, computes_metrics: true, handles_edge_cases: true, matches_intent: true }
+
+  # FAIL — the suite counts a case as passed without checking the verdict and returns no failed list, so
+  # the pass_rate is meaningless. 0/4 = 0.0 → fail; gate technically_correct=false caps fail→fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: run_suite runs the agent and calls judge but
+      counts every case as passed regardless of the verdict's passed flag, so pass_rate is always 1.0 no
+      matter how the agent did. computes_metrics does NOT hold: pass_rate is not the fraction that actually
+      passed and avg_score ignores the returned scores. handles_edge_cases does NOT hold: it never inspects
+      the verdict, so an all-fail suite still reports a perfect run. matches_intent does NOT hold: the prompt
+      required pass_rate/avg_score plus the failed inputs, and it returns neither the real metric nor a
+      failed list.
+      signals.must_use=[]; avoid=[counting a case as passed without checking the verdict, reporting only an aggregate with no failed list].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, computes_metrics: false, handles_edge_cases: false, matches_intent: false }

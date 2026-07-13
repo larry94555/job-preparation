@@ -22,3 +22,39 @@
     - "Rate limit every user (e.g. a per-user token bucket) so one caller can't drain the worker pool or burn the token budget and take everyone else down."
     - "Canary the new version to a small, deterministic slice of traffic first (sticky per user via a stable hash) instead of shipping to 100% at once, then watch the canary's error rate and latency against stable."
     - "Keep rollback to one fast command back to the last known-good version, because rolling back to something that worked is instant while rolling forward with a fix costs time you don't have mid-incident."
+
+- id: essay-worker-pool
+  type: essay
+  length: short
+  tags: [jobs]
+  difficulty: 3
+  prompt: "Your single background worker can't keep up: the queue backs up and jobs sit queued for minutes. You want to run a pool of workers instead. Explain what has to be true about how a worker claims a job for a pool to be correct, and what the job's state machine looks like as it moves through the pool."
+  eval_skill: eval-agentic-deploy-essay
+  reference_points:
+    - "Throughput scales with the number of workers draining the same queue, not with request threads; many workers pull from one shared queue in parallel."
+    - "The claim must be atomic — a worker moves a job from queued to running in a single guarded step (e.g. SELECT ... FOR UPDATE SKIP LOCKED or an equivalent compare-and-set) so two workers never grab the same job."
+    - "A job is a small state machine keyed by its id: queued → running → (done with result | failed with error), where done/failed are terminal and the poll endpoint reads that status off the record."
+
+- id: essay-rate-limit-design
+  type: essay
+  length: short
+  tags: [ratelimit]
+  difficulty: 3
+  prompt: "Design per-user rate limiting for the agent service with a token bucket. Explain what `capacity` and `refill_per_sec` each control, how you key the bucket, and what the service returns when a request is denied."
+  eval_skill: eval-agentic-deploy-essay
+  reference_points:
+    - "A per-user token bucket is keyed by the caller's identity (user/tenant/API key) so it enforces multi-tenant fairness — one caller's flood can't drain the shared worker pool or token budget."
+    - "capacity bounds the largest instantaneous burst (how many tokens can accumulate) while refill_per_sec sets the sustained average rate; tuning them separately allows bursts but caps long-run throughput."
+    - "A denied request returns 429 Too Many Requests (ideally with a Retry-After hint) so the client backs off, rather than a 200 that hides the throttle or an indefinite hold that reintroduces blocking."
+
+- id: essay-idempotent-retries
+  type: essay
+  length: long
+  tags: [jobs, asyncapi]
+  difficulty: 4
+  prompt: "Networks drop responses, so clients retry submit, and downstream dependencies fail transiently, so jobs fail. Explain how to make an async job API robust to both: what makes submit safe to retry, and how the worker should handle a transient job failure without either losing work or running it twice."
+  eval_skill: eval-agentic-deploy-essay
+  reference_points:
+    - "Submit is made safe to retry with a client-supplied idempotency key: if a job already exists for that key, submit returns the existing job id instead of enqueuing a second run, so a dropped response and a retry don't create duplicate work."
+    - "A transient job failure (e.g. a downstream API briefly down) should be retried with backoff up to a bounded number of attempts, then marked terminally failed — often parked in a dead-letter queue for inspection — rather than retried forever or silently marked done."
+    - "The async shape still holds throughout: submit stays a fast write returning a job id, poll stays a fast read, and the retries/claims happen on the worker off the request thread, so request latency stays decoupled from run latency."

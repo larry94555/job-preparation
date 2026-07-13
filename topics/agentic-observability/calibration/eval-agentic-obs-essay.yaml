@@ -51,3 +51,31 @@ cases:
     expect:
       verdict: fail
       checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # PASS — a third strong, correct, specific answer (production-metrics framing) that names the
+  # aggregate/tail mechanisms and the dashboard-vs-alert split. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      In dev you run the agent a handful of times, so cost is a rounding error, median latency looks
+      fine, and a one-in-a-thousand tool failure never shows. Production changes the sample, not the
+      per-run behavior: the same per-run cost times real volume, plus retries and longer tool loops on
+      messy inputs, makes cost a number you watch in aggregate; concurrency and slow tools stretch the
+      p95/p99 tail, which is what users actually feel; and the rare failure finally appears at volume. You
+      catch these with a dashboard for the trends you scan — cost per hour, p95 latency, failure rate —
+      and an alert that fires when a metric crosses a budget or SLO threshold, so you are told without
+      staring at the dashboard. Dashboards for trends, alerts for thresholds.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — a third clear fail: on-topic-sounding but technically wrong on every claim (provider raised
+  # prices, mean equals the tail, alerts and dashboards are the same). 0/4 = 0.0 → fail; gate false caps fail→fail.
+  - answer: >-
+      Cost surprises in production because the provider quietly raises the per-token price once you are at
+      scale, so there is nothing you could measure to see it coming. Latency is simple too: the mean and
+      the tail are the same number, so if your median looked fine in dev then p95 and p99 are fine as
+      well and users will not notice anything. A dashboard and an alert are just two words for the same
+      thing, so you only need one, and failure rate does not really change with volume since ten dev runs
+      already covers every case. Recording spans per step is optional busywork.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }

@@ -18,3 +18,24 @@
     Guardrails — a step cap, a can't-finish path, per-step logging, and validating observations — bound and
     surface the failure, but they do not by themselves guarantee the agent recovers. A bigger cap or a
     faster model does not close the gap.
+
+- id: frontier-error-recovery
+  type: multiple_choice
+  tags: [validation]
+  difficulty: 4
+  prompt: >-
+    A team wants their single agent not just to STOP when it drifts, but to detect the drift mid-loop and
+    re-ground itself — back up, re-read, or abandon a bad line of reasoning. They point to their output
+    validation and step cap as evidence this is handled. What is the honest, frontier-aware read?
+  options:
+    - { text: "Output validation and the step cap BOUND and SURFACE the failure but do not achieve recovery — detecting mid-run drift and re-grounding is automated error recovery, an open problem much harder than bounding the loop; approaches like verbal self-reflection (Reflexion) are attempts, not a solved checkbox", correct: true }
+    - { text: "Recovery is fully handled: validating each observation guarantees the agent never drifts in the first place", correct: false }
+    - { text: "Recovery is trivial — just raise max_steps so the agent has more room to fix itself", correct: false }
+    - { text: "Drift is impossible once you log every step, because logging corrects the reasoning automatically", correct: false }
+  explanation: >-
+    Bounding a loop (a step cap, a can't-finish path) and keeping garbage out of it (output validation) are
+    necessary and solved-enough, and logging makes drift visible after the fact — but none of them makes the
+    agent RECOVER. Automated error recovery — detecting mid-run that the loop has gone off the rails and
+    re-grounding or backing up — is the active research edge, materially harder than bounding the loop.
+    Self-reflection methods (e.g. Reflexion) attempt it by feeding a critique back into the next attempt, but
+    long-horizon recovery for a single agent is an open problem, not a checkbox the existing guardrails tick.

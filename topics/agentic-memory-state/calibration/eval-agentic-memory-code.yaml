@@ -61,3 +61,34 @@ cases:
     expect:
       verdict: fail
       checks: { technically_correct: false, validates_input: false, handles_errors: false, matches_intent: false }
+
+  # PASS — memory-buffer done right: caps at capacity, evicts the oldest (FIFO), returns
+  # a copy from window(), and reports len correctly. 4/4 → pass; gate technically_correct=true.
+  - answer: >-
+      tests_passed=true. technically_correct holds: ShortTermBuffer stores messages in a deque bounded by
+      capacity, and add() appends to the right so that when the buffer is already full the oldest message on
+      the left is evicted (FIFO), never exceeding capacity. validates_input holds: the constructor checks that
+      capacity is a positive int and raises otherwise before building the buffer. handles_errors holds: a
+      non-positive capacity raises ValueError, and window() returns a fresh list so mutating the returned list
+      cannot corrupt internal state. matches_intent holds: window() returns messages oldest -> newest, len()
+      reports how many are held, and the newest messages are the ones kept, exactly as asked.
+      signals.must_use=[cap the buffer at capacity, evict the oldest message when full (FIFO), keep the most-recent messages, return a copy from window()];
+      avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, validates_input: true, handles_errors: true, matches_intent: true }
+
+  # FAIL — memory-buffer done wrong: grows without bound and evicts the newest instead of
+  # the oldest. Fails the gate plus every other check. 0/4 → fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: ShortTermBuffer never caps its storage, so it
+      grows without bound past capacity, and on the rare path where it does trim it removes the NEWEST message
+      instead of the oldest, inverting FIFO. validates_input does NOT hold: it never checks that capacity is a
+      positive int and happily accepts zero or a negative value. handles_errors does NOT hold: window() returns
+      the internal list by reference, so a caller mutating it silently corrupts the buffer. matches_intent does
+      NOT hold: the prompt asked for a capacity-capped FIFO buffer that keeps the most-recent messages and
+      returns a copy, and it does the opposite on every count.
+      signals.must_use=[]; avoid=[letting the buffer grow without bound, evicting the newest message instead of the oldest].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, validates_input: false, handles_errors: false, matches_intent: false }

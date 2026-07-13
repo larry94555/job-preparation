@@ -10,3 +10,39 @@
     - { text: "A network topology is always superior because more communication paths mean more capability" }
     - { text: "The supervisor topology cannot use specialist agents, only the network one can" }
   explanation: "In the supervisor (hierarchical) topology one agent coordinates and specialists report back to it, which keeps the flow observable and easy to debug — the sensible default. A network topology lets agents communicate peer-to-peer: more flexible, but the interactions are far harder to trace, bound, and control, so you only reach for it when a hierarchy truly can't model the collaboration."
+
+- id: expert-orchestrator-worker
+  type: multiple_choice
+  tags: [supervisor]
+  difficulty: 3
+  prompt: "The supervisor pattern is often called 'orchestrator-worker.' What is the load-bearing property that makes it the default multi-agent architecture over a peer network?"
+  options:
+    - { text: "Coordination is centralized in one orchestrator that decomposes, routes, and combines, so there is a single place that decides what runs next and assembles the result — which makes the whole flow observable, bounded, and debuggable", correct: true }
+    - { text: "The orchestrator runs a larger model than the workers, which is what guarantees correctness" }
+    - { text: "Workers talk to each other directly, which is what makes the pattern fast" }
+    - { text: "It removes the need to validate handoffs because one agent owns everything" }
+  explanation: "Orchestrator-worker (the supervisor pattern) centralizes coordination: one orchestrator decomposes the task, routes sub-tasks to workers, and combines their results, with workers reporting back rather than talking peer-to-peer. That single locus of control is what makes the flow observable, bounded, and debuggable — the reason it is the default over a network. It says nothing about model size and does not remove the need to validate each handoff."
+
+- id: expert-single-agent-first
+  type: multiple_choice
+  tags: [orchestration]
+  difficulty: 3
+  prompt: "An expert defends 'single agent first' as more than a slogan. What is the rigorous version of the rule?"
+  options:
+    - { text: "Prefer the most constrained design that solves the problem: start with one agent and good tools, and add agents only when a single agent demonstrably falls short — because each added agent multiplies coordination cost, latency, tokens, and handoff failure modes", correct: true }
+    - { text: "Never use more than one agent under any circumstances, regardless of the task" }
+    - { text: "Always use exactly three agents — a researcher, a writer, and a critic — for every task" }
+    - { text: "Add agents freely, since coordination overhead is negligible in practice" }
+  explanation: "The rigorous rule is 'prefer the most constrained design that works': begin with a single agent and the right tools, and split only on evidence that one agent can't do the job (genuinely different skills/tools, a context that gets too crowded, or a need for independent review). It is not an absolute ban on multi-agent, nor a fixed head-count — it is a bias against unearned coordination cost, latency, token spend, and new handoff failure modes."
+
+- id: expert-handoff-protocol
+  type: multiple_choice
+  tags: [handoff]
+  difficulty: 4
+  prompt: "Treating handoffs as an explicit protocol (not an implicit convention) is a senior move. What does a well-designed handoff protocol guarantee at each seam?"
+  options:
+    - { text: "A validated, typed boundary: the producer's output is checked before the consumer runs, empty or malformed results are rejected with a structured error the orchestrator can act on, and a silent bad output becomes a loud, localized failure at the seam", correct: true }
+    - { text: "That the consumer always trusts the producer, so no boundary check is ever needed" }
+    - { text: "That the whole run crashes on any imperfect output, which is the only safe response" }
+    - { text: "That handoffs are checked once at the very end rather than at each boundary" }
+  explanation: "An explicit handoff protocol makes each seam a validated, typed boundary: the producer's output is checked before the consumer consumes it, empties and malformed results are rejected with a structured error the orchestrator can route on, and what would have been a silent far-away corruption becomes a loud, localized failure. Blind trust, blanket crashing, and end-only checking all fail the guarantee — validation belongs at every boundary, not once at the end."

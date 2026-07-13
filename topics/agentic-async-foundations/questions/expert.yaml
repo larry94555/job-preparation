@@ -10,3 +10,27 @@
     - { text: "Concurrency and parallelism are the same thing; asyncio simply renames threads as coroutines" }
     - { text: "The event loop preemptively interrupts coroutines at any instruction, exactly like OS thread scheduling" }
   explanation: "asyncio runs on one thread with a cooperative scheduler: coroutines yield only at await, so I/O waits interleave without spawning threads or fighting the GIL. That gives concurrency — many operations making progress by overlapping their waits — but not parallelism, since only one Python instruction runs at a time. CPU-bound work still needs processes or a real parallel backend."
+
+- id: expert-pep492-coroutines
+  type: multiple_choice
+  tags: [eventloop]
+  difficulty: 3
+  prompt: "PEP 492 introduced native `async`/`await` in Python 3.5. What did it change relative to the earlier generator-based `@asyncio.coroutine` / `yield from` style, and why does the distinction matter?"
+  options:
+    - { text: "It made coroutines a first-class, distinct type - an `async def` returns a coroutine object that is not a generator - so `await` is a dedicated suspension operator with its own protocol, removing the ambiguity of overloading generator `yield` for both iteration and awaiting", correct: true }
+    - { text: "It made coroutines run on real OS threads, finally giving asyncio parallel execution across cores" }
+    - { text: "It replaced the event loop with preemptive scheduling so coroutines no longer need to yield at await points" }
+    - { text: "It was purely cosmetic - `async def` compiles to the exact same generator object as the old `yield from` coroutines with no semantic difference" }
+  explanation: "Before PEP 492, coroutines were generators driven by `yield from`, which overloaded `yield` for both iteration and suspension and made intent ambiguous. PEP 492 gave coroutines their own type and the dedicated `async`/`await` syntax with an awaitable protocol - a native coroutine is not a generator. The scheduling model is unchanged: still one thread, still cooperative suspension at await."
+
+- id: expert-backoff-jitter-canon
+  type: multiple_choice
+  tags: [resilience]
+  difficulty: 4
+  prompt: "The AWS Builders' Library treatment of retries (Marc Brooker) argues plain exponential backoff is insufficient at scale. What is the canonical refinement and the failure it prevents?"
+  options:
+    - { text: "Add jitter (randomize each delay, e.g. toward 'full jitter') so independent clients don't retry on a synchronized schedule - this breaks up the correlated retry waves (thundering herd) that keep a recovering service pinned", correct: true }
+    - { text: "Remove the retry cap so clients keep trying until the service is guaranteed to answer" }
+    - { text: "Shorten the base delay to a fixed small interval so recovery is detected as fast as possible" }
+    - { text: "Retry on a single shared global clock so every client retries at exactly the same instant for fairness" }
+  explanation: "Pure exponential backoff still leaves many clients retrying in lockstep (all at t=2, 4, 8...), so their load arrives in correlated spikes that re-overload a service just as it recovers. The canonical fix is jitter - randomizing each client's delay (full/decorrelated jitter) - which decorrelates the retries and smooths the aggregate load. Removing the cap or using a shared clock makes it worse."

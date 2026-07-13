@@ -1,0 +1,11 @@
+id: lesson-topologies
+title: "Multi-agent topologies"
+material: topologies.md
+segments:
+  - present: choosing-a-topology
+  - check: mc-hierarchical
+  - check: mc-network-cost
+  - check: cloze-network
+  - present: frameworks-encode-these
+  - check: mc-frameworks
+  - apply: essay-topologies

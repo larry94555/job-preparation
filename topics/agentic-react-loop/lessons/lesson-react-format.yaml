@@ -1,0 +1,13 @@
+id: lesson-react-format
+title: "The ReAct step format"
+material: react-format.md
+segments:
+  - present: reading-a-react-step
+  - check: mc-thought-parseable
+  - check: mc-step-kind-drives
+  - check: mc-one-shot-vs-loop
+  - check: cloze-thought
+  - present: why-the-format-grounds-the-loop
+  - check: mc-observe-error
+  - check: mc-adaptive-length
+  - apply: essay-observe-ground

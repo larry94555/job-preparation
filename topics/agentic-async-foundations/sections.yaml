@@ -1,7 +1,7 @@
 sections:
   - id: sec-concurrency
     title: "Concurrency & the event loop"
-    lessons: [lesson-why-async, lesson-async-patterns, lesson-expert-context]
+    lessons: [lesson-why-async, lesson-async-patterns, lesson-structured-concurrency, lesson-expert-context]
     assessment:
       title: "Section 1 — Concurrency & the event loop"
       from_tags: [concurrency, eventloop]

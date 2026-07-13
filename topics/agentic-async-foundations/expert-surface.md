@@ -14,12 +14,15 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L3]** PEP 492 async/await and the asyncio event loop as the origin of native coroutines — `lessons/expert-context.md`, `questions/expert.yaml`.
 - ✅ **[L3]** "Concurrency is not parallelism" (Rob Pike) and the role of the GIL in why threads ≠ parallel Python — `lessons/expert-context.md`, `questions/expert.yaml`.
 - ✅ **[L3]** Exponential backoff with jitter as the canonical retry discipline (AWS builders' library) — `lessons/resilient-calls.md`, `questions/mcq.yaml`.
+- ✅ **[L3]** Canon depth: PEP 492 native coroutines vs. generator-based `yield from`, and full/decorrelated jitter as the AWS-canon backoff refinement — `questions/expert.yaml` (`expert-pep492-coroutines`, `expert-backoff-jitter-canon`).
 - ✅ **[L4]** Frontier open problems: bounded concurrency/backpressure, connection pooling, and rate-limit awareness at scale — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
+- ✅ **[L4]** Adaptive concurrency control as an open problem: static caps are wrong under drifting upstream capacity, so congestion-signal-driven (AIMD/TCP-style) limiters are the frontier — `questions/frontier-ops.yaml` (`frontier-adaptive-concurrency`).
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L3]** The fan-out with gather as an architecture: schedule concurrently, preserve order, overlap waits — `lessons/async-patterns.md`, `questions/mcq.yaml`.
 - ✅ **[L3]** The resilience trio — timeout, bounded retry with backoff/jitter, error isolation — as complementary layers — `lessons/resilient-calls.md`, `lessons/error-isolation.md`, `questions/mcq.yaml`.
 - ✅ **[L3]** Concurrency (structuring) vs. parallelism (executing), and choosing async vs. processes by bottleneck — `lessons/expert-context.md`, `questions/expert.yaml`.
+- ✅ **[L3]** Structured & bounded concurrency as architecture: create_task/TaskGroup for scoped lifetimes, Semaphore for backpressure, to_thread for blocking escapes, as_completed for streaming — `lessons/structured-concurrency.md`, `questions/mcq.yaml`.
 
 ## D4 — Problem solving
 - ✅ **[L3]** Diagnose a blocking call stalling the single-threaded loop and prescribe the awaitable/executor fix — `lessons/async-patterns.md`, `questions/mcq.yaml`.
@@ -40,8 +43,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L3]** Whiteboard the fan-out speedup and defend the timeout/retry/isolation posture under questioning — `questions/essay.yaml` (`essay-why-async`, `essay-resilience`).
 
 ## Coverage summary
-18 items · ✅ 18 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+21 items · ✅ 21 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
 This surface is fully covered as of the snapshot; it will revert to partial as the field's frontier
 expands (structured concurrency defaults, adaptive rate limiting, distributed backpressure).
 
-<!-- coverage: items=18 covered=18 partial=0 gap=0 -->
+<!-- coverage: items=21 covered=21 partial=0 gap=0 -->

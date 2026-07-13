@@ -52,3 +52,12 @@
   answer:
     regex: '^critic$'
     normalize: true
+
+- id: cloze-network
+  type: text_input
+  tags: [orchestration]
+  difficulty: 2
+  prompt: "The peer-to-peer topology where agents talk directly with no single coordinator is the ____ topology."
+  answer:
+    regex: '^network$'
+    normalize: true

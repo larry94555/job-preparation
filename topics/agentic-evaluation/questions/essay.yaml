@@ -22,3 +22,39 @@
     - "The four metrics are completion (did it finish), accuracy (was it correct), hallucination (did it fabricate facts/tool results), and cost (tokens, tool calls, latency)."
     - "Hallucination is tracked separately because a fluent, confident, wrong answer is worse than an honest failure and aggregate accuracy can hide it; tracking it separately is how you catch a regression."
     - "The eval suite runs on every change and produces a pass_rate; a deploy gate mechanically blocks the release when pass_rate is below a fixed threshold (never deploy below the bar), with no discretionary bypass."
+
+- id: essay-rubric-design
+  type: essay
+  length: short
+  tags: [rubric]
+  difficulty: 3
+  prompt: "You are told to grade agent summaries by asking the judge 'is this good?'. Explain why that is unreliable, and design a rubric that fixes it — including what the criteria look like and what output format the judge must return."
+  eval_skill: eval-agentic-eval-essay
+  reference_points:
+    - "'Is this good?' is unreliable because the verdict is a function of the judge's mood, phrasing, and the day rather than the output; the fix is a rubric — a list of explicit, named criteria the output is judged against, each scored independently."
+    - "Good criteria are specific and independently checkable (e.g. answers the exact question, every factual claim is supported, cites the tool results used, is concise), so a failure records WHICH criterion broke, not just that the score dropped."
+    - "The judge must return a strict-JSON verdict against a fixed schema (a boolean passed, a numeric score, a reasoning string), which you parse and validate (a score outside [0,1] is a bug to raise on), so a hundred judgments aggregate into one pass-rate — you cannot average English."
+
+- id: essay-judge-reliability
+  type: essay
+  length: long
+  tags: [judge]
+  difficulty: 4
+  prompt: "Before you gate deploys on an LLM-as-judge, argue how you would establish the judge itself is trustworthy. Cover agreement with humans, the named biases you must control for, and calibration — and explain why 'it's a big model, so trust it' is wrong."
+  eval_skill: eval-agentic-eval-essay
+  reference_points:
+    - "A judge is a model and inherits model failure modes, so 'it's large, trust it' is wrong: you validate it like a classifier by measuring agreement against a human-labeled sample (accuracy against the labels or correlation with human scores) — a judge that disagrees with humans is noise."
+    - "Control for the documented biases: position bias (favoring the first answer in a pairwise comparison), verbosity bias (rating longer answers higher regardless of quality), and self-preference (a model rating its own family higher) — mitigations include randomizing order, normalizing length, and using a judge from a different model family than the agent."
+    - "Calibrate by pinning the judge to a fixed model and a calibration set of labeled clear passes and clear fails, so a change (new model, reworded rubric) is caught when it stops reproducing the known verdicts (the Zheng et al. / MT-Bench 2023 discipline); and note reliability at scale is harder still — agreement on 200 calibration cases can still drift on the long tail, so you keep sampling for human review."
+
+- id: essay-suite-architecture
+  type: essay
+  length: short
+  tags: [suite]
+  difficulty: 3
+  prompt: "Describe the architecture of an eval suite as a loop: what it does per case, what it aggregates, and why returning the failed inputs (not just a pass_rate) matters. Contrast it with grading one impressive transcript."
+  eval_skill: eval-agentic-eval-essay
+  reference_points:
+    - "The suite is a fixed set of cases run on every change; the loop is mechanical — for each case run the agent on the input, judge the output against that case's criteria, and tally the verdicts."
+    - "It aggregates to a headline pass_rate (fraction of cases passed) plus avg_score (how good the passes were, not just how many), and crucially returns the list of failed inputs so a bad run is debuggable rather than just a number."
+    - "Grading one impressive transcript is an anecdote — it shows the agent can succeed once, not how it does across the distribution and the awkward inputs; a fixed suite makes runs comparable over time so a regression shows up as a drop you can see."

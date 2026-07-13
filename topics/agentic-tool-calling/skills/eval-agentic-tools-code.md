@@ -4,6 +4,7 @@ applies_to: code
 output_schema: CodeConceptScore
 model_hint: "qwen2.5-3b-instruct, temperature 0, response_format=json"
 gates: [technically_correct]
+grader_samples: 3
 ---
 
 # Grading the agentic-tool-calling exercises (concepts only)

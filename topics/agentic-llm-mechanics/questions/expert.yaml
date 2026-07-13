@@ -10,3 +10,27 @@
     - { text: "Models always ignore the beginning of the context and read only the end" }
     - { text: "Retrieval accuracy depends only on total token count, never on position" }
   explanation: "Liu et al. (2023) measured retrieval accuracy as a function of where the relevant fact sits in a long context and found a U-shaped curve: performance is high at the beginning and end and dips in the middle. The practical takeaway is positional — place load-bearing information at the start or end, and don't assume a larger window fixes it."
+
+- id: expert-effective-context
+  type: multiple_choice
+  tags: [context]
+  difficulty: 3
+  prompt: "An expert distinguishes a model's advertised context window from its 'effective' context. What is that distinction, and why does it matter operationally?"
+  options:
+    - { text: "Window size is how many tokens fit; effective context is how reliably the model uses tokens at every position — a large window can still degrade on mid-context retrieval, so 'it fits' is necessary but not sufficient", correct: true }
+    - { text: "They are synonyms; a model's effective context always equals its advertised window" }
+    - { text: "Effective context is the training-time sequence length and has no bearing on inference" }
+    - { text: "Effective context is simply the window minus the system prompt, a fixed subtraction" }
+  explanation: "Advertised window size and effective long-context use are different axes. A model with a very large window can still lose facts placed mid-context (the lost-in-the-middle effect), so fitting under the limit does not guarantee the model will actually use the content. Operationally you evaluate long-context retrieval, order by importance, and keep the budget tight rather than trusting the headline number."
+
+- id: expert-cost-per-run
+  type: multiple_choice
+  tags: [cost]
+  difficulty: 3
+  prompt: "What is the correct formula for the cost of a multi-call agent run, and what subtlety makes later calls dominate the bill?"
+  options:
+    - { text: "Σ over calls of (input_tokens × input_price + output_tokens × output_price), with input and output priced separately — and re-sending the growing history makes each call's input term climb", correct: true }
+    - { text: "Number of calls × a flat per-call fee, independent of tokens" }
+    - { text: "Total output tokens × output price only; input tokens are never billed" }
+    - { text: "(input_tokens + output_tokens) × a single blended price, constant across the run" }
+  explanation: "Cost is the per-call sum of input and output token costs, priced separately, accumulated over the run. Because each call re-sends the whole accumulated conversation, the input token count grows turn over turn, so later calls carry the largest input cost — the run costs far more than the naive 'N small prompts' estimate."

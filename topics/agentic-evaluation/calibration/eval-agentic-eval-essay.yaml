@@ -54,3 +54,31 @@ cases:
     expect:
       verdict: fail
       checks: { addresses_question: false, covers_key_points: false, technically_correct: true, concrete: true }
+
+  # PASS — a third strong, correct, specific answer that leads with the gate and separates hallucination.
+  # 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      You track four numbers for an agent: completion (did it reach an answer at all rather than stall or
+      loop), accuracy (was that answer correct against the criteria), hallucination (did it fabricate facts,
+      tool results, or citations), and cost (tokens, tool calls, latency). Hallucination is broken out on
+      purpose because a confident fabrication sails past an accuracy check that only looks at the final
+      answer — separating it is exactly what surfaces a change that trades honesty for a couple of accuracy
+      points, which is the regression you are trying to catch. The deploy is gated by running the suite on
+      every change to get a pass_rate and comparing it to a fixed threshold with >=; a run under the bar
+      fails the build and does not ship, and there is no discretionary bypass to wave a borderline run
+      through.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — wrong on every load-bearing claim: bad metrics, says hallucination is fine, ship below the bar.
+  # 0/4 = 0.0 → fail; gate technically_correct=false caps fail→fail.
+  - answer: >-
+      The four metrics for an agent are latency, response length, temperature, and how confident the tone
+      reads. Hallucination does not need its own metric, because a higher accuracy score already accounts
+      for any fabrications. To gate a deploy you glance at the pass_rate on a dashboard, and if it is a bit
+      under the threshold you ship anyway and let whoever is on call approve an exception — the bar is only
+      a suggestion, and you can always lower it to match the run so the build goes green.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }

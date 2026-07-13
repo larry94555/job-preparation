@@ -18,3 +18,23 @@
     Each is an active research edge: a final-state verdict hides the path, trajectory scoring is much harder
     than answer scoring, and a judge calibrated on 200 cases still drifts and stays biased on the long tail.
     A single pass-rate does not capture any of this.
+
+- id: frontier-judge-scale
+  type: multiple_choice
+  tags: [judge]
+  difficulty: 4
+  prompt: >-
+    Your LLM judge agrees with human labels on all 200 calibration cases, so you gate every deploy on it and
+    grade tens of thousands of unsupervised production trajectories with it. Which frontier problem are you
+    walking into, and what is the honest read?
+  options:
+    - { text: "Judge reliability at scale — agreement on a 200-case calibration set does not guarantee agreement on the long tail; the judge drifts and its biases (position, verbosity, self-preference) compound unsupervised, so you must keep re-calibrating, de-biasing, and sampling for human review rather than trusting the one-time agreement number", correct: true }
+    - { text: "Nothing — 200-case agreement is a proof that generalizes to any volume, so the judge is done" }
+    - { text: "A pure latency problem; a faster judge model makes large-scale grading correct" }
+    - { text: "The agent got worse; the judge is irrelevant once calibration passed once" }
+  explanation: >-
+    A judge validated on 200 labeled cases can still drift on the long tail of real outputs, and its known
+    biases compound when it grades thousands of trajectories with no human in the loop. Keeping the judge
+    honest at scale — periodic re-calibration, de-biasing, and sampling cases into human audits — is the
+    reliability problem underneath every automated eval, and it is an active edge, not a solved metric. A
+    single passing calibration run is a necessary check, not a guarantee at volume.

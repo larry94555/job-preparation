@@ -61,3 +61,35 @@ cases:
     expect:
       verdict: fail
       checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # PASS — a third strong, correct, specific answer naming all four memories and the
+  # in-context vs external split with concrete mechanisms. 4/4 = 1.0 → pass.
+  - answer: >-
+      An agent needs four distinct memories. The short-term conversation buffer holds the most recent turns
+      in context, capped, so the model can follow the immediate dialogue by recency. The working
+      state/scratchpad is structured task state the agent reads and rewrites mid-task — the plan, what's
+      done, the current intermediate result. The long-term vector store is an external, durable home where
+      facts and preferences are embedded and recalled across sessions by semantic similarity. The episodic
+      history is an external append-only log of past runs, queried by time or run id rather than meaning. The
+      buffer and scratchpad live in context and are read for free on the next call but are bounded by the
+      window; the vector store and episodic log live externally with effectively unbounded capacity but cost
+      a retrieval step and can go stale. An agent with none of these is stateless and repeats itself forever:
+      it re-asks answered questions, re-runs tools whose results it already saw, and loses everything at the
+      end of the session.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — blatantly wrong and off-topic: conflates all memories into one, claims the
+  # vector store lives in the context window and episodic history is queried by cosine
+  # similarity, and denies statelessness. Fails the gate plus every check. 0/4 → fail.
+  - answer: >-
+      There is really only one memory: the context window, and all four names refer to the same list of
+      messages, so there is no reason to keep them separate. The long-term vector store lives inside the
+      context window and is always read for free, and the episodic history is looked up by cosine similarity
+      exactly like the vector store, so they are interchangeable. An agent with no memory is perfectly fine
+      because each model call already remembers everything from every previous session automatically, so it
+      never repeats itself and never loses anything when a session ends.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }

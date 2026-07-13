@@ -47,9 +47,39 @@ cases:
       verdict: fail
       checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
 
-  # BORDERLINE — on-topic, hits the key points, specific, but contains a wrong claim
-  # (says a bigger context window makes lost-in-the-middle disappear on its own), so
-  # it misses ONLY the gate. 3/4 = 0.75 → base pass; gate false caps pass→borderline.
+  # PASS — a third strong, correct, specific answer that reframes each failure and its
+  # agent-owned mitigation in fresh wording. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      An LLM inside an agent breaks in four named ways, each with a defense the surrounding agent owns.
+      Hallucination is confident output with no real source behind it — a fabricated citation or a
+      non-existent method — and the fix is grounding: retrieve or tool-fetch the fact and check the claim
+      against that evidence rather than the model's memory. Lost-in-the-middle is the U-shaped dip where a
+      fact placed in the middle of a long prompt is the most likely to be missed, so the agent moves
+      load-bearing content to the start or end and keeps the context tight. Instruction drift is adherence
+      to the original system prompt eroding as turns pile up, so the agent periodically re-asserts the
+      governing instructions to keep them salient. Latency grows with output length because generation is
+      one token per step, so the agent routes hot-path work to a faster, cheaper tier and trims how much
+      the model must emit.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — off-topic and wrong: treats the mitigations as interchangeable and prescribes
+  # non-fixes (raise temperature, buy a bigger model), grounds nothing. Fails the gate and
+  # every check. 0/4 = 0.0 → fail; gate false caps fail→fail.
+  - answer: >-
+      Honestly you fix all of these the same way. Raise the temperature so the model is more creative and it
+      will stop hallucinating, and if a fact is missed just buy a model with a bigger window, which also ends
+      instruction drift and latency at once. Grounding against sources is a waste of time because the model
+      already knows everything from training. There is no meaningful difference between hallucination,
+      lost-in-the-middle, and drift, so the agent needs no per-mode mitigation at all.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # FAIL — on-topic wording but every claim is wrong: denies the failure modes exist,
+  # prescribes non-fixes (temperature zero), and grounds nothing, so it fails the gate and
+  # every check. 0/4 = 0.0 → fail; gate false caps fail→fail.
   - answer: >-
       There is nothing to worry about with model failure modes. A modern model does not hallucinate as long
       as you set the temperature to zero, so grounding facts is unnecessary. Instruction drift is a myth —

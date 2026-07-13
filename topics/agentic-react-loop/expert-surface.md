@@ -9,11 +9,14 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L2]** Explain the ReAct loop a single agent runs — Reason → Act → Observe → Decide — and why it beats one-shot answering — `lessons/react-loop.md`, `questions/mcq.yaml`.
 - ✅ **[L3]** Command the vocabulary: thought, action, observation, decide, step kind, loop, max-steps, can't-finish, validate — `lessons/*`, `questions/missing-term.yaml`, `free-entry.yaml`.
 - ✅ **[L2]** Translate between altitudes (the reason/act/observe analogy ↔ the action/final step kind that drives the loop) — `lessons/react-loop.md`, `lessons/reason-act-observe.md`.
+- ✅ **[L3]** Read a ReAct step's Thought/Action/Action Input/Observation format and explain how the presence or absence of an Action line becomes the step kind that routes the loop — `lessons/react-format.md`, `questions/mcq.yaml` (`mc-thought-parseable`, `mc-step-kind-drives`).
 
 ## D2 — Literature, canon & frontier awareness
 - ✅ **[L3]** ReAct (Yao et al., 2022) as the origin of interleaved reasoning + acting, and why the synergy beats either alone — `lessons/expert-context.md`, `questions/expert.yaml`.
-- ✅ **[L3]** Reasoning-only (chain-of-thought) vs. acting-only vs. interleaved ReAct — knowing what each half lacks — `lessons/expert-context.md`.
+- ✅ **[L3]** Reasoning-only (chain-of-thought) vs. acting-only vs. interleaved ReAct — knowing what each half lacks — `lessons/expert-context.md`, `questions/expert.yaml` (`expert-cot-vs-act`).
+- ✅ **[L3]** Single-agent loop variants beyond plain ReAct: verbal self-reflection (Reflexion, Shinn et al. 2023) and plan-and-execute vs. interleaved re-planning — `questions/expert.yaml` (`expert-reflexion`, `expert-plan-execute`).
 - ✅ **[L4]** Frontier open problem: reliability and error recovery in long-horizon single-agent loops (errors compound silently) — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
+- ✅ **[L4]** Automated error recovery — detecting mid-loop drift and re-grounding is harder than bounding the loop and remains open (self-reflection attempts it, does not close it) — `questions/frontier-ops.yaml` (`frontier-error-recovery`).
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L3]** The ReAct loop as an architecture: continue on an action step, return on a final, driven by the step kind — `lessons/react-loop.md`, `questions/mcq.yaml`.
@@ -40,8 +43,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L3]** Whiteboard the ReAct loop end to end and defend the guardrails under questioning — `questions/essay.yaml` (`essay-react`, `essay-guardrails`).
 
 ## Coverage summary
-18 items · ✅ 18 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+21 items · ✅ 21 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
 This surface is fully covered as of the snapshot; it will revert to partial as the field's frontier
 expands (long-horizon reliability evals, automated error recovery for single-agent loops).
 
-<!-- coverage: items=18 covered=18 partial=0 gap=0 -->
+<!-- coverage: items=21 covered=21 partial=0 gap=0 -->

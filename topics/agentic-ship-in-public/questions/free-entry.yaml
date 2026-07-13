@@ -52,3 +52,21 @@
   answer:
     regex: '^proof$'
     normalize: true
+
+- id: fe-step-cap
+  type: text_input
+  tags: [ship]
+  difficulty: 2
+  prompt: "Two words: the hard limit on the agent loop that guarantees it always terminates is the ____."
+  answer:
+    regex: '^step\s*cap$'
+    normalize: true
+
+- id: fe-adr
+  type: text_input
+  tags: [portfolio]
+  difficulty: 2
+  prompt: "A README that records \"chose X over Y because Z\" is, in spirit, an architecture decision ____ (one word)."
+  answer:
+    regex: '^record$'
+    normalize: true

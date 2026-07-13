@@ -118,3 +118,123 @@
     - { text: "How many lines of code the new version changed" }
     - { text: "Whether the model is a newer release than the old one" }
   explanation: "A canary is only useful if you watch it. You compare the new slice's live signals — error rate, latency, failed jobs — against the stable slice, and let that decide whether to grow the rollout or roll it back."
+
+- id: mc-202-accepted
+  type: multiple_choice
+  tags: [asyncapi]
+  difficulty: 3
+  prompt: "Why does the submit endpoint answer `202 Accepted` rather than `200 OK`?"
+  options:
+    - { text: "202 says the work was accepted but not yet done — the body carries a job id, not a result; 200 would imply the run already finished", correct: true }
+    - { text: "202 is faster to serialize than 200, so it lowers submit latency" }
+    - { text: "202 forces the client to open a WebSocket for the result" }
+    - { text: "The status code is cosmetic; 200 and 202 behave identically here" }
+  explanation: "202 Accepted is the honest code for an async submit: the server took the work and will do it later, so it returns a handle (job id) with status queued. A 200 with the answer would be a lie, because the agent run has not happened yet."
+
+- id: mc-worker-decouple
+  type: multiple_choice
+  tags: [asyncapi]
+  difficulty: 3
+  prompt: "What does moving the agent run onto a background worker actually decouple?"
+  options:
+    - { text: "Request latency from run latency — the client's submit/poll calls stay fast no matter how long the agent takes", correct: true }
+    - { text: "The model's accuracy from its prompt, so worse prompts still pass" }
+    - { text: "The database from the queue, so neither needs to be durable" }
+    - { text: "The user's identity from their rate limit, so limits stop applying" }
+  explanation: "Submit is a fast write and poll is a fast read; the worker runs the agent between them. That split means the caller's HTTP latency is bounded and independent of the run duration — the whole reason to go async."
+
+- id: mc-idempotent-submit
+  type: multiple_choice
+  tags: [jobs]
+  difficulty: 4
+  prompt: "A client retries submit after a network blip and you don't want two runs for one task. What makes submit safe to retry?"
+  options:
+    - { text: "An idempotency key on submit: the same key returns the existing job id instead of creating a second job", correct: true }
+    - { text: "Making the worker faster so the duplicate finishes before anyone notices" }
+    - { text: "Rejecting every retry outright, so a dropped response means the task is lost" }
+    - { text: "Storing the result in the client so it never needs to resubmit" }
+  explanation: "Networks drop responses, so clients retry. An idempotency key (client-supplied) lets submit deduplicate: if a job already exists for that key, return its id rather than enqueue a duplicate run. That makes the submit write safe to repeat."
+
+- id: mc-atomic-claim
+  type: multiple_choice
+  tags: [jobs]
+  difficulty: 4
+  prompt: "Several workers drain the same queue. What keeps two of them from running the same job?"
+  options:
+    - { text: "An atomic claim — one worker moves a queued job to running in a single guarded step (e.g. SELECT ... FOR UPDATE SKIP LOCKED), so no other worker can grab it", correct: true }
+    - { text: "Running exactly one worker, since a pool can never claim safely" }
+    - { text: "Having each worker sleep a random amount before claiming" }
+    - { text: "Trusting that the queue happens to hand each job to one worker" }
+  explanation: "A worker pool scales throughput only if claims are disjoint. The claim — flip queued → running — must be atomic so two workers never grab the same job. FOR UPDATE SKIP LOCKED (or an equivalent compare-and-set) is the standard mechanism."
+
+- id: mc-retry-failed
+  type: multiple_choice
+  tags: [jobs]
+  difficulty: 3
+  prompt: "A job failed because a downstream API was briefly down. What is the right built-in behavior?"
+  options:
+    - { text: "Retry with backoff up to a bounded number of attempts, then mark it failed for good (optionally to a dead-letter queue)", correct: true }
+    - { text: "Retry forever with no delay until it eventually succeeds" }
+    - { text: "Immediately mark it done with an empty result so the caller stops polling" }
+    - { text: "Delete the job so no record of the failure remains" }
+  explanation: "Transient failures deserve a bounded retry with backoff so a blip self-heals without hammering the dependency. After the cap, the job is terminally failed (and often parked in a dead-letter queue for inspection) rather than retried forever or silently marked done."
+
+- id: mc-per-user-key
+  type: multiple_choice
+  tags: [ratelimit]
+  difficulty: 3
+  prompt: "You keep one token bucket per user. What is the key you look the bucket up by, and why per-user?"
+  options:
+    - { text: "The caller's identity (user/tenant/API key) — a per-user bucket enforces fairness so one tenant's flood can't consume another's share", correct: true }
+    - { text: "The current wall-clock second, so all users share one rolling bucket" }
+    - { text: "The job id, so each job gets its own fresh bucket and no one is ever limited" }
+    - { text: "The worker's process id, so the limit depends on which worker answers" }
+  explanation: "Rate limiting is multi-tenant fairness, so the bucket is keyed by the caller's identity. A shared global bucket wouldn't isolate tenants, and keying by job id or worker would defeat the limit entirely."
+
+- id: mc-429-backpressure
+  type: multiple_choice
+  tags: [ratelimit]
+  difficulty: 3
+  prompt: "The bucket is empty and denies a request. What should the service return?"
+  options:
+    - { text: "429 Too Many Requests, ideally with a Retry-After hint so the client backs off", correct: true }
+    - { text: "200 OK with an empty body, so the client assumes success" }
+    - { text: "500 Internal Server Error, since a denial is a server bug" }
+    - { text: "Hold the connection open until a token refills, however long that takes" }
+  explanation: "A denied request is 429 Too Many Requests — the standard backpressure signal — and a Retry-After header tells the client when to try again. It is not a 200 (that hides the throttle), not a 500 (nothing broke), and not an indefinite hold (that reintroduces blocking)."
+
+- id: mc-refill-rate
+  type: multiple_choice
+  tags: [ratelimit]
+  difficulty: 4
+  prompt: "In a token bucket, what do `capacity` and `refill_per_sec` each control?"
+  options:
+    - { text: "`capacity` caps the largest instantaneous burst; `refill_per_sec` sets the sustained average rate over time", correct: true }
+    - { text: "`capacity` sets the average rate; `refill_per_sec` sets how long a user is banned" }
+    - { text: "Both set the same thing; one is just an alias for the other" }
+    - { text: "`capacity` is the number of workers; `refill_per_sec` is the queue length" }
+  explanation: "Capacity is how many tokens can pile up, so it bounds the biggest back-to-back burst. Refill rate is how fast tokens return, so it bounds the sustainable long-run average. Tuning them separately lets you allow bursts while still capping throughput."
+
+- id: mc-sticky-hash
+  type: multiple_choice
+  tags: [rollout]
+  difficulty: 4
+  prompt: "Why must canary routing use a STABLE hash of the user id rather than Python's built-in `hash()` or a random draw?"
+  options:
+    - { text: "A stable hash gives every worker the same answer for a user, so routing is deterministic and sticky; salted hash() or randomness would flip a user between versions across calls or processes", correct: true }
+    - { text: "A stable hash is faster to compute than any alternative" }
+    - { text: "Python's hash() cannot take a string argument" }
+    - { text: "Randomness always sends everyone to the canary, which is unsafe" }
+  explanation: "Canary routing must be sticky — a user always lands on the same side — and consistent across all workers. Python's hash() is salted per process and randomness varies per call, so either would route the same user differently across processes or requests. A stable hash (e.g. sum of bytes mod 100) is identical everywhere."
+
+- id: mc-widen-canary
+  type: multiple_choice
+  tags: [rollout]
+  difficulty: 3
+  prompt: "The canary has run at 5% for a while and its error rate and latency match stable. What is the right next step?"
+  options:
+    - { text: "Widen the rollout in steps (e.g. 5% → 25% → 100%), continuing to watch the new slice at each stage", correct: true }
+    - { text: "Immediately jump to 100% since 5% looked fine, skipping the intermediate stages" }
+    - { text: "Roll back to 0%, because a healthy canary means the change is unnecessary" }
+    - { text: "Freeze at 5% forever, since widening can only add risk" }
+  explanation: "A healthy canary earns more traffic, but you widen in stages and keep watching — a regression can surface only at higher load or on a different slice. Jumping straight to 100% throws away the very safety the canary bought."

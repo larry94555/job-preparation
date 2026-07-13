@@ -1,7 +1,7 @@
 sections:
   - id: sec-riskgate
     title: "Risk-gated execution"
-    lessons: [lesson-why-hil, lesson-risk-gates, lesson-expert-context]
+    lessons: [lesson-why-hil, lesson-risk-gates, lesson-tiered-gating, lesson-expert-context]
     assessment:
       title: "Section 1 — Risk-gated execution"
       from_tags: [risk, approval]

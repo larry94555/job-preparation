@@ -19,3 +19,29 @@
     doesn't fall just because the model improved, so high-risk actions stay gated regardless. The line
     moves per action and per stakes, not as one global switch, and calibration has to be measured before
     confidence is trusted.
+
+- id: frontier-multiagent-oversight
+  type: multiple_choice
+  tags: [approval]
+  difficulty: 4
+  prompt: >-
+    A system runs many agents that can trigger each other's actions, and the team wants to scale
+    human-in-the-loop across the whole swarm. Proposals: (a) one human approves every high-risk action
+    anywhere in the system, (b) let agents approve each other's high-risk actions, (c) keep humans on
+    irreversible actions but redesign the approval surface so it doesn't collapse under volume. What is
+    the honest frontier read?
+  options:
+    - { text: "Multi-agent oversight is an open problem: (b) removes the human from exactly the irreversible actions that need one and lets one compromised agent authorize another, while (a) doesn't scale and induces rubber-stamping — so the real work is (c), keeping humans on irreversible effects while designing aggregation, batching, and routing that fit human attention at swarm scale", correct: true }
+    - { text: "It is solved: agents approving each other is strictly safer than a human because agents are faster and never tire" }
+    - { text: "Just raise every action to high risk and have one on-call human approve the entire queue serially, since a backlog is harmless" }
+    - { text: "Oversight doesn't apply to multi-agent systems because no single agent is responsible for any action" }
+  explanation: >-
+    Scaling oversight across many interacting agents is genuinely unsolved. Letting agents approve each
+    other's high-risk actions removes the human from the irreversible actions the gate exists for and
+    creates a path where one compromised or mistaken agent authorizes another's charge or deletion.
+    Routing every high-risk action to one human doesn't scale and drives habituation — the reviewer
+    rubber-stamps a flood. The defensible direction keeps humans on the irreversible effects while
+    re-engineering the approval surface (aggregating related actions, batching with full scope shown,
+    routing to empowered approvers) so human attention still lands where it changes the outcome. Whether
+    that surface holds at swarm scale, and how to preserve calibrated escalation across agents, is exactly
+    the frontier.

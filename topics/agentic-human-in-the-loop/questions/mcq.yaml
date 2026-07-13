@@ -118,3 +118,123 @@
     - { text: "The model is fine-tuned on the human's answer before continuing" }
     - { text: "The run ignores the human and finishes on its own" }
   explanation: "An interrupt is the framework version of pause → human → resume: execution stops at a checkpoint, waits for a human decision, and then resumes from that checkpoint with the decision folded in — the durable-pause pattern, built in."
+
+- id: mc-medium-risk
+  type: multiple_choice
+  tags: [risk]
+  difficulty: 2
+  prompt: "Creating a draft record in a table you own is best classified as which risk level, and why?"
+  options:
+    - { text: "Medium — it mutates owned state but is recoverable, so it runs directly without an approval gate", correct: true }
+    - { text: "High — any write to a database is irreversible and must be gated" }
+    - { text: "Low — writes are always as safe as reads" }
+    - { text: "It has no risk level; only tool calls that touch money have one" }
+  explanation: "Risk is reversibility × cost. A create/update on state you own is recoverable, so it sits at medium and runs directly. It is not high (you can undo it) and not low (it does mutate state) — the point of the three-tier scale is exactly to separate recoverable writes from irreversible ones."
+
+- id: mc-tiered-gating
+  type: multiple_choice
+  tags: [approval]
+  difficulty: 3
+  prompt: "Why gate ONLY high-risk actions behind approval instead of gating every write?"
+  options:
+    - { text: "Oversight has a cost — every gate spends human attention and latency — so you spend it only where an action is irreversible or expensive; gating recoverable writes trains reviewers to rubber-stamp", correct: true }
+    - { text: "Because low- and medium-risk actions can never fail, so they need no record" }
+    - { text: "Because approving writes is technically impossible" }
+    - { text: "Because the model is always right about medium-risk actions" }
+  explanation: "A gate is not free: it costs a human's attention and adds latency. Gate everything and reviewers habituate — they approve without reading, so the gate that matters gets rubber-stamped too. Tiering keeps human attention on the irreversible actions where it actually changes the outcome."
+
+- id: mc-batch-approval
+  type: multiple_choice
+  tags: [approval]
+  difficulty: 3
+  prompt: "An agent needs to delete 500 records. What is the safer approval design?"
+  options:
+    - { text: "Ask the human to approve the whole batch as one reviewable action with its scope shown, rather than firing 500 separate prompts that get rubber-stamped", correct: true }
+    - { text: "Auto-approve all 500 since they are the same action type" }
+    - { text: "Approve the first one and apply that decision silently to the rest forever" }
+    - { text: "Split into 500 prompts so each is individually confirmed no matter how long it takes" }
+  explanation: "Five hundred identical prompts guarantee habituation — the reviewer stops reading and clicks yes. Presenting the batch as one action with its full scope (what, how many, which records) makes the decision reviewable and keeps the human's yes meaningful. Approval UX has to fit human attention, not defeat it."
+
+- id: mc-approval-context
+  type: multiple_choice
+  tags: [approval]
+  difficulty: 3
+  prompt: "What must an approval request show the human for the approval to be meaningful rather than a rubber stamp?"
+  options:
+    - { text: "The concrete action, its parameters, the risk level, and enough context to judge it — a bare 'approve? yes/no' with no detail is not real oversight", correct: true }
+    - { text: "Only the word 'approve' so the human decides fast" }
+    - { text: "The model's full chain-of-thought token stream" }
+    - { text: "Nothing — the human should trust the agent picked correctly" }
+  explanation: "A human can only be a real check if they can see what they are approving: the action, its params, the assessed risk, and the context. An approval prompt that hides the details reduces the human to a rubber stamp, which is oversight in name only."
+
+- id: mc-risk-cost-axis
+  type: multiple_choice
+  tags: [risk]
+  difficulty: 3
+  prompt: "An action is fully reversible but would spend $5,000 of compute on one call. How should risk classification treat it?"
+  options:
+    - { text: "Potentially high — cost is the second axis of risk alongside reversibility, so an expensive-but-reversible action can still warrant a gate", correct: true }
+    - { text: "Always low, because anything reversible is automatically low risk" }
+    - { text: "Medium, because only irreversibility can ever make an action high" }
+    - { text: "Risk classification ignores cost entirely; only reversibility counts" }
+  explanation: "Risk runs on two axes: reversibility AND cost. Reversibility usually dominates, but a reversible action that burns a huge amount of money is still expensive enough to deserve a human's yes. Collapsing risk to reversibility alone misses the expensive-but-undoable case."
+
+- id: mc-who-approves
+  type: multiple_choice
+  tags: [approval]
+  difficulty: 3
+  prompt: "A junior support agent's session triggers a high-risk refund far above their limit. What should the approval routing do?"
+  options:
+    - { text: "Escalate the approval to someone with the authority to approve that action — the gate routes by who is allowed to say yes, not just to any nearby human", correct: true }
+    - { text: "Let the junior approve it since a human is a human" }
+    - { text: "Auto-approve because a support agent is already trusted" }
+    - { text: "Reject it permanently with no path to a higher approver" }
+  explanation: "Who approves matters as much as whether someone approves. A gate that routes a high-value action to whoever is closest — regardless of authority — is not real oversight. Approval routing should send the decision to someone actually empowered to make it, which is the escalation pattern applied to authority, not just difficulty."
+
+- id: mc-append-only-tamper
+  type: multiple_choice
+  tags: [audit]
+  difficulty: 3
+  prompt: "Beyond convenience, what security property does an append-only audit log provide?"
+  options:
+    - { text: "Tamper-evidence — because history is never rewritten, an actor cannot quietly erase or alter the record of an action after the fact", correct: true }
+    - { text: "It encrypts every record so no one can read the log" }
+    - { text: "It guarantees the agent never makes a mistake" }
+    - { text: "It makes the log smaller than a mutable one" }
+  explanation: "Append-only is not just tidy bookkeeping — it is a tamper-evidence property. If records can be edited or deleted, a compromised actor (or a buggy agent) can hide what it did. Immutable history is what lets the audit trail stand up in an incident review or a compliance audit."
+
+- id: mc-audit-fields
+  type: multiple_choice
+  tags: [audit]
+  difficulty: 2
+  prompt: "For an audit record to actually reconstruct what happened, which fields does it need at minimum?"
+  options:
+    - { text: "The action, its parameters, the risk level, and the decision (approved / rejected / executed) — enough to answer what ran, on what, and who let it", correct: true }
+    - { text: "Only a timestamp, since the time alone explains the decision" }
+    - { text: "Only whether it succeeded, not what the action was" }
+    - { text: "The model's temperature and token count" }
+  explanation: "An audit record that omits the action or its params can't answer the questions that matter after an incident: what ran, against what data, at what risk, and who approved it. Those four fields are the minimum that makes the trail a reconstruction rather than a vague note."
+
+- id: mc-checkpoint-state
+  type: multiple_choice
+  tags: [resume]
+  difficulty: 3
+  prompt: "What exactly must be persisted at a checkpoint so an interrupted agent can resume cleanly hours later?"
+  options:
+    - { text: "The agent's plan, its message/conversation history, and the specific pending action awaiting the decision — the full state needed to continue, not just a flag that it paused", correct: true }
+    - { text: "Only a boolean saying the agent is waiting" }
+    - { text: "Only the final answer the agent expects to produce" }
+    - { text: "Nothing — the agent should reconstruct everything from the original prompt" }
+  explanation: "Resuming cleanly means picking up mid-task without redoing work. That requires the actual state — plan, message history, and the pending action being gated — to be durably saved. A bare 'paused' flag forces a restart from scratch, which loses the work already done and the context that made the pending action correct."
+
+- id: mc-resume-idempotent
+  type: multiple_choice
+  tags: [resume]
+  difficulty: 4
+  prompt: "On resume after approval, the agent re-sends the same approved action to the tool because a retry fired. Why is idempotency the relevant safeguard?"
+  options:
+    - { text: "A resumable, gated action can be delivered more than once (retries, duplicate resumes), so the executed effect must be idempotent or keyed so it applies at most once", correct: true }
+    - { text: "Idempotency makes the model more confident, so it needs no approval" }
+    - { text: "It is irrelevant; approved actions can never be delivered twice" }
+    - { text: "It replaces the audit log, so no record is needed" }
+  explanation: "Durable pause/resume introduces at-least-once delivery: a resume can replay, a retry can double-fire. If the underlying effect (a charge, a deletion) is not idempotent or keyed to run once, one approval can produce two irreversible effects. Clean resumption therefore needs the execute step to be safe to deliver more than once."

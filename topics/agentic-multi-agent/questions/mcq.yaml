@@ -118,3 +118,123 @@
     - { text: "It raises an unhandled exception that ends the whole run" }
     - { text: "It substitutes a made-up default so the pipeline never stops" }
   explanation: "A good handoff validator rejects None, \"\", {} or [] with a structured error the orchestrator can act on — it neither passes the empty value on nor crashes nor fabricates a default."
+
+- id: mc-hierarchical
+  type: multiple_choice
+  tags: [orchestration]
+  difficulty: 3
+  prompt: "A task is too big for one supervisor coordinating a flat list of specialists. What is the natural next topology, and what does it preserve?"
+  options:
+    - { text: "Hierarchical — supervisors of supervisors: a top-level supervisor coordinates mid-level supervisors that each own a cluster of specialists, keeping every seam a clear parent-to-child handoff", correct: true }
+    - { text: "A network where every specialist talks to every other specialist, since that scales best" }
+    - { text: "Drop the supervisor entirely and let the specialists vote on what to do next" }
+    - { text: "One giant supervisor prompt that lists all fifty specialists at once" }
+  explanation: "The hierarchical topology nests the supervisor idea: a top-level supervisor coordinates mid-level supervisors, each owning a cluster of specialists. It scales the pattern to larger tasks while every seam stays a clear parent-to-child handoff — so the flow remains observable, unlike a flat mega-prompt or a peer-to-peer network."
+
+- id: mc-network-cost
+  type: multiple_choice
+  tags: [orchestration]
+  difficulty: 3
+  prompt: "Why is a peer-to-peer network topology the hardest to operate, even though it is the most flexible?"
+  options:
+    - { text: "With no single coordinator, interactions are emergent and hard to trace, bound, and control — failures arise that no one agent caused", correct: true }
+    - { text: "Networks cannot use specialist agents, only supervisors can" }
+    - { text: "A network is slower only because it uses a bigger model" }
+    - { text: "Peer-to-peer agents are unable to call tools" }
+  explanation: "A network lets agents talk directly with no central coordinator, which is maximally flexible but means the interactions are emergent — hard to trace, bound, and control — and some failures come from the interaction itself, not any single agent. That is why you reach for it only when a hierarchy genuinely can't express the collaboration."
+
+- id: mc-frameworks
+  type: multiple_choice
+  tags: [orchestration]
+  difficulty: 2
+  prompt: "Which framing does LangGraph use for a multi-agent system?"
+  options:
+    - { text: "Agents as nodes in an explicit graph with typed edges, which makes the topology explicit enough to reason about and bound each handoff", correct: true }
+    - { text: "A single monolithic prompt with no notion of separate agents" }
+    - { text: "A fixed two-agent pair that can never be extended" }
+    - { text: "A leaderboard that ranks agents by benchmark score" }
+  explanation: "LangGraph models agents as nodes in an explicit graph with typed edges. Making the topology explicit is exactly what lets you reason about, validate, and bound each handoff — versus CrewAI's role-specialized 'crew' framing or AutoGen's supervised/conversational arrangements, which encode the same topologies differently."
+
+- id: mc-decompose
+  type: multiple_choice
+  tags: [supervisor]
+  difficulty: 2
+  prompt: "The first thing a supervisor does with an incoming task is:"
+  options:
+    - { text: "Decompose it into sub-tasks it can route to the right specialists", correct: true }
+    - { text: "Send the whole undivided task to every specialist at once" }
+    - { text: "Answer it directly without involving any specialist" }
+    - { text: "Wait for a specialist to volunteer before doing anything" }
+  explanation: "Decomposition is step one: the supervisor breaks the task into sub-tasks, then routes each to the specialist best suited to it, and finally combines the results. Skipping decomposition and broadcasting the whole task defeats the point of having focused specialists."
+
+- id: mc-test-specialist
+  type: multiple_choice
+  tags: [supervisor]
+  difficulty: 3
+  prompt: "Why is a critic specialist easier to evaluate than the same review logic buried inside one do-everything agent?"
+  options:
+    - { text: "You can test the critic in isolation with a known-bad draft and check it flags the right issues, because its job and interface are narrow", correct: true }
+    - { text: "A critic never makes mistakes, so it needs no evaluation" }
+    - { text: "Evaluation only applies to the supervisor, never to specialists" }
+    - { text: "The critic shares the writer's context, so there is nothing separate to test" }
+  explanation: "A narrow specialist has a tight prompt and a small, well-defined interface, so you can feed the critic a known-bad draft in isolation and assert it flags the right issues. Inside a do-everything agent that same behavior is entangled with research and writing, so when it fails you can't tell which of its three jobs broke."
+
+- id: mc-reject-action
+  type: multiple_choice
+  tags: [handoff]
+  difficulty: 3
+  prompt: "A handoff validator rejects a specialist's empty output. What are the supervisor's legitimate next moves?"
+  options:
+    - { text: "Retry the producing agent, route the sub-task elsewhere, or stop with a clear error — but never let the empty value flow on as if it were real", correct: true }
+    - { text: "Immediately crash the entire run with an unhandled exception" }
+    - { text: "Substitute a plausible-looking fabricated default and continue silently" }
+    - { text: "Pass the empty value to the next agent and hope it recovers" }
+  explanation: "A rejected handoff means the supervisor has stopped making progress on that path. Its legitimate options are to retry the producing agent, route the work elsewhere, or halt with a clear error. What it must not do is fabricate a default, crash blindly, or let the empty output continue downstream."
+
+- id: mc-boundary-not-semantic
+  type: multiple_choice
+  tags: [handoff]
+  difficulty: 3
+  prompt: "What kind of checking is handoff validation, precisely?"
+  options:
+    - { text: "A cheap boundary guard that rejects obviously broken output (None, empty string, empty container) — not deep semantic verification of correctness", correct: true }
+    - { text: "A full re-computation of the producing agent's answer to confirm it is right" }
+    - { text: "A human review of every handoff before the next agent runs" }
+    - { text: "A benchmark score computed over the whole pipeline" }
+  explanation: "Handoff validation is a guard at the seam, not deep semantic checking. It rejects the obviously broken cases — None, empty string, empty dict or list — with a structured error. Verifying that a non-empty output is actually correct is the critic's job, or a downstream eval's, not the handoff guard's."
+
+- id: mc-critic-role
+  type: multiple_choice
+  tags: [validation]
+  difficulty: 2
+  prompt: "In a writer/critic setup, what is the critic's single job?"
+  options:
+    - { text: "Review another agent's output and approve it or reject it with issues, before the output flows on", correct: true }
+    - { text: "Write the draft so the writer doesn't have to" }
+    - { text: "Coordinate all the specialists in place of the supervisor" }
+    - { text: "Call tools directly while the writer watches" }
+  explanation: "The critic is a specialist whose one job is to review another agent's output and either approve it or reject it with concrete issues, before that output is trusted downstream. It doesn't write, coordinate, or execute tools — that focus is what makes it independently testable."
+
+- id: mc-return-last-draft
+  type: multiple_choice
+  tags: [validation]
+  difficulty: 3
+  prompt: "An approval loop hits its max_tries cap without the critic approving. What should it return?"
+  options:
+    - { text: "The best/last draft so far, marked as unapproved, so the caller knows it terminated without approval", correct: true }
+    - { text: "Nothing — raise an exception so the whole run ends" }
+    - { text: "An empty result, discarding the work done so far" }
+    - { text: "approved: True anyway, since the loop is over" }
+  explanation: "A bounded loop that gives up gracefully returns the last draft flagged as unapproved (e.g. approved=False, tries=max_tries), so the caller can decide what to do. Discarding the work, crashing, or lying that it was approved all defeat the point of a graceful, honest exit."
+
+- id: mc-loop-generalizes
+  type: multiple_choice
+  tags: [validation]
+  difficulty: 4
+  prompt: "The 'cap the approval loop' rule is a special case of which broader discipline?"
+  options:
+    - { text: "Any loop driven by another agent's judgment must be bounded — exactly as a single agent's tool-call loop is capped and budgeted", correct: true }
+    - { text: "Only critic loops need caps; every other agent-driven loop is safe to run unbounded" }
+    - { text: "Loops never need bounds as long as the model is large enough" }
+    - { text: "Bounding a loop is purely a latency optimization with no correctness role" }
+  explanation: "Capping the approval loop generalizes: any loop whose continuation depends on another agent's judgment can fail to terminate, so it must be bounded and budgeted — the same discipline that caps a single agent's tool-call loop. It is a correctness and cost guarantee, not just a latency tweak."

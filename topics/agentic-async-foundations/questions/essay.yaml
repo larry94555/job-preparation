@@ -22,3 +22,39 @@
     - "A timeout bounds each call so a hung request turns into a catchable error instead of blocking the agent forever — it's the trigger that a retry can act on."
     - "Retries with exponential backoff (plus jitter) recover from transient failures and timeouts without hammering an overloaded service or retrying in lockstep, but must be bounded so they eventually give up."
     - "Error isolation (gather with return_exceptions=True, or per-task try/except) keeps one failed call from sinking the whole batch; the three compose — timeout bounds the wait, backoff retries the transient failure, isolation contains what still fails so the rest of the fan-out succeeds."
+
+- id: essay-event-loop
+  type: essay
+  length: short
+  tags: [eventloop]
+  difficulty: 3
+  prompt: "A teammate says 'just add async and our agent gets faster automatically.' Explain what the single-threaded cooperative event loop actually does, what await is, and one concrete way you can accidentally freeze the whole loop."
+  eval_skill: eval-agentic-async-essay
+  reference_points:
+    - "The event loop is single-threaded and cooperative: it runs one coroutine at a time and only switches at an await point, so async gives concurrency (overlapping I/O waits) but not parallelism — CPU-bound code does not get faster and can even get worse."
+    - "await is the cooperative yield point: hitting `await something()` suspends the coroutine and returns control to the loop, which advances other ready tasks until the awaited operation completes and this one resumes."
+    - "You freeze the whole loop with a blocking call that never yields — e.g. time.sleep, a synchronous DB/HTTP driver, or a heavy CPU loop — because it never reaches an await; the fix is the awaitable equivalent (await asyncio.sleep) or offloading to an executor / asyncio.to_thread."
+
+- id: essay-bounded-concurrency
+  type: essay
+  length: short
+  tags: [concurrency]
+  difficulty: 4
+  prompt: "Your agent fans out thousands of tool calls with a single asyncio.gather and starts hitting rate limits and exhausted connection pools. Explain why unbounded gather is the problem and how bounded concurrency (a semaphore) fixes it without losing the fan-out speedup."
+  eval_skill: eval-agentic-async-essay
+  reference_points:
+    - "asyncio.gather launches every awaitable at once, so gathering thousands of calls opens thousands of in-flight connections — that exhausts connection pools, trips upstream rate limits, and makes timeouts cascade; the loop does NOT auto-throttle."
+    - "Bounded concurrency caps how many calls run at once: acquire an asyncio.Semaphore(N) inside each task so at most N overlap while the rest wait, which is backpressure applied at the client instead of overwhelming both ends."
+    - "You keep most of the fan-out speedup because N calls still overlap their waits (total time ≈ batches × slowest call, not the full sum), while staying under the pool/rate-limit ceiling — the discipline is bounded overlap, not maximal overlap."
+
+- id: essay-retry-safety
+  type: essay
+  length: short
+  tags: [errors]
+  difficulty: 4
+  prompt: "Retries make an agent more resilient but can also cause harm. Explain the difference between a transient and a permanent failure, why idempotency matters before retrying, and why exponential backoff needs jitter."
+  eval_skill: eval-agentic-async-essay
+  reference_points:
+    - "Retries only help transient failures (503s, timeouts, connection resets) that a later attempt can clear; permanent errors (400/401/404) fail identically on retry, so you classify errors and fail fast on the permanent ones instead of burning your attempt budget."
+    - "Idempotency matters because retrying a non-idempotent operation (e.g. 'charge the card', 'submit order') after a lost response can duplicate the side effect — such calls need an idempotency key so the server dedups, or a no-retry policy; reads and other idempotent calls are safe to repeat."
+    - "Exponential backoff grows the delay (1s, 2s, 4s) to give an overloaded service room to recover, but if many clients back off on the same schedule they retry in lockstep and hammer it in synchronized waves (thundering herd) — jitter randomizes each delay so retries spread out."

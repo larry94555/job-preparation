@@ -10,7 +10,7 @@ sections:
 
   - id: sec-compression
     title: "Compression & recall"
-    lessons: [lesson-compression, lesson-recall, lesson-frontier-ops]
+    lessons: [lesson-compression, lesson-compression-practice, lesson-recall, lesson-frontier-ops]
     assessment:
       title: "Section 2 — Compression & recall"
       from_tags: [compression, recall]

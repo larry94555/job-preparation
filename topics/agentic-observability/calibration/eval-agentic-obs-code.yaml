@@ -56,3 +56,32 @@ cases:
     expect:
       verdict: fail
       checks: { technically_correct: false, aggregates_correctly: false, handles_edge_cases: false, matches_intent: false }
+
+  # PASS — a third correct solution (the cost-aggregate exercise) with the None/"none" edge case right.
+  # 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      tests_passed=true. technically_correct holds: summarize sums cost and latency_ms over the steps,
+      sets count to len(steps), and builds by_tool by tallying each step's tool. aggregates_correctly
+      holds: total_cost and total_latency_ms are accumulated across the steps rather than fabricated, and
+      the per-tool counts come from the steps themselves. handles_edge_cases holds: a step whose tool is
+      None or the string "none" is treated as no tool and excluded from by_tool, and an empty list yields
+      zero totals, count 0, and an empty by_tool. matches_intent holds: the returned dict has exactly
+      total_cost, total_latency_ms, count, and by_tool as asked.
+      signals.must_use=[sum cost and latency, tally per tool, treat None and 'none' as no tool]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, aggregates_correctly: true, handles_edge_cases: true, matches_intent: true }
+
+  # FAIL — a third clear fail: the trace exercise, totals reset each call and None leaks into the tools list.
+  # Fails the gate plus every other check. 0/4 = 0.0 → fail; gate false caps fail→fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: AgentTrace.add_step reassigns total_cost to
+      just the current step's cost instead of adding to it, so the total reflects only the last step.
+      aggregates_correctly does NOT hold: the totals are overwritten rather than accumulated across the
+      steps, so the sum is wrong for any trace with more than one step. handles_edge_cases does NOT hold:
+      a step with tool=None is appended to the tools list as None rather than skipped. matches_intent does
+      NOT hold: to_dict therefore returns wrong totals and a tools list that includes None entries.
+      signals.must_use=[accumulate totals per step, skip None in tools]; avoid=[overwriting totals, including None in tools].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, aggregates_correctly: false, handles_edge_cases: false, matches_intent: false }

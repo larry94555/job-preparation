@@ -15,8 +15,11 @@ const topics = readdirSync(root, { withFileTypes: true })
   .map((d) => d.name)
   .sort();
 
+type Track = "core" | "agentic";
+
 interface Row {
   topic: string;
+  track: Track;
   items: number;
   covered: number;
   partial: number;
@@ -25,22 +28,33 @@ interface Row {
 }
 
 const re = /<!--\s*coverage:\s*items=(\d+)\s+covered=(\d+)\s+partial=(\d+)\s+gap=(\d+)\s*-->/;
+// The topic's track lives in topic.yaml (`track: agentic`, default `core`). Read
+// it directly so the index can report the two curricula as independent sub-totals.
+const trackRe = /^track:\s*(\w+)/m;
 const rows: Row[] = [];
 
+function trackOf(topic: string): Track {
+  const path = join(root, topic, "topic.yaml");
+  if (!existsSync(path)) return "core";
+  const m = readFileSync(path, "utf8").match(trackRe);
+  return m?.[1] === "agentic" ? "agentic" : "core";
+}
+
 for (const topic of topics) {
+  const track = trackOf(topic);
   const path = join(root, topic, "expert-surface.md");
   if (!existsSync(path)) {
-    rows.push({ topic, items: 0, covered: 0, partial: 0, gap: 0, pct: null });
+    rows.push({ topic, track, items: 0, covered: 0, partial: 0, gap: 0, pct: null });
     continue;
   }
   const m = readFileSync(path, "utf8").match(re);
   if (!m) {
-    rows.push({ topic, items: 0, covered: 0, partial: 0, gap: 0, pct: null });
+    rows.push({ topic, track, items: 0, covered: 0, partial: 0, gap: 0, pct: null });
     continue;
   }
   const [items, covered, partial, gap] = m.slice(1, 5).map(Number);
   const pct = items ? (covered + 0.5 * partial) / items : 0;
-  rows.push({ topic, items, covered, partial, gap, pct });
+  rows.push({ topic, track, items, covered, partial, gap, pct });
 }
 
 const withSurface = rows.filter((r) => r.pct !== null);
@@ -64,3 +78,19 @@ console.log(
 );
 console.log(`Enumerated surface items: ${totItems} · weighted covered: ${totWeighted.toFixed(1)}`);
 console.log(`Topic Mastery Index (weighted coverage across all surfaced topics): ${Math.round(tmi * 100)}%`);
+
+// Per-track sub-totals: the core curriculum and the independent agentic track are
+// scored separately so each reads as its own complete program (roadmap §"Mastery
+// Index gains an Agentic-track sub-total").
+console.log("");
+for (const track of ["core", "agentic"] as const) {
+  const trackRows = withSurface.filter((r) => r.track === track);
+  if (!trackRows.length) continue;
+  const ti = trackRows.reduce((a, r) => a + r.items, 0);
+  const tw = trackRows.reduce((a, r) => a + r.covered + 0.5 * r.partial, 0);
+  const pct = ti ? tw / ti : 0;
+  const label = track === "core" ? "Core curriculum" : "Agentic track";
+  console.log(
+    `${pad(label + " sub-index", 30)} ${trackRows.length} topics · ${ti} items · ${Math.round(pct * 100)}%`,
+  );
+}

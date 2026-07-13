@@ -61,3 +61,34 @@ cases:
     expect:
       verdict: fail
       checks: { technically_correct: false, handles_loop_exit: false, validates_handoff: false, matches_intent: false }
+
+  # PASS — sound handoff validator: rejects None and every empty container with a
+  # structured error, returns the value on a non-empty handoff. 4/4 -> pass; gate true.
+  - answer: >-
+      tests_passed=true. technically_correct holds: validate_handoff checks output against None, "", {}, and
+      [] and returns {"ok": False, "error": "empty_handoff"} for each, otherwise returns {"ok": True,
+      "value": output}, exactly the boundary guard the prompt asks for. handles_loop_exit holds: there is no
+      loop in this exercise, so nothing can spin forever. validates_handoff holds: the empty cases are
+      rejected at the boundary with a structured error instead of being passed along, and a non-empty value
+      is wrapped and returned. matches_intent holds: the returned dict shapes match the prompt for both the
+      reject and accept paths.
+      signals.must_use=[reject None and empty containers with a structured error, return the value on a non-empty handoff];
+      avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, handles_loop_exit: true, validates_handoff: true, matches_intent: true }
+
+  # FAIL — supervisor ignores the revision loop and the critic: writes once and returns
+  # immediately, never calling critic_agent or bounding anything. Fails the gate plus
+  # loop-exit and intent. 0/4 -> fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: supervise calls research_agent(task) and
+      writer_agent(research, None) and then returns that first draft immediately, never entering the
+      range(max_revisions) loop and never calling critic_agent, so the revision-until-approved coordination
+      the prompt describes is absent. handles_loop_exit does NOT hold: there is no revision loop to bound.
+      validates_handoff does NOT hold: the critic's approval is never checked, so a bad draft ships
+      unreviewed. matches_intent does NOT hold: it skips the write-review-revise cycle the prompt requires.
+      signals.must_use=[research then write]; avoid=[ignoring the critic's approval, looping without a revision cap].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, handles_loop_exit: false, validates_handoff: false, matches_intent: false }

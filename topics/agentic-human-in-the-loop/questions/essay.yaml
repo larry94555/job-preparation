@@ -22,3 +22,39 @@
     - "Auditability comes from an append-only, queryable trail that records each action, its params, its risk level, and whether it was approved, rejected, or executed — so you can reconstruct what happened and who approved it after the fact."
     - "The pause → human → resume cycle: the agent runs until a high-risk action, pauses with its state durably saved, a human steps in to approve/reject/edit, and the agent resumes cleanly from that saved state rather than starting over."
     - "Gates need a timeout because a human may never answer; on timeout the action must fail safe — default to rejected, never auto-approve — and leave an audit record, so a pending irreversible action can't silently execute."
+
+- id: essay-tiered-gating
+  type: essay
+  length: short
+  tags: [approval]
+  difficulty: 3
+  prompt: "A team proposes gating every write behind human approval to be maximally safe. Explain why that is the wrong design and how risk-tiered gating spends human attention better, including the failure mode of over-gating."
+  eval_skill: eval-agentic-hil-essay
+  reference_points:
+    - "Oversight is not free: every gate costs a human's attention and adds latency, so approval should be spent where it changes the outcome — on irreversible or expensive actions — not on recoverable writes that can simply be undone."
+    - "Risk-tiered gating routes only high-risk actions through approval while low- and medium-risk actions run directly, so a human reviews the deletions and charges, not the routine create/update calls."
+    - "Over-gating has a concrete failure mode: when reviewers face a flood of low-stakes prompts they habituate and rubber-stamp, so the one high-risk prompt that matters gets waved through too — gating everything actively weakens the gate that counts."
+
+- id: essay-approval-ux
+  type: essay
+  length: long
+  tags: [approval]
+  difficulty: 4
+  prompt: "Design the approval UX for a high-risk agent action. Explain what the request must show the human, how you keep a batch of many actions reviewable, who the request should route to, and why a bare 'approve? yes/no' is not real oversight."
+  eval_skill: eval-agentic-hil-essay
+  reference_points:
+    - "A meaningful approval request shows the concrete action, its parameters, the assessed risk level, and enough context to judge it — a bare yes/no with no detail reduces the human to a rubber stamp, which is oversight in name only."
+    - "For a batch (e.g. deleting 500 records), present it as one reviewable action with its full scope shown rather than firing hundreds of separate prompts, because a flood of identical prompts guarantees habituation and rubber-stamping."
+    - "Approval routing must send the decision to someone with the authority to make it — a high-value refund escalates to an empowered approver, not just whoever is nearest — because who says yes matters as much as that someone does; the design succeeds only when the human can actually understand and judge what they approve."
+
+- id: essay-durable-resume
+  type: essay
+  length: long
+  tags: [resume]
+  difficulty: 4
+  prompt: "Explain what durable pause and clean resumption require in an agent, why an in-memory input() prompt is insufficient, and why an approved action delivered on resume must be idempotent."
+  eval_skill: eval-agentic-hil-essay
+  reference_points:
+    - "Clean resumption requires persisting the full state at the checkpoint — the plan, the message/conversation history, and the specific pending action awaiting the decision — so the agent continues mid-task rather than a bare 'paused' flag that forces a restart from scratch."
+    - "An in-memory input() prompt is insufficient because a human may take minutes, hours, or days to respond; if the process exits or crashes, the in-memory state is gone, so the pause must survive as persisted/checkpointed state, which is what framework interrupts provide, and is why the pattern needs a durable store rather than a blocking call."
+    - "Durable pause/resume introduces at-least-once delivery — a resume can replay and a retry can double-fire — so the executed effect must be idempotent or keyed to run at most once; otherwise a single approval can produce two irreversible effects (a double charge, a double deletion)."

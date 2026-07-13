@@ -1,4 +1,4 @@
-# Calibration for eval-agentic-hil-code (2 clear PASS + 2 clear FAIL, no borderline).
+# Calibration for eval-agentic-hil-code (3 clear PASS + 3 clear FAIL, no borderline).
 skill: eval-agentic-hil-code
 cases:
   # PASS — the approval-gate solution: gates high risk, blocks execute on rejection,
@@ -57,6 +57,37 @@ cases:
       matches_intent does NOT hold: the required high/medium/low mapping is wrong for exactly the actions
       that matter.
       signals.must_use=[]; avoid=[treating an irreversible action as low risk, leaving a high-risk action ungated].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, gates_high_risk: false, audits_actions: false, matches_intent: false }
+
+  # PASS — the audit-log solution on its own: append-only, ordered, filterable by action,
+  # carrying the four fields. 4/4 with the gate → pass.
+  - answer: >-
+      tests_passed=true. technically_correct holds: AuditLog.record appends a dict carrying action, params,
+      risk, and decision to an internal list and never mutates earlier entries, and query returns a copy of
+      all records when action is None else the records whose action matches. gates_high_risk holds: the log
+      records the risk level of each decision, including the high-risk gated ones, without dropping any.
+      audits_actions holds: every call appends in order and history is never overwritten, so the trail
+      reconstructs the real timeline. matches_intent holds: query filters by action exactly as specified and
+      returns everything when action is None.
+      signals.must_use=[append each record in order, record action/params/risk/decision, filter by action]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, gates_high_risk: true, audits_actions: true, matches_intent: true }
+
+  # FAIL — the approval gate asks for approval on the wrong tier and overwrites the log:
+  # it gates low-risk reads while running high-risk actions unapproved, and rewrites records
+  # in place instead of appending. Fails the gate plus every check. 0/4 → fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: execute_with_approval calls approve only when
+      risk=="low" and lets risk=="high" actions run without ever calling approve, so the irreversible
+      effect is never gated. gates_high_risk does NOT hold: the high tier is exactly the tier that skips
+      approval here, so a rejected deletion still executes. audits_actions does NOT hold: record assigns
+      audit[action] = decision, overwriting any earlier record for the same action instead of appending, so
+      history is silently rewritten. matches_intent does NOT hold: the prompt required gating high risk and
+      an append-only trail, and it inverts both.
+      signals.must_use=[]; avoid=[gating low risk while leaving high risk ungated, overwriting audit records instead of appending].
     expect:
       verdict: fail
       checks: { technically_correct: false, gates_high_risk: false, audits_actions: false, matches_intent: false }

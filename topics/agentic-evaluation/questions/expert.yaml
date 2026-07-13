@@ -10,3 +10,39 @@
     - { text: "Only check that its JSON parses; the verdicts themselves need no validation" }
     - { text: "Use the same model family as the agent so their judgments always agree" }
   explanation: "A judge is a model and inherits model failure modes. You validate it like a classifier: agreement against human-labeled examples, control for documented biases (position, verbosity, self-preference — Zheng et al., MT-Bench 2023), and pin it to a calibration set so a change that breaks its verdicts is caught. Prefer a different model family than the agent to avoid self-preference."
+
+- id: expert-rubric-design
+  type: multiple_choice
+  tags: [rubric]
+  difficulty: 3
+  prompt: "What distinguishes a rubric that yields reproducible, aggregatable verdicts from one that does not?"
+  options:
+    - { text: "Explicit, independently-checkable criteria scored one at a time, plus a strict-JSON verdict against a fixed schema — so each judgment is a function of the output and named criteria and a hundred of them roll up into a pass-rate", correct: true }
+    - { text: "A single holistic 'quality' criterion, so the judge has room to use its overall judgment" }
+    - { text: "A long free-text instruction telling the judge to be fair, returned as prose" }
+    - { text: "Criteria that change per run so the rubric adapts to each output" }
+  explanation: "Reproducibility comes from explicit named criteria judged independently (which also records WHICH criterion failed) and a strict-JSON verdict against a fixed schema you can parse, validate, and average. Holistic prose verdicts can't be aggregated, and a rubric that drifts between runs makes scores incomparable — this is the G-Eval / rubric-grading standard."
+
+- id: expert-meta-eval
+  type: multiple_choice
+  tags: [suite]
+  difficulty: 3
+  prompt: "What is a meta-eval, and why does an eval harness that grades with an LLM-as-judge need one?"
+  options:
+    - { text: "A meta-eval evaluates the evaluator — it checks the judge reproduces a set of labeled exemplars, so a change to the judge (model or rubric) that breaks grading is caught before it silently corrupts every downstream pass-rate", correct: true }
+    - { text: "A meta-eval is just running the suite twice and averaging, to reduce noise" }
+    - { text: "A meta-eval is the agent grading the judge, closing the loop" }
+    - { text: "A meta-eval is unnecessary once the judge uses a large model" }
+  explanation: "Because the judge is itself a fallible model, you evaluate it: pin it to labeled clear-pass and clear-fail exemplars (a calibration set) and gate on whether it still reproduces them. This repo's own meta-eval gate is a worked example — it fails CI when the pinned judge's agreement with the calibration cases drops."
+
+- id: expert-gate-design
+  type: multiple_choice
+  tags: [gate]
+  difficulty: 3
+  prompt: "Two teams both 'have a deploy gate'. One blocks the build in CI when pass_rate < threshold; the other emails a report after the run. Which is actually a gate, and what is the principle?"
+  options:
+    - { text: "Only the CI-blocking one — a gate must mechanically block a sub-threshold release with no discretionary bypass; a report you read after the fact measures without gating", correct: true }
+    - { text: "Both are gates, since both surface the pass_rate somewhere" }
+    - { text: "Only the emailing one, because a human should always make the final call" }
+    - { text: "Neither, because gates require a separate approval committee" }
+  explanation: "The defining property of a gate is mechanical enforcement: below the bar, the release is blocked automatically, in the path to production, with no step where the check can be waved through under deadline pressure. A report emailed after the run is measurement without a gate — the exact anti-pattern the deploy-gate pattern exists to prevent."

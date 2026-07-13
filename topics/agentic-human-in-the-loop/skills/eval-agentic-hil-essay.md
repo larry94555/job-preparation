@@ -3,6 +3,7 @@ id: eval-agentic-hil-essay
 applies_to: essay
 output_schema: EssayCheckScore
 model_hint: "qwen2.5-3b-instruct, temperature 0, response_format=json"
+grader_samples: 3
 ---
 
 # Grading a human-in-the-loop essay

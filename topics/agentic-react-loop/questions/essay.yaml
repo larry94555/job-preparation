@@ -22,3 +22,39 @@
     - "Max-steps cap: bound the number of iterations so an agent that never emits a final answer becomes a bounded, observable failure instead of spinning forever."
     - "Can't-finish path and per-step logging: when the cap is hit, return a structured can't-finish result (no answer, a reason like step_limit) rather than crashing or fabricating one; log every step (thought, action, observation) so the run is auditable and debuggable."
     - "Validate tool outputs: reject empty or malformed observations before feeding them back, so the agent never reasons over garbage and a bad tool result cannot corrupt the next decision."
+
+- id: essay-observe-ground
+  type: essay
+  length: short
+  tags: [react]
+  difficulty: 3
+  prompt: "An engineer proposes letting the agent 'assume' a tool call succeeded and continue reasoning, to save a round-trip. Explain what the Observe step actually does, the failure mode this shortcut introduces, and why feeding back the real result — even an error — keeps the agent honest."
+  eval_skill: eval-agentic-react-essay
+  reference_points:
+    - "Observe means taking the tool's actual output and appending it to the conversation, so the next Thought reasons over what really happened rather than what the model imagined would happen."
+    - "The shortcut's failure mode is a hallucinated observation: if the agent assumes success, one imagined result poisons every subsequent step, and the agent drifts with no signal that anything went wrong."
+    - "Feeding back the genuine result — including an error or empty answer — keeps the agent tied to reality: it can retry, pick a different action, or give up cleanly, because its next decision is grounded in the true tool outcome."
+
+- id: essay-loop-control
+  type: essay
+  length: short
+  tags: [loop]
+  difficulty: 3
+  prompt: "Explain how the ReAct loop knows when to run another iteration versus stop, why this makes the loop adaptive, and what role the max-steps cap plays relative to that stopping logic."
+  eval_skill: eval-agentic-react-essay
+  reference_points:
+    - "Each step the model emits has a kind: an 'action' means run the requested tool, observe, and loop again; a 'final' means return the answer and stop. The step kind is the whole control signal, not a timer or a token count."
+    - "Because the agent decides when to emit a final, the loop length is not fixed — an easy task ends in a couple of steps, a hard one runs longer. That data-dependent length is what makes the loop adaptive rather than a fixed script."
+    - "The max-steps cap is a backstop, not the normal stopping condition: it bounds the loop so an agent that never emits a final becomes a bounded, observable failure, but in a healthy run the agent stops on its own by returning a final well before the cap."
+
+- id: essay-validate-boundary
+  type: essay
+  length: short
+  tags: [validation]
+  difficulty: 3
+  prompt: "Describe validating a tool's output before it re-enters the loop as an observation: what counts as a bad observation, what the loop should do when validation fails, and why this is the same discipline as validating tool inputs."
+  eval_skill: eval-agentic-react-essay
+  reference_points:
+    - "A bad observation is empty or malformed content — None, an empty string, an empty dict, or garbage — that carries no real result; validation is a boundary check that accepts non-empty content and rejects the rest before the agent's next Thought sees it."
+    - "When validation fails, the loop does not feed the empty observation back as if it were a result: it records the rejection (that is what per-step logging is for) and can retry the tool or surface the failure, but it never lets the agent reason as though a broken call succeeded."
+    - "It is the symmetric counterpart to validating tool inputs: the tool distrusts the agent's arguments and the loop distrusts the tool's results — data crossing the trust boundary is untrusted in both directions, so you check it at the seam."

@@ -34,3 +34,21 @@
   answer:
     regex: '^relevance$'
     normalize: true
+
+- id: cloze-episodic
+  type: text_input
+  tags: [memory]
+  difficulty: 2
+  prompt: "A durable, append-only log of the agent's past runs, queried by time or run id, is the ____ history."
+  answer:
+    regex: '^episodic$'
+    normalize: true
+
+- id: cloze-consolidation
+  type: text_input
+  tags: [compression]
+  difficulty: 3
+  prompt: "Collapsing many verbose turns into a few sentences of durable state is summarization used as ____ (one word)."
+  answer:
+    regex: '^consolidation$'
+    normalize: true

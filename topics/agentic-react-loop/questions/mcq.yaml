@@ -118,3 +118,124 @@
     - { text: "Removing the Observe step so the loop is shorter" }
     - { text: "Letting the agent decide its own step limit at runtime" }
   explanation: "The four guardrails work together: the max-steps cap bounds runtime, the can't-finish path handles giving up cleanly, per-step logging makes the run auditable, and validating outputs keeps bad observations out of the loop. Bigger models or shorter loops do not substitute for them."
+
+- id: mc-one-shot-vs-loop
+  type: multiple_choice
+  tags: [react]
+  difficulty: 2
+  prompt: "Why does a ReAct agent beat one-shot answering on tasks that need external information?"
+  options:
+    - { text: "It can act to gather real information mid-task and reason over what actually came back, instead of committing to an answer from the prompt alone", correct: true }
+    - { text: "It uses a larger context window, which is the only thing that helps" }
+    - { text: "It answers on the first turn but with more tokens of reasoning" }
+    - { text: "It runs the same prompt several times and averages the answers" }
+  explanation: "One-shot answering is stuck with whatever was in the prompt. A ReAct agent interleaves reasoning with acting: it can call a tool, observe the real result, and revise — so it grounds the answer in information it actually fetched rather than guessing. The advantage is the closed loop, not a bigger model or repeated sampling."
+
+- id: mc-step-kind-drives
+  type: multiple_choice
+  tags: [loop]
+  difficulty: 3
+  prompt: "The harness decides whether to run another iteration based on which property of the step the model just emitted?"
+  options:
+    - { text: "The step's kind — 'action' means run the tool and loop, 'final' means return and stop", correct: true }
+    - { text: "The number of tokens in the step's text" }
+    - { text: "Whether the step contains the word 'done' anywhere" }
+    - { text: "The wall-clock time elapsed since the loop started" }
+  explanation: "The loop is driven by the step kind, not by heuristics on the text or a timer. An 'action' step means the agent wants a tool run and another iteration; a 'final' step means it is returning the answer. That single discriminator is the whole control signal for continuing versus stopping."
+
+- id: mc-adaptive-length
+  type: multiple_choice
+  tags: [loop]
+  difficulty: 3
+  prompt: "What does it mean that the ReAct loop is 'adaptive' rather than fixed-length?"
+  options:
+    - { text: "The number of iterations depends on the task — an easy task finishes in a couple of steps, a hard one takes more, because the agent decides when to emit a final", correct: true }
+    - { text: "The loop always runs exactly max_steps iterations regardless of the task" }
+    - { text: "The model rewrites its own code to change the loop each turn" }
+    - { text: "The loop length is chosen randomly at the start of each run" }
+  explanation: "Adaptive means the loop's length is not hard-coded: the agent keeps emitting actions until it judges it can answer, then emits a final. Simple tasks end quickly, harder ones run longer. The max_steps cap is only a backstop, not the normal stopping condition."
+
+- id: mc-observe-error
+  type: multiple_choice
+  tags: [react]
+  difficulty: 3
+  prompt: "A tool returns an error string instead of a useful result. In a correct ReAct loop, what happens next?"
+  options:
+    - { text: "The real error is fed back as the observation so the agent can reason about it and try a different action", correct: true }
+    - { text: "The loop silently pretends the tool succeeded and continues" }
+    - { text: "The error is discarded and the agent re-reasons from the original prompt with no memory of the failure" }
+    - { text: "The loop must immediately return the error as the final answer" }
+  explanation: "Observe means feeding back the genuine result — including an error. A well-formed loop lets the agent see the failure and adapt (retry, pick a different tool, or give up cleanly). Pretending success or dropping the error breaks the grounding the loop depends on."
+
+- id: mc-thought-parseable
+  type: multiple_choice
+  tags: [react]
+  difficulty: 3
+  prompt: "In the classic ReAct prompt format (Thought / Action / Action Input / Observation), what makes a step machine-parseable?"
+  options:
+    - { text: "Each part is on its own labeled line, so the harness can extract the Thought, the Action (tool name), and the Action Input, and detect a final when there is no Action line", correct: true }
+    - { text: "The model emits raw JSON only, never any prose" }
+    - { text: "The harness runs a second model to guess what the first one meant" }
+    - { text: "Every step must contain an Action line, so parsing never has to handle a final" }
+  explanation: "The Thought/Action/Action Input/Observation shape is deliberately line-structured so a parser can pull each field out. A thought-only step with no Action line signals a final. The format is what lets the harness reliably route between running a tool and returning an answer."
+
+- id: mc-validate-vs-log
+  type: multiple_choice
+  tags: [validation]
+  difficulty: 3
+  prompt: "Output validation and per-step logging are both guardrails. How do their jobs differ?"
+  options:
+    - { text: "Validation rejects a bad observation at the boundary so it never re-enters the loop; logging records what happened so the run is auditable — one prevents, the other observes", correct: true }
+    - { text: "They do the same job, so you only need one of them" }
+    - { text: "Logging rejects bad observations and validation records the run" }
+    - { text: "Validation makes the loop faster and logging makes it slower, so they cancel out" }
+  explanation: "Validation is a boundary check that stops empty or malformed output from being fed back — it changes control flow. Logging is a passive record of thought/action/observation that makes the run debuggable but does not itself reject anything. They are complementary: one prevents corruption, the other makes failures visible."
+
+- id: mc-validate-symmetry
+  type: multiple_choice
+  tags: [validation]
+  difficulty: 4
+  prompt: "Validating tool OUTPUTS before feeding them back is described as symmetric with validating tool INPUTS. What is the shared principle?"
+  options:
+    - { text: "Treat data crossing a trust boundary as untrusted in both directions — the tool distrusts the agent's arguments, and the agent's loop distrusts the tool's results", correct: true }
+    - { text: "Both checks exist only to make the code longer and are otherwise pointless" }
+    - { text: "Inputs and outputs are always identical, so one check covers both" }
+    - { text: "Only inputs matter; output validation is a redundant copy of input validation" }
+    - { text: "Validation should be skipped whenever the same model wrote both sides" }
+  explanation: "The principle is boundary distrust in both directions. A tool validates the agent's arguments because the agent is an untrusted caller; symmetrically, the loop validates the tool's result because a tool can return empty or malformed data. The agent is an untrusted consumer of results just as the tool is an untrusted consumer of arguments."
+
+- id: mc-guardrails-independent
+  type: multiple_choice
+  tags: [guardrails]
+  difficulty: 4
+  prompt: "Why is a max-steps cap alone insufficient, even though it does stop an infinite loop?"
+  options:
+    - { text: "The cap bounds runtime but says nothing about correctness — you still need a can't-finish path to give up honestly, logging to see what happened, and output validation to keep garbage out of the reasoning", correct: true }
+    - { text: "The cap is sufficient; the other three guardrails are decorative" }
+    - { text: "A cap slows the loop down too much, so it must be removed in production" }
+    - { text: "The cap only works if max_steps is set to exactly 10" }
+  explanation: "A cap solves exactly one failure mode: unbounded runtime. It does nothing about an agent that reasons over garbage, fabricates an answer to escape, or drifts undetectably. The other three guardrails cover honest failure, auditability, and observation quality. They are complementary layers, not substitutes for one another."
+
+- id: mc-cant-finish-vs-crash
+  type: multiple_choice
+  tags: [guardrails]
+  difficulty: 3
+  prompt: "When the loop hits its step cap, why return a structured can't-finish result instead of raising an exception?"
+  options:
+    - { text: "Hitting the cap is an expected outcome, so a structured result (answer=None, reason=step_limit) lets the caller handle it as data — retry, escalate, or report — instead of catching a crash", correct: true }
+    - { text: "Exceptions are impossible to raise inside a loop in most languages" }
+    - { text: "A crash is fine and identical to a structured result in every way" }
+    - { text: "Raising is required so the process exits and the run is discarded" }
+  explanation: "Running out of steps is a normal, anticipated end state, not a bug. Returning it as structured data (no answer, a step_limit reason) keeps it in the caller's control flow so it can decide what to do. An exception forces error-handling for something that isn't an error and loses the clean signal that the agent gave up deliberately."
+
+- id: mc-log-contents
+  type: multiple_choice
+  tags: [guardrails]
+  difficulty: 2
+  prompt: "What should a per-step log record to make a ReAct run reconstructable?"
+  options:
+    - { text: "The thought, the action and its input, and the observation at each iteration", correct: true }
+    - { text: "Only the final answer, since the intermediate steps do not matter" }
+    - { text: "Just the total number of steps and nothing about their content" }
+    - { text: "A hash of the model weights used for the run" }
+  explanation: "To reconstruct what an agent did, the log needs the per-step trace: what it reasoned (thought), what it called (action + input), and what came back (observation). With that you can find the exact step where it drifted. The final answer or a bare step count tells you nothing about how the agent got there."

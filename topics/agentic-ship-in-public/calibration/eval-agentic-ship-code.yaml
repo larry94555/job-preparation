@@ -58,3 +58,33 @@ cases:
     expect:
       verdict: fail
       checks: { technically_correct: false, assembles_the_pieces: false, handles_edge_cases: false, matches_intent: false }
+
+  # PASS — correct portfolio-readiness check. All four checks true. 4/4 = 1.0 → pass; gate true.
+  - answer: >-
+      tests_passed=true. technically_correct holds: portfolio_ready checks all four required keys
+      ("agent", "readme", "evals", "demo"), treats an absent or empty value (empty string, empty list,
+      None) as missing, and reports ready True only when nothing is missing. assembles_the_pieces holds:
+      the four artifacts are checked together and the missing list is built from exactly those keys.
+      handles_edge_cases holds: empty values are counted as missing rather than present, and the missing
+      list is returned sorted. matches_intent holds: it returns {"ready", "missing"} with ready True iff
+      missing is empty, exactly as the prompt asked.
+      signals.must_use=[check all four required keys, treat absent or empty as missing, return sorted
+      missing list, ready True only when nothing missing]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, assembles_the_pieces: true, handles_edge_cases: true, matches_intent: true }
+
+  # FAIL — portfolio check counts empty values as present and returns ready with missing keys.
+  # All four checks false. 0/4 = 0.0 → fail; gate false caps fail→fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: portfolio_ready only tests key presence with
+      `in project`, so an empty string or empty list counts as present even though the artifact is missing.
+      assembles_the_pieces does NOT hold: it never checks all four required keys against emptiness, so the
+      artifacts are not wired together as the exercise requires. handles_edge_cases does NOT hold: an empty
+      value slips through as present, so a repo with an empty evals list is reported ready. matches_intent
+      does NOT hold: it can return ready True while the missing list should be non-empty, and the missing
+      list is returned unsorted.
+      signals.must_use=[treat absent or empty as missing, sorted missing list]; avoid=[counting an empty value as present, returning ready True with missing keys].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, assembles_the_pieces: false, handles_edge_cases: false, matches_intent: false }

@@ -20,10 +20,13 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L3]** The four memories as an architecture: recent buffer, working scratchpad, long-term store, episodic log, and what each is for — `lessons/four-memories.md`, `questions/mcq.yaml`.
 - ✅ **[L3]** Choosing a memory type by lifetime and access pattern; in-context vs external tradeoffs (latency, capacity, staleness) — `lessons/memory-types.md`, `questions/mcq.yaml`.
 - ✅ **[L3]** Compression as budget-triggered consolidation: keep decisions/facts/open tasks, drop chit-chat, accept lossiness — `lessons/compression.md`, `questions/mcq.yaml`.
+- ✅ **[L4]** Compression budget arithmetic: the running summary itself counts toward the budget, so summary + retained recent turns must still fit — `lessons/compression-practice.md`, `questions/mcq.yaml` (`mc-summary-counts-budget`).
 
 ## D4 — Problem solving
 - ✅ **[L3]** Diagnose a buffer overflowing the context window and prescribe budget-triggered summarization — `lessons/compression.md`, `questions/mcq.yaml`, `essay.yaml`.
 - ✅ **[L3]** Diagnose "dump the whole store into context" and prescribe retrieve-then-inject with relevance-ranked top-k recall — `lessons/recall.md`, `questions/mcq.yaml`, `free-entry.yaml`.
+- ✅ **[L3]** Distinguish agent long-term memory from classic document RAG (self-authored, evolving store → write policy, staleness, forgetting are first-class) — `questions/expert.yaml` (`expert-rag-vs-memory`), `lessons/frontier-ops.md`.
+- ✅ **[L3]** Recall as a ranking (not merely retrieval) problem, blending semantic similarity with recency/importance into the relevance score — `lessons/recall.md`, `questions/mcq.yaml` (`mc-recall-not-retrieval`, `mc-recall-recency-importance`).
 
 ## D5 — Engineering & code craft
 - ✅ **[L3]** Implement a capped rolling short-term buffer with FIFO eviction (`ShortTermBuffer`) — `exercises/memory-buffer`, `questions/code.yaml`.
@@ -40,8 +43,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L3]** Whiteboard the four memories and defend budget-triggered compression + relevance-ranked recall under questioning — `questions/essay.yaml` (`essay-four-memories`, `essay-compression-recall`).
 
 ## Coverage summary
-18 items · ✅ 18 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+21 items · ✅ 21 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
 This surface is fully covered as of the snapshot; it will revert to partial as the field's frontier
 expands (learned forgetting policies, memory-quality evals, multi-agent shared-memory consistency).
 
-<!-- coverage: items=18 covered=18 partial=0 gap=0 -->
+<!-- coverage: items=21 covered=21 partial=0 gap=0 -->

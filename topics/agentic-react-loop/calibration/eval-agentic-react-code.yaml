@@ -1,5 +1,5 @@
-# Calibration for eval-agentic-react-code (exemplars target the react-loop / validate-observation exercises).
-# Exactly 2 clear PASS + 2 clear FAIL — no borderline cases.
+# Calibration for eval-agentic-react-code (exemplars target the react-loop / validate-observation / reason-act-parse exercises).
+# Exactly 3 clear PASS + 3 clear FAIL — no borderline cases.
 skill: eval-agentic-react-code
 cases:
   # PASS — run_react is conceptually right on every axis. 4/4 = 1.0 → pass; gate technically_correct=true.
@@ -56,6 +56,36 @@ cases:
       result. matches_intent does NOT hold: the prompt asked it to reject None/""/{} with
       empty_observation and it does the opposite.
       signals.must_use=[reject None/empty string/empty dict]; avoid=[treating an empty observation as valid, raising instead of returning a structured error].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, handles_limits: false, validates_output: false, matches_intent: false }
+
+  # PASS — parse_react is conceptually right on every axis. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      tests_passed=true. technically_correct holds: parse_react extracts the Thought line and, when an
+      Action line is present, the Action and Action Input, returning {"thought": ..., "action": ...,
+      "action_input": ...} with each value stripped of surrounding whitespace. handles_limits is not
+      applicable here but the parser handles the thought-only (final) case as a bound. validates_output
+      holds: it checks for the presence of the Action line rather than assuming it, returning None for
+      action and action_input when there is no Action line. matches_intent holds: it returns the exact dict
+      shape the prompt specified for both the action step and the thought-only final step.
+      signals.must_use=[extract the Thought line, extract Action and Action Input when present, return None for action/action_input when there is no Action line];
+      avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, handles_limits: true, validates_output: true, matches_intent: true }
+
+  # FAIL — parse_react assumes an Action line is always present and returns raw un-stripped fields.
+  # Fails the gate plus every other check. 0/4 = 0.0 → fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: parse_react assumes every block contains an
+      Action and Action Input line, so on a thought-only final step it raises or returns wrong fields
+      instead of {"action": None, "action_input": None}. handles_limits does NOT hold: it does not handle
+      the bound case of a missing Action line at all. validates_output does NOT hold: it never checks
+      whether the Action line is present and returns the captured values with surrounding whitespace
+      un-stripped. matches_intent does NOT hold: the prompt asked for None on a missing Action line and
+      stripped fields, and it does the opposite.
+      signals.must_use=[return None for action/action_input when there is no Action line]; avoid=[assuming an Action line is always present, returning raw un-stripped fields].
     expect:
       verdict: fail
       checks: { technically_correct: false, handles_limits: false, validates_output: false, matches_intent: false }

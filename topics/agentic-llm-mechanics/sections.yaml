@@ -10,7 +10,7 @@ sections:
 
   - id: sec-routing
     title: "Routing, cost & failure modes"
-    lessons: [lesson-routing-cost, lesson-failure-modes, lesson-frontier-ops]
+    lessons: [lesson-routing-cost, lesson-cost-accounting, lesson-failure-modes, lesson-frontier-ops]
     assessment:
       title: "Section 2 — Routing, cost & failure modes"
       from_tags: [routing, cost, failure]

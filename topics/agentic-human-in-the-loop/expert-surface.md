@@ -20,6 +20,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L3]** Risk classification (reversibility × cost → low/medium/high) as the routing decision for oversight — `lessons/why-hil.md`, `questions/mcq.yaml`.
 - ✅ **[L3]** The approval gate as the seam between intent and effect: execute is blocked until an explicit human yes — `lessons/risk-gates.md`, `questions/mcq.yaml`.
 - ✅ **[L3]** Durable pause and clean resumption (interrupts) vs. an in-memory prompt, and fail-safe timeouts — `lessons/resume.md`, `questions/mcq.yaml`.
+- ✅ **[L3]** Placing the risk-tier boundary as a two-sided tradeoff (too coarse → irreversible actions slip through; too fine → reviewers habituate) — `lessons/tiered-gating.md`, `questions/expert.yaml` (`expert-risk-tiering`).
+- ✅ **[L4]** Idempotent/at-most-once execution on resume, so a replayed delivery of an approved action can't double-apply an irreversible effect — `lessons/resume.md`, `questions/mcq.yaml` (`mc-resume-idempotent`), `questions/expert.yaml` (`expert-audit-resume-state`).
 
 ## D4 — Problem solving
 - ✅ **[L3]** Diagnose an ungated irreversible action and prescribe risk-gating behind approval — `lessons/why-hil.md`, `lessons/risk-gates.md`, `questions/mcq.yaml`, `essay.yaml`.
@@ -38,10 +40,11 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D8 — Career & professional practice
 - ✅ **[L3]** Whiteboard why irreversible actions need a human and defend risk-gating, auditability, and fail-safe resumption under questioning — `questions/essay.yaml` (`essay-hil`, `essay-audit`).
+- ✅ **[L4]** Design a real approval surface — show action/params/risk/context, batch to avoid rubber-stamping, route to an empowered approver — and defend it as oversight that fits human attention — `lessons/tiered-gating.md`, `questions/essay.yaml` (`essay-approval-ux`), `questions/expert.yaml` (`expert-approval-habituation`).
 
 ## Coverage summary
-18 items · ✅ 18 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+21 items · ✅ 21 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
 This surface is fully covered as of the snapshot; it will revert to partial as the field's frontier
 expands (calibrated autonomy-by-confidence, multi-agent oversight, standardized approval protocols).
 
-<!-- coverage: items=18 covered=18 partial=0 gap=0 -->
+<!-- coverage: items=21 covered=21 partial=0 gap=0 -->

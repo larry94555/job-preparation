@@ -10,3 +10,39 @@
     - { text: "A multi-agent protocol for many agents to vote on an answer" }
     - { text: "A decoding mode that guarantees the model's output matches a JSON schema" }
   explanation: "ReAct (Yao et al., 2022) is 'synergizing reasoning and acting': the model interleaves reasoning traces (Thought) with actions (tool calls) and observations in a single loop. Reasoning helps it plan and revise actions, while acting lets it gather information — each improving the other, unlike reasoning or acting alone."
+
+- id: expert-cot-vs-act
+  type: multiple_choice
+  tags: [react]
+  difficulty: 3
+  prompt: "Reasoning-only (chain-of-thought) and acting-only agents each have a characteristic weakness. What does interleaving them in ReAct fix?"
+  options:
+    - { text: "Reasoning-only drifts and hallucinates because nothing checks its plan against the world; acting-only flails because there is no explicit plan tying tool calls together — interleaving lets observations ground the reasoning and the reasoning direct the actions", correct: true }
+    - { text: "Reasoning-only is too slow and acting-only is too fast, so interleaving just balances latency", correct: false }
+    - { text: "Both are identical, so interleaving changes nothing except formatting", correct: false }
+    - { text: "Interleaving removes the need for tools entirely by fine-tuning the model", correct: false }
+  explanation: "Chain-of-thought reasoning alone is untethered — it plans but nothing checks the plan against reality, so it hallucinates facts. Acting alone gathers real information but has no explicit plan connecting the calls, so it flails. ReAct interleaves them: observations feed real information back into the reasoning, and the reasoning trace decides and revises the next action. That mutual correction is the synergy Yao et al. (2022) named."
+
+- id: expert-reflexion
+  type: multiple_choice
+  tags: [guardrails]
+  difficulty: 3
+  prompt: "Reflexion (Shinn et al., 2023) extends the single-agent loop with self-reflection. What does it add on top of plain ReAct?"
+  options:
+    - { text: "A verbal self-reflection step: after a failed attempt the agent writes a critique of what went wrong and stores it in memory to guide the next attempt, turning feedback into an improved retry rather than a blind repeat", correct: true }
+    - { text: "It removes the Observe step so the agent reasons faster", correct: false }
+    - { text: "It replaces the single agent with a committee that votes on each action", correct: false }
+    - { text: "It guarantees the loop always succeeds on the first try", correct: false }
+  explanation: "Reflexion adds verbal self-reflection: when an attempt fails, the agent reflects in language on why, and keeps that reflection in memory so the next attempt is informed rather than a blind repeat. It is a recovery-oriented layer on the ReAct loop — an attempt at the error-recovery gap — not a replacement for observing or a multi-agent vote, and it does not guarantee success."
+
+- id: expert-plan-execute
+  type: multiple_choice
+  tags: [loop]
+  difficulty: 3
+  prompt: "A plan-and-execute agent is often contrasted with the interleaved ReAct loop. What is the key structural difference?"
+  options:
+    - { text: "Plan-and-execute first drafts a multi-step plan up front and then executes the steps, whereas ReAct interleaves a single Thought and Action per iteration and re-plans each turn from the latest observation", correct: true }
+    - { text: "Plan-and-execute never calls tools, while ReAct only calls tools", correct: false }
+    - { text: "They are the same architecture under two different names", correct: false }
+    - { text: "Plan-and-execute requires multiple agents, while ReAct forbids tools", correct: false }
+  explanation: "Plan-and-execute separates planning from acting: it produces a whole plan first, then runs the steps (sometimes revising). ReAct interleaves — one Thought, one Action, one Observation per turn, re-deciding the next step from the newest observation. Up-front planning can be more token-efficient and coherent on long tasks; interleaving adapts turn-by-turn to what the tools actually return. Both are single-agent loop patterns, not the same thing."

@@ -118,3 +118,147 @@
     - { text: "It speeds up tool calls by caching results" }
     - { text: "It only runs after the tool has already executed" }
   explanation: "Output filtering gates what comes out as an action: a filter checks the proposed tool call against an allow-list and refuses dangerous tools before the harness runs them — the confused-deputy defense that actually bites."
+
+- id: mc-indirect-injection
+  type: multiple_choice
+  tags: [injection]
+  difficulty: 3
+  prompt: "Why is indirect injection considered more dangerous than direct injection?"
+  options:
+    - { text: "The payload is planted in content the agent fetches, so the attacker never talks to the agent and the trap fires whenever the agent reads it", correct: true }
+    - { text: "It is typed directly into the prompt, which is easier for the model to detect" }
+    - { text: "It only works when the system prompt is empty" }
+    - { text: "It is slower to execute, giving the model time to notice it" }
+  explanation: "Direct injection is typed into the prompt by whoever is talking to the agent; indirect injection (Greshake et al.) plants the payload in a fetched page, document, or tool result and detonates when the agent reads it — the attacker never needs to interact with the agent at all, which is what makes it the practical, dangerous case."
+
+- id: mc-injection-no-fix
+  type: multiple_choice
+  tags: [injection]
+  difficulty: 3
+  prompt: "Why is there no clean, general fix that fully separates injected instructions from data?"
+  options:
+    - { text: "Following instructions and following instructions hidden in data are the same capability — you cannot have one without the other", correct: true }
+    - { text: "The fix exists but is too slow to run in production" }
+    - { text: "A large enough model reliably tells the two apart" }
+    - { text: "Encrypting the fetched content removes all embedded instructions" }
+  explanation: "A capable model is built to follow instructions wherever they appear; asking it to follow your instructions yet never follow instructions that appear in data is asking for two contradictory behaviors from one capability. That is why defense is layered mitigation, not a single patch, and why larger models do not close the gap."
+
+- id: mc-least-authority
+  type: multiple_choice
+  tags: [injection]
+  difficulty: 3
+  prompt: "How does granting an agent least authority limit the damage from a successful injection?"
+  options:
+    - { text: "A confused deputy cannot pull a lever it was never handed — fewer tools and narrower permissions mean a smaller blast radius", correct: true }
+    - { text: "Least authority makes the model immune to injection entirely" }
+    - { text: "It speeds up tool calls so the injection has no time to run" }
+    - { text: "It encrypts the agent's context so the payload cannot be read" }
+  explanation: "Least authority does not stop the injection; it shrinks what a hijacked turn can do. If the agent was never given send_email or a payment tool, an injection that convinces the model to use them still fails — the dangerous levers were never in reach."
+
+- id: mc-untrusted-until-proven
+  type: multiple_choice
+  tags: [separation]
+  difficulty: 2
+  prompt: "How should an agent treat content it fetches from the web or a file?"
+  options:
+    - { text: "As untrusted until proven otherwise — data to be analyzed, never commands to obey", correct: true }
+    - { text: "As trusted, since the model can judge whether it is safe" }
+    - { text: "As part of the system prompt, so it carries the same authority" }
+    - { text: "As trusted if it comes from an HTTPS URL" }
+  explanation: "Provenance is the point: content the agent did not write is untrusted by default. Marking fetched text as data to analyze — not instructions to obey — is the discipline that separation and sanitizing implement. HTTPS proves transport security, not that the content is benign."
+
+- id: mc-delimiter-label
+  type: multiple_choice
+  tags: [separation]
+  difficulty: 3
+  prompt: "You wrap fetched content in an <untrusted> block and tell the model to ignore instructions inside it. Why is this still not a guarantee?"
+  options:
+    - { text: "A determined injection can try to break out of the frame or impersonate the delimiter, so separation must layer with sanitizing and other controls", correct: true }
+    - { text: "Delimiters make the model respond in fewer tokens" }
+    - { text: "The <untrusted> tag is automatically stripped before the model sees it" }
+    - { text: "Labeling content as untrusted deletes any instructions it contains" }
+  explanation: "Separation is defense in depth, not a proof. An attacker can craft content that mimics the closing delimiter or argues its way out of the frame, so you pair separation with sanitizing the content and with the downstream guardrails — no single layer is trusted."
+
+- id: mc-ephemeral-fs
+  type: multiple_choice
+  tags: [sandbox]
+  difficulty: 2
+  prompt: "Why give sandboxed code an ephemeral filesystem and no outbound network?"
+  options:
+    - { text: "So hostile code has no exfiltration path and nothing it writes persists or touches anything real", correct: true }
+    - { text: "So the code runs faster by avoiding disk I/O" }
+    - { text: "So the model can read the code's output more easily" }
+    - { text: "So the sandbox can share credentials with the host safely" }
+  explanation: "No network means no path to send stolen data out; an ephemeral filesystem means nothing the code writes survives or reaches real data. Together with no mounted credentials and bounded CPU/memory/time, these are the properties that let hostile code run and fail harmlessly."
+
+- id: mc-sandbox-not-review
+  type: multiple_choice
+  tags: [sandbox]
+  difficulty: 3
+  prompt: "Why is running untrusted code in a sandbox better than asking the model whether the code is safe first?"
+  options:
+    - { text: "The isolation boundary contains code that turns out to be hostile regardless of the model's judgment, which an injection can subvert", correct: true }
+    - { text: "The model's safety judgment is provably correct, making the sandbox redundant" }
+    - { text: "Sandboxes are only for benign code; hostile code needs a model review" }
+    - { text: "Asking the model is faster and therefore always preferable" }
+  explanation: "A model asked 'is this code safe?' can itself be injected or simply wrong. The sandbox does not depend on that judgment: it confines execution so even code the model wrongly approved cannot reach credentials, network, or the host. Containment beats prediction."
+
+- id: mc-secret-token-redact
+  type: multiple_choice
+  tags: [redaction]
+  difficulty: 3
+  prompt: "A redactor scrubs emails and phone numbers but a novel secret-token format slips through into the context. What does this illustrate?"
+  options:
+    - { text: "Redaction is best-effort — a novel format slips it — so it layers with separation, sandboxing, and output filtering rather than standing alone", correct: true }
+    - { text: "Redaction is useless and should be removed from the pipeline" }
+    - { text: "The secret is safe because it was never an email address" }
+    - { text: "Redaction guarantees no sensitive data ever enters the context" }
+  explanation: "Like sanitizing, redaction is a best-effort filter: a format your patterns do not cover gets through. That is not a reason to drop it — it shrinks the blast radius for everything it does catch — but it is why redaction is one layer among several, never the whole defense."
+
+- id: mc-allowlist-vs-blocklist
+  type: multiple_choice
+  tags: [redaction]
+  difficulty: 4
+  prompt: "For an output filter gating tool calls, why is an allow-list of permitted tools safer than a block-list of forbidden ones?"
+  options:
+    - { text: "An allow-list denies by default, so a newly added or cleverly named dangerous tool is blocked until explicitly permitted; a block-list silently lets anything it forgot to name through", correct: true }
+    - { text: "A block-list is faster to evaluate, so it is always preferred" }
+    - { text: "Allow-lists and block-lists are identical in security terms" }
+    - { text: "An allow-list automatically encrypts the tool's arguments" }
+  explanation: "Default-deny is the safer failure mode. A block-list only stops the tools you remembered to forbid, so a new or renamed dangerous tool passes; an allow-list blocks everything not explicitly permitted, so the confused-deputy action fails closed rather than open."
+
+- id: mc-defense-in-depth-layers
+  type: multiple_choice
+  tags: [redaction]
+  difficulty: 3
+  prompt: "What is the point of layering separate + sanitize + sandbox + redact + filter instead of relying on the strongest single control?"
+  options:
+    - { text: "Each layer is bypassable alone, but an attack must defeat all of them at once, making the system hard to break even when one layer fails", correct: true }
+    - { text: "Layering lets you delete the weakest control once the others are added" }
+    - { text: "More layers make the agent respond faster" }
+    - { text: "One perfect control exists, so the layers are only for show" }
+  explanation: "No single control is trusted: an injection may slip a filter, a sandbox may have an edge case, redaction may miss a format. Defense in depth means an attacker has to beat every layer simultaneously, so the system survives the failure of any one of them."
+
+- id: mc-egress
+  type: multiple_choice
+  tags: [redaction]
+  difficulty: 3
+  prompt: "An injection makes the agent call an allowed HTTP tool but points it at attacker.example with a secret in the query string. Which control stops the leak?"
+  options:
+    - { text: "An egress allow-list that permits only approved destinations and fails closed, so an unapproved host is refused at the wire even though the tool itself was allowed", correct: true }
+    - { text: "A longer system prompt telling the model not to leak data" }
+    - { text: "Trusting the tool because it was on the allow-list of permitted tools" }
+    - { text: "Redaction alone, since it guarantees no secret is ever present to send" }
+  explanation: "Output filtering gates which tool runs, but an allowed tool can still be pointed at a hostile destination. Exfiltration is about where data flows, so you also gate the data-out step: an egress allow-list of permitted destinations that fails closed refuses attacker.example even when the tool call itself is permitted."
+
+- id: mc-exfiltration
+  type: multiple_choice
+  tags: [redaction]
+  difficulty: 3
+  prompt: "What is data exfiltration in an agentic system, and what makes it distinct from prompt injection itself?"
+  options:
+    - { text: "It is a data-flow failure — sensitive data reaching a destination it should never reach — which injection can trigger but which you defend at the egress step, independent of stopping the injection", correct: true }
+    - { text: "It is the same thing as prompt injection under a different name" }
+    - { text: "It is a bug where the model runs out of context tokens" }
+    - { text: "It only happens when the sandbox filesystem is ephemeral" }
+  explanation: "Exfiltration is about where data flows, not what the model was tricked into saying. An injection may be the trigger, but you can defend the data-out step separately: gate HTTP requests, emails, external writes, and webhooks with an egress allow-list and human confirmation, so even a successful injection is stopped at the wire."

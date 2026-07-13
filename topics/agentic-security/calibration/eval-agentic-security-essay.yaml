@@ -1,5 +1,5 @@
 # Calibration for eval-agentic-security-essay (exemplars target essay-injection).
-# 2 clear PASS + 2 clear FAIL, no borderline.
+# 3 clear PASS + 3 clear FAIL, no borderline.
 skill: eval-agentic-security-essay
 cases:
   # PASS — answers the question, hits every reference point, all claims correct,
@@ -54,6 +54,37 @@ cases:
       cache responses, and batch requests so the per-token cost stays low, and you can stream tokens to make
       the interface feel responsive. Latency is really the whole game — if the agent answers quickly, users
       are happy and everything else takes care of itself. Prompts should just be kept short to save money.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # PASS — a third strong answer, this one on the guardrails/data-flow side: names
+  # concrete mechanisms (redaction, egress allow-list, output filter, least authority)
+  # and states them correctly. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      Beyond separating instructions from content, an agent needs guardrails on the data flowing through it.
+      Redact PII — emails, phone numbers, secret-like tokens — before it enters the context, because what
+      never enters the window cannot be leaked by an injection, logged in plaintext, or memorized. On the way
+      out, an output filter inspects each proposed tool call against an allow-list and refuses anything not
+      permitted, so even if an injection convinces the model to call send_email or charge_payment the action
+      is blocked before the harness runs it — the confused-deputy defense. Exfiltration is a data-flow
+      problem, so also gate the data-out step with an egress allow-list that fails closed, and grant least
+      authority so a hijacked turn has few levers to pull. None of these is a silver bullet, so you layer
+      them and build them in from the start rather than bolting them on after a breach.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — technically wrong on the guardrails: claims host-permission execution is
+  # fine, redaction is pointless, and a block-list beats an allow-list. Fails the gate
+  # plus every other check. 0/4 = 0.0 → fail.
+  - answer: >-
+      Guardrails mostly get in the way. It is fine to run model-written code directly on the host with full
+      permissions, since the model is usually right and a sandbox just slows things down. Redacting PII is
+      pointless because the model would never leak it, so you should keep all the raw emails and API keys in
+      the context for accuracy. For tool calls, a block-list of a few bad tools is better than an allow-list,
+      and you do not need to think about where data flows — as long as the tool was allowed, any destination
+      is safe. Security like this is best added later, only if an incident actually happens.
     expect:
       verdict: fail
       checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }

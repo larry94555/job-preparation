@@ -52,3 +52,21 @@
   answer:
     regex: '^metrics$'
     normalize: true
+
+- id: fe-calibration
+  type: text_input
+  tags: [judge]
+  difficulty: 2
+  prompt: "The set of labeled clear-pass and clear-fail exemplars you pin a judge to, so a change that breaks its verdicts is caught, is a ____ set. (one word)"
+  answer:
+    regex: '^calibration$'
+    normalize: true
+
+- id: fe-avg-score
+  type: text_input
+  tags: [suite]
+  difficulty: 2
+  prompt: "Alongside pass_rate, the mean score over all cases — how good the passes were, not just how many — is the ____. (one term)"
+  answer:
+    regex: '^(avg_score|avg score|average score)$'
+    normalize: true

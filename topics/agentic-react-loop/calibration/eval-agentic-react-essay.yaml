@@ -1,5 +1,5 @@
 # Calibration for eval-agentic-react-essay (exemplars target essay-react / essay-guardrails).
-# Exactly 2 clear PASS + 2 clear FAIL — no borderline cases.
+# Exactly 3 clear PASS + 3 clear FAIL — no borderline cases.
 skill: eval-agentic-react-essay
 cases:
   # PASS — answers the question, hits every reference point, all claims correct,
@@ -54,6 +54,35 @@ cases:
       majority answer wins. Reasoning and acting are the same thing, so there is nothing to interleave, and
       because every agent answers in a single shot there is never any observation to feed back or any
       decision about whether to continue. The whole point is to avoid loops entirely.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # PASS — a third strong, correct, specific answer, this one on observing/validating the tool result and
+  # why feeding the real result back keeps the agent honest. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      The Observe step takes the tool's actual output and appends it to the conversation, so the agent's
+      next Thought reasons over what really happened rather than what it imagined. Assuming a call succeeded
+      to save a round-trip is the failure mode: one hallucinated observation poisons every step after it,
+      and the agent drifts with no signal that anything broke. Feeding back the genuine result — even an
+      error string or an empty answer — keeps it honest, because it can then retry, pick a different action,
+      or give up cleanly. The same discipline applies to validating that observation at the boundary: a
+      None, an empty string, or an empty dict is rejected before it re-enters the loop, so the agent never
+      reasons over garbage. That mirrors validating tool inputs — data crossing the trust boundary is
+      untrusted in both directions.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — off-topic and technically wrong on validation/observing: claims empty output is fine to feed
+  # back and that the boundary check is pointless. Fails the gate plus every other check. 0/4 = 0.0 → fail.
+  - answer: >-
+      There is no need to validate what a tool returns before feeding it back — an empty string or an empty
+      dict is just as good an observation as any, and the agent will sort it out on the next turn. Checking
+      the output at the boundary is busywork that only makes the code longer; tools never return anything
+      broken, so rejecting a result is pointless. If the call comes back with nothing, the safest move is to
+      feed that nothing straight into the next Thought and let the model keep going, since stopping to check
+      would just slow the loop down.
     expect:
       verdict: fail
       checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }

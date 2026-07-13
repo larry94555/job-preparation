@@ -118,3 +118,123 @@
     - { text: "Errors should never be shown to the model; feeding it back leaks internals" }
     - { text: "To pad the context so the model slows down and is more careful" }
   explanation: "The error is only useful if the model sees it. Feeding a model-facing error back turns a failed call into a self-correcting step: the model reads what was wrong and retries correctly."
+
+- id: mc-tool-use-id
+  type: multiple_choice
+  tags: [toolloop]
+  difficulty: 3
+  prompt: "The model fires several tool calls in one turn. What lets the harness attach each tool_result to the right call?"
+  options:
+    - { text: "The tool_use_id — each tool_result carries the id of the tool_use block it answers", correct: true }
+    - { text: "The order of the results; the model always reads them positionally" }
+    - { text: "The tool_name, which is unique per turn by protocol" }
+    - { text: "Nothing — a turn may only ever contain one tool call" }
+  explanation: "Each tool_result echoes the tool_use_id of the request that produced it. When one turn contains multiple tool_use blocks, that id — not position or name — is what binds each result back to the correct call."
+
+- id: mc-step-cap-why
+  type: multiple_choice
+  tags: [toolloop]
+  difficulty: 3
+  prompt: "Why cap the tool-use loop at a fixed number of steps?"
+  options:
+    - { text: "A model that keeps requesting tools (or loops between two) would otherwise run forever; a cap turns that into a bounded, observable failure", correct: true }
+    - { text: "The API rejects any conversation longer than ten messages" }
+    - { text: "A cap makes each individual tool call return faster" }
+    - { text: "Without a cap the model cannot emit end_turn at all" }
+  explanation: "A cap bounds the loop so a misbehaving model can't spin indefinitely. Hitting the cap is an explicit, observable failure you can log and handle — not silent infinite work."
+
+- id: mc-end-turn
+  type: multiple_choice
+  tags: [toolloop]
+  difficulty: 2
+  prompt: "The model returns with `stop_reason == \"end_turn\"`. What should the loop do?"
+  options:
+    - { text: "Stop looping and return the model's final .text — the turn is complete", correct: true }
+    - { text: "Run one more tool just in case the model forgot" }
+    - { text: "Retry the request because end_turn signals an error" }
+    - { text: "Append an empty tool_result and call the model again" }
+  explanation: "`end_turn` means the model is finished and its .text is the answer. Unlike tool_use, which means continue, end_turn is the loop's exit condition."
+
+- id: mc-schema-description
+  type: multiple_choice
+  tags: [schema]
+  difficulty: 3
+  prompt: "Beyond types and `required`, why do the natural-language `description` fields in a tool schema matter?"
+  options:
+    - { text: "The model reads them to decide when and how to call the tool; a vague description leads to misuse even when the types are correct", correct: true }
+    - { text: "They are stripped before the request, so they have no effect" }
+    - { text: "They replace the need for a required list" }
+    - { text: "They are only shown to human developers, never to the model" }
+  explanation: "The model uses the schema — including each description — as its instructions for the tool. Precise descriptions guide correct selection and argument-filling; a typed schema with vague prose still gets called wrong."
+
+- id: mc-harness-untrusting
+  type: multiple_choice
+  tags: [schema]
+  difficulty: 3
+  prompt: "Why treat the harness as an 'untrusting executor' of the model's tool calls?"
+  options:
+    - { text: "The model is the caller and can propose malformed or hallucinated calls; the harness validates every call against the contract before any side effect", correct: true }
+    - { text: "The model is trusted, so the harness only logs calls without checking them" }
+    - { text: "Untrusting means the harness re-runs each tool twice to be safe" }
+    - { text: "It means the harness ignores the schema and runs whatever the model sends" }
+  explanation: "The model proposes; the harness disposes. Because a proposed call can be malformed or hallucinated, the harness checks it against the typed contract first and only executes calls that pass — that is what 'untrusting executor' means."
+
+- id: mc-shape-vs-semantics
+  type: multiple_choice
+  tags: [structured]
+  difficulty: 4
+  prompt: "Structured-outputs mode already guarantees the JSON matches the schema. Why still run a Pydantic validator on the result?"
+  options:
+    - { text: "Constrained decoding guarantees the shape, but not semantics the schema can't express — a confidence in [0,1], a non-empty list; validation enforces those", correct: true }
+    - { text: "Because structured-outputs mode frequently returns unparseable JSON anyway" }
+    - { text: "Pydantic re-runs the decoder to double-check each token" }
+    - { text: "There is no reason; validation after structured outputs is pure redundancy" }
+  explanation: "The two layers are complementary. Structured-outputs mode guarantees a parseable object of the right shape; a validator enforces value-level semantics (ranges, non-empty constraints, cross-field rules) the schema cannot fully capture."
+
+- id: mc-fail-loudly
+  type: multiple_choice
+  tags: [structured]
+  difficulty: 2
+  prompt: "What is the benefit of validating model JSON at the boundary and raising immediately on a bad field?"
+  options:
+    - { text: "A malformed or out-of-range field becomes an immediate, localized error instead of corrupting state far downstream", correct: true }
+    - { text: "It makes the model emit fewer tokens" }
+    - { text: "It guarantees the model never returns a bad field again" }
+    - { text: "It lets you skip defining the expected shape" }
+  explanation: "Failing loudly at the boundary localizes the error to where the bad value entered. Without it, a wrong value flows silently into later steps and surfaces as a confusing failure far from its cause."
+
+- id: mc-default-antipattern
+  type: multiple_choice
+  tags: [recovery]
+  difficulty: 3
+  prompt: "A tool call is missing a required argument. Why is silently filling in a default the wrong recovery?"
+  options:
+    - { text: "It executes the tool on a value the model never chose, hiding the error and risking a wrong side effect; validation should reject and let the model resupply the field", correct: true }
+    - { text: "Defaults are impossible to compute for any argument type" }
+    - { text: "It makes the tool run slower than rejecting would" }
+    - { text: "The API forbids any tool from having default values" }
+  explanation: "A silent default runs the tool on an argument the model didn't provide, masking the mistake and possibly triggering a wrong action. The safe path is to reject with a model-facing error so the model resupplies the field itself."
+
+- id: mc-hallucinated-name
+  type: multiple_choice
+  tags: [recovery]
+  difficulty: 3
+  prompt: "The model calls a tool whose name is not in the registry. What is the correct classification and response?"
+  options:
+    - { text: "Treat it as a hallucinated call: reject with a structured unknown_tool error and feed it back — do not guess the closest real tool", correct: true }
+    - { text: "Run whichever registered tool has the most similar name" }
+    - { text: "Assume the registry is stale and register the new name automatically" }
+    - { text: "Crash the loop so a human can investigate the unknown name" }
+  explanation: "An unregistered name is a hallucinated call. The harness returns a structured unknown_tool error the model can read and correct from — never guessing a similar tool, auto-registering, or crashing."
+
+- id: mc-parse-then-validate
+  type: multiple_choice
+  tags: [structured]
+  difficulty: 2
+  prompt: "What is the correct order of operations for handling a model's JSON string response?"
+  options:
+    - { text: "Parse the string into an object, then validate that object's fields against the schema before using any value", correct: true }
+    - { text: "Use the raw string directly and parse only if a later step fails" }
+    - { text: "Validate the raw string as text, then never parse it" }
+    - { text: "Ask the model to confirm its own JSON is valid, then trust it" }
+  explanation: "Parse-then-validate: first turn the string into an object, then check every field's type and constraints. Using the raw string or trusting the parse alone lets missing keys and out-of-range values slip through."

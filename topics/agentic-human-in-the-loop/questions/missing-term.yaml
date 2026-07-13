@@ -52,3 +52,12 @@
   answer:
     regex: '^pause$'
     normalize: true
+
+- id: cloze-checkpoint
+  type: text_input
+  tags: [resume]
+  difficulty: 3
+  prompt: "A framework interrupt halts the run at a ____, waits for human input, then continues from there. (one word)"
+  answer:
+    regex: '^checkpoint$'
+    normalize: true

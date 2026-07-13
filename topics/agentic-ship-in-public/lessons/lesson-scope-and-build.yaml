@@ -1,0 +1,12 @@
+id: lesson-scope-and-build
+title: "Scope it, then make it real"
+material: scope-and-build.md
+segments:
+  - present: scope-the-agent-so-it-ships
+  - check: mc-scope
+  - check: mc-self-designed
+  - present: make-it-a-real-agent-not-a-toy
+  - check: mc-step-cap
+  - check: mc-validate-observation
+  - check: mc-trace
+  - apply: code-capstone-agent

@@ -14,11 +14,13 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L3]** LLM-as-judge for open-ended output and its biases (Zheng et al., MT-Bench / Chatbot Arena, 2023) — `lessons/expert-context.md`, `questions/expert.yaml`.
 - ✅ **[L3]** Rubric-based grading with explicit criteria and strict-JSON verdicts as the reproducible standard — `lessons/rubrics.md`, `questions/mcq.yaml`.
 - ✅ **[L4]** Frontier open problems: agentic/task-completion benchmarks, trajectory evaluation, judge reliability at scale — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
+- ✅ **[L3]** Meta-evaluation: evaluate the evaluator by pinning the judge to a calibration set of labeled exemplars and gating on its agreement — `lessons/calibration.md`, `questions/expert.yaml`.
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L3]** The eval suite as an architecture: run agent, judge each case, aggregate to pass_rate and avg_score, report failures — `lessons/eval-suite.md`, `questions/mcq.yaml`.
 - ✅ **[L3]** The deploy gate as a mechanical threshold check (`>=`, no bypass) that blocks sub-bar releases — `lessons/deploy-gate.md`, `questions/mcq.yaml`.
 - ✅ **[L3]** The four agent metrics (completion, accuracy, hallucination, cost) and why hallucination is tracked separately — `lessons/eval-suite.md`, `questions/mcq.yaml`.
+- ✅ **[L3]** Judge drift as an instrument problem: a reworded rubric or swapped model can shift verdicts, caught by a calibration set of clear passes/fails — `lessons/calibration.md`, `questions/mcq.yaml` (`mc-rubric-drift`).
 
 ## D4 — Problem solving
 - ✅ **[L3]** Diagnose an unmeasurable "seems fine" agent and prescribe an LLM-as-judge with explicit criteria — `lessons/llm-judge.md`, `lessons/rubrics.md`, `questions/mcq.yaml`, `essay.yaml`.
@@ -31,6 +33,7 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D6 — Ecosystem, tooling & operational judgment
 - ✅ **[L3]** LLM-as-judge + rubric + calibration + a CI deploy gate as the practical eval stack, exemplified by this repo's own meta-eval gate — `lessons/llm-judge.md`, `lessons/deploy-gate.md`, `lessons/expert-context.md`.
+- ✅ **[L3]** Wire the calibration check into CI so a judge that stops reproducing its labels fails the build, one level up from the deploy gate — `lessons/calibration.md`, `questions/expert.yaml` (`expert-meta-eval`, `expert-gate-design`).
 
 ## D7 — Staying current & meta-learning
 - ✅ **[L2]** Know where the eval frontier moves (task-completion benchmarks, trajectory eval, judge reliability) and how to track it — `reading-list.md`, plus pointers in `lessons/frontier-ops.md`.
@@ -39,8 +42,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L3]** Whiteboard LLM-as-judge grading and the four metrics + gate, and defend "never deploy below the bar" under questioning — `questions/essay.yaml` (`essay-judge`, `essay-metrics`).
 
 ## Coverage summary
-18 items · ✅ 18 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+21 items · ✅ 21 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
 This surface is fully covered as of the snapshot; it will revert to partial as the field's frontier
 expands (long-horizon trajectory eval, automated judge de-biasing, live-traffic regression detection).
 
-<!-- coverage: items=18 covered=18 partial=0 gap=0 -->
+<!-- coverage: items=21 covered=21 partial=0 gap=0 -->

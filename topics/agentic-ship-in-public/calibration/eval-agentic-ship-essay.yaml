@@ -56,3 +56,32 @@ cases:
     expect:
       verdict: fail
       checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # PASS — a third strong, correct, specific answer: a different break in the tool contract,
+  # a clear cause, and a fix that addresses it. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      The break was that my code-review agent kept calling the same lint tool twice and then contradicting
+      itself in the final answer. The symptom was duplicate tool calls in the trace and a wobbly verdict;
+      the cause was a tool contract mismatch — the lint tool returned a list of findings but my harness fed
+      back only the first element as a string, so the model never saw the full result and re-requested it.
+      The fix was to correct the tool contract: I passed the whole findings list back as the observation
+      and validated that it was non-empty before trusting it, marking an empty result ok:False in the
+      trace. After that the duplicate calls disappeared and the verdict was stable, and I added an eval case
+      with a multi-finding input so the regression can't silently return. The pass rate went from 7/10 to
+      10/10 once the observation was fed back whole.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — off-topic and technically wrong: denies any real break, claims a demo alone proves
+  # correctness and that validating observations is pointless. Fails the gate plus every other
+  # check. 0/4 = 0.0 → fail.
+  - answer: >-
+      Honestly nothing broke worth writing about, and it does not really matter — once you have a demo that
+      runs, the agent is proven correct and evals are just busywork you can skip. Validating observations is
+      pointless too: whatever a tool returns, empty or not, you should feed it straight back because the
+      model always sorts it out. What really gets you hired is a resume with the right keywords, so I spent
+      my time on the skills list rather than on measuring anything. It looks great in the video.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }

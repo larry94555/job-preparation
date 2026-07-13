@@ -1,4 +1,4 @@
-# Calibration for eval-agentic-hil-essay (2 clear PASS + 2 clear FAIL, no borderline).
+# Calibration for eval-agentic-hil-essay (3 clear PASS + 3 clear FAIL, no borderline).
 skill: eval-agentic-hil-essay
 cases:
   # PASS — answers the question, hits every reference point, all claims correct,
@@ -52,6 +52,34 @@ cases:
       everything a program does can be undone automatically — so gating deletions or payments behind a
       human is wasted latency. Let the model run fully autonomously on every action and skip approvals
       entirely.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # PASS — a third strong, correct, specific answer, this one centered on tiering and the
+  # over-gating failure mode with concrete mechanisms. 4/4 → pass; gate technically_correct=true.
+  - answer: >-
+      You do not gate every write; you gate the irreversible and expensive ones, because oversight is not
+      free. Each approval spends a human's attention and adds latency, so you classify actions by
+      reversibility and cost — reads low, recoverable create/update medium, deletions and charges high —
+      and route only the high tier through the gate. Low and medium actions run directly. The reason not
+      to over-gate is concrete: flood a reviewer with routine prompts and they habituate and rubber-stamp,
+      so the one high-risk deletion that mattered gets waved through with the noise. Tiering keeps the
+      human's attention on the actions where a yes or no actually changes the outcome, and every decision
+      still lands in the append-only audit trail so the choice can be reconstructed later.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — technically wrong and off-topic: says gate every write, that a flood of prompts
+  # makes reviewers more careful, and that on timeout the gate should auto-approve. Fails the
+  # gate plus every other check. 0/4 → fail.
+  - answer: >-
+      The correct design is to gate every single write behind human approval, and the more prompts you
+      send the reviewer the more careful they become, so a flood of approvals is a feature. Risk tiers are
+      pointless; treat a read and a card charge the same. If a human does not answer before the timeout,
+      the gate should auto-approve the pending action so the task is never blocked, and there is no need to
+      record rejected actions since only successful ones matter.
     expect:
       verdict: fail
       checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }

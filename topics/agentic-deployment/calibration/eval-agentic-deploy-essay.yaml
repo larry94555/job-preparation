@@ -1,5 +1,5 @@
-# Calibration for eval-agentic-deploy-essay (exemplars target essay-deploy).
-# Two clear PASS + two clear FAIL, no borderline.
+# Calibration for eval-agentic-deploy-essay (exemplars target essay-deploy / essay-operability).
+# Three clear PASS + three clear FAIL, no borderline.
 skill: eval-agentic-deploy-essay
 cases:
   # PASS — answers the question, hits every reference point, all claims correct,
@@ -53,6 +53,33 @@ cases:
       is clear and the model is capable, the service will be fast and reliable, so the main work is prompt
       engineering and evaluation of answer quality. Infrastructure details like how the HTTP endpoint
       returns are not really important and can be figured out later once the prompt is good enough.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # PASS — a third strong answer, on the operability checklist. Correct, specific,
+  # covers rate limiting + canary + rollback. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      Before widening a new version I gate the service on three things. First, a per-user token bucket
+      keyed by the caller's identity: capacity bounds the burst and refill_per_sec bounds the sustained
+      rate, so one tenant's flood returns 429 instead of draining the shared worker pool or the token
+      budget. Second, a canary: I route a small, deterministic slice by a stable hash of the user id
+      (never Python's salted hash()), so a user sticks to one side, and I watch the canary's error rate,
+      latency, and failed jobs against stable before widening 5% → 25% → 100%. Third, rollback stays one
+      command back to the last known-good version — instant, because rolling back to something that worked
+      beats rolling forward with a fix mid-incident. Each step bounds blast radius before the next.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — technically wrong on rollout: canary = ship to everyone, roll forward mid-incident,
+  # random routing. Fails the gate and every check. 0/4 = 0.0 → fail.
+  - answer: >-
+      A canary rollout means deploying the new version to 100% of users and then watching the dashboards;
+      if something looks off you write a fix and roll forward with it during the incident, since rolling
+      back to an old version is old-fashioned. You don't need per-user rate limits because the model is
+      fast, and you can route users to the canary with a random coin flip each request so the sample stays
+      fresh. There's no real need to keep a known-good version around once the new one is live.
     expect:
       verdict: fail
       checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }

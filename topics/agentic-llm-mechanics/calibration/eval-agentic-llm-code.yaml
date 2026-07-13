@@ -44,3 +44,27 @@ cases:
     expect:
       verdict: fail
       checks: { technically_correct: false, correct_logic: false, handles_edge_cases: false, matches_intent: false }
+
+  - answer: >-
+      tests_passed=true. technically_correct holds: fit_messages keeps a leading system message when present,
+      then adds the most-recent non-system messages while their counted tokens stay under max_tokens,
+      dropping the oldest non-system first, and returns the kept messages in original order. correct_logic
+      holds: it walks history newest-first accumulating count_tokens(message) until the budget would be
+      exceeded, then restores original ordering. handles_edge_cases holds: no system message still works, and
+      everything fitting returns the whole list unchanged. matches_intent holds: it returns the kept messages
+      in original order as asked.
+      signals.must_use=[keep leading system, keep most recent under budget, drop oldest non-system first, original order]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, correct_logic: true, handles_edge_cases: true, matches_intent: true }
+
+  - answer: >-
+      tests_passed=false. technically_correct does NOT hold: route_to_model sends every task to the "best"
+      tier and never maps classify/summarize/extract to "cheap", so it neither routes by task nor defaults an
+      unknown task to balanced. correct_logic does NOT hold: there is no tier mapping at all. handles_edge_cases
+      does NOT hold: an unknown task returns "best" instead of the required balanced default. matches_intent
+      does NOT hold: the prompt asked for a per-task tier and it returns a constant.
+      signals.must_use=[simple->cheap]; avoid=[routing every task to the best tier, raising or constant-returning on an unknown task].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, correct_logic: false, handles_edge_cases: false, matches_intent: false }

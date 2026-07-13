@@ -17,3 +17,23 @@
     agent's tokens and turns, and taming emergent failures that only appear from agent interaction at
     scale are real frontier open problems. Validation and a supervisor help but do not close them; larger
     models or more agents do not automatically make a big multi-agent system correct or cheap.
+
+- id: frontier-multi-agent-eval
+  type: multiple_choice
+  tags: [validation]
+  difficulty: 4
+  prompt: >-
+    Your large multi-agent system passes its per-agent evals and each handoff validator is green, yet
+    end-to-end quality is unreliable and you can't attribute failures to any single agent. Which frontier
+    problem is this, and what is the honest read on measuring it?
+  options:
+    - { text: "Multi-agent evaluation at scale — emergent, interaction-level failures that per-agent and per-handoff checks miss; measuring them is an open problem because reliable end-to-end labels are costly, attribution across a graph is unsolved, and a green per-component dashboard can hide a system-level regression", correct: true }
+    - { text: "It is fully solved: if every agent and every handoff passes, the system is guaranteed correct end-to-end" }
+    - { text: "It is only a latency issue that a faster model removes, with no bearing on correctness" }
+    - { text: "It means you simply need more agents, since more agents always raises end-to-end quality" }
+  explanation: >-
+    Passing per-agent and per-handoff checks does not certify the system: some failures emerge only from
+    agents interacting at scale, and evaluating them end-to-end is a genuine open problem — reliable
+    whole-system labels are expensive, attribution across a large agent graph is unsolved, and a green
+    per-component dashboard can mask a system-level regression. Per-agent evals and handoff validation are
+    necessary but not sufficient, and neither a faster model nor more agents closes the gap.

@@ -18,8 +18,11 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L3]** The async job API as an architecture: submit is a fast write, poll is a fast read, the worker runs the agent between them — `lessons/async-api.md`, `lessons/jobs.md`, `questions/mcq.yaml`.
-- ✅ **[L3]** A job as a state machine (queued → running → done | failed) and the atomic claim behind a worker pool — `lessons/jobs.md`, `lessons/expert-context.md`, `questions/mcq.yaml`.
+- ✅ **[L3]** A job as a state machine (queued → running → done | failed) and the atomic claim behind a worker pool — `lessons/jobs.md`, `lessons/job-durability.md`, `lessons/expert-context.md`, `questions/mcq.yaml`, `questions/expert.yaml`.
 - ✅ **[L3]** Rate limiting as multi-tenant fairness — a hard cap (bucket) that permits bursts but bounds the average — `lessons/operability.md`, `questions/mcq.yaml`.
+- ✅ **[L4]** Durable jobs: idempotent submit (retry-safe with an idempotency key), bounded retries with backoff and a dead-letter queue, and an atomic claim for a worker pool — `lessons/job-durability.md`, `questions/mcq.yaml`, `questions/essay.yaml` (`essay-idempotent-retries`).
+- ✅ **[L3]** Backpressure as one idea across rate limiting, bounded queues, and load shedding — a 429 (with Retry-After) is admission control before the pool — `lessons/operability.md`, `questions/mcq.yaml`, `questions/expert.yaml` (`expert-backpressure`).
+- ✅ **[L3]** Blue-green vs. canary as two points on the safe-rollout spectrum, both built around a one-command rollback (blast radius vs. switch time) — `lessons/rollout.md`, `questions/expert.yaml` (`expert-blue-green`).
 
 ## D4 — Problem solving
 - ✅ **[L3]** Diagnose a blocking endpoint under load and prescribe an async job API with a job id — `lessons/async-api.md`, `questions/mcq.yaml`, `essay.yaml`.
@@ -40,8 +43,8 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L3]** Whiteboard turning an agent into a service and defend the deployment checklist under questioning — `questions/essay.yaml` (`essay-deploy`, `essay-operability`).
 
 ## Coverage summary
-18 items · ✅ 18 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+21 items · ✅ 21 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
 This surface is fully covered as of the snapshot; it will revert to partial as the field's frontier
 expands (metric-gated progressive delivery for agents, eval gates trusted enough to auto-promote a deploy).
 
-<!-- coverage: items=18 covered=18 partial=0 gap=0 -->
+<!-- coverage: items=21 covered=21 partial=0 gap=0 -->

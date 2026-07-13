@@ -10,7 +10,7 @@ sections:
 
   - id: sec-guardrails
     title: "Guardrails"
-    lessons: [lesson-guardrails, lesson-redaction, lesson-frontier-ops]
+    lessons: [lesson-guardrails, lesson-redaction, lesson-egress, lesson-frontier-ops]
     assessment:
       title: "Section 2 — Guardrails"
       from_tags: [sandbox, redaction]

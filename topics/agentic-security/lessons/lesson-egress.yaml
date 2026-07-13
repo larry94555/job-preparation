@@ -1,0 +1,10 @@
+id: lesson-egress
+title: "Control the egress"
+material: egress.md
+segments:
+  - present: control-the-egress
+  - check: mc-egress
+  - check: mc-exfiltration
+  - check: fe-egress
+  - present: layer-egress-with-the-rest
+  - check: mc-defense-in-depth-layers

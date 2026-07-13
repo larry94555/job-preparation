@@ -10,3 +10,39 @@
     - { text: "Decoding modes that constrain the model's output to a schema" }
     - { text: "Load balancers that route HTTP requests across servers" }
   explanation: "Celery and RQ are the Python-standard distributed task queues: enqueue returns a handle (AsyncResult / job id) and a pool of worker processes drains tasks from a broker. It is exactly the async job API this topic teaches — background jobs off the request thread — backed by a durable broker and many workers, not a web framework, a decoder, or a load balancer."
+
+- id: expert-atomic-claim
+  type: multiple_choice
+  tags: [jobs]
+  difficulty: 3
+  prompt: "In a worker-pool task queue, what guarantee does `SELECT ... FOR UPDATE SKIP LOCKED` (or an equivalent atomic claim) provide, and why is it the whole concurrency story?"
+  options:
+    - { text: "It lets each of many workers claim a DISJOINT job in one atomic step — the row is locked and skipped by others — so two workers never run the same job even as the pool scales", correct: true }
+    - { text: "It makes each individual job run faster by parallelizing the agent call inside one job" }
+    - { text: "It guarantees the broker never loses a message even if every worker crashes" }
+    - { text: "It orders jobs so the newest queued job is always claimed first" }
+  explanation: "A worker pool only scales if claims are disjoint. FOR UPDATE SKIP LOCKED atomically flips one queued job to running and makes concurrent claimers skip that locked row, so no two workers grab the same job. That single guarded step — not per-job speed or broker durability — is what makes the pool correct."
+
+- id: expert-backpressure
+  type: multiple_choice
+  tags: [ratelimit]
+  difficulty: 3
+  prompt: "Rate limiting, a bounded queue, and load shedding are all forms of the same operational idea. What is it, and what does the token bucket contribute?"
+  options:
+    - { text: "Backpressure — bounding accepted work so the system degrades gracefully instead of collapsing; the per-user token bucket is the admission control that rejects (429) excess load before it reaches the pool", correct: true }
+    - { text: "Caching — reusing prior results so repeated requests never reach a worker" }
+    - { text: "Sharding — splitting the queue across databases so throughput scales linearly" }
+    - { text: "Retrying — resubmitting failed work until the dependency recovers" }
+  explanation: "Backpressure is the discipline of bounding accepted work — a hard rate cap, a bounded queue, shedding excess — so overload turns into clean rejections rather than a meltdown. A per-user token bucket is admission control at the edge: it returns 429 for excess before that load ever pins the worker pool."
+
+- id: expert-blue-green
+  type: multiple_choice
+  tags: [rollout]
+  difficulty: 3
+  prompt: "How does a blue-green deploy relate to the canary rollout this topic teaches?"
+  options:
+    - { text: "Both are safe-rollout patterns with a fast rollback: blue-green keeps two full environments and flips 100% of traffic (instant rollback = flip back), while a canary ramps a small slice first; canary limits blast radius, blue-green minimizes switch time", correct: true }
+    - { text: "Blue-green runs the new and old versions on the same request and diffs their outputs live" }
+    - { text: "Blue-green is a load-balancing algorithm unrelated to deployment safety" }
+    - { text: "Blue-green replaces rollback entirely, so no known-good version is needed" }
+  explanation: "Blue-green and canary are two points on the safe-rollout spectrum, both built around a one-command rollback. Blue-green holds two complete environments and cuts all traffic over at once (rollback = flip back to the old one); a canary sends a small deterministic slice first to bound blast radius, then widens. The shared principle is: keep a known-good version and make returning to it instant."

@@ -22,3 +22,39 @@
     - "Compression: when the buffer exceeds its token budget, the oldest turns are collapsed into a running summary that keeps decisions, facts/constraints, and open tasks while dropping chit-chat; the risk is that it is lossy, so you can summarize away something you later need."
     - "Recall: keep everything in the external store and retrieve-then-inject only the items most relevant to the current query (ranked by a relevance/similarity score), rather than dumping the whole store back into context."
     - "The risk in recall is that irrelevant recalled items waste context tokens and distract or mislead the model, so ranking and taking only the top-k relevant items is what makes long-term memory useful."
+
+- id: essay-choose-memory-type
+  type: essay
+  length: short
+  tags: [types]
+  difficulty: 3
+  prompt: "For each of these needs, name the right memory and justify it by lifetime and access pattern: (a) following the last few turns of chat, (b) tracking where you are in a multi-step task, (c) recalling a user preference from a session last month, (d) checking whether you have run this exact job before."
+  eval_skill: eval-agentic-memory-essay
+  reference_points:
+    - "(a) The short-term conversation buffer: in-context, appended each turn and capped, so the model can follow the immediate dialogue; its lifetime is the current conversation and it is accessed by recency."
+    - "(b) The working state / scratchpad: in-context but structured, read and rewritten mid-task to hold the plan, what's done, and the current intermediate result; its lifetime is the task and it is accessed by direct read/write, not by scrolling raw turns."
+    - "(c) The long-term (vector) store: external and durable, written once and retrieved later by semantic similarity to the current query; its lifetime spans sessions and it is accessed by meaning. (d) The episodic history: an external append-only log of past runs, accessed by time or run id rather than semantic meaning."
+
+- id: essay-when-what-compress
+  type: essay
+  length: long
+  tags: [compression]
+  difficulty: 3
+  prompt: "Explain WHEN an agent should compress its conversation buffer and WHAT it should keep versus drop. Then explain the lossy risk that makes compression a source of subtle bugs, and how you would compress conservatively to limit it."
+  eval_skill: eval-agentic-memory-essay
+  reference_points:
+    - "When: compression is budget-triggered — you compress the oldest turns only when the buffer would exceed its token budget, not on every turn and not never; the summary's own tokens count toward the budget so summary plus kept recent turns must still fit."
+    - "What: keep the load-bearing content — decisions, established facts and constraints, and open tasks — and drop chit-chat, greetings, and restated reasoning whose conclusion you already captured; a good summary is the minutes, not the transcript."
+    - "Risk and mitigation: compression is lossy, so a detail that seemed irrelevant can matter later and is now gone, producing subtle hard-to-debug forgetting; compress conservatively by keeping decisions and open tasks as verbatim as possible and treating aggressive summarization as a known failure source."
+
+- id: essay-recall-vs-stuffing
+  type: essay
+  length: short
+  tags: [recall]
+  difficulty: 3
+  prompt: "Contrast retrieve-then-inject relevance-ranked recall with the naive approach of stuffing the whole long-term store back into context. Why is stuffing wrong on both capacity and quality grounds, and why is recall a ranking problem?"
+  eval_skill: eval-agentic-memory-essay
+  reference_points:
+    - "Stuffing the whole store into context fails on capacity: the store is far larger than the context window, so it usually will not even fit; retrieve-then-inject keeps everything in the external store and pulls in only the items relevant to the current query."
+    - "Stuffing also fails on quality: even if it fit, most stored items are irrelevant to this task, and irrelevant recalled text both wastes tokens and distracts or misleads the model away from the goal — irrelevant recall is actively harmful, not merely wasteful."
+    - "Recall is therefore a ranking problem: score each stored item's relevance (semantic similarity, optionally blended with recency/importance), rank them, and inject only the top-k — returning items in insertion order or returning everything skips the only step that makes long-term memory useful."

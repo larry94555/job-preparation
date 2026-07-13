@@ -17,3 +17,22 @@
     popularized by FrugalGPT. It is a real cost/quality lever, not a solved problem: the router is itself a
     model that must be trained, calibrated, and evaluated, and it can misroute. Bigger-is-always-cheaper and
     "latency only" are wrong reads.
+
+- id: frontier-effective-context
+  type: multiple_choice
+  tags: [context]
+  difficulty: 4
+  prompt: >-
+    Windows have grown to hundreds of thousands (even millions) of tokens. Where is the long-context
+    frontier actually moving, and what is the honest read for an agent engineer?
+  options:
+    - { text: "Toward effective-context evals — measuring reliable retrieval and reasoning at every position, not just whether content fits — because large windows still degrade mid-context; you evaluate long-context use, order by importance, and keep the budget tight rather than trusting the headline size", correct: true }
+    - { text: "Toward ever-larger windows that make context engineering obsolete, since a big enough window uses every token uniformly" }
+    - { text: "Toward removing tokenization, which is the sole cause of lost-in-the-middle" }
+    - { text: "Nowhere: once a document fits in the window, retrieval position no longer affects accuracy" }
+  explanation: >-
+    Growing the window raises the ceiling on what fits but does not guarantee the model uses every position
+    equally — the lost-in-the-middle effect persists at scale. The frontier is effective-context evaluation:
+    benchmarks and harnesses that probe retrieval/reasoning across positions, plus continued context
+    engineering (order by importance, retrieve the few most relevant passages, keep it tight). The honest read
+    is that window size is necessary but not sufficient, so you measure effective use rather than assume it.

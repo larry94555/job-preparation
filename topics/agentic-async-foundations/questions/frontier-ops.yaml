@@ -17,3 +17,27 @@
     cascade. The disciplined answer is bounded concurrency (a semaphore or worker pool) applying
     backpressure, a pooled/limited HTTP client, and explicit rate-limit awareness with backoff — not a
     single unbounded gather. More connections alone does not fix a coordination problem.
+
+- id: frontier-adaptive-concurrency
+  type: multiple_choice
+  tags: [resilience]
+  difficulty: 4
+  prompt: >-
+    A statically-tuned semaphore bounds your fan-out, but the right concurrency limit keeps changing:
+    the upstream's capacity drifts with its own load, other tenants, and time of day, so a fixed cap is
+    either too conservative (wasted throughput) or too aggressive (rate-limited, cascading timeouts).
+    What is the honest read of this open problem?
+  options:
+    - { text: "There is no single correct static limit — the frontier is adaptive concurrency control: sense congestion signals (rising latency, 429s, timeouts) and adjust the in-flight limit dynamically (AIMD-style, à la TCP congestion control or a Netflix-style adaptive limiter), which bounds risk but is a control-loop that can oscillate or mis-tune, not a solved formula", correct: true }
+    - { text: "Just set the semaphore to the largest value that ever worked once; capacity never really changes so a static cap is always optimal" }
+    - { text: "Drop the semaphore entirely and rely on the upstream's rate limiter to push back — client-side concurrency control is unnecessary if the server has limits" }
+    - { text: "Retry harder with more aggressive backoff whenever you get a 429; tuning concurrency at all is premature optimization" }
+  explanation: >-
+    Because upstream capacity is not constant, any fixed concurrency cap is wrong most of the time. The
+    frontier answer is adaptive concurrency control: treat it like congestion control (TCP/AIMD, or an
+    adaptive limiter that watches latency and error signals) and move the in-flight limit up when things
+    are healthy and down when latency climbs or 429s appear. This is genuinely open — the control loop
+    can oscillate, lag real capacity, or fight the server's own limiter — so it bounds the risk rather
+    than closing it. Leaning entirely on the server's limiter just converts your load into rejected
+    requests and retries; retrying harder without controlling concurrency amplifies the very overload
+    it's reacting to.

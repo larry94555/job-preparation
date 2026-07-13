@@ -55,3 +55,32 @@ cases:
     expect:
       verdict: fail
       checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # PASS — a third strong answer, correct and specific, hitting all three failure modes
+  # with concrete mechanisms and no false claims. 4/4 = 1.0 -> pass; gate true.
+  - answer: >-
+      Multi-agent systems break at the handoffs. The worst case is a silent bad output: an agent emits a
+      well-formed, plausible, but wrong result, nothing throws, and the next agent builds on it so the error
+      compounds while every agent reports success. The guard is to validate every handoff at the boundary —
+      a validate_handoff step that rejects None, "", {}, or [] with a structured error like
+      {"ok": false, "error": "empty_handoff"} the supervisor can act on, instead of letting the next
+      specialist consume garbage. The third break is the infinite approval loop: a critic that never
+      approves keeps the writer revising forever, burning tokens. Bound it with a max_tries cap and return
+      the last draft flagged approved=false when the cap is hit. Each fix has the same shape — check at the
+      seam, and cap every agent-driven loop.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — on-topic vocabulary but technically wrong: claims silent bad outputs always
+  # crash, that validation is unnecessary, and that approval loops self-terminate.
+  # Fails the gate plus every other check. 0/4 = 0.0 -> fail.
+  - answer: >-
+      Multi-agent systems don't really have silent failures, because a bad output between agents always
+      raises an exception, so you can rely on the crash to find it and never need to validate a handoff. If
+      an agent produced an output, the next agent can just trust it. Approval loops also take care of
+      themselves: a critic will always approve eventually, so a max-tries cap is unnecessary and would only
+      cut the work off before it is good enough. More agents is simply more capability with no downside.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }

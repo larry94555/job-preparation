@@ -1,7 +1,7 @@
 sections:
   - id: sec-judge
     title: "LLM-as-judge"
-    lessons: [lesson-llm-judge, lesson-rubrics, lesson-expert-context]
+    lessons: [lesson-llm-judge, lesson-rubrics, lesson-expert-context, lesson-calibration]
     assessment:
       title: "Section 1 — LLM-as-judge"
       from_tags: [judge, rubric]

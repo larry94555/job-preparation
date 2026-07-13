@@ -52,3 +52,12 @@
   answer:
     regex: '^pii$'
     normalize: true
+
+- id: fe-egress
+  type: text_input
+  tags: [redaction]
+  difficulty: 2
+  prompt: "Sensitive data reaching a destination it should never reach — data leakage or ____ (one word) — is stopped by gating the data-out step."
+  answer:
+    regex: '^exfiltration$'
+    normalize: true

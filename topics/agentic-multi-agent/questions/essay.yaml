@@ -22,3 +22,39 @@
     - "Silent bad outputs: a plausible-but-wrong result is passed between agents with no error, so it flows downstream and the whole system fails while every agent reports success."
     - "No validation between handoffs: prevent it by validating each handoff at the boundary — reject None, empty, or malformed output with a structured error instead of letting the next agent consume garbage."
     - "Infinite approval loops: a critic that never approves makes a revise-until-approved loop spin forever, so bound it with a max-tries limit and return the best draft when the cap is hit."
+
+- id: essay-topologies
+  type: essay
+  length: short
+  tags: [orchestration]
+  difficulty: 4
+  prompt: "Compare the supervisor, hierarchical, and network multi-agent topologies. Say what each is, which is the sensible default and why, and when you would reach for each."
+  eval_skill: eval-agentic-multiagent-essay
+  reference_points:
+    - "Supervisor (single coordinator): one agent decomposes the task, routes sub-tasks to specialists, and combines their results while specialists report back to it — centralized coordination makes the flow observable and debuggable, which is why it is the sensible default."
+    - "Hierarchical (supervisors of supervisors): the supervisor idea nested — a top-level supervisor coordinates mid-level supervisors that each own a cluster of specialists — which scales the pattern to larger tasks while keeping every seam a clear parent-to-child handoff."
+    - "Network (peer-to-peer): agents talk directly with no single coordinator — the most flexible but the hardest to trace, bound, and control, since failures emerge from interaction; reach for it only when a hierarchy genuinely can't express the collaboration, and otherwise prefer the most constrained topology that works."
+
+- id: essay-single-first
+  type: essay
+  length: short
+  tags: [supervisor]
+  difficulty: 3
+  prompt: "A teammate wants to split a working single agent into six specialists 'to be more robust.' Argue when you would and would not do this, and name the concrete signals that a single agent has genuinely fallen short."
+  eval_skill: eval-agentic-multiagent-essay
+  reference_points:
+    - "Default to a single agent with a good prompt and the right tools: every added agent is another prompt to maintain, another handoff that can go wrong, more latency, and more tokens per run, so 'more agents' is a tradeoff, not a free upgrade."
+    - "Split only when a single agent demonstrably can't do the job — concrete signals include the task needing genuinely different skills or tool sets that don't fit one focused prompt, a single agent's context getting so crowded it loses the thread, or needing one agent's work independently reviewed by another (a critic)."
+    - "'It feels more sophisticated' or 'to be more robust' is not a reason; splitting a working agent into six adds six prompts to keep correct and five handoffs that can each silently pass garbage, so you earn multi-agent by evidence of failure, not by reflex."
+
+- id: essay-approval-loop
+  type: essay
+  length: short
+  tags: [validation]
+  difficulty: 3
+  prompt: "A revise-until-approved loop between a writer and a critic is burning tokens in production and sometimes never returns. Explain what is happening, the exact fix, and what the loop should return when the fix triggers."
+  eval_skill: eval-agentic-multiagent-essay
+  reference_points:
+    - "This is an infinite (unbounded) approval loop: the writer drafts, the critic reviews and rejects, the writer revises, and if the critic never approves the loop runs forever, burning tokens and money with no result."
+    - "The fix is a bounded exit — a max_tries cap counting the critic calls — after which the loop stops instead of spinning; the same discipline generalizes to any loop driven by another agent's judgment, exactly as a single agent's tool loop is capped and budgeted."
+    - "When the cap is hit, return the best/last draft so far marked as unapproved (e.g. approved=False, tries=max_tries) so the caller can decide what to do — a terminating loop that gives up gracefully beats an infinite one, and it must not fabricate approval or discard the work."

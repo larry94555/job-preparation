@@ -21,6 +21,8 @@ revert.
 - ✅ **[L3]** The capstone as assembly: tool calling + a bounded reason–act loop + an eval suite into one real agent — `lessons/capstone.md`, `questions/code.yaml`.
 - ✅ **[L3]** The four shippable artifacts (agent, README, evals, demo) and what each proves — `lessons/what-to-ship.md`, `questions/mcq.yaml`.
 - ✅ **[L3]** A defensible design decision (step cap, validation boundary, cut tool) as the portfolio's judgment signal — `lessons/expert-context.md`, `questions/essay.yaml`.
+- ✅ **[L3]** Scope the capstone right — small enough to finish, real enough to break — and why a self-designed task out-signals a tutorial clone — `lessons/scope-and-build.md`, `questions/mcq.yaml`, `questions/expert.yaml`.
+- ✅ **[L3]** The three behaviors that make a capstone real, not a toy: a bounded loop, observation validation, and a trace — `lessons/scope-and-build.md`, `lessons/capstone.md`, `questions/mcq.yaml`.
 
 ## D4 — Problem solving
 - ✅ **[L3]** Diagnose an unbounded or garbage-trusting agent and prescribe a bounded loop with observation validation — `lessons/capstone.md`, `questions/code.yaml`, `essay.yaml`.
@@ -36,13 +38,14 @@ revert.
 
 ## D7 — Staying current & meta-learning
 - ✅ **[L2]** Know where the agentic-engineer career frontier moves (rising bar: measured, defensible, well-communicated agents) and how to track it — `reading-list.md`, `lessons/frontier-ops.md`.
+- ✅ **[L3]** Track the unsettled agent-portfolio norms (live-demo expectations, standardized agent evals for hiring) and keep shipping verifiable proof as the invariant — `lessons/frontier-ops.md`, `reading-list.md`, `questions/frontier-ops.yaml`.
 
 ## D8 — Career & professional practice
 - ✅ **[L3]** Ship one real agent in public and defend its architecture, its break-and-fix, and why it is hireable proof — `questions/essay.yaml` (`essay-architecture`, `essay-what-broke`, `essay-portfolio`).
 
 ## Coverage summary
-18 items · ✅ 18 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+21 items · ✅ 21 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
 This surface is fully covered as of the snapshot; it will revert to partial as the field's frontier
 expands (agent-portfolio norms, standardized agent evals for hiring, live-demo expectations).
 
-<!-- coverage: items=18 covered=18 partial=0 gap=0 -->
+<!-- coverage: items=21 covered=21 partial=0 gap=0 -->

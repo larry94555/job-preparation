@@ -52,3 +52,21 @@
   answer:
     regex: '^rollback$'
     normalize: true
+
+- id: fe-idempotency
+  type: text_input
+  tags: [jobs]
+  difficulty: 3
+  prompt: "What kind of key does a client send so a retried submit returns the same job instead of a duplicate? A(n) ____ key (one word)."
+  answer:
+    regex: '^idempotency$'
+    normalize: true
+
+- id: fe-deadletter
+  type: text_input
+  tags: [jobs]
+  difficulty: 3
+  prompt: "A job that fails past its retry limit is parked in a ____-letter queue for inspection (one word)."
+  answer:
+    regex: '^(dead|dead-letter|deadletter)$'
+    normalize: true

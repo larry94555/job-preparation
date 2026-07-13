@@ -1,0 +1,9 @@
+id: lesson-calibration
+title: "Calibrate the judge"
+material: calibration.md
+segments:
+  - present: calibrate-the-judge
+  - check: mc-rubric-drift
+  - check: mc-judge-different-family
+  - check: fe-calibration
+  - apply: essay-judge-reliability

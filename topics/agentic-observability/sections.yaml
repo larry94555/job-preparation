@@ -10,7 +10,7 @@ sections:
 
   - id: sec-production
     title: "Production surprises"
-    lessons: [lesson-production-surprises, lesson-alerts, lesson-frontier-ops]
+    lessons: [lesson-production-surprises, lesson-reading-metrics, lesson-alerts, lesson-frontier-ops]
     assessment:
       title: "Section 2 — Production surprises"
       from_tags: [metrics, alerts]

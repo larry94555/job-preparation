@@ -1,7 +1,7 @@
 sections:
   - id: sec-reactloop
     title: "The ReAct loop"
-    lessons: [lesson-react-loop, lesson-reason-act-observe, lesson-expert-context]
+    lessons: [lesson-react-loop, lesson-reason-act-observe, lesson-react-format, lesson-expert-context]
     assessment:
       title: "Section 1 — The ReAct loop"
       from_tags: [react, loop]

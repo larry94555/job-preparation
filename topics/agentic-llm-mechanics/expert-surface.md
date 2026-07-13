@@ -12,13 +12,15 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D2 — Literature, canon & frontier awareness
 - ✅ **[L3]** "Lost in the Middle" (Liu et al., 2023): U-shaped retrieval accuracy over position — `lessons/expert-context.md`, `questions/expert.yaml`.
-- ✅ **[L3]** Context windows vs. *effective* long-context use as distinct axes — `lessons/expert-context.md`.
+- ✅ **[L3]** Context windows vs. *effective* long-context use as distinct axes — `lessons/expert-context.md`, `questions/expert.yaml` (`expert-effective-context`), `questions/frontier-ops.yaml` (`frontier-effective-context`).
 - ✅ **[L4]** Frontier of routing: learned routers, model cascades, confidence-based escalation (FrugalGPT) — `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
+- ✅ **[L4]** Long-context frontier moving to *effective-context* evals (reliable retrieval/reasoning per position, not raw window size) — `lessons/cost-accounting.md`, `questions/frontier-ops.yaml` (`frontier-effective-context`), `questions/expert.yaml` (`expert-effective-context`).
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L3]** Treat context as a budget the agent must fit under — keep system + recent, drop/summarize the rest — `lessons/context-tokens.md`, `lessons/lost-middle.md`.
 - ✅ **[L3]** Route each task to the cheapest capable tier; reserve the best model for compounding-error tasks — `lessons/routing-cost.md`, `questions/mcq.yaml`.
-- ✅ **[L3]** Cost per run = Σ(input×price_in + output×price_out); use it to attribute spend and justify routing — `lessons/routing-cost.md`, `lessons/context-tokens.md`.
+- ✅ **[L3]** Cost per run = Σ(input×price_in + output×price_out); use it to attribute spend and justify routing — `lessons/routing-cost.md`, `lessons/context-tokens.md`, `lessons/cost-accounting.md`.
+- ✅ **[L3]** Why re-sent growing history makes later calls dominate the bill, and the two levers (trim budget, route the driver step) — `lessons/cost-accounting.md`, `questions/mcq.yaml` (`mc-cost-growth`), `questions/expert.yaml` (`expert-cost-per-run`).
 
 ## D4 — Problem solving
 - ✅ **[L3]** Diagnose a missed fact in a long prompt as lost-in-the-middle and reposition key info at the edges — `lessons/lost-middle.md`, `questions/mcq.yaml`.
@@ -38,10 +40,11 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D8 — Career & professional practice
 - ✅ **[L3]** Defend a routing decision and a failure-mode mitigation plan under questioning — `questions/essay.yaml` (`essay-routing`, `essay-failure-modes`).
+- ✅ **[L3]** Use cost-per-run evidence to justify (and de-risk) routing a high-volume step to a cheaper tier under questioning — `questions/essay.yaml` (`essay-cost-routing-tradeoff`, `essay-token-cost`).
 
 ## Coverage summary
-18 items · ✅ 18 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+21 items · ✅ 21 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
 This surface is fully covered as of the snapshot; it will revert to partial as the field's frontier
 expands (effective-context benchmarks, trained routers, per-tier reliability evals).
 
-<!-- coverage: items=18 covered=18 partial=0 gap=0 -->
+<!-- coverage: items=21 covered=21 partial=0 gap=0 -->

@@ -44,16 +44,42 @@ cases:
       verdict: fail
       checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
 
-  # BORDERLINE — on-topic, hits the key points, but contains a wrong claim (says a
-  # tool_use turn is the final answer so no loop is needed), so it misses ONLY the gate.
-  # 3/4 = 0.75 → base pass; gate technically_correct=false caps pass→borderline.
+  # FAIL — replaces the former borderline case with a clear fail. Technically wrong and
+  # off-substance: claims validation errors should never block a tool, so it silently
+  # defaults a missing required field and runs the handler on garbage. Fails the gate
+  # (technically_correct) and every other check. 0/4 = 0.0 → fail; gate false caps fail→fail.
   - answer: >-
-      The unknown tool is a hallucinated call, so the harness rejects it and returns a structured
-      unknown_tool error rather than executing anything, and the call missing a required field fails schema
-      validation before the handler runs so it never executes on bad input, returning invalid_args. Both
-      are returned as model-facing errors so the model can fix them. One rule to add: when a required field
-      is missing, the harness should just fill it in with an empty string so that the call always succeeds
-      — a validation error should never actually block a tool from running.
+      A missing required field should never actually block a tool from running, so the harness fills the
+      field in with an empty string and calls the handler anyway — a validation error is just a warning. An
+      unknown tool name is fine too: the harness runs whichever registered tool has the most similar name,
+      since the model obviously meant that one. There's no need to send anything back to the model, and if a
+      handler still throws the cleanest thing is to let the exception crash the loop.
     expect:
-      verdict: borderline
-      checks: { addresses_question: true, covers_key_points: true, technically_correct: false, concrete: true }
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # PASS — third strong answer for the talk-vs-act / loop question. Correct, specific,
+  # names mechanisms. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      A model that only emits text is a chatbot; the moment it can request tools that a harness runs, it
+      becomes an agent that acts on the world. The loop is driven by stop_reason: when the model returns
+      stop_reason == "tool_use" with a tool_name and tool_input, the harness executes that tool and appends
+      the output as a tool_result block in a user-role message, keyed by tool_use_id. It then calls the model
+      again, and repeats until stop_reason == "end_turn", at which point the model's .text is the final
+      answer. A step cap bounds the loop so a misbehaving model can't spin forever.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — third clear fail. Off-topic and technically wrong for the talk-vs-act question:
+  # claims tool_use is the final answer (no loop), and that well-formed JSON is always correct.
+  # Fails the gate plus every other check. 0/4 = 0.0 → fail; gate false caps fail→fail.
+  - answer: >-
+      There is no real difference between a chatbot and an agent — tool calling is just a longer prompt. When
+      the model returns stop_reason == "tool_use" the turn is already finished and that block is the final
+      answer, so there is no loop to run and nothing to feed back. Whatever JSON the model returns is
+      correct as long as it parses, so validating fields is a waste of time and you can use the raw string
+      directly.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }

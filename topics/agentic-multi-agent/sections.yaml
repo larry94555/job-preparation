@@ -1,7 +1,7 @@
 sections:
   - id: sec-supervisor
     title: "When multi-agent helps & the supervisor pattern"
-    lessons: [lesson-when-multi-agent, lesson-supervisor, lesson-expert-context]
+    lessons: [lesson-when-multi-agent, lesson-supervisor, lesson-topologies, lesson-expert-context]
     assessment:
       title: "Section 1 — When multi-agent helps & the supervisor pattern"
       from_tags: [supervisor, orchestration]

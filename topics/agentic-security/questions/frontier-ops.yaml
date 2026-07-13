@@ -17,3 +17,23 @@
     through tools so the payload detonates deep in a sequence. There is no known way to let a model follow
     instructions yet never follow instructions hidden in data; agent security is an active frontier, not a
     solved checklist, and larger models do not close the gap.
+
+- id: frontier-scale
+  type: multiple_choice
+  tags: [injection]
+  difficulty: 4
+  prompt: >-
+    A platform runs many concurrent agents that pass content to one another across many tools and turns.
+    Beyond single-prompt sanitizing, what is the honest read on where the attack surface compounds, and
+    what does an expert claim about it?
+  options:
+    - { text: "The surface compounds across tools, turns, and inter-agent content flow — excessive agency, cross-tenant leakage, and injections that fire deep in a tool chain — and agent security remains unsolved at scale; the honest posture is defense in depth, not a claim of a fix", correct: true }
+    - { text: "At scale the problem disappears because more agents cross-check each other into safety" }
+    - { text: "A single sanitized entry prompt fully protects every downstream agent and tool result" }
+    - { text: "It is purely a throughput problem solved by adding more compute to the agents" }
+  explanation: >-
+    Across many tools, many turns, many concurrent agents, and content flowing between them, the attack
+    surface grows rather than shrinks: excessive agency, cross-tenant leakage, and payloads that only
+    detonate deep in a tool chain. A single sanitized prompt is no longer the whole story, and more agents
+    or more compute do not close the gap. The expert read is that this is an active frontier — defend in
+    depth and name indirect, tool-chained injection as the open case, rather than claiming it is solved.

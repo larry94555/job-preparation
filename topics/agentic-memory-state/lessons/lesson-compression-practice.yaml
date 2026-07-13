@@ -1,0 +1,12 @@
+id: lesson-compression-practice
+title: "Compression in practice: budget, consolidation & the lossy risk"
+material: compression-practice.md
+segments:
+  - present: summarizing-old-turns-is-consolidation
+  - check: mc-compress-consolidation
+  - check: cloze-consolidation
+  - present: the-summary-counts-toward-the-budget
+  - check: mc-summary-counts-budget
+  - present: lossy-compression-is-a-source-of-subtle-bugs
+  - check: mc-compress-lossy-risk
+  - apply: essay-when-what-compress

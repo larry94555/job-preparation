@@ -10,3 +10,39 @@
     - { text: "Confidence thresholds make approval gates unnecessary, so no action ever needs a human" }
     - { text: "Escalation means the agent always does the hard cases itself and hands the easy ones to a human" }
   explanation: "The patterns share one principle — oversight proportional to stakes. Approval gates catch irreversible actions, escalation routes only hard cases to a human, and ask-when-unsure gates by confidence. The catch is that gating by confidence requires calibrated uncertainty: an over-confident model asks in the wrong places."
+
+- id: expert-risk-tiering
+  type: multiple_choice
+  tags: [risk]
+  difficulty: 3
+  prompt: "An expert designs the risk-tiering that drives an approval gate. Which statement best captures the L3 judgment behind where the tiers sit?"
+  options:
+    - { text: "Tier by reversibility first and cost second, gate only the high tier, and treat the tier boundary as a deliberate tradeoff — too coarse and irreversible actions slip through, too fine and reviewers habituate and rubber-stamp", correct: true }
+    - { text: "Put every write in the high tier so nothing irreversible can ever run without approval" }
+    - { text: "Tier purely by how long the action takes to run, since latency is the real risk" }
+    - { text: "Skip tiering and let the model choose a tier per call from its own confidence" }
+  explanation: "The senior move is treating the tier boundary as a design decision with two-sided cost. Reversibility drives the classification and cost refines it; only the high tier is gated. Set the boundary too coarse and irreversible actions run ungated; set it too fine (gate everything) and reviewers habituate, so the high-risk prompt that matters gets rubber-stamped along with the noise. The boundary is calibrated to keep human attention where it changes the outcome."
+
+- id: expert-approval-habituation
+  type: multiple_choice
+  tags: [approval]
+  difficulty: 4
+  prompt: "Two approval-UX designs both 'gate high-risk actions.' Which reflects the L3 understanding of what makes a gate real oversight rather than a rubber stamp?"
+  options:
+    - { text: "Show the action, params, risk, and context; collapse a batch into one reviewable request with its scope; and route to an approver with authority — so the human's yes is informed and their attention isn't drowned", correct: true }
+    - { text: "Fire one prompt per action as fast as possible so throughput stays high, trusting the reviewer to keep up" }
+    - { text: "Present only 'approve? yes/no' so the human decides quickly without being biased by detail" }
+    - { text: "Auto-approve repeated actions of the same type after the first yes, permanently" }
+  explanation: "A gate is only oversight if the human can actually judge what they approve. That means surfacing the action, its params, the assessed risk, and context; batching many identical actions into one scoped request instead of a prompt flood that induces habituation; and routing to someone empowered to say yes. A bare yes/no or a per-action flood turns the reviewer into a rubber stamp — the gate exists on paper but not in practice."
+
+- id: expert-audit-resume-state
+  type: multiple_choice
+  tags: [audit]
+  difficulty: 4
+  prompt: "An expert relates the audit trail and resumable state as two views of the same agent history. Which statement is the accurate L3 read?"
+  options:
+    - { text: "The audit trail is the immutable, append-only record of what was decided and why (tamper-evident for review), while resumable checkpoint state is the durable snapshot the agent continues from — related but distinct: one is for accountability, one is for continuation, and an approved action delivered on resume must be idempotent so replay can't double-apply it", correct: true }
+    - { text: "The audit trail and the checkpoint state are the same object, so persisting one automatically gives you the other for free" }
+    - { text: "Checkpoint state should be editable so an operator can rewrite the pending action, which is why the audit log must be editable too" }
+    - { text: "Neither needs durability, since a human always answers within the same process lifetime" }
+  explanation: "They overlap in content but serve different jobs. The audit trail is append-only and tamper-evident — its value is accountability, so it must not be rewritten. The checkpoint is a durable snapshot (plan, messages, pending action) whose value is clean continuation across a long pause. Because resume can replay a delivery, the executed effect must be idempotent or keyed to run once — otherwise one approval yields two irreversible effects. Conflating the two, or making either editable, breaks exactly the property that made it useful."

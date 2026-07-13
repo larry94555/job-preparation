@@ -34,3 +34,12 @@
   answer:
     regex: '^k$'
     normalize: true
+
+- id: fe-retrieve-inject
+  type: text_input
+  tags: [recall]
+  difficulty: 3
+  prompt: "The pattern of keeping everything in the store and pulling in only the relevant items on demand is called retrieve-then-____ (one word)."
+  answer:
+    regex: '^inject$'
+    normalize: true

@@ -118,3 +118,123 @@
     - { text: "Timeouts are only needed for CPU-bound work, not I/O" }
     - { text: "An unbounded await automatically cancels itself after a while" }
   explanation: "Networks stall and services hang. Without a timeout an await can wait indefinitely, freezing the agent. A timeout converts an unbounded hang into a bounded, catchable error you can retry or surface."
+
+- id: mc-coroutine-object
+  type: multiple_choice
+  tags: [eventloop]
+  difficulty: 2
+  prompt: "You write `async def fetch(): ...` and then call `fetch()` without awaiting it. What did you get back?"
+  options:
+    - { text: "A coroutine object that hasn't run yet — it only makes progress once you await it or schedule it on the event loop", correct: true }
+    - { text: "The function's return value, computed immediately and synchronously" }
+    - { text: "A new OS thread already running the function body in the background" }
+    - { text: "Nothing — calling a coroutine function is a syntax error" }
+  explanation: "Calling an `async def` function does not execute its body; it constructs a coroutine object. The body runs only when the coroutine is awaited or handed to the loop (e.g. via gather or create_task). Forgetting to await it is why you sometimes see a 'coroutine was never awaited' warning."
+
+- id: mc-create-task
+  type: multiple_choice
+  tags: [concurrency]
+  difficulty: 3
+  prompt: "What is the difference between `await coro` and `task = asyncio.create_task(coro)`?"
+  options:
+    - { text: "await runs the coroutine to completion before continuing; create_task schedules it to run concurrently in the background and returns immediately with a Task handle", correct: true }
+    - { text: "They are identical; create_task is just an alias for await" }
+    - { text: "create_task blocks the event loop while await does not" }
+    - { text: "await runs the coroutine on a separate thread; create_task runs it inline" }
+  explanation: "`await coro` suspends the caller until that one coroutine finishes. `create_task` schedules the coroutine on the loop right away and hands back a Task you can await later — that's how you get several coroutines in flight at once (the same overlap gather gives you, done manually)."
+
+- id: mc-executor
+  type: multiple_choice
+  tags: [eventloop]
+  difficulty: 3
+  prompt: "You must call a slow, purely synchronous CPU/blocking library from inside a coroutine. What keeps it from freezing the event loop?"
+  options:
+    - { text: "Run it off the loop with loop.run_in_executor (or asyncio.to_thread), so the blocking work happens in a thread/process pool and the loop stays responsive", correct: true }
+    - { text: "Wrap the call in await — await makes any function non-blocking automatically" }
+    - { text: "Nothing is needed; synchronous calls never block the async loop" }
+    - { text: "Split the call across many create_task calls so it runs in parallel on the loop" }
+  explanation: "A blocking call never yields at an `await`, so on the single loop thread it stalls everything. `asyncio.to_thread` / `run_in_executor` moves that work to a separate thread (or process) pool, letting the loop keep advancing other tasks while it runs."
+
+- id: mc-taskgroup
+  type: multiple_choice
+  tags: [concurrency]
+  difficulty: 3
+  prompt: "`asyncio.TaskGroup` (Python 3.11+) is often preferred over a bare `gather` for structured concurrency because it:"
+  options:
+    - { text: "Scopes the tasks' lifetimes to a block and, if one task fails, cancels the siblings and propagates the error — so tasks can't leak past the block", correct: true }
+    - { text: "Runs the tasks on multiple CPU cores for true parallelism" }
+    - { text: "Guarantees each task retries forever until it succeeds" }
+    - { text: "Removes the need to await anything inside the block" }
+  explanation: "A TaskGroup gives structured concurrency: all tasks started in the `async with` block are awaited at block exit, and a failure cancels the remaining siblings and raises. That makes 'no task outlives its scope' a structural property instead of something you remember to code by hand."
+
+- id: mc-semaphore
+  type: multiple_choice
+  tags: [concurrency]
+  difficulty: 4
+  prompt: "You need to fan out 10,000 API calls but the service allows only 20 concurrent connections. Which primitive bounds the in-flight concurrency?"
+  options:
+    - { text: "An asyncio.Semaphore(20) acquired around each call, so at most 20 run at once while the rest wait — bounded concurrency as backpressure", correct: true }
+    - { text: "A single asyncio.gather over all 10,000 coroutines, which the loop auto-throttles to 20" }
+    - { text: "time.sleep between calls to pace them out" }
+    - { text: "return_exceptions=True, which caps concurrency to a safe level" }
+  explanation: "`gather` launches everything at once and will happily open 10,000 connections. An `asyncio.Semaphore(20)` (acquired inside each task) caps in-flight work to 20, applying backpressure so the overlap stays fast without exhausting the pool or tripping rate limits."
+
+- id: mc-idempotent-retry
+  type: multiple_choice
+  tags: [resilience]
+  difficulty: 4
+  prompt: "Before you blindly retry a failed call, what property of the operation must you check?"
+  options:
+    - { text: "Whether it is idempotent — retrying a non-idempotent call (e.g. 'charge the card') can duplicate the side effect, so it needs an idempotency key or must not be retried", correct: true }
+    - { text: "Whether the response was JSON, since only JSON calls are safe to retry" }
+    - { text: "Nothing — every call is always safe to retry as many times as you like" }
+    - { text: "Whether the call used HTTPS, since only encrypted calls can be retried" }
+  explanation: "Retries assume the operation can be repeated without harm. A read is naturally idempotent; a write like 'submit order' or 'charge card' is not — a retry after a lost response can double the effect. Non-idempotent operations need an idempotency key (dedup on the server) or a no-retry policy."
+
+- id: mc-transient-vs-permanent
+  type: multiple_choice
+  tags: [errors]
+  difficulty: 3
+  prompt: "A call returns HTTP 400 (bad request). Should your retry logic treat it like a 503?"
+  options:
+    - { text: "No — a 400 is a permanent client error that will fail identically on retry; retrying wastes attempts, so you retry only transient failures (5xx, timeouts, resets) and fail fast on permanent ones", correct: true }
+    - { text: "Yes — retry every error the same way, since any call can succeed on a second try" }
+    - { text: "Yes, but only if you retry a 400 more times than a 503" }
+    - { text: "No — you should retry a 400 forever because client errors are always temporary" }
+  explanation: "Retries only help transient failures. A 400/401/404 is a permanent error — the request is wrong and will fail the same way every time — so retrying it just burns your attempt budget. Classify errors and retry the retryable ones (5xx, timeouts, connection resets), fail fast on the rest."
+
+- id: mc-error-per-item
+  type: multiple_choice
+  tags: [errors]
+  difficulty: 3
+  prompt: "After `gather(..., return_exceptions=True)`, how do you tell a successful result from a failed one in the returned list?"
+  options:
+    - { text: "Check each element with isinstance(r, Exception) — failures come back as the exception object in that slot, successes as the normal return value", correct: true }
+    - { text: "Failed calls are dropped from the list, so any element present is a success" }
+    - { text: "gather sorts all exceptions to the end of the list for you" }
+    - { text: "You can't tell them apart; return_exceptions only counts failures" }
+  explanation: "With `return_exceptions=True`, `gather` places the raised exception object into the result slot instead of raising. So you iterate the list and branch on `isinstance(r, Exception)`: exception → isolated failure to record, otherwise the real value — order preserved throughout."
+
+- id: mc-cancellation
+  type: multiple_choice
+  tags: [errors]
+  difficulty: 4
+  prompt: "When `asyncio.wait_for` hits its timeout, what does it do to the underlying coroutine, and what exception surfaces?"
+  options:
+    - { text: "It cancels the awaited task (raising CancelledError inside it) and raises asyncio.TimeoutError to the caller — so the hung work is actually stopped, not just abandoned", correct: true }
+    - { text: "It leaves the coroutine running forever in the background and returns None" }
+    - { text: "It raises ValueError and lets the coroutine keep running to completion" }
+    - { text: "It converts the coroutine into a synchronous blocking call" }
+  explanation: "`wait_for` enforces the bound by cancelling the inner task (a CancelledError is thrown into it at its next await) and raising `asyncio.TimeoutError` to the caller. This matters: the timed-out work is genuinely cancelled and cleaned up, not left leaking on the loop."
+
+- id: mc-gather-vs-as-completed
+  type: multiple_choice
+  tags: [concurrency]
+  difficulty: 3
+  prompt: "You fan out many calls but want to process each result the moment it arrives, not wait for all of them. Which fits better than `gather`?"
+  options:
+    - { text: "asyncio.as_completed, which yields awaitables in completion order so you can handle each result as soon as it finishes", correct: true }
+    - { text: "asyncio.sleep, which returns results one at a time on a timer" }
+    - { text: "time.sleep in a loop, polling each coroutine for completion" }
+    - { text: "gather with return_exceptions=True, which returns results in completion order" }
+  explanation: "`gather` waits for the whole batch and returns results in *input* order. `asyncio.as_completed` yields futures in *completion* order, so you can start handling (stream, aggregate, short-circuit) each result the instant it's ready instead of blocking on the slowest call."

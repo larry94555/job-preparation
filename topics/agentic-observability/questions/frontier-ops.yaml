@@ -18,3 +18,23 @@
     unlabeled, drifting production trajectories live (LLM-as-judge, trajectory evals, human review) is a
     genuine frontier problem, and its failures are silent and semantic: nothing errors, cost looks normal,
     and the agent still did the wrong thing. More attributes or a faster model do not close it.
+
+- id: frontier-sampling
+  type: multiple_choice
+  tags: [metrics]
+  difficulty: 4
+  prompt: >-
+    At agent scale, many concurrent agents over long horizons emit more spans than anyone can store or
+    read, so you must sample. Which frontier tension does this create, and what is the honest read on the
+    naive fix?
+  options:
+    - { text: "Observability at scale: uniform sampling keeps traces in proportion to frequency, so it drops the rare failing trajectory you most need — the open work is tail/error-biased sampling that stays affordable without losing the one-in-a-thousand failure", correct: true }
+    - { text: "It is solved by uniform random sampling, which represents the tail perfectly" }
+    - { text: "It is purely a storage-cost problem with no effect on what failures you can see" }
+    - { text: "It disappears if you simply record fewer attributes per span" }
+  explanation: >-
+    Sampling at scale is a real frontier edge. Uniform sampling keeps runs in proportion to how often
+    they occur, so the low-frequency failing trajectory — exactly the run you need — is usually thrown
+    away. Error-biased or tail-aware sampling (keep all errors, sample the rest) and propagating trace
+    context across sub-agent boundaries are the open, unsettled techniques; recording fewer attributes
+    does not address which whole traces you keep, and it is not solved by uniform sampling.

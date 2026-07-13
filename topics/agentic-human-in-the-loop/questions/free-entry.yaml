@@ -52,3 +52,12 @@
   answer:
     regex: '^timeout$'
     normalize: true
+
+- id: fe-idempotent
+  type: text_input
+  tags: [resume]
+  difficulty: 3
+  prompt: "Because a resume can replay a delivery, the executed effect must be ____ so it applies at most once. (one word)"
+  answer:
+    regex: '^idempotent$'
+    normalize: true
