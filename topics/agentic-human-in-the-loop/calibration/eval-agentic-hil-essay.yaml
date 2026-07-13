@@ -1,0 +1,57 @@
+# Calibration for eval-agentic-hil-essay (2 clear PASS + 2 clear FAIL, no borderline).
+skill: eval-agentic-hil-essay
+cases:
+  # PASS — answers the question, hits every reference point, all claims correct,
+  # names concrete mechanisms. 4/4 → pass; gate technically_correct=true.
+  - answer: >-
+      An agent that can call tools can act on the world, and a wrong action there is not a bad sentence —
+      it is a real charge, a deleted user, a public post you cannot take back. Those irreversible and
+      expensive actions are exactly where you keep a human: the agent proposes, but a person is the last
+      check before the effect happens. You decide which actions need that check by classifying each one by
+      risk from two questions — is it reversible and is it expensive. Reads are low, changes to owned state
+      are medium, and irreversible or expensive actions are high. High-risk actions route through an
+      approval gate and do not execute until a human explicitly approves; low and medium actions run
+      directly. So oversight is proportional to stakes rather than blocking everything.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # PASS — a second strong, correct, specific answer using different wording.
+  # 4/4 → pass; gate technically_correct=true.
+  - answer: >-
+      The reason to keep a human in the loop is that some actions are permanent. Undoing a reversible
+      mistake is an inconvenience; an irreversible one — money moved, a record destroyed, something posted
+      publicly — is a fact you cannot revoke, and no after-the-fact log brings it back. So a person signs
+      off on those specifically. To know which those are, you risk-classify every action by reversibility
+      and cost: a lookup is low risk, creating or updating owned state is medium, and charging a card or
+      deleting data is high. The classification is a lookup that decides routing: high-risk actions pause
+      at an approval gate and only run on an explicit human yes, while low and medium actions execute on
+      their own. That way you spend human attention only where the stakes justify it.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — off-topic and technically wrong: says approve everything including reads,
+  # run rejected actions anyway, and never classify by risk. Fails the gate plus
+  # every other check. 0/4 → fail.
+  - answer: >-
+      The safest design is to make a human approve every single action the agent takes, including every
+      read and lookup, because you can never be too careful. Risk classification is not worth the effort —
+      just treat all actions the same. And if a human rejects a high-risk action, you should still run it,
+      since the agent already decided it was the right thing to do; the rejection is just advisory. That
+      way nothing the agent wants to do is ever blocked.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # FAIL — does not address the question and is technically wrong: claims tool calling
+  # is just a longer prompt and no gate is needed for irreversible actions. 0/4 → fail.
+  - answer: >-
+      Human oversight is unnecessary because giving a model tools is really just a longer prompt, so it
+      cannot actually do anything harmful. There is no such thing as an irreversible action for an agent —
+      everything a program does can be undone automatically — so gating deletions or payments behind a
+      human is wasted latency. Let the model run fully autonomously on every action and skip approvals
+      entirely.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }

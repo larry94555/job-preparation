@@ -1,0 +1,6 @@
+id: lesson-expert-context
+title: "Expert context: human-in-the-loop patterns"
+material: expert-context.md
+segments:
+  - present: human-in-the-loop-patterns
+  - check: expert-hil-patterns

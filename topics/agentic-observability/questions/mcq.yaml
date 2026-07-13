@@ -1,0 +1,120 @@
+# Multiple choice
+- id: mc-why-trace
+  type: multiple_choice
+  tags: [trace]
+  difficulty: 2
+  prompt: "An agent run costs 10x what you expected in production. Why is a trace of the run the thing you reach for?"
+  options:
+    - { text: "It records what happened at each step, so you can point at the exact step that went wrong instead of guessing", correct: true }
+    - { text: "It makes the agent run faster so the cost drops on its own" }
+    - { text: "It replaces the need to look at cost, since a trace never costs anything" }
+    - { text: "It hides the failing steps so the final output still looks correct" }
+  explanation: "Without a per-step record you have only a final output and a guess. A trace lets you replay the run and attribute the surprise — the slow tool, the retry, the cost spike — to the exact step that caused it."
+
+- id: mc-trace-id
+  type: multiple_choice
+  tags: [trace]
+  difficulty: 2
+  prompt: "Why give every agent run a trace_id?"
+  options:
+    - { text: "So a specific run can be looked up later and every step is tied back to it", correct: true }
+    - { text: "So the model generates fewer tokens per run" }
+    - { text: "So two different runs are guaranteed to produce the same output" }
+    - { text: "So the trace can be discarded once the run finishes" }
+  explanation: "The trace_id ties a user complaint (\"run r-4817 was slow\") back to the exact sequence of steps the agent took, turning \"sometimes slow\" into a specific, lookup-able record."
+
+- id: mc-span
+  type: multiple_choice
+  tags: [spans]
+  difficulty: 2
+  prompt: "In agent tracing, what is a span?"
+  options:
+    - { text: "A record of one step of the agent's work — its tokens, cost, latency, tool, and error", correct: true }
+    - { text: "The total cost of the whole run collapsed into one number" }
+    - { text: "The system prompt sent to the model" }
+    - { text: "A random sample of runs kept for debugging" }
+  explanation: "A span is the unit of detail in a trace: one step (a model call or tool call) with its tokens, cost, latency, tool, and error recorded. A trace is the ordered list of its spans."
+
+- id: mc-per-step
+  type: multiple_choice
+  tags: [spans]
+  difficulty: 3
+  prompt: "Why record a span per step instead of only the run-level totals?"
+  options:
+    - { text: "A single slow or failing step is invisible in a run-level number; per-step spans show which step is the problem", correct: true }
+    - { text: "Run-level totals are always wrong, so they must be discarded" }
+    - { text: "Per-step spans make the run cheaper to execute" }
+    - { text: "The model can only read data if it is stored per step" }
+  explanation: "A run that takes 9s looks fine against a 10s budget — until a span reveals one step spent 8s in a single tool call. Per-step spans tell you which step to fix; the run total only tells you that a problem exists."
+
+- id: mc-tool-latency
+  type: multiple_choice
+  tags: [spans]
+  difficulty: 3
+  prompt: "A span records tool=\"search_web\" and latency_ms=8200. What does that let you conclude?"
+  options:
+    - { text: "That specific tool call is the slow step — the one to investigate or fix", correct: true }
+    - { text: "The whole run is fast, since one span is only part of it" }
+    - { text: "The model, not the tool, is responsible for the latency" }
+    - { text: "Latency cannot be attributed to a tool from a span" }
+  explanation: "Recording latency and the tool name per span is exactly what lets you attribute a slow run to a specific tool call. The span points at search_web at 8.2s as the step to fix."
+
+- id: mc-cost-surprise
+  type: multiple_choice
+  tags: [metrics]
+  difficulty: 3
+  prompt: "In development the agent's bill is a rounding error; in production cost surprises everyone. What changed?"
+  options:
+    - { text: "The per-run cost is similar, but real volume (plus longer tool loops on messy inputs) multiplies it into a large aggregate", correct: true }
+    - { text: "The provider secretly raised the price per token in production" }
+    - { text: "Production models are always more expensive than dev models" }
+    - { text: "Cost is random and cannot be predicted or measured" }
+  explanation: "The per-run cost did not change — the count did. Real volume multiplied by the same per-run cost, plus retries and extra tool steps on messy inputs, is what makes cost a metric you watch in aggregate across runs."
+
+- id: mc-latency-surprise
+  type: multiple_choice
+  tags: [metrics]
+  difficulty: 3
+  prompt: "Median latency looked fine in dev but users complain in production. What is the usual explanation?"
+  options:
+    - { text: "Under load the tail (p95/p99) is far worse than the median you tested, and the tail is what users feel", correct: true }
+    - { text: "The median latency doubled, so every request is now slow" }
+    - { text: "Latency only matters in development, not production" }
+    - { text: "The model forgets how to respond quickly at scale" }
+  explanation: "Concurrency, queuing, and slow tools stretch the tail. The run that hangs is rarely the average run — it is the p95/p99, which dev-scale testing under-samples and users actually experience."
+
+- id: mc-failure-rate
+  type: multiple_choice
+  tags: [metrics]
+  difficulty: 2
+  prompt: "A tool passes every one of your ten dev runs but fails in production. Why?"
+  options:
+    - { text: "At real volume you hit the rare tail — a timeout or rate limit that one run in a thousand triggers", correct: true }
+    - { text: "The tool was fine; production must have corrupted the code" }
+    - { text: "Ten dev runs is a large enough sample to catch any failure" }
+    - { text: "Failure rate is fixed, so passing ten runs guarantees it always passes" }
+  explanation: "A one-in-a-thousand failure is invisible in ten runs. That tail of failing runs only appears at production volume, and it is exactly the part no test covered — which is why you watch failure rate in aggregate."
+
+- id: mc-alerts
+  type: multiple_choice
+  tags: [alerts]
+  difficulty: 2
+  prompt: "What is an alert in an agent observability setup?"
+  options:
+    - { text: "A rule on a metric that fires when a threshold (a budget or SLO) is crossed, so you are told without watching", correct: true }
+    - { text: "A dashboard you have to keep staring at to notice trends" }
+    - { text: "A log line the agent writes on every single step" }
+    - { text: "A retry the agent performs automatically when a tool fails" }
+  explanation: "An alert is a threshold rule: you set a cost ceiling, latency SLO, or failure-rate limit, and it fires the moment a run or window breaches it — catching the incident even when nobody is looking at the dashboard."
+
+- id: mc-dashboard
+  type: multiple_choice
+  tags: [alerts]
+  difficulty: 2
+  prompt: "What is a dashboard for, versus an alert?"
+  options:
+    - { text: "The always-on view of aggregate trends you scan; the alert is the threshold rule that pages you", correct: true }
+    - { text: "It replaces alerts entirely, so no thresholds are needed" }
+    - { text: "It stores the raw spans and nothing else" }
+    - { text: "It runs the agent; the alert stops it" }
+  explanation: "Dashboards are for trends — cost per hour, p95 latency, failure rate over time — that you notice at a glance. Alerts are for thresholds that fire on their own. The rule of thumb: dashboards for trends, alerts for thresholds."

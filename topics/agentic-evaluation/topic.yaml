@@ -1,0 +1,10 @@
+id: agentic-evaluation
+title: "Evaluation & Quality"
+description: "You cannot improve what you do not measure. Score agent outputs with an LLM-as-judge against explicit criteria, build an eval suite that reports pass-rate and average score, catch regressions, and gate every deploy on it — never ship below your bar."
+track: agentic
+pass_threshold: 0.8
+tag_weights:
+  judge: 1.2
+  rubric: 1.0
+  suite: 1.2
+  gate: 1.0

@@ -1,0 +1,12 @@
+# Expert canon (L3) — the OWASP LLM Top 10 and injection taxonomy.
+- id: expert-owasp
+  type: multiple_choice
+  tags: [injection]
+  difficulty: 3
+  prompt: "Where does prompt injection sit on the OWASP Top 10 for LLM Applications, and how is the attack split?"
+  options:
+    - { text: "It is the #1 risk, split into direct injection (typed into the prompt) and indirect injection (planted in content the agent fetches)", correct: true }
+    - { text: "It is a minor, tenth-place issue fully solved by input length limits" }
+    - { text: "It is not on the OWASP list because it only affects chatbots" }
+    - { text: "It is a single undivided category with a known, complete patch" }
+  explanation: "OWASP ranks prompt injection #1 for LLM apps. It splits into direct injection (the malicious instruction is typed into the prompt) and indirect injection (Greshake et al.) where the payload is planted in fetched content and detonates when the agent reads it — the practical, dangerous case."

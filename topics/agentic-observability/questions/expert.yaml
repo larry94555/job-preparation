@@ -1,0 +1,12 @@
+# Expert canon (L3) — OpenTelemetry / distributed tracing for agents.
+- id: expert-otel
+  type: multiple_choice
+  tags: [trace]
+  difficulty: 3
+  prompt: "How does OpenTelemetry (OTel) relate to tracing an agent's model and tool calls?"
+  options:
+    - { text: "OTel's data model is exactly the one agent tracing uses — a trace is a tree of spans with attributes and status, and trace context links a span to its parent — so agent traces slot into standard backends", correct: true }
+    - { text: "OTel is a Python library that validates the model's JSON output before a tool runs" }
+    - { text: "OTel is an LLM decoding mode that constrains output to a schema" }
+    - { text: "OTel is a leaderboard that scores how well models call tools" }
+  explanation: "Agent observability is distributed tracing with LLM attributes. OTel standardizes traces/spans/metrics: a trace is a tree of spans, each with attributes and status, and trace context propagates parent-child links. A span per model or tool call (with tokens/cost/latency/tool/error attributes) is that same primitive — which is why LLM-observability tools (Langfuse, LangSmith, Helicone) are OTel-compatible rather than a new invention. It is not a validator, a decoding mode, or a benchmark."

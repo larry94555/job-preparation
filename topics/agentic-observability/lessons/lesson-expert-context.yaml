@@ -1,0 +1,6 @@
+id: lesson-expert-context
+title: "Expert context: traces, spans, and OpenTelemetry"
+material: expert-context.md
+segments:
+  - present: traces-spans-and-opentelemetry
+  - check: expert-otel

@@ -1,0 +1,18 @@
+sections:
+  - id: sec-tracing
+    title: "Tracing"
+    lessons: [lesson-tracing, lesson-spans, lesson-expert-context]
+    assessment:
+      title: "Section 1 — Tracing"
+      from_tags: [trace, spans]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-production
+    title: "Production surprises"
+    lessons: [lesson-production-surprises, lesson-alerts, lesson-frontier-ops]
+    assessment:
+      title: "Section 2 — Production surprises"
+      from_tags: [metrics, alerts]
+      count: 5
+      pass_threshold: 0.8

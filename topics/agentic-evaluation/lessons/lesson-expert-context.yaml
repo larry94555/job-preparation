@@ -1,0 +1,6 @@
+id: lesson-expert-context
+title: "Is the judge any good?"
+material: expert-context.md
+segments:
+  - present: is-the-judge-any-good
+  - check: expert-llm-judge

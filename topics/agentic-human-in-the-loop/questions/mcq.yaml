@@ -1,0 +1,120 @@
+# Multiple choice
+- id: mc-why-hil
+  type: multiple_choice
+  tags: [risk]
+  difficulty: 2
+  prompt: "Why keep a human in the loop for some of an agent's actions instead of running fully autonomously?"
+  options:
+    - { text: "Because an agent that can act can act wrongly, and some actions are irreversible or expensive — a human is the last check before those", correct: true }
+    - { text: "Because models cannot call tools without human help" }
+    - { text: "Because a human should approve every single action an agent takes, including reads" }
+    - { text: "Because logging is impossible without a human watching" }
+  explanation: "A chatbot's mistake is a bad sentence; an agent's mistake can move money or delete data. You keep a human on the actions that are irreversible or expensive, and let the harmless ones run — the point is proportional oversight, not approving everything."
+
+- id: mc-risk-classes
+  type: multiple_choice
+  tags: [risk]
+  difficulty: 2
+  prompt: "What two questions best decide how risky an action is?"
+  options:
+    - { text: "Is it reversible, and is it expensive? Irreversible/expensive actions are high risk", correct: true }
+    - { text: "Is the model confident, and is the prompt long?" }
+    - { text: "Does it use a tool, and does the tool have a schema?" }
+    - { text: "Is it fast to run, and is the code short?" }
+  explanation: "Risk is driven by reversibility and cost. A reversible, cheap action (a read) is low risk; an irreversible or expensive one (a charge, a deletion) is high risk and is what an approval gate exists to catch."
+
+- id: mc-high-risk
+  type: multiple_choice
+  tags: [risk]
+  difficulty: 2
+  prompt: "Which of these is a HIGH-risk action that should be gated behind human approval?"
+  options:
+    - { text: "Charging a customer's payment card — it is irreversible and expensive", correct: true }
+    - { text: "Reading a user's profile from the database" }
+    - { text: "Looking up the current weather" }
+    - { text: "Listing the open tickets in a queue" }
+  explanation: "Charging a card is irreversible and moves real money, so it is high risk and belongs behind an approval gate. The others are read-only lookups — reversible and cheap, so low risk."
+
+- id: mc-approval-gate
+  type: multiple_choice
+  tags: [approval]
+  difficulty: 2
+  prompt: "What is the defining property of an approval gate on a high-risk action?"
+  options:
+    - { text: "The action does not execute unless a human explicitly approves it; on rejection the effect never happens", correct: true }
+    - { text: "The action executes immediately and a human is notified afterward" }
+    - { text: "The action is logged as rejected but still runs so nothing is blocked" }
+    - { text: "The model decides on its own whether to skip the gate" }
+  explanation: "A gate means the irreversible effect is blocked until a human says yes. If the human rejects, execute is never called. A 'gate' that logs a rejection and then runs the action anyway is not a gate."
+
+- id: mc-agent-unsure
+  type: multiple_choice
+  tags: [approval]
+  difficulty: 2
+  prompt: "The agent is genuinely unsure whether a consequential action is the right one. What should it do?"
+  options:
+    - { text: "Ask a human — escalate rather than act, especially when the action is irreversible", correct: true }
+    - { text: "Pick the most likely action and execute it, since asking is slow" }
+    - { text: "Do nothing at all and silently drop the task with no record" }
+    - { text: "Retry the same reasoning until it becomes confident" }
+  explanation: "Ask-when-unsure is the whole point of human-in-the-loop: when the agent is not confident and the stakes are high, escalating to a person is correct behavior, not a failure. Guessing on an irreversible action is exactly what the gate prevents."
+
+- id: mc-audit-trail
+  type: multiple_choice
+  tags: [audit]
+  difficulty: 2
+  prompt: "What is an audit trail for an agent's actions?"
+  options:
+    - { text: "An append-only, queryable record of what the agent did, the risk level, and whether it was approved, rejected, or executed", correct: true }
+    - { text: "A cache of tool results so the agent runs faster next time" }
+    - { text: "The system prompt that tells the model which tools exist" }
+    - { text: "A list of the model's internal chain-of-thought tokens" }
+  explanation: "The audit trail records what happened and why — action, params, risk, and the decision — in an append-only, queryable log. It is the accountability layer that makes autonomy defensible after the fact."
+
+- id: mc-pause-resume
+  type: multiple_choice
+  tags: [resume]
+  difficulty: 3
+  prompt: "In the pause → human → resume cycle, what does clean resumption require?"
+  options:
+    - { text: "The agent's state is durably saved at the pause so it continues from where it stopped, not from scratch", correct: true }
+    - { text: "The agent restarts the whole task from the beginning after every approval" }
+    - { text: "The human must respond within one second or the state is lost" }
+    - { text: "The agent keeps spinning in a busy loop while it waits" }
+  explanation: "Resuming cleanly means the pause is durable: the plan, messages, and pending action are persisted so a human can take minutes or days to respond and the agent picks up exactly where it paused rather than redoing work."
+
+- id: mc-timeout
+  type: multiple_choice
+  tags: [resume]
+  difficulty: 3
+  prompt: "A high-risk action is waiting on human approval and the timeout expires with no answer. What should happen?"
+  options:
+    - { text: "Fail safe — default to rejected and record it; never auto-approve on timeout", correct: true }
+    - { text: "Auto-approve the action so the task isn't blocked" }
+    - { text: "Retry the action automatically without approval" }
+    - { text: "Crash the whole agent process" }
+  explanation: "On timeout the action must fail safe: default to rejected, not executed, and leave an audit record. Auto-approving a pending irreversible action because nobody answered is exactly the mistake the gate existed to prevent."
+
+- id: mc-audit-why
+  type: multiple_choice
+  tags: [audit]
+  difficulty: 3
+  prompt: "Why keep the audit log append-only rather than editable?"
+  options:
+    - { text: "So the trace of what happened and who approved it cannot be quietly rewritten after the fact", correct: true }
+    - { text: "So it uses less memory than an editable list" }
+    - { text: "So the model can delete records it disagrees with" }
+    - { text: "So old records automatically disappear over time" }
+  explanation: "An audit trail is only trustworthy if history can't be edited. Append-only means every decision — including rejections and approvals — stays on the record, which is what makes it usable for incident review and accountability."
+
+- id: mc-resume-clean
+  type: multiple_choice
+  tags: [resume]
+  difficulty: 3
+  prompt: "Modern agent frameworks implement pause-for-human as an interrupt. What does that mean?"
+  options:
+    - { text: "The run halts at a checkpoint, waits for external human input, then continues from that checkpoint", correct: true }
+    - { text: "The run throws an exception and discards all progress" }
+    - { text: "The model is fine-tuned on the human's answer before continuing" }
+    - { text: "The run ignores the human and finishes on its own" }
+  explanation: "An interrupt is the framework version of pause → human → resume: execution stops at a checkpoint, waits for a human decision, and then resumes from that checkpoint with the decision folded in — the durable-pause pattern, built in."

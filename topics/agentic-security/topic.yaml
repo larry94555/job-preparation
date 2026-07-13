@@ -1,0 +1,10 @@
+id: agentic-security
+title: "Security & Guardrails"
+description: "The moment your agent touches the real world, people will try to break it. Defend against the biggest threat — prompt injection — by separating system instructions from untrusted content and sanitizing what the agent reads. Then add the guardrails: sandbox untrusted code, redact PII before it enters the context, and filter what the agent sends before it sends it."
+track: agentic
+pass_threshold: 0.8
+tag_weights:
+  injection: 1.2
+  separation: 1.2
+  sandbox: 1.0
+  redaction: 1.0

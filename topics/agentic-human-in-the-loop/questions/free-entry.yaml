@@ -1,0 +1,54 @@
+# Free entry (short answer)
+- id: fe-approve
+  type: text_input
+  tags: [approval]
+  difficulty: 2
+  prompt: "Before a high-risk action runs, a human must ____ it. (one word, the noun for the gate)"
+  answer:
+    regex: '^approval$'
+    normalize: true
+
+- id: fe-irreversible
+  type: text_input
+  tags: [risk]
+  difficulty: 2
+  prompt: "The single most important property that makes an action high risk is that it is ____. (one word)"
+  answer:
+    regex: '^irreversible$'
+    normalize: true
+
+- id: fe-high-risk
+  type: text_input
+  tags: [risk]
+  difficulty: 1
+  prompt: "Charging a card or deleting a user is which risk level? (one word)"
+  answer:
+    regex: '^high$'
+    normalize: true
+
+- id: fe-audit
+  type: text_input
+  tags: [audit]
+  difficulty: 2
+  prompt: "The append-only log of the agent's decisions is the ____ trail. (one word)"
+  answer:
+    regex: '^audit$'
+    normalize: true
+
+- id: fe-resume
+  type: text_input
+  tags: [resume]
+  difficulty: 2
+  prompt: "After the human approves, the agent should ____ from where it paused. (one word)"
+  answer:
+    regex: '^resume$'
+    normalize: true
+
+- id: fe-timeout
+  type: text_input
+  tags: [resume]
+  difficulty: 2
+  prompt: "A gate must fail safe if no human answers within the ____. (one word)"
+  answer:
+    regex: '^timeout$'
+    normalize: true

@@ -1,0 +1,11 @@
+id: lesson-tracing
+title: "Without tracing you are guessing"
+material: tracing.md
+segments:
+  - present: without-tracing-you-are-guessing
+  - check: mc-why-trace
+  - check: cloze-trace
+  - present: every-run-is-a-trace
+  - check: mc-trace-id
+  - check: fe-trace
+  - apply: code-agent-trace

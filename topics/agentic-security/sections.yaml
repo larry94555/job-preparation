@@ -1,0 +1,18 @@
+sections:
+  - id: sec-injection
+    title: "Prompt injection"
+    lessons: [lesson-injection, lesson-separation, lesson-expert-context]
+    assessment:
+      title: "Section 1 — Prompt injection"
+      from_tags: [injection, separation]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-guardrails
+    title: "Guardrails"
+    lessons: [lesson-guardrails, lesson-redaction, lesson-frontier-ops]
+    assessment:
+      title: "Section 2 — Guardrails"
+      from_tags: [sandbox, redaction]
+      count: 5
+      pass_threshold: 0.8

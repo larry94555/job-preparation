@@ -1,0 +1,58 @@
+# Calibration for eval-agentic-obs-code (exemplars target the agent-trace / cost-aggregate / alert exercises).
+skill: eval-agentic-obs-code
+cases:
+  # PASS — correct, aggregates properly, handles the edge cases, matches intent.
+  # 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      tests_passed=true. technically_correct holds: AgentTrace.add_step appends a step and adds cost to
+      total_cost and latency_ms to total_latency_ms, and to_dict returns the step count, both totals, and
+      the list of tools. aggregates_correctly holds: the totals are summed across the steps and the step
+      count is len(steps), not fabricated. handles_edge_cases holds: a step with tool=None is skipped when
+      building the tools list, and an empty trace returns zero totals and an empty list. matches_intent
+      holds: to_dict returns exactly {"steps", "total_cost", "total_latency_ms", "tools"} in order.
+      signals.must_use=[accumulate totals per step, count steps, collect tool names skipping None]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, aggregates_correctly: true, handles_edge_cases: true, matches_intent: true }
+
+  # PASS — a second correct solution (the alert exercise) with the strict-boundary edge case right.
+  # 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      tests_passed=true. technically_correct holds: check_budget compares total_cost against cost_budget
+      and total_latency_ms against latency_budget, each with a strict >, and returns a list. aggregates_correctly
+      holds: it reads the totals straight off the trace dict rather than recomputing them wrongly. handles_edge_cases
+      holds: a value exactly equal to its budget does not alert because the comparison is strict >, and a
+      trace within both budgets returns []. matches_intent holds: "cost" is appended before "latency" so
+      the order is correct when both are exceeded.
+      signals.must_use=[compare each total to its budget, per-exceeded alert string, empty list within budget]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, aggregates_correctly: true, handles_edge_cases: true, matches_intent: true }
+
+  # FAIL — conceptually wrong: hard-codes/guesses totals and never excludes the None tool.
+  # Fails the gate plus every other check. 0/4 = 0.0 → fail; gate false caps fail→fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: summarize does not sum anything — it returns
+      total_cost=0.0 always and sets count to 1 regardless of how many steps were passed. aggregates_correctly
+      does NOT hold: the totals are fabricated rather than accumulated over the steps, and by_tool is left
+      empty. handles_edge_cases does NOT hold: it never treats None or "none" as "no tool" because it never
+      inspects the tool field at all. matches_intent does NOT hold: the prompt asked for real per-tool
+      tallies and summed totals and it produces neither.
+      signals.must_use=[sum cost and latency, tally per tool]; avoid=[fabricating totals, ignoring the tool field].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, aggregates_correctly: false, handles_edge_cases: false, matches_intent: false }
+
+  # FAIL — a second clear fail: wrong comparison and wrong intent on the alert exercise.
+  # Fails the gate plus every other check. 0/4 = 0.0 → fail; gate false caps fail→fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: check_budget uses >= instead of a strict >, so
+      a trace whose cost exactly equals the budget wrongly fires a "cost" alert, and it returns the string
+      "cost" rather than a list. aggregates_correctly does NOT hold: it compares total_latency_ms against
+      the cost_budget by mistake, so latency is never checked against its own budget. handles_edge_cases
+      does NOT hold: the equal-to-budget boundary alerts when it should be within budget. matches_intent
+      does NOT hold: it never returns an empty list for a within-budget trace and swaps the alert ordering.
+      signals.must_use=[strict > against the right budget, return a list, empty list within budget]; avoid=[alerting at equality, wrong budget].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, aggregates_correctly: false, handles_edge_cases: false, matches_intent: false }

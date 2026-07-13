@@ -1,0 +1,61 @@
+# Coding exercises — engine type: code (graded by tests + concept skill)
+- id: code-injection-sanitize
+  type: code
+  language: python
+  tags: [separation]
+  difficulty: 3
+  prompt: >-
+    Implement `sanitize(content: str) -> str`. Replace common prompt-injection patterns (case-insensitive)
+    with the literal marker `[removed]`: "ignore (all )?(previous )?instructions",
+    "disregard (all )?(previous )?instructions", "new instructions:", "system prompt:", and "you are now".
+    An adversarial "IGNORE ALL PREVIOUS INSTRUCTIONS" must come back containing `[removed]`; ordinary
+    benign text must be returned unchanged. Use the `re` module.
+  starter_file: exercises/injection-sanitize/starter.py
+  test_file: exercises/injection-sanitize/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-security-code
+  concept_checks:
+    must_use: ["match the injection patterns case-insensitively", "replace each match with [removed]", "leave benign text unchanged"]
+    avoid_antipattern: ["matching only an exact-case literal", "deleting or altering benign content"]
+
+- id: code-pii-redact
+  type: code
+  language: python
+  tags: [redaction]
+  difficulty: 3
+  prompt: >-
+    Implement `redact(text: str) -> str`. Replace email addresses with `[EMAIL]`, and long secret-like
+    tokens with `[REDACTED]`: an `sk-` prefix followed by 16+ characters, or any 20+ character
+    alphanumeric key. An email and an API key in the text must both be redacted; ordinary short words must
+    be left untouched. Use the `re` module.
+  starter_file: exercises/pii-redact/starter.py
+  test_file: exercises/pii-redact/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-security-code
+  concept_checks:
+    must_use: ["replace email addresses with [EMAIL]", "replace secret-like tokens with [REDACTED]", "leave ordinary short words unchanged"]
+    avoid_antipattern: ["redacting every word regardless of shape", "missing the api-key token"]
+
+- id: code-output-filter
+  type: code
+  language: python
+  tags: [redaction]
+  difficulty: 3
+  prompt: >-
+    Implement `filter_output(action: dict) -> dict`. Given a proposed action like `{"tool": name, ...}`,
+    block a disallowed tool (`send_email`, `charge_payment`, or `delete`) by returning
+    `{"allowed": False, "reason": "blocked_tool"}`; otherwise return `{"allowed": True}`. A blocked tool
+    must return allowed False with the reason; an allowed tool must return allowed True.
+  starter_file: exercises/output-filter/starter.py
+  test_file: exercises/output-filter/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-security-code
+  concept_checks:
+    must_use: ["block the disallowed tools", "return the blocked_tool reason", "allow everything else"]
+    avoid_antipattern: ["allowing a blocked tool through", "blocking every tool indiscriminately"]

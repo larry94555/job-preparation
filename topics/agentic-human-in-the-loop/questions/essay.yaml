@@ -1,0 +1,24 @@
+# Essay
+- id: essay-hil
+  type: essay
+  length: short
+  tags: [risk]
+  difficulty: 3
+  prompt: "Explain why you keep a human in the loop for an agent's irreversible or expensive actions, and describe how risk-gating decides which actions need approval."
+  eval_skill: eval-agentic-hil-essay
+  reference_points:
+    - "An agent that can act can act wrongly, and unlike a chatbot's bad sentence, a wrong irreversible or expensive action (a charge, a deletion, a public post) is a permanent, costly fact — so a human is the last check on exactly those actions."
+    - "You classify actions by risk using reversibility and cost: reads are low, changes to owned state are medium, and irreversible/expensive actions are high; the classification turns 'should a human approve this?' into a lookup."
+    - "High-risk actions route through an approval gate and do not execute until a human explicitly approves; low- and medium-risk actions run directly, so oversight is proportional to stakes rather than blocking everything."
+
+- id: essay-audit
+  type: essay
+  length: short
+  tags: [audit]
+  difficulty: 3
+  prompt: "Describe how an agent stays auditable and how the pause → human → resume cycle works, including why gates need timeouts."
+  eval_skill: eval-agentic-hil-essay
+  reference_points:
+    - "Auditability comes from an append-only, queryable trail that records each action, its params, its risk level, and whether it was approved, rejected, or executed — so you can reconstruct what happened and who approved it after the fact."
+    - "The pause → human → resume cycle: the agent runs until a high-risk action, pauses with its state durably saved, a human steps in to approve/reject/edit, and the agent resumes cleanly from that saved state rather than starting over."
+    - "Gates need a timeout because a human may never answer; on timeout the action must fail safe — default to rejected, never auto-approve — and leave an audit record, so a pending irreversible action can't silently execute."

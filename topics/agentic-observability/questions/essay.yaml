@@ -1,0 +1,24 @@
+# Essay
+- id: essay-tracing
+  type: essay
+  length: short
+  tags: [trace]
+  difficulty: 3
+  prompt: "Explain what a trace and its spans capture for an agent run, and why per-step tracing beats guessing when a run misbehaves in production."
+  eval_skill: eval-agentic-obs-essay
+  reference_points:
+    - "A trace is the complete per-step record of one agent run, made of spans; each span records one step's tokens, cost, latency, tool, and error."
+    - "A trace_id ties a run back to its exact sequence of steps, so a complaint about a specific run can be looked up and inspected."
+    - "Per-step spans let you attribute a surprise (a slow tool, a cost spike, a failing step) to the exact step that caused it, instead of having only a final output and a guess."
+
+- id: essay-production
+  type: essay
+  length: short
+  tags: [metrics]
+  difficulty: 3
+  prompt: "Describe the metrics that surprise teams when an agent goes from development to production load — cost, latency, and failure rate — and how dashboards and alerts catch them."
+  eval_skill: eval-agentic-obs-essay
+  reference_points:
+    - "Cost, latency, and failure rate are all fine on a small dev sample but bad at scale: cost multiplies with real volume, tail (p95/p99) latency stretches under concurrency, and rare failures appear only at high volume."
+    - "Dev-scale testing sees the median of a small sample; production reveals the aggregate and the tail of a large one, which is why the surprises are systematic rather than random."
+    - "A dashboard shows the aggregate trends you scan (cost per hour, p95 latency, failure rate), and an alert fires when a metric crosses a budget or SLO threshold so you are told without watching — dashboards for trends, alerts for thresholds."

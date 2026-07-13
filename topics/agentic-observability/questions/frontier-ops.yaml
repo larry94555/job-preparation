@@ -1,0 +1,20 @@
+# Frontier drill (L4) — open problems in agent observability.
+- id: frontier-obs
+  type: multiple_choice
+  tags: [metrics]
+  difficulty: 4
+  prompt: >-
+    Your spans show every step's cost and latency, yet a multi-step run still "succeeds" while doing the
+    wrong thing — nothing errors and the cost looks normal. Which named frontier problem is this, and what
+    is the honest read?
+  options:
+    - { text: "Semantic / agent-specific observability and evaluating trajectories in production — an open problem: per-step metrics capture mechanics, not whether the trajectory accomplished the goal, and the failures are silent and semantic", correct: true }
+    - { text: "It is fully solved by recording more attributes on each span" }
+    - { text: "It is a latency problem; a faster model makes the trajectory correct" }
+    - { text: "It is not a real problem — if no step errors and cost is normal, the run is by definition correct" }
+  explanation: >-
+    Spans measure the mechanics of a step (cost, latency, tool, error) but not its meaning — whether the
+    agent should have taken it or whether the whole trajectory reached a correct end state. Scoring
+    unlabeled, drifting production trajectories live (LLM-as-judge, trajectory evals, human review) is a
+    genuine frontier problem, and its failures are silent and semantic: nothing errors, cost looks normal,
+    and the agent still did the wrong thing. More attributes or a faster model do not close it.

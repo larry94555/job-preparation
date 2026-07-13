@@ -1,0 +1,24 @@
+# Essay
+- id: essay-judge
+  type: essay
+  length: short
+  tags: [judge]
+  difficulty: 3
+  prompt: "Explain how an LLM-as-judge works for grading open-ended agent output, and why it should use the best model you can afford together with explicit criteria."
+  eval_skill: eval-agentic-eval-essay
+  reference_points:
+    - "An LLM-as-judge is a separate, evaluation-only model call that reads the task and the agent's output and returns a verdict, used when the answer can't be exact-matched (a summary, a plan, a trajectory)."
+    - "Use the best model you can afford as the judge, because grading is often harder than the task and a weak judge that mislabels outputs corrupts every pass-rate built on it."
+    - "Give the judge explicit criteria (a rubric) rather than 'is this good?', and require a strict-JSON verdict, so scoring is reproducible and a hundred judgments aggregate into one number."
+
+- id: essay-metrics
+  type: essay
+  length: short
+  tags: [suite]
+  difficulty: 3
+  prompt: "Name the four metrics you track when evaluating an agent, explain why hallucination is tracked separately, and describe how a deploy is gated on an eval suite."
+  eval_skill: eval-agentic-eval-essay
+  reference_points:
+    - "The four metrics are completion (did it finish), accuracy (was it correct), hallucination (did it fabricate facts/tool results), and cost (tokens, tool calls, latency)."
+    - "Hallucination is tracked separately because a fluent, confident, wrong answer is worse than an honest failure and aggregate accuracy can hide it; tracking it separately is how you catch a regression."
+    - "The eval suite runs on every change and produces a pass_rate; a deploy gate mechanically blocks the release when pass_rate is below a fixed threshold (never deploy below the bar), with no discretionary bypass."

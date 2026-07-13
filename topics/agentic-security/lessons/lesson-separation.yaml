@@ -1,0 +1,12 @@
+id: lesson-separation
+title: "Separate instructions from content"
+material: separation.md
+segments:
+  - present: separate-instructions-from-content
+  - check: mc-separate
+  - check: mc-sanitize
+  - check: cloze-separate
+  - check: fe-separate
+  - check: fe-sanitize
+  - apply: code-injection-sanitize
+  - apply: essay-injection

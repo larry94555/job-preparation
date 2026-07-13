@@ -1,0 +1,20 @@
+# Frontier drill (L4) — open problems in agent evaluation.
+- id: frontier-eval
+  type: multiple_choice
+  tags: [suite]
+  difficulty: 4
+  prompt: >-
+    You must evaluate a long-horizon agent that completes multi-step tasks by chaining tools, and the LLM
+    judge grading it can drift and is itself biased. Which named frontier problems is this, and what is the
+    honest read?
+  options:
+    - { text: "Agentic/task-completion benchmarks, trajectory evaluation, and judge reliability at scale — open problems: a final-state pass/fail hides how the agent got there, scoring a trajectory is far harder than scoring an answer, and a calibrated judge still drifts on the long tail", correct: true }
+    - { text: "Fully solved by reporting a single pass-rate over final answers" }
+    - { text: "A latency problem; a faster judge model makes trajectory eval correct" }
+    - { text: "Not a real problem — if the final answer is right, the path it took never matters" }
+  explanation: >-
+    Grading whole agents means scoring task completion (SWE-bench, tool-use suites), evaluating the
+    trajectory of tool calls (not just the last message), and keeping a fallible LLM judge honest at scale.
+    Each is an active research edge: a final-state verdict hides the path, trajectory scoring is much harder
+    than answer scoring, and a judge calibrated on 200 cases still drifts and stays biased on the long tail.
+    A single pass-rate does not capture any of this.

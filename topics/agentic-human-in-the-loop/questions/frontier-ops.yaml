@@ -1,0 +1,21 @@
+# Frontier drill (L4) — the autonomy spectrum and calibrated confidence.
+- id: frontier-autonomy
+  type: multiple_choice
+  tags: [risk]
+  difficulty: 4
+  prompt: >-
+    A team wants an agent to place itself on the autonomy spectrum — acting on its own when confident and
+    asking a human when unsure — and proposes wiring approval purely to the model's stated confidence.
+    What is the honest read of this frontier problem?
+  options:
+    - { text: "Autonomy-by-confidence is only as safe as the model's calibration: an over-confident model skips the gate on exactly the actions it should escalate, and irreversible actions should stay gated regardless of confidence", correct: true }
+    - { text: "It is fully solved — a large enough model is always correctly calibrated, so stated confidence can be trusted directly" }
+    - { text: "Confidence is irrelevant; the agent should always act autonomously to maximize throughput" }
+    - { text: "The autonomy level is a fixed global switch, so it never needs to be decided per action" }
+  explanation: >-
+    Placing an agent on the autonomy spectrum by its own confidence is a genuine frontier problem because
+    stated confidence must match real accuracy — calibration — to be safe. An over-confident model
+    barrels past the gate on the actions it should escalate, and the cost of a wrong irreversible action
+    doesn't fall just because the model improved, so high-risk actions stay gated regardless. The line
+    moves per action and per stakes, not as one global switch, and calibration has to be measured before
+    confidence is trusted.

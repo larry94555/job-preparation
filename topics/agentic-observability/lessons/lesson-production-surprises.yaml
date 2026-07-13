@@ -1,0 +1,12 @@
+id: lesson-production-surprises
+title: "What surprises you in production"
+material: production-surprises.md
+segments:
+  - present: what-surprises-you-in-production
+  - check: mc-cost-surprise
+  - check: mc-latency-surprise
+  - check: mc-failure-rate
+  - check: cloze-metrics
+  - check: fe-cost
+  - apply: essay-production
+  - apply: code-cost-aggregate

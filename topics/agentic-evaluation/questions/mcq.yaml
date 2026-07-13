@@ -1,0 +1,120 @@
+# Multiple choice
+- id: mc-cant-improve
+  type: multiple_choice
+  tags: [judge]
+  difficulty: 2
+  prompt: "Why is measuring agent quality the first job of evaluation?"
+  options:
+    - { text: "You cannot improve what you do not measure — an unmeasured agent's quality is just a guess", correct: true }
+    - { text: "Measurement makes the agent run faster at inference time" }
+    - { text: "A measured agent no longer needs any error handling" }
+    - { text: "Once you have a number you never have to look at transcripts again" }
+  explanation: "Eyeballing a few transcripts does not tell you how an agent does across the distribution or whether a change regressed it. Turning 'seems fine' into a tracked number is the precondition for improving it."
+
+- id: mc-llm-judge
+  type: multiple_choice
+  tags: [judge]
+  difficulty: 2
+  prompt: "When the correct answer isn't a single string you can compare with `==`, how do you grade it?"
+  options:
+    - { text: "With an LLM-as-judge — a separate model call that reads the task and output and returns a verdict", correct: true }
+    - { text: "By asking the same agent whether its own answer was good" }
+    - { text: "By checking the output length against a fixed number of tokens" }
+    - { text: "You cannot grade open-ended output at all; skip those cases" }
+  explanation: "Open-ended outputs (summaries, plans, agent trajectories) can't be exact-matched. An LLM-as-judge is a separate, evaluation-only call whose one job is to score the output against the task."
+
+- id: mc-best-judge
+  type: multiple_choice
+  tags: [judge]
+  difficulty: 3
+  prompt: "Which model should you use as the judge in an LLM-as-judge setup?"
+  options:
+    - { text: "The best model you can afford — grading is often harder than the task, and a weak judge corrupts every downstream number", correct: true }
+    - { text: "The same model as the agent, so its judgments match the agent's style" }
+    - { text: "The cheapest model, because the judge only reads, it doesn't generate" }
+    - { text: "A model with the largest context window, regardless of its quality" }
+  explanation: "Grading is frequently harder than doing the task, so it is worth spending more on the judge than on the agent. A weak judge that mislabels outputs poisons every pass-rate built on it."
+
+- id: mc-rubric
+  type: multiple_choice
+  tags: [rubric]
+  difficulty: 2
+  prompt: "Why give the judge an explicit rubric instead of asking 'is this output good?'"
+  options:
+    - { text: "So the score is a function of the output and named criteria, not the judge's vibe — reproducible and defensible", correct: true }
+    - { text: "So the judge can answer in prose that a human reads later" }
+    - { text: "So the judge runs on a smaller model" }
+    - { text: "So you never have to look at which cases failed" }
+  explanation: "A rubric turns 'good' into 'does it hit these named criteria?', each judged independently. That makes the verdict reproducible and tells you which kind of failure occurred, not just that the number dropped."
+
+- id: mc-strict-json
+  type: multiple_choice
+  tags: [rubric]
+  difficulty: 3
+  prompt: "Why require the judge to return strict JSON (a boolean `passed`, a numeric `score`, a `reasoning` string)?"
+  options:
+    - { text: "So a hundred individual verdicts can be parsed, validated, and aggregated into one pass-rate — you cannot average English", correct: true }
+    - { text: "Because JSON makes the judge model more accurate" }
+    - { text: "So the reasoning field can be shown to the end user as the final answer" }
+    - { text: "Because prose verdicts are guaranteed to be more honest" }
+  explanation: "A judge that replies in prose can't be aggregated. Strict-JSON verdicts against a fixed schema let each judgment be parsed and validated (a score outside [0,1] is a bug to raise on) and rolled up into a pass-rate."
+
+- id: mc-pass-rate
+  type: multiple_choice
+  tags: [suite]
+  difficulty: 2
+  prompt: "What is the headline metric an eval suite reports?"
+  options:
+    - { text: "pass_rate — the fraction of cases the agent got right across the whole suite", correct: true }
+    - { text: "The total number of tokens the agent generated" }
+    - { text: "The judge model's temperature setting" }
+    - { text: "The length of the longest output in the suite" }
+  explanation: "The suite runs the agent on every case, judges each output, and tallies verdicts. The headline is the pass_rate — the fraction passing — summarizing performance across the distribution rather than one anecdote."
+
+- id: mc-four-metrics
+  type: multiple_choice
+  tags: [suite]
+  difficulty: 3
+  prompt: "The four metrics to track for an agent are completion, accuracy, cost, and which fourth — tracked separately on purpose?"
+  options:
+    - { text: "Hallucination — a fluent, confident, wrong answer is worse than an honest failure, and accuracy alone can hide it", correct: true }
+    - { text: "Font size of the rendered output" }
+    - { text: "The number of GPUs used to serve the model" }
+    - { text: "How many words the judge's reasoning field contained" }
+  explanation: "Completion (did it finish), accuracy (was it right), cost (tokens/tools/latency), and hallucination. Hallucination is tracked separately because a confident fabrication is worse than an honest miss and accuracy can mask it."
+
+- id: mc-regression
+  type: multiple_choice
+  tags: [suite]
+  difficulty: 3
+  prompt: "A prompt tweak lifts accuracy by two points but doubles the hallucination rate. What is that, and how did you catch it?"
+  options:
+    - { text: "A regression — you caught it only because you tracked hallucination as a separate metric, not just aggregate accuracy", correct: true }
+    - { text: "A clear improvement, since accuracy went up — ship it" }
+    - { text: "A latency problem unrelated to output quality" }
+    - { text: "Impossible to detect without human review of every case" }
+  explanation: "A change that improves one metric while silently degrading another is a regression. Tracking hallucination separately is exactly what surfaces it; an aggregate that only reports accuracy would hide it."
+
+- id: mc-never-deploy
+  type: multiple_choice
+  tags: [gate]
+  difficulty: 2
+  prompt: "Your eval suite comes back at 0.87 and your deploy gate's threshold is 0.90. What ships?"
+  options:
+    - { text: "Nothing — never deploy below the bar; the gate blocks the release regardless of how good the change feels", correct: true }
+    - { text: "The change ships; 0.87 is close enough to 0.90" }
+    - { text: "It ships if a human approves an exception for this one run" }
+    - { text: "It ships and the threshold is lowered to 0.87 to match" }
+  explanation: "A deploy gate blocks the release when the pass-rate is below a fixed threshold. The rule is blunt on purpose: below the bar does not ship. A gate a human can wave through under deadline pressure is not a gate."
+
+- id: mc-gate
+  type: multiple_choice
+  tags: [gate]
+  difficulty: 3
+  prompt: "What makes a deploy gate an actual gate rather than a dashboard?"
+  options:
+    - { text: "It is mechanical — it automatically blocks the deploy when pass_rate is below the threshold, with no discretionary bypass", correct: true }
+    - { text: "It emails the team a report they read after the incident" }
+    - { text: "It records the pass-rate in a log for later analysis" }
+    - { text: "It lets whoever is on call decide case by case whether to ship" }
+  explanation: "A number you look at but never act on protects nothing. The gate must mechanically block a sub-threshold deploy; a bypassable gate always gets bypassed under pressure, which is the same as having no gate."

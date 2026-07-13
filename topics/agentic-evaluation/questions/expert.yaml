@@ -1,0 +1,12 @@
+# Expert canon (L3) — judging the judge: reliability, bias, calibration.
+- id: expert-llm-judge
+  type: multiple_choice
+  tags: [judge]
+  difficulty: 3
+  prompt: "Before you gate deploys on an LLM-as-judge, how do you establish that the judge itself is trustworthy?"
+  options:
+    - { text: "Measure its agreement with human labels, control for known biases (position, verbosity, self-preference), and calibrate it against labeled exemplars", correct: true }
+    - { text: "Trust it — a large model used as a judge is correct by construction" }
+    - { text: "Only check that its JSON parses; the verdicts themselves need no validation" }
+    - { text: "Use the same model family as the agent so their judgments always agree" }
+  explanation: "A judge is a model and inherits model failure modes. You validate it like a classifier: agreement against human-labeled examples, control for documented biases (position, verbosity, self-preference — Zheng et al., MT-Bench 2023), and pin it to a calibration set so a change that breaks its verdicts is caught. Prefer a different model family than the agent to avoid self-preference."

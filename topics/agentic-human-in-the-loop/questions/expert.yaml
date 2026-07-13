@@ -1,0 +1,12 @@
+# Expert canon (L3) — human-in-the-loop patterns.
+- id: expert-hil-patterns
+  type: multiple_choice
+  tags: [approval]
+  difficulty: 3
+  prompt: "Which statement best captures the family of human-in-the-loop patterns (approval gates, escalation, confidence thresholds / ask-when-unsure)?"
+  options:
+    - { text: "Oversight proportional to stakes: gate irreversible actions behind approval, escalate only the hard cases, and ask-when-unsure — but ask-when-unsure only works if the agent's confidence is calibrated", correct: true }
+    - { text: "Every action, including reads, must be approved by a human before it runs" }
+    - { text: "Confidence thresholds make approval gates unnecessary, so no action ever needs a human" }
+    - { text: "Escalation means the agent always does the hard cases itself and hands the easy ones to a human" }
+  explanation: "The patterns share one principle — oversight proportional to stakes. Approval gates catch irreversible actions, escalation routes only hard cases to a human, and ask-when-unsure gates by confidence. The catch is that gating by confidence requires calibrated uncertainty: an over-confident model asks in the wrong places."

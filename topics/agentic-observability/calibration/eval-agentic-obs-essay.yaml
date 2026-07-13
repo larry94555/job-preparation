@@ -1,0 +1,53 @@
+# Calibration for eval-agentic-obs-essay (exemplars target essay-tracing).
+skill: eval-agentic-obs-essay
+cases:
+  # PASS — answers the question, hits every reference point, all claims correct,
+  # names concrete mechanisms. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      A trace is the complete per-step record of one agent run, and it is made of spans — one span per
+      step (a model call or a tool call). Each span records that step's tokens, cost, latency in
+      milliseconds, which tool ran, and whether it errored. Every run gets a trace_id, so when a user
+      says run r-4817 was slow you can look up exactly that run and walk its spans. That is why per-step
+      tracing beats guessing: instead of a final output and a hunch, you can attribute the surprise to a
+      specific step — the span showing search_web at 8.2s, or the span with error=timeout — and fix that
+      step rather than re-running the happy path and hoping.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # PASS — a second strong, correct, specific answer using different wording.
+  # 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      Think of a trace as the flight recorder for one run: an ordered list of spans, where a span is one
+      step with its cost, latency, tool, and error attached. The trace carries an id so a complaint about
+      a particular run maps back to that run's exact steps. The reason to keep this per step rather than
+      only a run total is that a run-level number hides the culprit — a 9-second run looks fine until one
+      span reveals a single tool call ate 8 of those seconds. With spans you point at the step that was
+      slow, expensive, or failed; without them you are left guessing from the output alone.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — off-topic and technically wrong: claims run-level totals are enough, that
+  # a trace makes the run cheaper, and that per-step data is pointless. Fails the gate
+  # (technically_correct) plus every other check. 0/4 = 0.0 → fail; gate false caps fail→fail.
+  - answer: >-
+      You do not really need per-step spans — the run's final total cost and total time tell you
+      everything, and if a run is slow you can just read the last output to see what went wrong. Adding a
+      trace mostly makes the agent cheaper to run because it caches the steps, and giving runs an id is
+      pointless since every run is basically the same. Recording each step's latency and tool is wasted
+      effort that no one ever looks at.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # FAIL — a second clear fail: vague, non-responsive, and wrong (a trace is a log level,
+  # spans are unrelated). Misses every check. 0/4 = 0.0 → fail; gate false caps fail→fail.
+  - answer: >-
+      Observability is important and teams should care about it. A trace is basically just turning on
+      debug logging, and a span is a bit of CSS layout, so they are not really connected to agents. The
+      main thing is to have good vibes about the system and trust that if something breaks someone will
+      notice. Numbers like latency are nice to have but not something you would actually record per step.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }

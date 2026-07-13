@@ -1,0 +1,54 @@
+# Missing term (cloze)
+- id: cloze-trace
+  type: text_input
+  tags: [trace]
+  difficulty: 1
+  prompt: "The complete per-step record of one agent run is called a ____."
+  answer:
+    regex: '^trace$'
+    normalize: true
+
+- id: cloze-span
+  type: text_input
+  tags: [spans]
+  difficulty: 1
+  prompt: "The record of a single step within a trace is a ____."
+  answer:
+    regex: '^span$'
+    normalize: true
+
+- id: cloze-metrics
+  type: text_input
+  tags: [metrics]
+  difficulty: 2
+  prompt: "Cost, latency, and failure rate are the production ____ you watch in aggregate."
+  answer:
+    regex: '^metrics$'
+    normalize: true
+
+- id: cloze-alert
+  type: text_input
+  tags: [alerts]
+  difficulty: 2
+  prompt: "A rule that fires when a metric crosses a threshold is an ____."
+  answer:
+    regex: '^alerts?$'
+    normalize: true
+
+- id: cloze-latency
+  type: text_input
+  tags: [spans]
+  difficulty: 1
+  prompt: "The time a step takes, recorded per span in milliseconds, is its ____."
+  answer:
+    regex: '^latency$'
+    normalize: true
+
+- id: cloze-dashboard
+  type: text_input
+  tags: [alerts]
+  difficulty: 2
+  prompt: "The always-on view of aggregate trends you scan is a ____."
+  answer:
+    regex: '^dashboard$'
+    normalize: true

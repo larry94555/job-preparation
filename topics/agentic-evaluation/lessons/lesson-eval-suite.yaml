@@ -1,0 +1,14 @@
+id: lesson-eval-suite
+title: "Run the whole suite"
+material: eval-suite.md
+segments:
+  - present: run-the-whole-suite
+  - check: mc-pass-rate
+  - check: cloze-suite
+  - check: fe-pass-rate
+  - check: fe-metrics
+  - present: track-the-four-metrics
+  - check: mc-four-metrics
+  - check: mc-regression
+  - check: cloze-regression
+  - apply: code-eval-suite

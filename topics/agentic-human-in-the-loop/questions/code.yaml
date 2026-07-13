@@ -1,0 +1,61 @@
+# Coding exercises — engine type: code (graded by tests + concept skill)
+- id: code-risk-gate
+  type: code
+  language: python
+  tags: [risk]
+  difficulty: 3
+  prompt: >-
+    Implement `assess_risk(action: str) -> str`. Return `"high"` when the action starts with any of
+    `delete` / `send_email` / `charge_payment` / `post_public` / `modify_database` (these are
+    irreversible or expensive). Return `"medium"` when it starts with `create` / `update` / `schedule`.
+    Otherwise return `"low"`. The match is by prefix, so `"delete_user"` and `"delete"` are both high.
+  starter_file: exercises/risk-gate/starter.py
+  test_file: exercises/risk-gate/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-hil-code
+  concept_checks:
+    must_use: ["classify high risk by the irreversible/expensive prefixes", "classify medium risk by the mutating prefixes", "default everything else to low", "match by prefix so delete_user is high"]
+    avoid_antipattern: ["treating an irreversible action as low risk", "returning the same level for every action"]
+
+- id: code-approval-gate
+  type: code
+  language: python
+  tags: [approval]
+  difficulty: 3
+  prompt: >-
+    Implement `execute_with_approval(action, params, approve, execute, audit) -> dict`. Compute
+    `risk = assess_risk(action)` (a copy of assess_risk is provided). If `risk == "high"` and
+    `approve(action, params)` is False, append a rejected record to `audit` and return
+    `{"status": "rejected"}` WITHOUT calling `execute`. Otherwise append an audit record and return
+    `{"status": "executed", "result": execute(action, params)}`. Low/medium actions run without approval.
+  starter_file: exercises/approval-gate/starter.py
+  test_file: exercises/approval-gate/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-hil-code
+  concept_checks:
+    must_use: ["gate only high-risk actions behind approval", "do NOT call execute on a rejected high-risk action", "append an audit record on every decision", "run low/medium actions without approval"]
+    avoid_antipattern: ["executing a high-risk action after the human rejected it", "asking for approval on a low-risk action"]
+
+- id: code-audit-log
+  type: code
+  language: python
+  tags: [audit]
+  difficulty: 3
+  prompt: >-
+    Implement an `AuditLog` class. `record(action, params, risk, decision)` appends a record (carrying at
+    least those four fields) to an internal list, preserving call order. `query(action=None)` returns all
+    records when `action` is None, otherwise only the records whose `action` matches. The log is
+    append-only — records are added, never rewritten.
+  starter_file: exercises/audit-log/starter.py
+  test_file: exercises/audit-log/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-hil-code
+  concept_checks:
+    must_use: ["append each record to an internal list in order", "record action, params, risk, and decision", "return all records when action is None", "filter by action otherwise"]
+    avoid_antipattern: ["overwriting earlier records instead of appending", "ignoring the action filter in query"]

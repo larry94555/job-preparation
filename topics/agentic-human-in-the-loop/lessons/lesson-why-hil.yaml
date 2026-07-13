@@ -1,0 +1,14 @@
+id: lesson-why-hil
+title: "Why full autonomy is dangerous"
+material: why-hil.md
+segments:
+  - present: autonomy-is-dangerous
+  - check: mc-why-hil
+  - check: mc-agent-unsure
+  - check: cloze-risk
+  - present: classify-actions-by-risk
+  - check: mc-risk-classes
+  - check: mc-high-risk
+  - check: cloze-irreversible
+  - check: fe-irreversible
+  - check: fe-high-risk

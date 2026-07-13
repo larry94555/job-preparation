@@ -1,0 +1,19 @@
+# Frontier drill (L4) — open problems in agent security.
+- id: frontier-security
+  type: multiple_choice
+  tags: [injection]
+  difficulty: 4
+  prompt: >-
+    A production agent fetches web pages and documents with its tools, and an attacker plants a payload in
+    a page that only fires three tool calls later. Which named open problem is this, and what is the honest
+    read?
+  options:
+    - { text: "Indirect / second-order injection via tool-fetched content — an open problem: there is no general fix, since a capable model follows instructions wherever they appear, and larger models do not close it", correct: true }
+    - { text: "It is fully solved by sanitizing the user's direct prompt before each request" }
+    - { text: "It is a latency issue; a faster model avoids reading the malicious page" }
+    - { text: "It is not a real problem because the attacker never talks to the agent directly" }
+  explanation: >-
+    The dangerous injections arrive indirectly — planted in content the agent fetches — and can chain
+    through tools so the payload detonates deep in a sequence. There is no known way to let a model follow
+    instructions yet never follow instructions hidden in data; agent security is an active frontier, not a
+    solved checklist, and larger models do not close the gap.

@@ -1,0 +1,13 @@
+id: lesson-spans
+title: "A span per step"
+material: spans.md
+segments:
+  - present: a-span-per-step
+  - check: mc-span
+  - check: mc-per-step
+  - check: mc-tool-latency
+  - check: cloze-span
+  - check: cloze-latency
+  - check: fe-span
+  - check: fe-latency
+  - apply: essay-tracing

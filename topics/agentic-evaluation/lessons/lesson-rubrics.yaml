@@ -1,0 +1,11 @@
+id: lesson-rubrics
+title: "Score against explicit criteria"
+material: rubrics.md
+segments:
+  - present: score-against-explicit-criteria
+  - check: mc-rubric
+  - check: mc-strict-json
+  - check: cloze-rubric
+  - check: cloze-criteria
+  - check: fe-criteria
+  - apply: essay-judge

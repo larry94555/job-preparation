@@ -1,0 +1,24 @@
+# Essay
+- id: essay-injection
+  type: essay
+  length: short
+  tags: [injection]
+  difficulty: 3
+  prompt: "Explain what prompt injection is, contrast the vulnerable pattern (untrusted content concatenated into instructions) with the safe pattern, and describe how separating system instructions from untrusted content defends against it."
+  eval_skill: eval-agentic-security-essay
+  reference_points:
+    - "Prompt injection is when untrusted content the agent reads (a page, email, tool result) contains instructions the model follows as if you had issued them — the #1 risk on the OWASP LLM Top 10."
+    - "The vulnerable pattern concatenates fetched/untrusted text directly into the instruction string, so the model cannot tell your instructions from the injected ones; the safe pattern keeps instructions in the system channel and marks fetched text as data, not commands."
+    - "Separating trusted system instructions from untrusted content — wrapping and labeling the untrusted region and telling the model to never obey instructions inside it — is the first defense, and it layers with sanitizing since separation alone is not a guarantee."
+
+- id: essay-guardrails
+  type: essay
+  length: short
+  tags: [sandbox]
+  difficulty: 3
+  prompt: "Describe the guardrails that defend an agent beyond prompt-injection separation: sandboxing untrusted code, redacting PII, and output filters. Explain why security must be built in, not bolted on."
+  eval_skill: eval-agentic-security-essay
+  reference_points:
+    - "Sandbox untrusted or model-written code in an isolated environment with no access to the real filesystem, network, secrets, or host, so hostile code can run and fail without touching anything that matters."
+    - "Redact PII before it enters the context (so it cannot be leaked or logged) and add output filters that inspect a proposed action and block disallowed tools before execution — the confused-deputy defense."
+    - "Build security in from the start with least authority and defense in depth: these controls are robust when they are part of the architecture and brittle when retrofitted after an incident, and no single layer is trusted."
