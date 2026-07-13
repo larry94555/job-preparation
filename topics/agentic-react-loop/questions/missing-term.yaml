@@ -1,0 +1,54 @@
+# Missing term (cloze)
+- id: cloze-react
+  type: text_input
+  tags: [react]
+  difficulty: 1
+  prompt: "The loop that interleaves reasoning and acting is called ____."
+  answer:
+    regex: '^react$'
+    normalize: true
+
+- id: cloze-observe
+  type: text_input
+  tags: [react]
+  difficulty: 1
+  prompt: "After the agent acts, the step where it reads the real tool result is ____."
+  answer:
+    regex: '^observe$'
+    normalize: true
+
+- id: cloze-loop
+  type: text_input
+  tags: [loop]
+  difficulty: 1
+  prompt: "Reason → Act → Observe → Decide repeats inside a single ____."
+  answer:
+    regex: '^loop$'
+    normalize: true
+
+- id: cloze-max-steps
+  type: text_input
+  tags: [guardrails]
+  difficulty: 2
+  prompt: "The max-____ cap bounds how many iterations the loop may run."
+  answer:
+    regex: '^step$'
+    normalize: true
+
+- id: cloze-validate
+  type: text_input
+  tags: [validation]
+  difficulty: 2
+  prompt: "Before feeding an observation back, ____ it so garbage never re-enters the loop."
+  answer:
+    regex: '^validate$'
+    normalize: true
+
+- id: cloze-thought
+  type: text_input
+  tags: [react]
+  difficulty: 2
+  prompt: "The written reasoning the agent produces before an action is its ____."
+  answer:
+    regex: '^thought$'
+    normalize: true

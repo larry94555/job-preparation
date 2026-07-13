@@ -1,0 +1,18 @@
+sections:
+  - id: sec-supervisor
+    title: "When multi-agent helps & the supervisor pattern"
+    lessons: [lesson-when-multi-agent, lesson-supervisor, lesson-expert-context]
+    assessment:
+      title: "Section 1 — When multi-agent helps & the supervisor pattern"
+      from_tags: [supervisor, orchestration]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-handoffs
+    title: "Handoffs & failure modes"
+    lessons: [lesson-handoffs, lesson-failure-modes, lesson-frontier-ops]
+    assessment:
+      title: "Section 2 — Handoffs & failure modes"
+      from_tags: [handoff, validation]
+      count: 5
+      pass_threshold: 0.8

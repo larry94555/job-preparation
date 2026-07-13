@@ -1,0 +1,10 @@
+id: agentic-multi-agent
+title: "Multi-Agent Orchestration"
+description: "One agent has limits; sometimes you need a team — but more agents is not automatically better. Learn the supervisor pattern (specialists coordinated by a supervisor), and the handoff failure modes where multi-agent systems quietly fall apart: unvalidated handoffs, silent bad outputs, and approval loops with no exit."
+track: agentic
+pass_threshold: 0.8
+tag_weights:
+  supervisor: 1.2
+  orchestration: 1.0
+  handoff: 1.2
+  validation: 1.0

@@ -1,0 +1,61 @@
+# Calibration for eval-agentic-react-code (exemplars target the react-loop / validate-observation exercises).
+# Exactly 2 clear PASS + 2 clear FAIL — no borderline cases.
+skill: eval-agentic-react-code
+cases:
+  # PASS — run_react is conceptually right on every axis. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      tests_passed=true. technically_correct holds: run_react loops while the step kind is "action", runs
+      tools[tool](tool_input), appends the observation to messages, and returns {"answer": ..., "steps": n}
+      on a "final" step. handles_limits holds: it iterates over range(max_steps) and, when no final is
+      reached, returns {"answer": None, "steps": max_steps, "stopped": "step_limit"} instead of spinning.
+      validates_output holds: it only indexes tools the step named and feeds the observation back through
+      the loop. matches_intent holds: it returns the required dict shapes for both the final and the
+      step-limit cases exactly as asked.
+      signals.must_use=[loop while kind is action, feed observation back, return on final, cap with max_steps and signal step_limit];
+      avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, handles_limits: true, validates_output: true, matches_intent: true }
+
+  # PASS — validate_observation is conceptually right on every axis. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      tests_passed=true. technically_correct holds: validate_observation returns {"ok": True, "value": obs}
+      for a non-empty dict or a non-empty string and {"ok": False, "error": "empty_observation"} for None,
+      "", and {}. handles_limits is not applicable but the structured rejection keeps a bad observation out
+      of the loop. validates_output holds: it explicitly checks type and emptiness before accepting the
+      observation rather than trusting it. matches_intent holds: it returns the exact ok/error dict the
+      prompt specified for each case.
+      signals.must_use=[accept non-empty dict or string, reject None/empty string/empty dict, structured ok/error];
+      avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, handles_limits: true, validates_output: true, matches_intent: true }
+
+  # FAIL — run_react returns after a single model step with no cap and never feeds observations back.
+  # Fails the gate plus every other check. 0/4 = 0.0 → fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: run_react calls client.step exactly once and
+      returns step.answer regardless of whether the step kind is "action" or "final", so it never runs a
+      tool, never observes, and never loops. handles_limits does NOT hold: there is no max_steps cap and no
+      step_limit result — a model that keeps asking for actions is never bounded. validates_output does NOT
+      hold: it never inspects or feeds back any observation. matches_intent does NOT hold: the prompt asked
+      for a ReAct loop with a cap and it implements a single-shot call.
+      signals.must_use=[loop while kind is action]; avoid=[returning after a single model step, looping without a step cap].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, handles_limits: false, validates_output: false, matches_intent: false }
+
+  # FAIL — validate_observation treats empty observations as valid and raises on None.
+  # Fails the gate plus every other check. 0/4 = 0.0 → fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: validate_observation returns {"ok": True} for
+      every input, so an empty string, an empty dict, and even None are all accepted as valid observations
+      and would be fed straight back into the loop. handles_limits does NOT hold: nothing bounds or rejects
+      a bad observation. validates_output does NOT hold: there is no emptiness or type check at all — it
+      trusts whatever it is handed and raises an unhandled error on None instead of returning a structured
+      result. matches_intent does NOT hold: the prompt asked it to reject None/""/{} with
+      empty_observation and it does the opposite.
+      signals.must_use=[reject None/empty string/empty dict]; avoid=[treating an empty observation as valid, raising instead of returning a structured error].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, handles_limits: false, validates_output: false, matches_intent: false }

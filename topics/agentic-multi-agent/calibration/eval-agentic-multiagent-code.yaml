@@ -1,0 +1,63 @@
+# Calibration for eval-agentic-multiagent-code (exemplars target the supervisor / approval-loop exercises).
+skill: eval-agentic-multiagent-code
+cases:
+  # PASS — sound supervisor: research then write, bounded revision loop, returns on
+  # approval and returns last content after the cap. 4/4 -> pass; gate true.
+  - answer: >-
+      tests_passed=true. technically_correct holds: supervise calls research_agent(task), then
+      writer_agent(research, None), then loops up to max_revisions calling critic_agent, returns content the
+      moment review["approved"] is true, and returns the last content after the cap. handles_loop_exit holds:
+      the revision loop is bounded by range(max_revisions) and returns gracefully when it ends without
+      approval. validates_handoff holds: it respects the critic's approval before returning and feeds the
+      critic's issues into the next revision instead of shipping the rejected draft. matches_intent holds: it
+      coordinates the three specialists exactly as asked.
+      signals.must_use=[research then write, loop up to max_revisions, return on approval, return last content after cap];
+      avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, handles_loop_exit: true, validates_handoff: true, matches_intent: true }
+
+  # PASS — sound approval loop: returns on approval with the right tries, bounded by
+  # max_tries, returns approved False at the cap. 4/4 -> pass; gate true.
+  - answer: >-
+      tests_passed=true. technically_correct holds: revise_until_approved loops from 1..max_tries, calls
+      critic(draft), returns {"content": draft, "approved": True, "tries": n} on approval, otherwise revises
+      with r["issues"], and after the cap returns {"content": draft, "approved": False, "tries": max_tries}.
+      handles_loop_exit holds: the loop is bounded by max_tries and returns an unapproved result when it is
+      hit instead of spinning forever. validates_handoff holds: it only returns approved=True when the critic
+      actually approved. matches_intent holds: the returned dict shape and tries count match the prompt.
+      signals.must_use=[return on approval, cap at max_tries, approved False with tries==max_tries when never approved];
+      avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, handles_loop_exit: true, validates_handoff: true, matches_intent: true }
+
+  # FAIL — no loop exit: the approval loop uses `while not approved` with no cap, so a
+  # critic that never approves loops forever. Fails the gate plus loop-exit and intent.
+  # 0/4 -> fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: revise_until_approved uses `while True` / `while
+      not approved` with no max_tries check, so when the critic never approves it loops forever and never
+      returns the bounded {"approved": False, "tries": max_tries} result. handles_loop_exit does NOT hold:
+      there is no bounded exit at all. validates_handoff does NOT hold: it never returns the unapproved
+      result the prompt requires. matches_intent does NOT hold: the prompt asked for a max_tries cap and the
+      code has none.
+      signals.must_use=[return on approval]; avoid=[looping without a max_tries exit].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, handles_loop_exit: false, validates_handoff: false, matches_intent: false }
+
+  # FAIL — passes empty handoffs through and ignores the critic: validate_handoff
+  # returns ok=True for None/empty, and supervise returns the first draft without ever
+  # checking approval. Fails the gate plus validate-handoff and intent. 0/4 -> fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: validate_handoff returns {"ok": True, "value":
+      output} for every input including None and empty containers, so an empty handoff is passed along as
+      valid, and supervise returns writer_agent(research, None) immediately without ever calling the critic
+      or looping. handles_loop_exit does NOT hold: there is no revision loop. validates_handoff does NOT
+      hold: empty output is accepted and the critic's approval is never checked. matches_intent does NOT
+      hold: it neither rejects empty handoffs nor coordinates the revision loop the prompt describes.
+      signals.must_use=[]; avoid=[passing an empty output through as valid, ignoring the critic's approval].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, handles_loop_exit: false, validates_handoff: false, matches_intent: false }

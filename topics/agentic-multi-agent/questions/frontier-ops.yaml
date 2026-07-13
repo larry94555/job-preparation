@@ -1,0 +1,19 @@
+# Frontier drill (L4) — open problems in multi-agent systems.
+- id: frontier-multi-agent
+  type: multiple_choice
+  tags: [orchestration]
+  difficulty: 4
+  prompt: >-
+    A production multi-agent system scales to dozens of agents and its cost and error rate climb
+    faster than the work does, with failures that appear only at scale and no clean way to attribute
+    them. Which named open problems is this, and what is the honest read?
+  options:
+    - { text: "Reliable handoffs, cost explosion, and emergent failures at scale — genuine open problems: handoff errors compound silently, every added agent multiplies token cost, and some failures only emerge from agent interaction, so more agents is not a free win", correct: true }
+    - { text: "It is fully solved by adding a supervisor on top of the supervisors" }
+    - { text: "It is only a latency problem; a faster model makes large agent networks correct and cheap" }
+    - { text: "It is not a real problem — agents never interact in ways that produce new failures" }
+  explanation: >-
+    Keeping handoffs reliable as an agent graph grows, containing the cost explosion from every extra
+    agent's tokens and turns, and taming emergent failures that only appear from agent interaction at
+    scale are real frontier open problems. Validation and a supervisor help but do not close them; larger
+    models or more agents do not automatically make a big multi-agent system correct or cheap.

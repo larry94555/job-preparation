@@ -1,0 +1,6 @@
+id: lesson-expert-context
+title: "Expert context: the ReAct pattern"
+material: expert-context.md
+segments:
+  - present: the-react-pattern
+  - check: expert-react-paper

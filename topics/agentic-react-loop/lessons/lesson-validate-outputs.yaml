@@ -1,0 +1,9 @@
+id: lesson-validate-outputs
+title: "Validate tool outputs"
+material: validate-outputs.md
+segments:
+  - present: validate-tool-outputs-before-feeding-back
+  - check: mc-validate-output
+  - check: cloze-validate
+  - check: fe-validate
+  - apply: code-validate-observation

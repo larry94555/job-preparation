@@ -1,0 +1,10 @@
+id: lesson-reason-act-observe
+title: "Observe before you decide"
+material: reason-act-observe.md
+segments:
+  - present: observe-before-you-decide
+  - check: mc-observe
+  - check: mc-decide
+  - check: cloze-observe
+  - check: fe-observe
+  - apply: essay-react

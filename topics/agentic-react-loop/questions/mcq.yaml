@@ -1,0 +1,120 @@
+# Multiple choice
+- id: mc-react-def
+  type: multiple_choice
+  tags: [react]
+  difficulty: 2
+  prompt: "What is the ReAct loop that a single agent runs?"
+  options:
+    - { text: "Reason about the task, Act by calling a tool, Observe the result, and Decide whether to continue or finish", correct: true }
+    - { text: "Retrieve documents, Answer, and Cite — a pure RAG pipeline with no tools" }
+    - { text: "Repeatedly ask the user for input until the model has enough context" }
+    - { text: "Run every tool in parallel once and concatenate the outputs into the answer" }
+  explanation: "ReAct interleaves reasoning and acting: the agent reasons, acts by calling a tool, observes the tool's result, and decides whether to loop again or return a final answer. That Reason→Act→Observe→Decide cycle is the whole pattern."
+
+- id: mc-observe
+  type: multiple_choice
+  tags: [react]
+  difficulty: 2
+  prompt: "In the ReAct loop, what is the Observe step?"
+  options:
+    - { text: "Reading the tool's actual result and appending it to the conversation before the agent reasons again", correct: true }
+    - { text: "The model narrating what it thinks the tool would return, without running it" }
+    - { text: "A final summary shown to the user after the loop ends" }
+    - { text: "Discarding the tool output and re-reasoning from the original prompt" }
+  explanation: "Observe means feeding the real tool result back into the loop. The agent acts, then observes what actually came back, and only then reasons about the next step — grounding the next decision in reality rather than a guess."
+
+- id: mc-loop-step
+  type: multiple_choice
+  tags: [loop]
+  difficulty: 2
+  prompt: "What tells the ReAct loop to keep going versus stop?"
+  options:
+    - { text: "The kind of step the agent returns: an action means run a tool and continue; a final answer means stop", correct: true }
+    - { text: "A fixed timer — the loop always runs for exactly ten seconds" }
+    - { text: "Whether the user typed the word \"stop\" in the prompt" }
+    - { text: "The loop never stops on its own; a human must interrupt it" }
+  explanation: "Each step the agent emits is either an action (call a tool, observe, loop again) or a final answer (return and stop). The kind of the step is the signal that drives one more iteration or ends the loop."
+
+- id: mc-thought
+  type: multiple_choice
+  tags: [react]
+  difficulty: 2
+  prompt: "What is the role of the Thought (Reason) step before an action?"
+  options:
+    - { text: "The agent reasons in writing about what to do next, which then justifies the tool it picks", correct: true }
+    - { text: "It is decorative text that the harness strips out and ignores" }
+    - { text: "It runs the tool a first time as a dry run" }
+    - { text: "It is the final answer written early so the loop can exit" }
+  explanation: "The Thought is the explicit reasoning that precedes an action: the agent writes down what it is trying to do, and that reasoning is what selects the next tool and its input. Reasoning and acting are interleaved, not separate phases."
+
+- id: mc-decide
+  type: multiple_choice
+  tags: [react]
+  difficulty: 2
+  prompt: "After the agent observes a tool result, what is the Decide step?"
+  options:
+    - { text: "Judging whether it now has enough to answer — if yes, finish; if not, reason and act again", correct: true }
+    - { text: "Always calling exactly one more tool no matter what was observed" }
+    - { text: "Handing control to a second agent to make the choice" }
+    - { text: "Deleting the observation so the next turn starts fresh" }
+  explanation: "Decide is the branch at the end of each iteration: with the new observation in hand, the agent either concludes it can answer and returns a final, or it reasons and acts again. That decision is what makes the loop adaptive rather than fixed-length."
+
+- id: mc-max-steps
+  type: multiple_choice
+  tags: [guardrails]
+  difficulty: 2
+  prompt: "Why cap a single-agent loop with a max-steps limit?"
+  options:
+    - { text: "So a model that keeps requesting tools (or loops between two of them) turns into a bounded, observable failure instead of running forever", correct: true }
+    - { text: "So the model answers faster on the very first turn" }
+    - { text: "Because tools are only allowed to run ten times per day" }
+    - { text: "So the agent can skip the Observe step entirely" }
+  explanation: "Without a hard cap, an agent that never emits a final answer spins indefinitely. A max-steps limit converts that into a bounded, detectable stop — the loop ends, reports it hit the cap, and never burns unbounded compute."
+
+- id: mc-cant-finish
+  type: multiple_choice
+  tags: [guardrails]
+  difficulty: 3
+  prompt: "The loop hits its max-steps cap without ever producing a final answer. What should it return?"
+  options:
+    - { text: "A structured can't-finish result — e.g. answer=None with a reason like \"step_limit\" — not a crash or a fabricated answer", correct: true }
+    - { text: "The last tool output, relabeled as the final answer" }
+    - { text: "A random one of the observations it collected" }
+    - { text: "Nothing — it should raise an unhandled exception and exit the process" }
+  explanation: "Hitting the cap is an expected outcome, not a bug. The loop should return a structured can't-finish signal (no answer, a stop reason like step_limit) so the caller can see the agent gave up cleanly rather than inventing an answer or crashing."
+
+- id: mc-log-steps
+  type: multiple_choice
+  tags: [guardrails]
+  difficulty: 2
+  prompt: "Why log every step (thought, action, observation) of the loop?"
+  options:
+    - { text: "So a run is auditable and debuggable — you can see exactly what the agent reasoned, called, and observed at each iteration", correct: true }
+    - { text: "So the model runs faster by caching its own reasoning" }
+    - { text: "Logging replaces the need for a step cap" }
+    - { text: "So the user can edit the observations mid-run" }
+  explanation: "Per-step logging makes an otherwise opaque loop observable: when an agent goes wrong, the log of thought/action/observation at each step is how you find where it drifted. It is the operational record of the run, not a performance optimization."
+
+- id: mc-validate-output
+  type: multiple_choice
+  tags: [validation]
+  difficulty: 3
+  prompt: "Before feeding a tool's output back as an observation, what should the loop do?"
+  options:
+    - { text: "Validate it — reject empty or malformed output before it re-enters the loop, so the agent never reasons over garbage", correct: true }
+    - { text: "Trust it unconditionally; a tool never returns bad output" }
+    - { text: "Feed it back only if it is longer than 100 characters" }
+    - { text: "Ask the model whether its own observation is valid" }
+  explanation: "A tool can return nothing, an empty structure, or malformed data. Validating the observation before feeding it back keeps the agent from reasoning over garbage — you reject the bad observation at the boundary instead of letting it corrupt the next decision."
+
+- id: mc-rogue
+  type: multiple_choice
+  tags: [guardrails]
+  difficulty: 3
+  prompt: "Which combination of guardrails keeps a single agent from going rogue in its loop?"
+  options:
+    - { text: "A max-steps cap, a can't-finish path, per-step logging, and validating tool outputs before feeding them back", correct: true }
+    - { text: "A larger context window and a faster model" }
+    - { text: "Removing the Observe step so the loop is shorter" }
+    - { text: "Letting the agent decide its own step limit at runtime" }
+  explanation: "The four guardrails work together: the max-steps cap bounds runtime, the can't-finish path handles giving up cleanly, per-step logging makes the run auditable, and validating outputs keeps bad observations out of the loop. Bigger models or shorter loops do not substitute for them."

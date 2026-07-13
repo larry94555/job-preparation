@@ -1,0 +1,11 @@
+id: lesson-when-multi-agent
+title: "When multi-agent is worth it"
+material: when-multi-agent.md
+segments:
+  - present: one-agent-first
+  - check: mc-single-first
+  - check: fe-single-first
+  - check: cloze-single
+  - present: more-agents-is-not-better
+  - check: mc-more-not-better
+  - apply: essay-supervisor

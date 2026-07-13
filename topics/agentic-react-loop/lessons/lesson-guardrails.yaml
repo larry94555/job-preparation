@@ -1,0 +1,14 @@
+id: lesson-guardrails
+title: "Guardrails on the loop"
+material: guardrails.md
+segments:
+  - present: cap-the-loop
+  - check: mc-max-steps
+  - check: mc-cant-finish
+  - check: mc-rogue
+  - check: cloze-max-steps
+  - check: fe-step-limit
+  - present: log-every-step
+  - check: mc-log-steps
+  - check: fe-log
+  - apply: essay-guardrails

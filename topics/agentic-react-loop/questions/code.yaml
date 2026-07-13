@@ -1,0 +1,64 @@
+# Coding exercises — engine type: code (graded by tests + concept skill)
+- id: code-react-loop
+  type: code
+  language: python
+  tags: [loop]
+  difficulty: 3
+  prompt: >-
+    Implement `run_react(client, task, tools, max_steps=10) -> dict`. `client.step(messages)` returns an
+    object with `.kind` ("action" or "final"), `.tool`, `.tool_input`, and `.answer`. Loop: on "action"
+    run `tools[tool](tool_input)`, append the observation to `messages`, and call `client.step` again; on
+    "final" return `{"answer": answer, "steps": n, "log": [...]}` where `n` is the number of model steps.
+    If `max_steps` is reached without a final, return
+    `{"answer": None, "steps": max_steps, "stopped": "step_limit", "log": [...]}`. Cap the loop so a
+    model that never finishes can't spin forever.
+  starter_file: exercises/react-loop/starter.py
+  test_file: exercises/react-loop/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-react-code
+  concept_checks:
+    must_use: ["loop while the step kind is action", "run the requested tool and feed the observation back", "return the answer on a final step", "cap the loop with max_steps and signal step_limit"]
+    avoid_antipattern: ["returning after a single model step", "looping without a step cap"]
+
+- id: code-validate-observation
+  type: code
+  language: python
+  tags: [validation]
+  difficulty: 2
+  prompt: >-
+    Implement `validate_observation(obs) -> dict`. Return `{"ok": True, "value": obs}` for a non-empty
+    dict or a non-empty string. Return `{"ok": False, "error": "empty_observation"}` for `None`, an empty
+    string `""`, or an empty dict `{}`. The point is to reject a bad observation before it is fed back
+    into the loop.
+  starter_file: exercises/validate-observation/starter.py
+  test_file: exercises/validate-observation/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-react-code
+  concept_checks:
+    must_use: ["accept a non-empty dict or string", "reject None, empty string, and empty dict", "return a structured ok/error result"]
+    avoid_antipattern: ["treating an empty observation as valid", "raising instead of returning a structured error"]
+
+- id: code-reason-act-parse
+  type: code
+  language: python
+  tags: [react]
+  difficulty: 3
+  prompt: >-
+    Implement `parse_react(text) -> dict`. Parse a ReAct block with lines `Thought: ...`,
+    `Action: <tool>`, and `Action Input: <rest>` into
+    `{"thought": ..., "action": ..., "action_input": ...}`. If there is no `Action` line (a final,
+    thought-only step), return `{"thought": ..., "action": None, "action_input": None}`. Strip
+    surrounding whitespace from each captured value.
+  starter_file: exercises/reason-act-parse/starter.py
+  test_file: exercises/reason-act-parse/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-react-code
+  concept_checks:
+    must_use: ["extract the Thought line", "extract Action and Action Input when present", "return None for action and action_input when there is no Action line"]
+    avoid_antipattern: ["assuming an Action line is always present", "returning raw un-stripped fields"]

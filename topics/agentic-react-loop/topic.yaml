@@ -1,0 +1,10 @@
+id: agentic-react-loop
+title: "Single-Agent Workflows (ReAct)"
+description: "Build one agent that works end to end: Reason → Act → Observe → Decide, looping until the job is done. Then add the guardrails that keep it from going rogue — a max-steps cap, a can't-finish path, per-step logging, and validating tool outputs before feeding them back."
+track: agentic
+pass_threshold: 0.8
+tag_weights:
+  react: 1.2
+  loop: 1.0
+  guardrails: 1.2
+  validation: 1.0

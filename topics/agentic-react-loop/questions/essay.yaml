@@ -1,0 +1,24 @@
+# Essay
+- id: essay-react
+  type: essay
+  length: short
+  tags: [react]
+  difficulty: 3
+  prompt: "Walk through the ReAct loop a single agent runs end to end — Reason, Act, Observe, Decide — and explain why each phase matters."
+  eval_skill: eval-agentic-react-essay
+  reference_points:
+    - "Reason (Thought): the agent reasons in writing about what to do next, and that reasoning selects the tool and its input — interleaving reasoning with acting rather than separating them."
+    - "Act then Observe: the agent calls the chosen tool, and the real result is fed back as an observation so the next step is grounded in what actually happened, not a guess."
+    - "Decide and loop: with the observation in hand the agent either concludes it can answer and returns a final, or reasons and acts again — the loop repeats until done, which is what makes it adaptive."
+
+- id: essay-guardrails
+  type: essay
+  length: short
+  tags: [guardrails]
+  difficulty: 3
+  prompt: "A single agent running a loop can go rogue — spin forever, act on garbage, or fail silently. Describe the guardrails that prevent this and why each one matters."
+  eval_skill: eval-agentic-react-essay
+  reference_points:
+    - "Max-steps cap: bound the number of iterations so an agent that never emits a final answer becomes a bounded, observable failure instead of spinning forever."
+    - "Can't-finish path and per-step logging: when the cap is hit, return a structured can't-finish result (no answer, a reason like step_limit) rather than crashing or fabricating one; log every step (thought, action, observation) so the run is auditable and debuggable."
+    - "Validate tool outputs: reject empty or malformed observations before feeding them back, so the agent never reasons over garbage and a bad tool result cannot corrupt the next decision."

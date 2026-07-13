@@ -1,0 +1,12 @@
+# Expert canon (L3) — multi-agent topologies.
+- id: expert-multi-agent-patterns
+  type: multiple_choice
+  tags: [orchestration]
+  difficulty: 3
+  prompt: "How do the supervisor/hierarchical and network multi-agent topologies differ, and when do you pick which?"
+  options:
+    - { text: "Supervisor/hierarchical funnels coordination through one agent (observable, debuggable — the default); a network lets agents talk peer-to-peer (more flexible but harder to trace and control) — reach for the network only when a strict hierarchy genuinely can't express the collaboration", correct: true }
+    - { text: "They are identical; 'network' is just another name for the supervisor pattern" }
+    - { text: "A network topology is always superior because more communication paths mean more capability" }
+    - { text: "The supervisor topology cannot use specialist agents, only the network one can" }
+  explanation: "In the supervisor (hierarchical) topology one agent coordinates and specialists report back to it, which keeps the flow observable and easy to debug — the sensible default. A network topology lets agents communicate peer-to-peer: more flexible, but the interactions are far harder to trace, bound, and control, so you only reach for it when a hierarchy truly can't model the collaboration."

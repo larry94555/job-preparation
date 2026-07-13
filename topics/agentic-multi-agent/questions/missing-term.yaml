@@ -1,0 +1,54 @@
+# Missing term (cloze)
+- id: cloze-supervisor
+  type: text_input
+  tags: [supervisor]
+  difficulty: 1
+  prompt: "The agent that decomposes a task and routes sub-tasks to specialists is the ____."
+  answer:
+    regex: '^supervisor$'
+    normalize: true
+
+- id: cloze-specialist
+  type: text_input
+  tags: [orchestration]
+  difficulty: 1
+  prompt: "The focused agents that each do one narrow job are the ____."
+  answer:
+    regex: '^specialists?$'
+    normalize: true
+
+- id: cloze-handoff
+  type: text_input
+  tags: [handoff]
+  difficulty: 2
+  prompt: "Passing one agent's output to the next agent is a ____."
+  answer:
+    regex: '^handoff$'
+    normalize: true
+
+- id: cloze-validate
+  type: text_input
+  tags: [validation]
+  difficulty: 2
+  prompt: "To catch a silent bad output, ____ every handoff before the next agent uses it."
+  answer:
+    regex: '^validate$'
+    normalize: true
+
+- id: cloze-single
+  type: text_input
+  tags: [supervisor]
+  difficulty: 1
+  prompt: "Before reaching for a team of agents, try a ____ agent first."
+  answer:
+    regex: '^single$'
+    normalize: true
+
+- id: cloze-critic
+  type: text_input
+  tags: [validation]
+  difficulty: 2
+  prompt: "The agent that reviews a draft and approves or rejects it in an approval loop is the ____."
+  answer:
+    regex: '^critic$'
+    normalize: true

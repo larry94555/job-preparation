@@ -1,0 +1,12 @@
+# Expert canon (L3) — the ReAct paper.
+- id: expert-react-paper
+  type: multiple_choice
+  tags: [react]
+  difficulty: 3
+  prompt: "What did ReAct (Yao et al., 2022) contribute to single-agent workflows?"
+  options:
+    - { text: "Synergizing reasoning and acting — interleaving chain-of-thought reasoning with tool actions and observations in one loop, rather than doing them separately", correct: true }
+    - { text: "A fine-tuning method that removes the need for any tools at inference time" }
+    - { text: "A multi-agent protocol for many agents to vote on an answer" }
+    - { text: "A decoding mode that guarantees the model's output matches a JSON schema" }
+  explanation: "ReAct (Yao et al., 2022) is 'synergizing reasoning and acting': the model interleaves reasoning traces (Thought) with actions (tool calls) and observations in a single loop. Reasoning helps it plan and revise actions, while acting lets it gather information — each improving the other, unlike reasoning or acting alone."

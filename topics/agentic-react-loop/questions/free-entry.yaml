@@ -1,0 +1,54 @@
+# Free entry (short answer)
+- id: fe-react-expand
+  type: text_input
+  tags: [react]
+  difficulty: 2
+  prompt: "In ReAct, the \"Re\" is reasoning. What does the \"Act\" stand for? (one word)"
+  answer:
+    regex: '^(act|acting)$'
+    normalize: true
+
+- id: fe-observe
+  type: text_input
+  tags: [react]
+  difficulty: 2
+  prompt: "What is the step where the agent reads the tool's real result called? (one word)"
+  answer:
+    regex: '^(observe|observation)$'
+    normalize: true
+
+- id: fe-step-limit
+  type: text_input
+  tags: [guardrails]
+  difficulty: 2
+  prompt: "What guardrail bounds how many iterations the loop may run? (a word or the parameter name)"
+  answer:
+    regex: '^(max_steps|limit|step)$'
+    normalize: true
+
+- id: fe-log
+  type: text_input
+  tags: [guardrails]
+  difficulty: 2
+  prompt: "To make a run auditable, you ____ every step of the loop. (one word)"
+  answer:
+    regex: '^log$'
+    normalize: true
+
+- id: fe-loop
+  type: text_input
+  tags: [loop]
+  difficulty: 1
+  prompt: "Reason, act, observe, decide, repeat — the whole thing is one ____. (one word)"
+  answer:
+    regex: '^loop$'
+    normalize: true
+
+- id: fe-validate
+  type: text_input
+  tags: [validation]
+  difficulty: 2
+  prompt: "Before an observation is fed back into the loop, you ____ it. (one word)"
+  answer:
+    regex: '^validate$'
+    normalize: true

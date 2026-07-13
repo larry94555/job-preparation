@@ -1,0 +1,24 @@
+# Essay
+- id: essay-supervisor
+  type: essay
+  length: short
+  tags: [supervisor]
+  difficulty: 3
+  prompt: "Explain the supervisor pattern for multi-agent systems, and describe when splitting work into multiple agents is worth it versus keeping a single agent."
+  eval_skill: eval-agentic-multiagent-essay
+  reference_points:
+    - "In the supervisor pattern one coordinating agent decomposes the task, routes each sub-task to a specialist agent, and combines the specialists' results into the final answer — specialists report back to the supervisor rather than talking to each other directly."
+    - "Each specialist has a narrow job, a focused prompt, and a small tool set, which makes it more reliable and easier to evaluate than one do-everything agent."
+    - "Multi-agent is worth it only when a single agent demonstrably can't do the job: more agents add coordination overhead, latency, and handoff failure modes, so you start single-agent and split only when one agent clearly falls short."
+
+- id: essay-handoffs
+  type: essay
+  length: short
+  tags: [handoff]
+  difficulty: 3
+  prompt: "Describe where multi-agent systems break — silent bad outputs, no validation between handoffs, and infinite approval loops — and how to prevent each."
+  eval_skill: eval-agentic-multiagent-essay
+  reference_points:
+    - "Silent bad outputs: a plausible-but-wrong result is passed between agents with no error, so it flows downstream and the whole system fails while every agent reports success."
+    - "No validation between handoffs: prevent it by validating each handoff at the boundary — reject None, empty, or malformed output with a structured error instead of letting the next agent consume garbage."
+    - "Infinite approval loops: a critic that never approves makes a revise-until-approved loop spin forever, so bound it with a max-tries limit and return the best draft when the cap is hit."
