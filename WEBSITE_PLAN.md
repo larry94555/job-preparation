@@ -126,6 +126,11 @@ already serving the LLM, so grading never leaves the machine.
 - **Troubleshooting page** (`/help/signup`) covers: didn't get the email (check spam,
   resend), link expired (request a new one), wrong email (start over), still stuck (email
   support). A **Resend link** button is included.
+- **Tradeoff & optional enhancement:** magic-link means every sign-in needs an email round
+  trip (no password to remember, but a click each time). The existing `web/auth.ts` already
+  supports **Google/GitHub OAuth** behind env keys — enabling Google gives returning users a
+  one-click sign-in and is a low-effort add (set `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET`). Offer
+  both: magic link for anyone, Google for speed.
 - **Acceptance:** a real inbox receives the link within ~1 minute; clicking it creates the
   user row, marks the email verified, and starts a session; an expired/again-clicked link
   shows a friendly "request a new link" message, not an error page.
@@ -230,6 +235,9 @@ No change to `lesson_progress`, `content_topics`, or `grading_jobs`.
   limiting on auth email sends to prevent inbox spam.
 - **Privacy:** collect only the email needed to sign in; publish a short privacy note and a
   terms note (linked in the footer). Donations are processed by Stripe under their terms.
+- **Backups & recovery:** the Postgres volume holds the only irreplaceable data (user
+  accounts, donation records — lesson content and progress can be re-derived). Take a daily
+  `pg_dump` and copy it off the VM, so a lost instance is recoverable. (Runbook Phase H.)
 
 ---
 

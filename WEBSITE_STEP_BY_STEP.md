@@ -17,6 +17,13 @@ Code while it's open in this repository**. Claude Code can read the whole codeba
 prompts tell it exactly what to build and where. After each one, it will show you the changes;
 run the "check it worked" command listed before moving on.
 
+> **⚠️ Save your work as you go (important).** Phases A–E generate new code on your **local
+> computer**. Phase F copies the code onto the server with `git`. So after each phase that
+> passes its checkpoint, **commit and push** your changes:
+> `git add -A && git commit -m "add <feature>" && git push`.
+> If you skip this, the server will not have the pages you generated. When in doubt, ask
+> Claude Code: "commit and push my changes with a clear message."
+
 **Legend:** 🖥️ = type in a terminal · 🌐 = do in a web browser · 🤖 = paste into Claude Code ·
 ✅ = checkpoint (confirm before continuing).
 
@@ -75,7 +82,8 @@ lesson, and keep the real lessons behind sign-in.
 > the **full list of all topics with each topic's title and description/explanation**, plus a
 > banner: 'Free — create an account to unlock every lesson.' For any real topic, the 'Start
 > lesson' button should link to `/signup` when the visitor is not signed in. Use the existing
-> `currentUserId()` helper (`web/lib/session.ts`) to detect sign-in. Keep the existing signed-in
+> `currentUserId()` helper (`web/lib/session.ts`) to detect sign-in. Make the public pages
+> **mobile-responsive** (they are many visitors' first impression). Keep the existing signed-in
 > behavior unchanged. Do not break `npm run typecheck` or the tests."
 
 **A.2 🤖 Create the one sample lesson (no LLM needed).**
@@ -135,6 +143,11 @@ can test:
 enter a real email, and confirm the link arrives and signs you in. Try `/help/signup` and the
 "Resend link" button.
 
+**B.5 🌐 (Optional, recommended) One-click Google sign-in.** Magic-link asks for an email every
+time. The app **already supports Google sign-in** — just create a Google OAuth client (Google
+Cloud Console → OAuth credentials), then set `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET` in your
+env. A "Continue with Google" button appears automatically. No code change needed.
+
 ---
 
 ## Phase C — Confirm the full signed-in experience
@@ -174,8 +187,10 @@ key** and **Secret key**. You'll create a **webhook** in Phase F once you have a
 > **webhook** route (`/api/stripe/webhook`) that records completed donations into a new
 > `donations` table (id, stripe_session_id, amount_cents, currency, email, created_at) in the
 > Postgres store. Read `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, and
-> `STRIPE_WEBHOOK_SECRET` from env. This must work for anonymous visitors too (no sign-in
-> required to donate). Never store card data — Stripe hosts the payment page."
+> `STRIPE_WEBHOOK_SECRET` from env. Enforce a **minimum of $1** on the amount (Stripe's
+> per-payment fee is ~30¢, so smaller tips mostly go to fees) and suggest a few preset amounts
+> ($3 / $5 / $10) alongside the custom field. This must work for anonymous visitors too (no
+> sign-in required to donate). Never store card data — Stripe hosts the payment page."
 
 **D.3 🤖 Add the premium preview (disabled).**
 
@@ -214,6 +229,21 @@ button, enter an amount, and complete a payment using Stripe's test card `4242 4
 **E.3 ✅ Check it worked.** Click the Help link — your email app should open pre-addressed.
 Send a test message to `support@yourdomain.com` and confirm it lands in your personal inbox.
 
+**E.4 🤖 Add a Privacy Policy and Terms page.** Because you collect an email address and accept
+payments, you need these two short pages — Stripe also expects a link to your terms.
+
+> **PROMPT ▸ Privacy & terms**
+> "Add two simple, plain-English pages: `/privacy` and `/terms`, linked in the site footer.
+> Privacy should state what is collected (an email address for sign-in; donation records via
+> Stripe; lesson progress), that no card data is stored (Stripe handles payments), how to
+> request deletion (email support), and that verification emails are sent via Resend. Terms
+> should state the service is provided as-is for educational use, donations are voluntary and
+> non-refundable, and premium is not yet available. Keep both concise and readable; add a
+> 'last updated' date. These are starter templates — advise me to have a professional review
+> them before serious use."
+
+✅ **Check:** `/privacy` and `/terms` load and are linked in the footer.
+
 ---
 
 ## Phase F — Deploy to the Oracle VM and go live
@@ -228,7 +258,10 @@ on one, reuse it. Note its **public IP address**. In the VM's network security s
 inbound **TCP 80 and 443**.
 
 **F.2 🖥️ Get the code and secrets onto the VM.** SSH into the VM and:
-- `git clone <your repo URL>` (or pull the latest).
+- `git clone <your repo URL>` (or `git pull` if already cloned). **This must include all the
+  features you generated in Phases A–E** — so make sure you committed and pushed them (see the
+  "Save your work as you go" note near the top). Confirm with `git log --oneline -5` that your
+  feature commits are present.
 - `cd` into the repo. Create the production secrets file (git-ignored — never commit it). The
   repo already ignores `secrets/*.env`. Fill in every value:
 
@@ -242,10 +275,16 @@ CONTENT=db
 QUEUE=db
 SANDBOX=http
 SANDBOX_URL=http://sandbox:4500
-# LLM (already running on this box)
+# Auth.js v5 canonical URL var (behind the Caddy proxy). trustHost is already on,
+# but setting this makes the magic-link callback URLs correct.
+AUTH_URL=https://yourdomain.com
+# LLM (already running on this box). DEPLOY_ENV=hosted forces the single Oracle
+# backend and makes the /models config read-only in production.
+DEPLOY_ENV=hosted
 LLAMA_BASE_URL=http://<llm-host-or-container>:8080/v1
 LLAMA_API_KEY=<your Oracle LLM key>
 MODEL_CONFIG_PATH=/app/model_configuration.yaml
+LLAMA_TIMEOUT_MS=120000
 # Email (Resend)
 RESEND_API_KEY=<from Resend>
 EMAIL_FROM=verify@yourdomain.com
@@ -254,7 +293,6 @@ SUPPORT_EMAIL=support@yourdomain.com
 STRIPE_SECRET_KEY=<Stripe live secret when ready; test key until then>
 STRIPE_PUBLISHABLE_KEY=<Stripe publishable>
 STRIPE_WEBHOOK_SECRET=<from step F.6>
-NEXTAUTH_URL=https://yourdomain.com
 ```
 
 > **PROMPT ▸ Deployment doublecheck** (run in Claude Code before deploying)
@@ -279,10 +317,12 @@ either on or off per Caddy guidance below.
 
 **F.5 🖥️ Start everything.** On the VM:
 - `docker compose -f docker-compose.prod.yml --env-file secrets/prod.env up -d --build`
-- Apply the database schema (first time): run the migration/`db:push` against the running
-  `db` (see `DEPLOY.md`; do it once).
-- Import the lesson content into Postgres (the `content_topics` projection): run the content
-  import step from `HOSTING.md` / `DEPLOY.md` so the site serves topics from the DB.
+- Apply the database schema (first time only): with `DATABASE_URL` pointing at the running
+  `db`, run 🖥️ `npm run db:push` once (creates all tables, including the auth tables from
+  Phase B).
+- Import the lesson content into Postgres (the `content_topics` projection) so the site
+  serves topics from the DB: 🖥️ `CONTENT=db npm run db:import` (with `DATABASE_URL` set).
+  This is idempotent — safe to re-run after content changes.
 - 🖥️ `docker compose -f docker-compose.prod.yml ps` — confirm `web`, `worker`, `sandbox`,
   `db`, and `caddy` are all "Up."
 
@@ -320,7 +360,36 @@ When all seven pass, **you are live.**
 
 ---
 
-## Phase H — Later: turn premium ON (not part of launch)
+## Phase H — Keep it running (updates, backups, monitoring)
+
+Small, mostly one-time setup that protects you after launch.
+
+**H.1 🖥️ Deploying an update later.** When you (or Claude Code) change the site: commit and
+push locally, then on the VM run `git pull` and
+`docker compose -f docker-compose.prod.yml --env-file secrets/prod.env up -d --build`. If you
+changed the database shape, run `npm run db:push` once; if you changed lesson content, run
+`CONTENT=db npm run db:import`.
+
+**H.2 🖥️ Back up the database (do this — it holds your users and donations).** Add a daily
+`pg_dump` of the `db` container to a file, e.g. a cron job:
+`docker exec <db-container> pg_dump -U jobprep jobprep > ~/backups/jobprep-$(date +%F).sql`.
+Copy those backups somewhere off the VM (e.g. Cloudflare R2 free tier or your own storage)
+so a lost VM doesn't lose your data.
+
+**H.3 🌐 Uptime monitoring (free).** Create a free **UptimeRobot** monitor that pings
+`https://yourdomain.com` every few minutes and emails you if it goes down. Add a lightweight
+health check first if you like:
+> **PROMPT ▸ Health check**
+> "Add a public `/api/health` route that returns 200 and a small JSON `{status:'ok'}` when the
+> app and database are reachable, so an uptime monitor can watch it."
+
+**H.4 🖥️ Watch logs when something's wrong.**
+`docker compose -f docker-compose.prod.yml logs -f web` (or `worker`, `sandbox`, `db`). Paste
+errors into Claude Code in the repo to diagnose.
+
+---
+
+## Phase I — Later: turn premium ON (not part of launch)
 
 When you're ready to sell the $1/month coaching services:
 
