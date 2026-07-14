@@ -1,17 +1,57 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import PublicCatalog from "@/components/PublicCatalog";
 import UserBar from "@/components/UserBar";
-import { homeData } from "@/lib/lesson-service";
+import { catalogData, homeData } from "@/lib/lesson-service";
 import { currentUserId } from "@/lib/session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 // Home hub — a Server Component that reads content + progress directly via the
-// lesson service (no client fetch needed for the initial render).
+// lesson service (no client fetch needed for the initial render). Anonymous
+// visitors get a public catalog + a sign-up call to action; signed-in users get
+// the full progress-aware hub below (unchanged).
 export default async function HomePage() {
   const userId = await currentUserId();
-  if (!userId) redirect("/login");
+  if (!userId) {
+    const catalog = await catalogData();
+    return (
+      <main className="wrap">
+        <div className="row" style={{ justifyContent: "flex-end", marginTop: 0 }}>
+          <Link className="btn ghost mini" href="/login">
+            Sign in
+          </Link>
+        </div>
+        <div className="eyebrow">Interview prep</div>
+        <h1>AI-engineering lessons</h1>
+        <p className="muted">
+          {catalog.items.length} core topics plus a {catalog.agentic.total}-topic agentic
+          track — browse every topic free.
+        </p>
+
+        <div className="panel">
+          <div className="eyebrow">Free</div>
+          <p style={{ marginTop: 4 }}>
+            <strong>Free — create an account to unlock every lesson.</strong> No credit card.
+            You can try one sample lesson right now without signing up.
+          </p>
+          <div className="row">
+            <Link className="btn" href="/signup">
+              Sign up free →
+            </Link>
+            <Link className="btn ghost" href="/sample">
+              Try the sample lesson →
+            </Link>
+            <Link className="btn ghost" href="/topics">
+              Browse all topics →
+            </Link>
+          </div>
+        </div>
+
+        <PublicCatalog catalog={catalog} signedIn={false} />
+      </main>
+    );
+  }
   const data = await homeData(userId);
 
   return (

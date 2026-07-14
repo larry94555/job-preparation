@@ -31,7 +31,11 @@ async function makeDb(): Promise<Db> {
     CREATE TABLE users (
       id text PRIMARY KEY,
       email text,
-      role text NOT NULL DEFAULT 'user'
+      role text NOT NULL DEFAULT 'user',
+      name text,
+      email_verified timestamptz,
+      image text,
+      premium boolean NOT NULL DEFAULT false
     );
     CREATE TABLE lesson_progress (
       user_id text NOT NULL,
@@ -45,6 +49,13 @@ async function makeDb(): Promise<Db> {
       content_hash text NOT NULL,
       data jsonb NOT NULL,
       imported_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE TABLE donations (
+      id text PRIMARY KEY,
+      amount_cents integer NOT NULL,
+      currency text NOT NULL DEFAULT 'usd',
+      email text,
+      created_at timestamptz NOT NULL DEFAULT now()
     );
   `);
   return drizzle(client) as unknown as Db;
