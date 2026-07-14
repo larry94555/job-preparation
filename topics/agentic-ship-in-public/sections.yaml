@@ -1,0 +1,18 @@
+sections:
+  - id: sec-portfolio
+    title: "Portfolio architecture"
+    lessons: [lesson-what-to-ship, lesson-scope-and-build, lesson-capstone, lesson-expert-context]
+    assessment:
+      title: "Section 1 — Portfolio architecture"
+      from_tags: [portfolio, ship]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-communicate
+    title: "Communicating the work"
+    lessons: [lesson-communicate, lesson-get-hired, lesson-frontier-ops]
+    assessment:
+      title: "Section 2 — Communicating the work"
+      from_tags: [communicate, proof]
+      count: 5
+      pass_threshold: 0.8

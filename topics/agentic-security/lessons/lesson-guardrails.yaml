@@ -1,0 +1,12 @@
+id: lesson-guardrails
+title: "Sandbox untrusted code and build security in"
+material: guardrails.md
+segments:
+  - present: sandbox-untrusted-code
+  - check: mc-sandbox
+  - check: mc-compliance
+  - check: cloze-sandbox
+  - check: fe-sandbox
+  - present: build-security-in
+  - check: mc-build-in
+  - apply: essay-guardrails

@@ -1,0 +1,48 @@
+# Expert canon (L3) — what a hiring portfolio actually signals.
+- id: expert-portfolio
+  type: multiple_choice
+  tags: [portfolio]
+  difficulty: 3
+  prompt: "Once the buzzwords are stripped out, what does a strong reviewer actually read an agentic-engineering portfolio for?"
+  options:
+    - { text: "Real, self-designed projects, defensible architecture decisions, and an eval suite that proves you measured the agent", correct: true }
+    - { text: "The number of AI keywords listed in the skills section" }
+    - { text: "How many popular tutorials the candidate reproduced exactly" }
+    - { text: "The length of the README, regardless of what it says" }
+  explanation: "Reviewers read a portfolio for engineering signal: a project you scoped and designed, a README that defends an architecture decision (an architecture-decision-record in spirit), and evals that prove measurement. That is the signal a self-designed agent sends and a buzzword list or a tutorial clone cannot."
+
+- id: expert-adr
+  type: multiple_choice
+  tags: [portfolio]
+  difficulty: 3
+  prompt: "Treating the README as an architecture decision record, what distinguishes a senior-reading README from a wall of code with a feature list?"
+  options:
+    - { text: "It records why the agent is built this way — one defended \"chose X over Y because Z\" that shows judgment under tradeoffs", correct: true }
+    - { text: "It documents every function and class so nothing is left unlisted" }
+    - { text: "It is longer, because length is what signals seniority" }
+    - { text: "It hides the design so reviewers focus on the demo instead" }
+  explanation: "An ADR-in-spirit README captures a decision and its tradeoff — why a bounded loop, why these tools, why this validation boundary. One clear \"chose X over Y because Z\" is worth more than exhaustive code listing, because it shows judgment, which is exactly what a reviewer wants to interrogate."
+
+- id: expert-evals-senior
+  type: multiple_choice
+  tags: [proof]
+  difficulty: 3
+  prompt: "Why does shipping an eval suite with a portfolio agent read as senior, beyond just proving the agent works?"
+  options:
+    - { text: "It proves you measured the agent and know where it fails — most portfolios skip evals, so it signals you treat an agent as a system to verify, not a demo to hope over", correct: true }
+    - { text: "It makes the agent run faster, which reviewers value most" }
+    - { text: "It replaces the README, so there is less to maintain" }
+    - { text: "It guarantees the agent has no remaining bugs" }
+  explanation: "An eval suite — cases plus a judge plus a pass rate — turns \"it works\" into \"it passes N of M.\" Shipping evals reads as senior precisely because most portfolios skip them: it signals measurement discipline, not a lucky demo."
+
+- id: expert-capstone-integration
+  type: multiple_choice
+  tags: [ship]
+  difficulty: 3
+  prompt: "In canon terms, what is the capstone agent an assembly of, and why is that the point of the whole track?"
+  options:
+    - { text: "Tool calling + a bounded reason–act loop + an eval suite — the integration test that proves the track's parts combine into one defensible agent", correct: true }
+    - { text: "A single large system prompt that describes many features at once" }
+    - { text: "A brand-new technique unrelated to the earlier topics" }
+    - { text: "A faithful reproduction of the most popular agent tutorial" }
+  explanation: "The capstone is where tool calling, the bounded loop, and the eval suite stop being separate lessons and become one program. It is the integration test for the track — assembly and defensible decisions, not new material."

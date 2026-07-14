@@ -1,0 +1,10 @@
+id: lesson-risk-gates
+title: "Gate the irreversible actions"
+material: risk-gates.md
+segments:
+  - present: gate-the-irreversible-actions
+  - check: mc-approval-gate
+  - check: cloze-approval
+  - check: fe-approve
+  - apply: code-risk-gate
+  - apply: essay-hil

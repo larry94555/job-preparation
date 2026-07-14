@@ -1,0 +1,94 @@
+# Calibration for eval-agentic-memory-code (exemplars target the recall-store / context-compress exercises).
+skill: eval-agentic-memory-code
+cases:
+  # PASS — recall-store done right: scores by query-term overlap, ranks, excludes
+  # zero-overlap, respects k. 4/4 → pass; gate technically_correct=true.
+  - answer: >-
+      tests_passed=true. technically_correct holds: recall scores each stored item by the number of
+      distinct query terms it contains, sorts by that score highest-first with ties broken by insertion
+      order, and returns items by relevance rather than insertion order. validates_input holds: it checks
+      that k is a positive int and that remembered text is a non-empty string before storing. handles_errors
+      holds: it raises ValueError on a non-positive k and on empty text. matches_intent holds: it excludes
+      zero-overlap items and returns at most k of the most relevant, exactly as asked.
+      signals.must_use=[score by query-term overlap, rank by relevance, exclude zero-overlap, return top-k];
+      avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, validates_input: true, handles_errors: true, matches_intent: true }
+
+  # PASS — context-compress done right: compresses only over budget, summarizes oldest
+  # via the injected callable, keeps recent, stays under budget. 4/4 → pass.
+  - answer: >-
+      tests_passed=true. technically_correct holds: compress_history returns the messages unchanged when
+      their total word count already fits the token_budget, and otherwise replaces the oldest messages with
+      a single summary produced by the injected summarize callable while keeping the most-recent messages
+      intact and the total under budget. validates_input holds: it measures the token cost before deciding
+      to compress and counts the summary toward the budget. handles_errors holds: it always leaves at least
+      the newest message and never returns an over-budget result. matches_intent holds: the summary message
+      is {"role": "system", "content": summarize(old)} and the recent tail is preserved verbatim, exactly as
+      asked.
+      signals.must_use=[compress only when over budget, summarize oldest via callable, keep recent, stay within budget];
+      avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, validates_input: true, handles_errors: true, matches_intent: true }
+
+  # FAIL — recall returns items in insertion order ignoring the query. Fails the gate
+  # plus every other check. 0/4 → fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: recall ignores the query entirely and returns
+      the first k stored items in insertion order, so relevance never enters into it and an irrelevant
+      memory can be returned ahead of the one that actually matches. validates_input does NOT hold: it never
+      checks that k is positive or that the query is used. handles_errors does NOT hold: it silently returns
+      whatever is at the front of the store instead of excluding zero-overlap items. matches_intent does NOT
+      hold: the prompt asked for relevance-ranked recall and it does none.
+      signals.must_use=[]; avoid=[returning items in insertion order ignoring the query, returning every stored item regardless of relevance].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, validates_input: false, handles_errors: false, matches_intent: false }
+
+  # FAIL — compression ignores the budget and drops the recent messages. Fails the gate
+  # plus every other check. 0/4 → fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: compress_history summarizes on every call even
+      when the messages already fit, and it keeps the oldest messages while discarding the most-recent ones,
+      so the newest turn is lost and the result can still exceed the token_budget. validates_input does NOT
+      hold: it never measures the token cost against the budget before compressing. handles_errors does NOT
+      hold: it can return an over-budget list and can drop the only recent message. matches_intent does NOT
+      hold: the prompt asked to compress only when over budget while keeping recent messages, and it does the
+      opposite.
+      signals.must_use=[]; avoid=[summarizing on every call regardless of budget, dropping the most-recent messages, ignoring the token budget].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, validates_input: false, handles_errors: false, matches_intent: false }
+
+  # PASS — memory-buffer done right: caps at capacity, evicts the oldest (FIFO), returns
+  # a copy from window(), and reports len correctly. 4/4 → pass; gate technically_correct=true.
+  - answer: >-
+      tests_passed=true. technically_correct holds: ShortTermBuffer stores messages in a deque bounded by
+      capacity, and add() appends to the right so that when the buffer is already full the oldest message on
+      the left is evicted (FIFO), never exceeding capacity. validates_input holds: the constructor checks that
+      capacity is a positive int and raises otherwise before building the buffer. handles_errors holds: a
+      non-positive capacity raises ValueError, and window() returns a fresh list so mutating the returned list
+      cannot corrupt internal state. matches_intent holds: window() returns messages oldest -> newest, len()
+      reports how many are held, and the newest messages are the ones kept, exactly as asked.
+      signals.must_use=[cap the buffer at capacity, evict the oldest message when full (FIFO), keep the most-recent messages, return a copy from window()];
+      avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, validates_input: true, handles_errors: true, matches_intent: true }
+
+  # FAIL — memory-buffer done wrong: grows without bound and evicts the newest instead of
+  # the oldest. Fails the gate plus every other check. 0/4 → fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: ShortTermBuffer never caps its storage, so it
+      grows without bound past capacity, and on the rare path where it does trim it removes the NEWEST message
+      instead of the oldest, inverting FIFO. validates_input does NOT hold: it never checks that capacity is a
+      positive int and happily accepts zero or a negative value. handles_errors does NOT hold: window() returns
+      the internal list by reference, so a caller mutating it silently corrupts the buffer. matches_intent does
+      NOT hold: the prompt asked for a capacity-capped FIFO buffer that keeps the most-recent messages and
+      returns a copy, and it does the opposite on every count.
+      signals.must_use=[]; avoid=[letting the buffer grow without bound, evicting the newest message instead of the oldest].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, validates_input: false, handles_errors: false, matches_intent: false }

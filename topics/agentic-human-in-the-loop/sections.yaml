@@ -1,0 +1,18 @@
+sections:
+  - id: sec-riskgate
+    title: "Risk-gated execution"
+    lessons: [lesson-why-hil, lesson-risk-gates, lesson-tiered-gating, lesson-expert-context]
+    assessment:
+      title: "Section 1 — Risk-gated execution"
+      from_tags: [risk, approval]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-audit
+    title: "Auditability & resumption"
+    lessons: [lesson-audit, lesson-resume, lesson-frontier-ops]
+    assessment:
+      title: "Section 2 — Auditability & resumption"
+      from_tags: [audit, resume]
+      count: 5
+      pass_threshold: 0.8

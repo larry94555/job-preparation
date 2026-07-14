@@ -1,0 +1,54 @@
+# Missing term (cloze)
+- id: cloze-judge
+  type: text_input
+  tags: [judge]
+  difficulty: 1
+  prompt: "To grade open-ended output, use another model call as the LLM-as-____."
+  answer:
+    regex: '^judge$'
+    normalize: true
+
+- id: cloze-rubric
+  type: text_input
+  tags: [rubric]
+  difficulty: 1
+  prompt: "The list of explicit criteria the judge scores an output against is its ____."
+  answer:
+    regex: '^rubric$'
+    normalize: true
+
+- id: cloze-criteria
+  type: text_input
+  tags: [rubric]
+  difficulty: 2
+  prompt: "A rubric is a set of explicit ____ the output must meet, each judged independently."
+  answer:
+    regex: '^criteria$'
+    normalize: true
+
+- id: cloze-suite
+  type: text_input
+  tags: [suite]
+  difficulty: 1
+  prompt: "The fixed set of cases you run on every change is your eval ____."
+  answer:
+    regex: '^suite$'
+    normalize: true
+
+- id: cloze-gate
+  type: text_input
+  tags: [gate]
+  difficulty: 2
+  prompt: "The automated check that blocks a deploy below the bar is the deploy ____."
+  answer:
+    regex: '^gate$'
+    normalize: true
+
+- id: cloze-regression
+  type: text_input
+  tags: [suite]
+  difficulty: 2
+  prompt: "A change that improves one metric while silently degrading another is a ____."
+  answer:
+    regex: '^regression$'
+    normalize: true

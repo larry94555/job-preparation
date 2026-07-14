@@ -1,0 +1,86 @@
+# Calibration for eval-agentic-multiagent-essay (exemplars target essay-handoffs).
+skill: eval-agentic-multiagent-essay
+cases:
+  # PASS — answers the question, hits every reference point, all claims correct,
+  # names concrete mechanisms. 4/4 = 1.0 -> pass; gate technically_correct=true.
+  - answer: >-
+      Multi-agent systems break at the seams between agents. A silent bad output is the worst case: one
+      agent produces a plausible but wrong result, nothing raises, and it is handed to the next agent and
+      compounds downstream while every agent reports success. The fix is to validate every handoff at the
+      boundary — reject None, an empty string, or an empty container with a structured error like
+      {"ok": false, "error": "empty_handoff"} instead of letting the next agent consume garbage. The third
+      failure is the infinite approval loop: a critic that never approves makes a revise-until-approved
+      loop spin forever, burning tokens with no result. Bound it with a max_tries limit and return the best
+      draft so far, marked unapproved, when the cap is hit. Validate the handoff, add a critic, and cap the
+      loop.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # PASS — a second strong, correct, specific answer using different wording.
+  # 4/4 = 1.0 -> pass; gate technically_correct=true.
+  - answer: >-
+      The three break points are unvalidated handoffs, silent bad outputs, and approval loops with no exit.
+      Because a handoff is where one agent's output becomes the next agent's input, a wrong-but-plausible
+      result crosses it with no exception and corrupts everything after it — a silent bad output. Prevent it
+      by guarding the boundary: a validate_handoff step rejects empty or malformed output before the next
+      specialist runs, turning a far-away silent corruption into a loud failure at the seam. And when a
+      writer revises until a critic approves, a critic that never approves loops forever; the prevention is a
+      hard max_tries cap that stops and returns the last draft flagged as not approved. Each failure has the
+      same shape of fix: check at the boundary and bound every agent-driven loop.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — off-topic and technically wrong: says handoffs never need validation and
+  # approval loops should never be capped. Fails the gate plus every other check.
+  # 0/4 = 0.0 -> fail.
+  - answer: >-
+      Multi-agent systems don't really break — more agents is always better, so the answer to any problem is
+      to add more agents. There is no need to validate what one agent hands to another, because if an agent
+      produced the output it must be fine. And an approval loop should just keep going until the critic is
+      finally happy; putting a cap on it would only stop it before the work is good enough, so loops should
+      never be bounded.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # FAIL — ignores the question and answers something else entirely, with no correct
+  # content about the failure modes asked for. 0/4 = 0.0 -> fail.
+  - answer: >-
+      A transformer is a neural network that uses self-attention over a sequence of tokens, and you train it
+      by minimizing cross-entropy loss with gradient descent over many epochs. Bigger models with more
+      parameters and more data generally score better on benchmarks. Prompt engineering and a larger context
+      window are the main levers for getting good answers out of a single model.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # PASS — a third strong answer, correct and specific, hitting all three failure modes
+  # with concrete mechanisms and no false claims. 4/4 = 1.0 -> pass; gate true.
+  - answer: >-
+      Multi-agent systems break at the handoffs. The worst case is a silent bad output: an agent emits a
+      well-formed, plausible, but wrong result, nothing throws, and the next agent builds on it so the error
+      compounds while every agent reports success. The guard is to validate every handoff at the boundary —
+      a validate_handoff step that rejects None, "", {}, or [] with a structured error like
+      {"ok": false, "error": "empty_handoff"} the supervisor can act on, instead of letting the next
+      specialist consume garbage. The third break is the infinite approval loop: a critic that never
+      approves keeps the writer revising forever, burning tokens. Bound it with a max_tries cap and return
+      the last draft flagged approved=false when the cap is hit. Each fix has the same shape — check at the
+      seam, and cap every agent-driven loop.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — on-topic vocabulary but technically wrong: claims silent bad outputs always
+  # crash, that validation is unnecessary, and that approval loops self-terminate.
+  # Fails the gate plus every other check. 0/4 = 0.0 -> fail.
+  - answer: >-
+      Multi-agent systems don't really have silent failures, because a bad output between agents always
+      raises an exception, so you can rely on the crash to find it and never need to validate a handoff. If
+      an agent produced an output, the next agent can just trust it. Approval loops also take care of
+      themselves: a critic will always approve eventually, so a max-tries cap is unnecessary and would only
+      cut the work off before it is good enough. More agents is simply more capability with no downside.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }

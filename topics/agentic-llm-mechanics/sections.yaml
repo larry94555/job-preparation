@@ -1,0 +1,18 @@
+sections:
+  - id: sec-context
+    title: "Context & tokens"
+    lessons: [lesson-context-tokens, lesson-lost-middle, lesson-expert-context]
+    assessment:
+      title: "Section 1 — Context & tokens"
+      from_tags: [context, tokens]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-routing
+    title: "Routing, cost & failure modes"
+    lessons: [lesson-routing-cost, lesson-cost-accounting, lesson-failure-modes, lesson-frontier-ops]
+    assessment:
+      title: "Section 2 — Routing, cost & failure modes"
+      from_tags: [routing, cost, failure]
+      count: 5
+      pass_threshold: 0.8

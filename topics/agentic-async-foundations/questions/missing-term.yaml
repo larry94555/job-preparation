@@ -1,0 +1,54 @@
+# Missing term (cloze)
+- id: cloze-asyncio
+  type: text_input
+  tags: [eventloop]
+  difficulty: 1
+  prompt: "The Python standard-library module that provides the event loop and coroutines is ____."
+  answer:
+    regex: '^asyncio$'
+    normalize: true
+
+- id: cloze-gather
+  type: text_input
+  tags: [concurrency]
+  difficulty: 1
+  prompt: "To run many awaitables concurrently and collect their results in order, call asyncio.____."
+  answer:
+    regex: '^gather$'
+    normalize: true
+
+- id: cloze-await
+  type: text_input
+  tags: [eventloop]
+  difficulty: 1
+  prompt: "The keyword that suspends a coroutine and yields control to the event loop is ____."
+  answer:
+    regex: '^await$'
+    normalize: true
+
+- id: cloze-backoff
+  type: text_input
+  tags: [resilience]
+  difficulty: 2
+  prompt: "Growing the wait between retries (1s, 2s, 4s, …) is called exponential ____."
+  answer:
+    regex: '^backoff$'
+    normalize: true
+
+- id: cloze-jitter
+  type: text_input
+  tags: [resilience]
+  difficulty: 2
+  prompt: "Adding randomness to retry delays so clients don't retry in lockstep is called ____."
+  answer:
+    regex: '^jitter$'
+    normalize: true
+
+- id: cloze-isolate
+  type: text_input
+  tags: [errors]
+  difficulty: 2
+  prompt: "To make gather return exceptions instead of raising the first one, pass ____=True."
+  answer:
+    regex: '^return_exceptions$'
+    normalize: true

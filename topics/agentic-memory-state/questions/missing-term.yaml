@@ -1,0 +1,54 @@
+# Missing term (cloze)
+- id: cloze-buffer
+  type: text_input
+  tags: [memory]
+  difficulty: 1
+  prompt: "The most recent turns of the dialogue, held in context and capped, are the short-term conversation ____."
+  answer:
+    regex: '^buffer$'
+    normalize: true
+
+- id: cloze-scratchpad
+  type: text_input
+  tags: [types]
+  difficulty: 2
+  prompt: "Structured, task-specific state the agent reads and writes mid-task is the working state or ____."
+  answer:
+    regex: '^scratchpad$'
+    normalize: true
+
+- id: cloze-summary
+  type: text_input
+  tags: [compression]
+  difficulty: 2
+  prompt: "When the buffer exceeds its token budget, the oldest turns are replaced by a running ____."
+  answer:
+    regex: '^summary$'
+    normalize: true
+
+- id: cloze-relevance
+  type: text_input
+  tags: [recall]
+  difficulty: 2
+  prompt: "You rank stored items by a ____ score and inject only the top-k most relevant ones."
+  answer:
+    regex: '^relevance$'
+    normalize: true
+
+- id: cloze-episodic
+  type: text_input
+  tags: [memory]
+  difficulty: 2
+  prompt: "A durable, append-only log of the agent's past runs, queried by time or run id, is the ____ history."
+  answer:
+    regex: '^episodic$'
+    normalize: true
+
+- id: cloze-consolidation
+  type: text_input
+  tags: [compression]
+  difficulty: 3
+  prompt: "Collapsing many verbose turns into a few sentences of durable state is summarization used as ____ (one word)."
+  answer:
+    regex: '^consolidation$'
+    normalize: true

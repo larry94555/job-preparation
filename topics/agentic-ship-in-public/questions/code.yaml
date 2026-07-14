@@ -1,0 +1,65 @@
+# Coding exercises — engine type: code (graded by tests + concept skill)
+- id: code-capstone-agent
+  type: code
+  language: python
+  tags: [ship]
+  difficulty: 3
+  prompt: >-
+    Implement `run_capstone(client, task, tools, max_steps=8) -> dict` — the capstone agent that
+    assembles tool calling, a bounded loop, and observation validation. `client.step(messages)` returns
+    an object with `.kind` ("action" or "final"), `.tool`, `.tool_input`, and `.answer`. Loop: on
+    "action", call `tools[tool](tool_input)` to get an observation and VALIDATE it — if it is empty or
+    None, append `{"tool": tool, "ok": False}` to a trace and feed an error note back; otherwise append
+    `{"tool": tool, "ok": True}` and feed the observation back. On "final", return
+    `{"answer": answer, "steps": n, "trace": [...]}` where n is the number of steps taken. If you reach
+    `max_steps` without a final, return `{"answer": None, "steps": max_steps, "stopped": "step_limit",
+    "trace": [...]}`.
+  starter_file: exercises/capstone-agent/starter.py
+  test_file: exercises/capstone-agent/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-ship-code
+  concept_checks:
+    must_use: ["loop until final or max_steps", "run the requested tool and feed the observation back", "validate the observation and mark ok False when empty", "record each step in a trace", "return step_limit when the cap is hit"]
+    avoid_antipattern: ["trusting an empty observation as ok", "looping without a step cap"]
+
+- id: code-portfolio-check
+  type: code
+  language: python
+  tags: [portfolio]
+  difficulty: 2
+  prompt: >-
+    Implement `portfolio_ready(project) -> dict`. `project` is a dict. A shippable portfolio piece needs
+    non-empty values for the keys "agent", "readme", "evals", and "demo". Return
+    `{"ready": bool, "missing": [...]}` where `missing` is the sorted list of those keys that are absent
+    or empty (empty string, empty list, None, etc.). `ready` is True exactly when `missing` is empty.
+  starter_file: exercises/portfolio-check/starter.py
+  test_file: exercises/portfolio-check/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-ship-code
+  concept_checks:
+    must_use: ["check all four required keys", "treat absent or empty as missing", "return sorted missing list", "ready is True only when nothing is missing"]
+    avoid_antipattern: ["counting an empty value as present", "returning ready True with missing keys"]
+
+- id: code-eval-harness
+  type: code
+  language: python
+  tags: [proof]
+  difficulty: 2
+  prompt: >-
+    Implement `run_evals(agent, cases, judge) -> dict` — the measurement layer you attach to a shipped
+    agent. For each case: `out = agent(case["input"])`, then `passed = judge(case["input"], out)`. Return
+    `{"pass_rate": float, "passed": n, "total": m}` where n is the number of cases the judge passed, m is
+    the total number of cases, and pass_rate is n / m (use 0.0 when there are no cases).
+  starter_file: exercises/eval-harness/starter.py
+  test_file: exercises/eval-harness/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-ship-code
+  concept_checks:
+    must_use: ["run the agent on each case input", "judge each output", "count passes", "compute pass_rate as passed over total"]
+    avoid_antipattern: ["dividing by zero on empty cases", "counting a case before judging it"]

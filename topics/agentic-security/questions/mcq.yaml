@@ -1,0 +1,264 @@
+# Multiple choice
+- id: mc-injection
+  type: multiple_choice
+  tags: [injection]
+  difficulty: 2
+  prompt: "What is a prompt injection attack?"
+  options:
+    - { text: "Untrusted content smuggles in instructions the model then follows as if you had issued them", correct: true }
+    - { text: "A bug where the model runs out of context and truncates the prompt" }
+    - { text: "A way to make the model respond faster by injecting tokens" }
+    - { text: "An error that occurs only when the system prompt is empty" }
+  explanation: "Prompt injection is when text the agent reads — a page, an email, a tool result — contains instructions the model obeys as if they were yours. It is the #1 risk on the OWASP LLM Top 10."
+
+- id: mc-untrusted
+  type: multiple_choice
+  tags: [injection]
+  difficulty: 2
+  prompt: "Why can't the model simply tell your instructions apart from injected ones in fetched content?"
+  options:
+    - { text: "To the decoder it is all just tokens — a capable model follows instructions wherever they appear", correct: true }
+    - { text: "Because fetched content is always encrypted and the model cannot read it" }
+    - { text: "Because the model ignores everything after the system prompt" }
+    - { text: "Because untrusted content is automatically placed in a separate model" }
+  explanation: "There is no clean, general fix: a model built to follow instructions cannot reliably distinguish trusted instructions from instructions that merely appear in untrusted data. Defense is layered mitigation."
+
+- id: mc-confused-deputy
+  type: multiple_choice
+  tags: [injection]
+  difficulty: 3
+  prompt: "Why is prompt injection especially dangerous for an agent (vs. a plain chatbot)?"
+  options:
+    - { text: "The agent is a confused deputy — the attacker tricks it into using its real tool authority to take a wrong action", correct: true }
+    - { text: "An agent has a larger context window, so more tokens are injected" }
+    - { text: "Chatbots are immune to injection; only agents can be prompted at all" }
+    - { text: "The agent retrains itself on the injected text permanently" }
+  explanation: "An injected chatbot says something wrong; an injected agent takes a wrong action — it actually sends the email or issues the refund. The agent is a confused deputy: legitimate authority used on the attacker's behalf."
+
+- id: mc-separate
+  type: multiple_choice
+  tags: [separation]
+  difficulty: 2
+  prompt: "What is the first and most important defense against prompt injection?"
+  options:
+    - { text: "Separate trusted system instructions from untrusted content, and mark fetched text as data, not commands", correct: true }
+    - { text: "Concatenate the fetched content directly into the instruction string" }
+    - { text: "Use a longer system prompt so the model pays less attention to the content" }
+    - { text: "Trust the content but ask the model to double-check itself" }
+  explanation: "The root cause is treating content as instructions. Keep your instructions in the system channel and wrap/label untrusted text as data to be analyzed, never obeyed."
+
+- id: mc-sanitize
+  type: multiple_choice
+  tags: [separation]
+  difficulty: 2
+  prompt: "What does sanitizing untrusted content do, and what is its limitation?"
+  options:
+    - { text: "It scrubs known injection patterns to a neutral marker — best-effort, since an attacker can rephrase to evade it", correct: true }
+    - { text: "It cryptographically proves the content contains no instructions" }
+    - { text: "It makes separation unnecessary once applied" }
+    - { text: "It guarantees the model will never be injected again" }
+  explanation: "Sanitizing removes obvious attack strings (e.g. 'ignore all previous instructions') before the model sees them. It is a best-effort filter, not a proof — which is why it layers with separation, sandboxing, redaction, and filtering."
+
+- id: mc-sandbox
+  type: multiple_choice
+  tags: [sandbox]
+  difficulty: 2
+  prompt: "How should an agent run untrusted or model-written code?"
+  options:
+    - { text: "In a sandbox — an isolated environment with no access to real filesystem, network, secrets, or host", correct: true }
+    - { text: "Directly with exec(), since the model is usually correct" }
+    - { text: "With full host permissions but a warning logged first" }
+    - { text: "Only after asking the model whether the code is safe" }
+  explanation: "Untrusted execution must be confined. A sandbox lets hostile code run and fail without touching anything that matters: no credentials, no network, ephemeral filesystem, bounded CPU/memory/time."
+
+- id: mc-compliance
+  type: multiple_choice
+  tags: [sandbox]
+  difficulty: 3
+  prompt: "Beyond a technical control, why does sandboxing matter for compliance?"
+  options:
+    - { text: "The isolation boundary is what lets you honestly say one tenant's code cannot reach another tenant's data", correct: true }
+    - { text: "Sandboxes automatically encrypt all customer data at rest" }
+    - { text: "Compliance only cares about model accuracy, not isolation" }
+    - { text: "Running code as root is fine as long as it is logged for audit" }
+  explanation: "Isolating untrusted execution is the boundary an audit points at: it is how you demonstrate that a customer's (or attacker's) code cannot cross into another tenant's data."
+
+- id: mc-build-in
+  type: multiple_choice
+  tags: [sandbox]
+  difficulty: 3
+  prompt: "What is the core posture behind all of these agent-security controls?"
+  options:
+    - { text: "Build security in from the start with least authority and defense in depth — do not bolt it on after an incident", correct: true }
+    - { text: "Add a single strong filter at the end and trust it completely" }
+    - { text: "Give the agent every tool so it can defend itself" }
+    - { text: "Retrofit security only once a breach has been observed" }
+  explanation: "Separation, sanitizing, sandboxing, redaction, and filtering are robust when built into the architecture and brittle when retrofitted. Assume every input is hostile, grant least authority, and layer defenses."
+
+- id: mc-redact
+  type: multiple_choice
+  tags: [redaction]
+  difficulty: 2
+  prompt: "Why redact PII before it enters the model's context?"
+  options:
+    - { text: "What never enters the context cannot be leaked by an injection, logged in plaintext, or memorized", correct: true }
+    - { text: "Redaction makes the model respond in fewer tokens" }
+    - { text: "PII improves accuracy, so it should be kept but encrypted in the prompt" }
+    - { text: "Redaction is only needed for the system prompt, not fetched content" }
+  explanation: "Redaction shrinks the blast radius: scrub emails, phone numbers, and secret-like tokens to placeholders before they enter the window, so sensitive data can't leak downstream."
+
+- id: mc-output-filter
+  type: multiple_choice
+  tags: [redaction]
+  difficulty: 3
+  prompt: "What does an output filter do in an agentic system?"
+  options:
+    - { text: "It inspects a proposed action before execution and blocks disallowed tools, even if an injection asked for them", correct: true }
+    - { text: "It rewrites the model's prose to be more polite" }
+    - { text: "It speeds up tool calls by caching results" }
+    - { text: "It only runs after the tool has already executed" }
+  explanation: "Output filtering gates what comes out as an action: a filter checks the proposed tool call against an allow-list and refuses dangerous tools before the harness runs them — the confused-deputy defense that actually bites."
+
+- id: mc-indirect-injection
+  type: multiple_choice
+  tags: [injection]
+  difficulty: 3
+  prompt: "Why is indirect injection considered more dangerous than direct injection?"
+  options:
+    - { text: "The payload is planted in content the agent fetches, so the attacker never talks to the agent and the trap fires whenever the agent reads it", correct: true }
+    - { text: "It is typed directly into the prompt, which is easier for the model to detect" }
+    - { text: "It only works when the system prompt is empty" }
+    - { text: "It is slower to execute, giving the model time to notice it" }
+  explanation: "Direct injection is typed into the prompt by whoever is talking to the agent; indirect injection (Greshake et al.) plants the payload in a fetched page, document, or tool result and detonates when the agent reads it — the attacker never needs to interact with the agent at all, which is what makes it the practical, dangerous case."
+
+- id: mc-injection-no-fix
+  type: multiple_choice
+  tags: [injection]
+  difficulty: 3
+  prompt: "Why is there no clean, general fix that fully separates injected instructions from data?"
+  options:
+    - { text: "Following instructions and following instructions hidden in data are the same capability — you cannot have one without the other", correct: true }
+    - { text: "The fix exists but is too slow to run in production" }
+    - { text: "A large enough model reliably tells the two apart" }
+    - { text: "Encrypting the fetched content removes all embedded instructions" }
+  explanation: "A capable model is built to follow instructions wherever they appear; asking it to follow your instructions yet never follow instructions that appear in data is asking for two contradictory behaviors from one capability. That is why defense is layered mitigation, not a single patch, and why larger models do not close the gap."
+
+- id: mc-least-authority
+  type: multiple_choice
+  tags: [injection]
+  difficulty: 3
+  prompt: "How does granting an agent least authority limit the damage from a successful injection?"
+  options:
+    - { text: "A confused deputy cannot pull a lever it was never handed — fewer tools and narrower permissions mean a smaller blast radius", correct: true }
+    - { text: "Least authority makes the model immune to injection entirely" }
+    - { text: "It speeds up tool calls so the injection has no time to run" }
+    - { text: "It encrypts the agent's context so the payload cannot be read" }
+  explanation: "Least authority does not stop the injection; it shrinks what a hijacked turn can do. If the agent was never given send_email or a payment tool, an injection that convinces the model to use them still fails — the dangerous levers were never in reach."
+
+- id: mc-untrusted-until-proven
+  type: multiple_choice
+  tags: [separation]
+  difficulty: 2
+  prompt: "How should an agent treat content it fetches from the web or a file?"
+  options:
+    - { text: "As untrusted until proven otherwise — data to be analyzed, never commands to obey", correct: true }
+    - { text: "As trusted, since the model can judge whether it is safe" }
+    - { text: "As part of the system prompt, so it carries the same authority" }
+    - { text: "As trusted if it comes from an HTTPS URL" }
+  explanation: "Provenance is the point: content the agent did not write is untrusted by default. Marking fetched text as data to analyze — not instructions to obey — is the discipline that separation and sanitizing implement. HTTPS proves transport security, not that the content is benign."
+
+- id: mc-delimiter-label
+  type: multiple_choice
+  tags: [separation]
+  difficulty: 3
+  prompt: "You wrap fetched content in an <untrusted> block and tell the model to ignore instructions inside it. Why is this still not a guarantee?"
+  options:
+    - { text: "A determined injection can try to break out of the frame or impersonate the delimiter, so separation must layer with sanitizing and other controls", correct: true }
+    - { text: "Delimiters make the model respond in fewer tokens" }
+    - { text: "The <untrusted> tag is automatically stripped before the model sees it" }
+    - { text: "Labeling content as untrusted deletes any instructions it contains" }
+  explanation: "Separation is defense in depth, not a proof. An attacker can craft content that mimics the closing delimiter or argues its way out of the frame, so you pair separation with sanitizing the content and with the downstream guardrails — no single layer is trusted."
+
+- id: mc-ephemeral-fs
+  type: multiple_choice
+  tags: [sandbox]
+  difficulty: 2
+  prompt: "Why give sandboxed code an ephemeral filesystem and no outbound network?"
+  options:
+    - { text: "So hostile code has no exfiltration path and nothing it writes persists or touches anything real", correct: true }
+    - { text: "So the code runs faster by avoiding disk I/O" }
+    - { text: "So the model can read the code's output more easily" }
+    - { text: "So the sandbox can share credentials with the host safely" }
+  explanation: "No network means no path to send stolen data out; an ephemeral filesystem means nothing the code writes survives or reaches real data. Together with no mounted credentials and bounded CPU/memory/time, these are the properties that let hostile code run and fail harmlessly."
+
+- id: mc-sandbox-not-review
+  type: multiple_choice
+  tags: [sandbox]
+  difficulty: 3
+  prompt: "Why is running untrusted code in a sandbox better than asking the model whether the code is safe first?"
+  options:
+    - { text: "The isolation boundary contains code that turns out to be hostile regardless of the model's judgment, which an injection can subvert", correct: true }
+    - { text: "The model's safety judgment is provably correct, making the sandbox redundant" }
+    - { text: "Sandboxes are only for benign code; hostile code needs a model review" }
+    - { text: "Asking the model is faster and therefore always preferable" }
+  explanation: "A model asked 'is this code safe?' can itself be injected or simply wrong. The sandbox does not depend on that judgment: it confines execution so even code the model wrongly approved cannot reach credentials, network, or the host. Containment beats prediction."
+
+- id: mc-secret-token-redact
+  type: multiple_choice
+  tags: [redaction]
+  difficulty: 3
+  prompt: "A redactor scrubs emails and phone numbers but a novel secret-token format slips through into the context. What does this illustrate?"
+  options:
+    - { text: "Redaction is best-effort — a novel format slips it — so it layers with separation, sandboxing, and output filtering rather than standing alone", correct: true }
+    - { text: "Redaction is useless and should be removed from the pipeline" }
+    - { text: "The secret is safe because it was never an email address" }
+    - { text: "Redaction guarantees no sensitive data ever enters the context" }
+  explanation: "Like sanitizing, redaction is a best-effort filter: a format your patterns do not cover gets through. That is not a reason to drop it — it shrinks the blast radius for everything it does catch — but it is why redaction is one layer among several, never the whole defense."
+
+- id: mc-allowlist-vs-blocklist
+  type: multiple_choice
+  tags: [redaction]
+  difficulty: 4
+  prompt: "For an output filter gating tool calls, why is an allow-list of permitted tools safer than a block-list of forbidden ones?"
+  options:
+    - { text: "An allow-list denies by default, so a newly added or cleverly named dangerous tool is blocked until explicitly permitted; a block-list silently lets anything it forgot to name through", correct: true }
+    - { text: "A block-list is faster to evaluate, so it is always preferred" }
+    - { text: "Allow-lists and block-lists are identical in security terms" }
+    - { text: "An allow-list automatically encrypts the tool's arguments" }
+  explanation: "Default-deny is the safer failure mode. A block-list only stops the tools you remembered to forbid, so a new or renamed dangerous tool passes; an allow-list blocks everything not explicitly permitted, so the confused-deputy action fails closed rather than open."
+
+- id: mc-defense-in-depth-layers
+  type: multiple_choice
+  tags: [redaction]
+  difficulty: 3
+  prompt: "What is the point of layering separate + sanitize + sandbox + redact + filter instead of relying on the strongest single control?"
+  options:
+    - { text: "Each layer is bypassable alone, but an attack must defeat all of them at once, making the system hard to break even when one layer fails", correct: true }
+    - { text: "Layering lets you delete the weakest control once the others are added" }
+    - { text: "More layers make the agent respond faster" }
+    - { text: "One perfect control exists, so the layers are only for show" }
+  explanation: "No single control is trusted: an injection may slip a filter, a sandbox may have an edge case, redaction may miss a format. Defense in depth means an attacker has to beat every layer simultaneously, so the system survives the failure of any one of them."
+
+- id: mc-egress
+  type: multiple_choice
+  tags: [redaction]
+  difficulty: 3
+  prompt: "An injection makes the agent call an allowed HTTP tool but points it at attacker.example with a secret in the query string. Which control stops the leak?"
+  options:
+    - { text: "An egress allow-list that permits only approved destinations and fails closed, so an unapproved host is refused at the wire even though the tool itself was allowed", correct: true }
+    - { text: "A longer system prompt telling the model not to leak data" }
+    - { text: "Trusting the tool because it was on the allow-list of permitted tools" }
+    - { text: "Redaction alone, since it guarantees no secret is ever present to send" }
+  explanation: "Output filtering gates which tool runs, but an allowed tool can still be pointed at a hostile destination. Exfiltration is about where data flows, so you also gate the data-out step: an egress allow-list of permitted destinations that fails closed refuses attacker.example even when the tool call itself is permitted."
+
+- id: mc-exfiltration
+  type: multiple_choice
+  tags: [redaction]
+  difficulty: 3
+  prompt: "What is data exfiltration in an agentic system, and what makes it distinct from prompt injection itself?"
+  options:
+    - { text: "It is a data-flow failure — sensitive data reaching a destination it should never reach — which injection can trigger but which you defend at the egress step, independent of stopping the injection", correct: true }
+    - { text: "It is the same thing as prompt injection under a different name" }
+    - { text: "It is a bug where the model runs out of context tokens" }
+    - { text: "It only happens when the sandbox filesystem is ephemeral" }
+  explanation: "Exfiltration is about where data flows, not what the model was tricked into saying. An injection may be the trigger, but you can defend the data-out step separately: gate HTTP requests, emails, external writes, and webhooks with an egress allow-list and human confirmation, so even a successful injection is stopped at the wire."

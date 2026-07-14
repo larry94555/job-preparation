@@ -1,0 +1,39 @@
+# Frontier drill (L4) — the agentic-engineer job market.
+- id: frontier-career
+  type: multiple_choice
+  tags: [proof]
+  difficulty: 4
+  prompt: >-
+    The agentic-engineer job market is new and the title means different things at different companies.
+    As more people ship agents, what differentiates candidates, and what is the honest read?
+  options:
+    - { text: "Shipped, measured, well-communicated agents — the bar rises from 'I built an agent' to 'I measured it, found where it breaks, and can defend the architecture'; the title is unstable, so proof-of-work travels better than the title", correct: true }
+    - { text: "The exact job title on the resume, since the role is now fully standardized across companies" }
+    - { text: "The number of frameworks and model names listed, because tooling is the durable signal" }
+    - { text: "Nothing differentiates candidates anymore — any shipped agent stands out equally, as it did early on" }
+  explanation: >-
+    The role is still being defined in public, so a portfolio that shows what you do beats an unstable title.
+    As shipping becomes common the differentiator moves up the stack to measured, defensible, well-communicated
+    agents. The honest read: judgment and communication compound while models and frameworks churn — and the bar
+    keeps rising.
+
+- id: frontier-portfolio-norms
+  type: multiple_choice
+  tags: [communicate]
+  difficulty: 4
+  prompt: >-
+    Norms for what a strong agent portfolio looks like are still forming in public and move fast. As those
+    norms shift, what is the durable practice a candidate should keep, and what is the honest read on the
+    churn?
+  options:
+    - { text: "Keep shipping self-designed agents whose README defends a decision, whose evals measure them, and whose write-up shows a break-and-fix — the specific expectations (live demos, standardized agent evals) will move, but proof that argues for you is the invariant, and you track the frontier by reading real portfolios and hiring threads, not hype", correct: true }
+    - { text: "Freeze on the current template and stop updating, since portfolio norms are already standardized across companies" }
+    - { text: "Chase every new format immediately and drop evals and READMEs whenever a flashier demo style trends" }
+    - { text: "Ignore the norms entirely, because a longer resume skills list is the only durable signal" }
+  explanation: >-
+    The portfolio-norm frontier is unsettled — live-demo expectations, standardized agent evals for hiring,
+    and agent-portfolio conventions are still being figured out in public. The durable move is to keep
+    shipping legible proof (self-designed agent + defended README + evals + break-and-fix write-up) and to
+    track where the bar actually sits by reading real portfolios and hiring threads. The honest read: the
+    surface conventions churn, but verifiable proof-of-work is the invariant that keeps predicting who gets
+    hired.

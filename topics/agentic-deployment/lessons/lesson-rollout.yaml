@@ -1,0 +1,14 @@
+id: lesson-rollout
+title: "Canary then rollback"
+material: rollout.md
+segments:
+  - present: canary-then-rollback
+  - check: mc-canary
+  - check: mc-rollback
+  - check: mc-watch-errors
+  - check: cloze-canary
+  - check: cloze-rollback
+  - check: fe-canary
+  - check: fe-rollback
+  - apply: essay-operability
+  - apply: code-canary-route

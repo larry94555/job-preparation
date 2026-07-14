@@ -1,0 +1,11 @@
+id: lesson-async-patterns
+title: "async, await, and gather"
+material: async-patterns.md
+segments:
+  - present: await-yields-control
+  - check: mc-await
+  - check: fe-coroutine-kw
+  - check: fe-await-kw
+  - present: fan-out-with-gather
+  - check: mc-fanout-speedup
+  - check: fe-gather

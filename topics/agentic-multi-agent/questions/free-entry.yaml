@@ -1,0 +1,54 @@
+# Free entry (short answer)
+- id: fe-single-first
+  type: text_input
+  tags: [supervisor]
+  difficulty: 1
+  prompt: "How many agents should you reach for first, before going multi-agent? (one word)"
+  answer:
+    regex: '^single$'
+    normalize: true
+
+- id: fe-supervisor
+  type: text_input
+  tags: [supervisor]
+  difficulty: 2
+  prompt: "What is the coordinating agent that routes sub-tasks to specialists called? (one word)"
+  answer:
+    regex: '^supervisor$'
+    normalize: true
+
+- id: fe-specialist
+  type: text_input
+  tags: [orchestration]
+  difficulty: 2
+  prompt: "What do we call the focused agents the supervisor delegates to? (one word)"
+  answer:
+    regex: '^specialists?$'
+    normalize: true
+
+- id: fe-handoff
+  type: text_input
+  tags: [handoff]
+  difficulty: 2
+  prompt: "What is the term for passing one agent's output to the next agent? (one word)"
+  answer:
+    regex: '^handoff$'
+    normalize: true
+
+- id: fe-max-tries
+  type: text_input
+  tags: [validation]
+  difficulty: 2
+  prompt: "What must an approval loop have so it can't run forever — a max-tries ____? (one word)"
+  answer:
+    regex: '^(max_tries|limit)$'
+    normalize: true
+
+- id: fe-validate
+  type: text_input
+  tags: [validation]
+  difficulty: 2
+  prompt: "What do you do to every handoff to catch a silent bad output? (one word)"
+  answer:
+    regex: '^validate$'
+    normalize: true

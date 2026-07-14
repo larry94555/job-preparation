@@ -1,0 +1,12 @@
+id: lesson-injection
+title: "Prompt injection is the biggest threat"
+material: injection.md
+segments:
+  - present: prompt-injection-is-the-biggest-threat
+  - check: mc-injection
+  - check: mc-untrusted
+  - check: cloze-injection
+  - check: cloze-untrusted
+  - check: fe-injection
+  - present: the-agent-is-a-confused-deputy
+  - check: mc-confused-deputy

@@ -1,0 +1,85 @@
+# Calibration for eval-agentic-deploy-essay (exemplars target essay-deploy / essay-operability).
+# Three clear PASS + three clear FAIL, no borderline.
+skill: eval-agentic-deploy-essay
+cases:
+  # PASS — answers the question, hits every reference point, all claims correct,
+  # names concrete mechanisms. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      The core rule is to never block the request thread on the agent run: doing a tens-of-seconds run
+      inline pins a worker thread and holds the connection open, so a handful of slow users exhaust the
+      pool and callers time out. Instead the submit handler does only fast work — it validates the
+      request, enqueues the task, and returns a job id immediately with status "queued" (a 202 Accepted),
+      while a background worker actually runs the agent off the request. The caller then polls a status
+      endpoint with that job id, looping until the job reaches a terminal state — "done" with the result
+      or "failed" with an error. That submit/poll split decouples request latency from run latency and
+      lets many workers drain the queue in parallel.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # PASS — a second strong, correct, specific answer using different wording.
+  # 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      You split one slow call into two fast ones plus a background run. On submit, the endpoint writes a
+      job record marked queued and hands back its id right away rather than waiting for the agent — the
+      request thread is scarce and must not be pinned for a multi-second run, or the server runs out of
+      threads under load. A pool of workers pulls queued jobs and runs the agent, moving each job
+      running → done (with the result) or failed (with the error). The client gets its answer by polling
+      the status endpoint with the job id until it sees a terminal status. Because neither submit nor poll
+      runs the agent, request latency is bounded and independent of how long the run takes.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — off-topic and technically wrong: says to run the agent inline and block,
+  # and denies any need for a job id or polling. Fails the gate plus every check.
+  # 0/4 = 0.0 → fail.
+  - answer: >-
+      The simplest design is to just run the agent inside the request handler and return the finished
+      result when it is ready — a job id and a status endpoint are unnecessary complexity. Blocking the
+      request thread for the whole run is fine because the user is waiting anyway, and holding the HTTP
+      connection open for a few minutes is what connections are for. If it gets slow you can always add
+      more request threads later; there is no reason to move the work onto a background worker or to make
+      the client poll for anything.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # FAIL — on the wrong topic entirely and vague: never describes the job API, blocking,
+  # or polling. Misses the question and the key points, states nothing concrete.
+  # 0/4 = 0.0 → fail.
+  - answer: >-
+      Deploying an agent is mostly about writing good prompts and picking a strong model. If the prompt
+      is clear and the model is capable, the service will be fast and reliable, so the main work is prompt
+      engineering and evaluation of answer quality. Infrastructure details like how the HTTP endpoint
+      returns are not really important and can be figured out later once the prompt is good enough.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # PASS — a third strong answer, on the operability checklist. Correct, specific,
+  # covers rate limiting + canary + rollback. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      Before widening a new version I gate the service on three things. First, a per-user token bucket
+      keyed by the caller's identity: capacity bounds the burst and refill_per_sec bounds the sustained
+      rate, so one tenant's flood returns 429 instead of draining the shared worker pool or the token
+      budget. Second, a canary: I route a small, deterministic slice by a stable hash of the user id
+      (never Python's salted hash()), so a user sticks to one side, and I watch the canary's error rate,
+      latency, and failed jobs against stable before widening 5% → 25% → 100%. Third, rollback stays one
+      command back to the last known-good version — instant, because rolling back to something that worked
+      beats rolling forward with a fix mid-incident. Each step bounds blast radius before the next.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — technically wrong on rollout: canary = ship to everyone, roll forward mid-incident,
+  # random routing. Fails the gate and every check. 0/4 = 0.0 → fail.
+  - answer: >-
+      A canary rollout means deploying the new version to 100% of users and then watching the dashboards;
+      if something looks off you write a fix and roll forward with it during the incident, since rolling
+      back to an old version is old-fashioned. You don't need per-user rate limits because the model is
+      fast, and you can route users to the canary with a random coin flip each request so the sample stays
+      fresh. There's no real need to keep a known-good version around once the new one is live.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }

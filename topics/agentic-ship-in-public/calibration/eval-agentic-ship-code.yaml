@@ -1,0 +1,90 @@
+# Calibration for eval-agentic-ship-code (exemplars target the capstone-agent / eval-harness exercises).
+skill: eval-agentic-ship-code
+cases:
+  # PASS — correct capstone agent. All four checks true. 4/4 = 1.0 → pass; gate true.
+  - answer: >-
+      tests_passed=true. technically_correct holds: run_capstone loops up to max_steps, returns on a
+      "final" step with the answer and step count, and returns a step_limit result when the cap is hit.
+      assembles_the_pieces holds: on an action it runs the requested tool, validates the observation,
+      records {"tool": tool, "ok": ...} in the trace, and feeds the observation or an error note back into
+      messages. handles_edge_cases holds: an empty or None observation is marked ok:False and the loop
+      still terminates at the cap. matches_intent holds: it returns exactly the specified dict shapes with
+      the trace populated.
+      signals.must_use=[loop until final or cap, run tool and feed observation back, validate observation,
+      record trace, step_limit on cap]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, assembles_the_pieces: true, handles_edge_cases: true, matches_intent: true }
+
+  # PASS — correct eval harness. 4/4 = 1.0 → pass; gate true.
+  - answer: >-
+      tests_passed=true. technically_correct holds: run_evals iterates the cases, calls agent on each
+      case input, judges the output, counts passes, and computes pass_rate as passed/total, guarding
+      total==0 with 0.0. assembles_the_pieces holds: agent → judge → count are wired in the right order,
+      judge receives both the input and the output. handles_edge_cases holds: empty cases return
+      pass_rate 0.0 with no ZeroDivisionError. matches_intent holds: it returns {"pass_rate", "passed",
+      "total"} exactly as asked.
+      signals.must_use=[run agent per case, judge each output, count passes, pass_rate as passed/total];
+      avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, assembles_the_pieces: true, handles_edge_cases: true, matches_intent: true }
+
+  # FAIL — capstone agent trusts empty observations and never caps the loop.
+  # All four checks false. 0/4 = 0.0 → fail; gate false caps fail→fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: run_capstone records every step as ok:True
+      without ever checking whether the observation is empty or None, so garbage from a tool is trusted as
+      real data. assembles_the_pieces does NOT hold: there is no validation boundary between the tool call
+      and the trace, so the pieces are not wired as the exercise requires. handles_edge_cases does NOT
+      hold: the loop has no step cap and never returns a step_limit result, so a looping client spins
+      forever. matches_intent does NOT hold: the prompt asked for observation validation and a bounded
+      loop and it does neither.
+      signals.must_use=[validate observation, step cap]; avoid=[trusting an empty observation, looping without a cap].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, assembles_the_pieces: false, handles_edge_cases: false, matches_intent: false }
+
+  # FAIL — eval harness divides by zero and miscounts.
+  # All four checks false. 0/4 = 0.0 → fail; gate false caps fail→fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: run_evals computes pass_rate as passed/total
+      with no guard, so an empty cases list raises ZeroDivisionError, and it increments the pass counter
+      before calling the judge so every case is counted as a pass. assembles_the_pieces does NOT hold: the
+      agent output is never passed to the judge — it judges the raw input instead. handles_edge_cases does
+      NOT hold: the empty-cases boundary crashes rather than returning 0.0. matches_intent does NOT hold:
+      the returned pass_rate does not reflect the judge's decisions at all.
+      signals.must_use=[judge each output, guard empty cases]; avoid=[dividing by zero, counting before judging].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, assembles_the_pieces: false, handles_edge_cases: false, matches_intent: false }
+
+  # PASS — correct portfolio-readiness check. All four checks true. 4/4 = 1.0 → pass; gate true.
+  - answer: >-
+      tests_passed=true. technically_correct holds: portfolio_ready checks all four required keys
+      ("agent", "readme", "evals", "demo"), treats an absent or empty value (empty string, empty list,
+      None) as missing, and reports ready True only when nothing is missing. assembles_the_pieces holds:
+      the four artifacts are checked together and the missing list is built from exactly those keys.
+      handles_edge_cases holds: empty values are counted as missing rather than present, and the missing
+      list is returned sorted. matches_intent holds: it returns {"ready", "missing"} with ready True iff
+      missing is empty, exactly as the prompt asked.
+      signals.must_use=[check all four required keys, treat absent or empty as missing, return sorted
+      missing list, ready True only when nothing missing]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, assembles_the_pieces: true, handles_edge_cases: true, matches_intent: true }
+
+  # FAIL — portfolio check counts empty values as present and returns ready with missing keys.
+  # All four checks false. 0/4 = 0.0 → fail; gate false caps fail→fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: portfolio_ready only tests key presence with
+      `in project`, so an empty string or empty list counts as present even though the artifact is missing.
+      assembles_the_pieces does NOT hold: it never checks all four required keys against emptiness, so the
+      artifacts are not wired together as the exercise requires. handles_edge_cases does NOT hold: an empty
+      value slips through as present, so a repo with an empty evals list is reported ready. matches_intent
+      does NOT hold: it can return ready True while the missing list should be non-empty, and the missing
+      list is returned unsorted.
+      signals.must_use=[treat absent or empty as missing, sorted missing list]; avoid=[counting an empty value as present, returning ready True with missing keys].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, assembles_the_pieces: false, handles_edge_cases: false, matches_intent: false }

@@ -1,0 +1,12 @@
+id: lesson-deploy-gate
+title: "Never deploy below the bar"
+material: deploy-gate.md
+segments:
+  - present: never-deploy-below-the-bar
+  - check: mc-never-deploy
+  - check: mc-gate
+  - check: cloze-gate
+  - check: fe-threshold
+  - check: fe-gate
+  - apply: essay-metrics
+  - apply: code-deploy-gate

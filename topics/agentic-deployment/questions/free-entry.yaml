@@ -1,0 +1,72 @@
+# Free entry (short answer)
+- id: fe-async
+  type: text_input
+  tags: [asyncapi]
+  difficulty: 2
+  prompt: "The submit endpoint returns immediately instead of blocking. What style of job API is this? (one word)"
+  answer:
+    regex: '^async$'
+    normalize: true
+
+- id: fe-jobid
+  type: text_input
+  tags: [jobs]
+  difficulty: 2
+  prompt: "What does submit() hand back to the caller so it can look the work up later?"
+  answer:
+    regex: '^(job_id|job id|id)$'
+    normalize: true
+
+- id: fe-poll
+  type: text_input
+  tags: [jobs]
+  difficulty: 2
+  prompt: "What does the client do against the status endpoint until the job is done? (one word)"
+  answer:
+    regex: '^poll$'
+    normalize: true
+
+- id: fe-bucket
+  type: text_input
+  tags: [ratelimit]
+  difficulty: 2
+  prompt: "A token ____ is the standard per-user rate-limiting mechanism (one word)."
+  answer:
+    regex: '^bucket$'
+    normalize: true
+
+- id: fe-canary
+  type: text_input
+  tags: [rollout]
+  difficulty: 2
+  prompt: "What do you call the small slice of traffic a new version ships to first? (one word)"
+  answer:
+    regex: '^canary$'
+    normalize: true
+
+- id: fe-rollback
+  type: text_input
+  tags: [rollout]
+  difficulty: 2
+  prompt: "What one-command action returns traffic to the last known-good version? (one word)"
+  answer:
+    regex: '^rollback$'
+    normalize: true
+
+- id: fe-idempotency
+  type: text_input
+  tags: [jobs]
+  difficulty: 3
+  prompt: "What kind of key does a client send so a retried submit returns the same job instead of a duplicate? A(n) ____ key (one word)."
+  answer:
+    regex: '^idempotency$'
+    normalize: true
+
+- id: fe-deadletter
+  type: text_input
+  tags: [jobs]
+  difficulty: 3
+  prompt: "A job that fails past its retry limit is parked in a ____-letter queue for inspection (one word)."
+  answer:
+    regex: '^(dead|dead-letter|deadletter)$'
+    normalize: true

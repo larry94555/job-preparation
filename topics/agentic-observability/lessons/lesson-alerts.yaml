@@ -1,0 +1,12 @@
+id: lesson-alerts
+title: "Alerts and dashboards"
+material: alerts.md
+segments:
+  - present: alerts-and-dashboards
+  - check: mc-alerts
+  - check: mc-dashboard
+  - check: cloze-alert
+  - check: cloze-dashboard
+  - check: fe-alert
+  - check: fe-dashboard
+  - apply: code-alert

@@ -1,0 +1,10 @@
+id: agentic-deployment
+title: "Production Deployment"
+description: "\"It works on my machine\" is not a product. Turn an agent into a service: an async job API that returns a job id immediately and never blocks the request thread, rate limiting so one user can't burn your budget, canary rollout to a slice of traffic first, and a one-command rollback."
+track: agentic
+pass_threshold: 0.8
+tag_weights:
+  asyncapi: 1.2
+  jobs: 1.0
+  ratelimit: 1.2
+  rollout: 1.0

@@ -1,0 +1,80 @@
+# Calibration for eval-agentic-async-code (exemplars target the async-fanout / retry-backoff / isolate exercises).
+# Six unambiguous cases: 3 clear PASS + 3 clear FAIL. No borderline cases — the
+# deployed 8B judge misgrades borderline code, so every exemplar is decisive.
+skill: eval-agentic-async-code
+cases:
+  - answer: >-
+      tests_passed=true. technically_correct holds: gather_calls builds a coroutine per query and awaits
+      asyncio.gather(*coros), so the fetches overlap and results come back in input order.
+      concurrent_not_sequential holds: it hands the coroutine objects to gather rather than awaiting each
+      one in a loop. handles_failures is not the focus of this exercise but nothing is swallowed or
+      crashed. matches_intent holds: it returns the results as a list in the same order as queries.
+      signals.must_use=[coroutine per query, asyncio.gather, preserve order]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, concurrent_not_sequential: true, handles_failures: true, matches_intent: true }
+
+  - answer: >-
+      tests_passed=true. technically_correct holds: retry_call awaits fn and returns on success, catches
+      the exception, and retries up to `attempts` with exponential 2**i delays via the injected sleep,
+      re-raising the last exception on exhaustion. concurrent_not_sequential is not applicable to a single
+      retried call and does not detract. handles_failures holds: the retry is bounded by attempts and uses
+      backoff instead of retrying forever, and it re-raises when exhausted. matches_intent holds: it uses
+      the injected async sleep rather than real time and re-raises the final error.
+      signals.must_use=[await fn and return, retry with exponential backoff, re-raise on exhaustion]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, concurrent_not_sequential: true, handles_failures: true, matches_intent: true }
+
+  - answer: >-
+      tests_passed=true. technically_correct holds: run_all awaits asyncio.gather(*coros,
+      return_exceptions=True) so every coroutine runs concurrently, then maps each result to
+      {"ok": True, "value": v} for a value or {"ok": False, "error": str(e)} for an Exception object in
+      that slot. concurrent_not_sequential holds: it gathers the coroutines rather than awaiting each one
+      in a loop, so a slow coroutine does not serialize the batch. handles_failures holds: a raising
+      coroutine is isolated as an ok=False entry and does not abort the siblings, exactly as the exercise
+      requires. matches_intent holds: order is preserved and each result is shaped as ok/value or ok/error.
+      signals.must_use=[run all coroutines concurrently, isolate each failure, shape as ok/value or ok/error]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, concurrent_not_sequential: true, handles_failures: true, matches_intent: true }
+
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: gather_calls awaits each fetch inside a for
+      loop (result = await client.fetch(q)) and appends it, so the calls run strictly one after another —
+      the fan-out speedup is lost even though order happens to be preserved. concurrent_not_sequential does
+      NOT hold: it is a sequential loop, the exact antipattern the exercise warns against. handles_failures
+      does NOT hold: a single failing fetch aborts the whole loop with nothing isolated. matches_intent
+      does NOT hold: the prompt required concurrent execution and this is sequential.
+      signals.must_use=[preserve order]; avoid=[awaiting each fetch in a sequential loop].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, concurrent_not_sequential: false, handles_failures: false, matches_intent: false }
+
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: retry_call catches the exception but never
+      sleeps and never backs off — it retries in a tight loop with no delay, and on exhaustion it returns
+      None instead of re-raising the last exception, so the exponential-backoff and re-raise requirements
+      are both missing. concurrent_not_sequential does NOT hold: it is neither concurrent nor a correct
+      sequential retry — the injected sleep is never awaited at all. handles_failures does NOT hold: with
+      no backoff and no cap-then-raise it hammers the service and reports a fully-failed call as a silent
+      None success. matches_intent does NOT hold: the prompt required the injected sleep with exponential
+      delay and a re-raise on exhaustion, none of which happen.
+      signals.must_use=[]; avoid=[retrying with no backoff, swallowing the final exception instead of re-raising].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, concurrent_not_sequential: false, handles_failures: false, matches_intent: false }
+
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: run_all awaits each coroutine in a sequential
+      for loop with a bare try/except that on failure appends the coroutine's exception unshaped, and on
+      success appends the raw value rather than the required {"ok": ...} dict — so the result shape is
+      wrong and the fan-out is serialized. concurrent_not_sequential does NOT hold: awaiting each coroutine
+      one at a time in the loop defeats the concurrency the exercise is about. handles_failures does NOT
+      hold: failures are neither isolated into the ok=False/error shape nor kept from distorting the batch,
+      and the sequential loop lets a slow coroutine block the rest. matches_intent does NOT hold: neither
+      the ok/value nor the ok/error result shape is produced.
+      signals.must_use=[]; avoid=[running the coroutines sequentially, returning raw values instead of the ok/value ok/error shape].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, concurrent_not_sequential: false, handles_failures: false, matches_intent: false }

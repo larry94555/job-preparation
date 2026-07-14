@@ -1,0 +1,39 @@
+# Frontier drill (L4) — an open problem in agent memory.
+- id: frontier-forget
+  type: multiple_choice
+  tags: [recall]
+  difficulty: 4
+  prompt: >-
+    An agent runs for weeks across many sessions; its memory store keeps growing, some stored facts have
+    since changed, and recalling them confidently makes the model reason from a falsehood. Which named open
+    problems are these, and what is the honest read?
+  options:
+    - { text: "Eviction/forgetting policy and context poisoning from stale memories — genuine open problems: there is no settled rule for what to forget, and no reliable way to detect and quarantine stale or wrong memories before they poison the context", correct: true }
+    - { text: "Both are fully solved by making the context window larger" }
+    - { text: "Neither is real — a stored memory is always correct, so recalling it can never mislead the model" }
+    - { text: "It is only a latency problem; a faster embedding model makes old memories correct again" }
+  explanation: >-
+    Deciding what to evict (forgetting) and preventing stale or wrong memories from poisoning the current
+    context are active, unsolved problems. Recency/importance heuristics trade recall against noise, and a
+    once-true fact recalled after it changed makes the model reason from a falsehood — bigger windows and
+    faster models do not fix either.
+
+- id: frontier-memory-eval
+  type: multiple_choice
+  tags: [recall]
+  difficulty: 4
+  prompt: >-
+    You can already measure whether a single retrieval returned nearby items, yet a teammate claims the
+    agent's memory subsystem "clearly works" because recall latency is low and the vector store is full.
+    What is the frontier-aware correction, and why is this an OPEN problem?
+  options:
+    - { text: "Retrieval-level metrics do not measure whether memory as a whole is HELPING — recalling the right things, forgetting the right things, staying correct over time; there is no settled end-to-end memory-quality eval, so 'it works' here is judged by vibes, and cross-session consistency (conflicting writes from many runs) has no accepted resolution rule either", correct: true }
+    - { text: "It is fully settled: a full store plus low recall latency is a complete proof that memory quality is high" }
+    - { text: "Memory quality is identical to recall@k, so the single retrieval metric already answers the question" }
+    - { text: "The only open question is embedding speed; once retrieval is fast enough, memory quality is guaranteed" }
+  explanation: >-
+    Measuring a single nearest-neighbor lookup is easy; measuring whether the memory system as a whole
+    recalls the right things, forgets the right things, and stays correct across time is not — there is no
+    accepted end-to-end memory-quality eval, and when many sessions or agents write a shared store,
+    resolving conflicting/contradictory memories (consistency) is unsolved. A full store and fast recall
+    say nothing about either, so this is an active research edge, not a settled metric.

@@ -1,0 +1,204 @@
+# Multiple choice
+- id: mc-no-memory
+  type: multiple_choice
+  tags: [memory]
+  difficulty: 2
+  prompt: "What is the characteristic failure of an agent built with no memory of its own?"
+  options:
+    - { text: "It repeats itself forever — re-asking answered questions and re-running tools whose results it has already seen", correct: true }
+    - { text: "It runs faster because it never has to look anything up" }
+    - { text: "It becomes more accurate because nothing stale can mislead it" }
+    - { text: "It can only ever answer a single question and then halts" }
+  explanation: "A model call is stateless. An agent with no memory has no record of what it tried or learned, so it loops — re-asking, re-running, and re-deriving the same things."
+
+- id: mc-four-memories
+  type: multiple_choice
+  tags: [memory]
+  difficulty: 2
+  prompt: "Which set correctly names the four memories an agent needs?"
+  options:
+    - { text: "Short-term conversation buffer, working state/scratchpad, long-term (vector) store, and episodic history", correct: true }
+    - { text: "System prompt, user prompt, assistant prompt, and tool prompt" }
+    - { text: "CPU cache, RAM, disk, and network" }
+    - { text: "Training data, fine-tuning data, RLHF data, and eval data" }
+  explanation: "The four memories are the recent-turns buffer, the mid-task working scratchpad, the durable long-term (vector) store for cross-session recall, and the episodic log of past runs."
+
+- id: mc-choose-memory
+  type: multiple_choice
+  tags: [types]
+  difficulty: 3
+  prompt: "You need to track where you are in a multi-step task — the plan, what's done, the current intermediate result. Which memory is that?"
+  options:
+    - { text: "The working state / scratchpad — structured, in-context state the agent reads and writes mid-task", correct: true }
+    - { text: "The long-term vector store, queried by semantic similarity" }
+    - { text: "The episodic history log, queried by run id" }
+    - { text: "The short-term conversation buffer of raw recent turns" }
+  explanation: "Task progress is structured working state the agent maintains mid-task — the scratchpad. It is in-context but distilled, not the raw transcript and not an external store."
+
+- id: mc-when-compress
+  type: multiple_choice
+  tags: [compression]
+  difficulty: 2
+  prompt: "When should an agent compress the conversation buffer into a running summary?"
+  options:
+    - { text: "When the buffer would exceed its token budget — the oldest turns are summarized so the essentials survive and raw tokens are dropped", correct: true }
+    - { text: "On every single turn, regardless of how full the context is" }
+    - { text: "Never — you should keep every raw turn in context indefinitely" }
+    - { text: "Only after the conversation has completely ended" }
+  explanation: "Compression is triggered by a budget threshold: when the buffer would overflow the context window, collapse the oldest turns into a summary rather than dropping them raw or keeping everything."
+
+- id: mc-keep-drop
+  type: multiple_choice
+  tags: [compression]
+  difficulty: 3
+  prompt: "When compressing old turns into a summary, what should you keep versus drop?"
+  options:
+    - { text: "Keep decisions, established facts/constraints, and open tasks; drop chit-chat and restated reasoning whose conclusion you already captured", correct: true }
+    - { text: "Keep the greetings and small talk; drop the decisions and constraints" }
+    - { text: "Keep everything verbatim — a summary must never lose a single word" }
+    - { text: "Drop everything; a summary should be empty to save the most tokens" }
+  explanation: "A good summary is the minutes, not the transcript: preserve load-bearing content (decisions, facts, open tasks) and discard chit-chat. The risk is that compression is lossy — you can summarize away something you later need."
+
+- id: mc-retrieve-inject
+  type: multiple_choice
+  tags: [recall]
+  difficulty: 3
+  prompt: "What is the right pattern for using a large long-term memory store across sessions?"
+  options:
+    - { text: "Retrieve-then-inject — keep everything in the store and pull only the most relevant items into context on demand", correct: true }
+    - { text: "Dump the entire store back into the context window at the start of every session" }
+    - { text: "Never read from the store; long-term memory is write-only" }
+    - { text: "Inject items in insertion order until the context window is full" }
+  explanation: "The store is far larger than the window and mostly irrelevant to any one task. Retrieve-then-inject brings in only the relevant items on demand, rather than stuffing everything back into context."
+
+- id: mc-ranking-matters
+  type: multiple_choice
+  tags: [recall]
+  difficulty: 3
+  prompt: "Why is relevance ranking essential when recalling from long-term memory, rather than just returning nearby items?"
+  options:
+    - { text: "Irrelevant recall wastes context tokens and distracts the model — so you must rank and take the top-k most relevant", correct: true }
+    - { text: "Ranking makes the embedding model train faster" }
+    - { text: "Without ranking the vector store cannot store any items at all" }
+    - { text: "Ranking guarantees the recalled facts are always correct and never stale" }
+  explanation: "Every injected item costs tokens and off-topic recall distracts the model away from the goal. Recall is a ranking problem: score items and inject only the top-k relevant ones."
+
+- id: mc-episodic-history
+  type: multiple_choice
+  tags: [memory]
+  difficulty: 2
+  prompt: "What does the episodic history memory hold, and how is it typically queried?"
+  options:
+    - { text: "A durable log of past runs/episodes — what the agent did and how it turned out — queried by time or run id rather than by semantic similarity", correct: true }
+    - { text: "The most recent turns of the current dialogue, queried by scrolling back through the buffer" }
+    - { text: "The current plan and intermediate results, queried by reading the scratchpad" }
+    - { text: "Every fact ever embedded, queried only by cosine similarity to the current message" }
+  explanation: "Episodic history is the append-only audit trail of past runs — the source of 'have I done this before?'. Its access pattern is by time/run id, distinct from the semantic (by-meaning) lookup the vector store provides."
+
+- id: mc-in-context-vs-external
+  type: multiple_choice
+  tags: [memory]
+  difficulty: 3
+  prompt: "Which pair of memories lives IN CONTEXT (read for free on the next model call), and which pair lives EXTERNALLY (pulled in on demand)?"
+  options:
+    - { text: "In-context: short-term buffer and working scratchpad; external: long-term vector store and episodic log", correct: true }
+    - { text: "In-context: vector store and episodic log; external: buffer and scratchpad" }
+    - { text: "All four live in context; nothing is ever stored externally" }
+    - { text: "All four live externally; the context window holds none of them" }
+  explanation: "The buffer and scratchpad are part of the prompt on the next call, so they are read for free but bounded by the window. The vector store and episodic log live outside the window and cost a retrieval step to bring in."
+
+- id: mc-wrong-memory-bug
+  type: multiple_choice
+  tags: [types]
+  difficulty: 3
+  prompt: "A team stores the agent's evolving multi-step plan by appending it to the raw conversation buffer instead of a structured scratchpad. What goes wrong?"
+  options:
+    - { text: "The plan is diluted among raw turns and gets summarized away or pushed out when the buffer compresses — task state should live in the structured working scratchpad, not the raw buffer", correct: true }
+    - { text: "Nothing — the buffer and the scratchpad are interchangeable in every respect" }
+    - { text: "The plan becomes permanently un-editable because buffers are read-only" }
+    - { text: "The vector store stops accepting new writes until the plan is removed" }
+  explanation: "Working state has a different lifetime and access pattern than recent chat: it must be read and rewritten mid-task and survive compression. Burying it in the raw buffer means it competes with chit-chat and can be compressed away — a memory-type mismatch bug."
+
+- id: mc-lifetime-access
+  type: multiple_choice
+  tags: [types]
+  difficulty: 3
+  prompt: "What two questions best decide WHICH memory a piece of state belongs in?"
+  options:
+    - { text: "How long must it live, and how is it looked up (by recency, by run id, or by semantic meaning)?", correct: true }
+    - { text: "How many GPUs it needs, and which vendor hosts the model" }
+    - { text: "What color the UI is, and how many users are online" }
+    - { text: "Whether the model was fine-tuned, and its parameter count" }
+  explanation: "Lifetime (this turn, this task, this session, forever) and access pattern (recency, run id, semantic similarity) are the two axes that map each piece of state to its right home. Defaulting everything into the buffer ignores both."
+
+- id: mc-compress-consolidation
+  type: multiple_choice
+  tags: [compression]
+  difficulty: 2
+  prompt: "Compression of old turns into a running summary is best understood as which operation?"
+  options:
+    - { text: "Consolidation — many verbose turns collapse into a few sentences of durable state that stand in for what they replaced", correct: true }
+    - { text: "Encryption — the old turns are scrambled so they cannot be read" }
+    - { text: "Replication — the old turns are copied to a second buffer for redundancy" }
+    - { text: "Sharding — the old turns are split across several context windows" }
+  explanation: "Summary-as-compression is consolidation: the raw tokens are discarded and a compact summary carries forward the load-bearing state. It is not encryption, replication, or sharding."
+
+- id: mc-compress-lossy-risk
+  type: multiple_choice
+  tags: [compression]
+  difficulty: 3
+  prompt: "What is the fundamental risk that makes aggressive summarization a source of subtle, hard-to-debug bugs?"
+  options:
+    - { text: "Compression is lossy — a detail that seemed irrelevant when you compressed can turn out to matter later, and it is now gone from context", correct: true }
+    - { text: "Compression is lossless, so it can never lose information and there is no risk" }
+    - { text: "Summaries always double the token count, overflowing the window faster" }
+    - { text: "Summarizing permanently deletes the underlying vector store" }
+  explanation: "Every dropped token is a fact you are betting you won't need. Because summarization is lossy, over-aggressive compression silently forgets details that surface as puzzling failures three turns later."
+
+- id: mc-summary-counts-budget
+  type: multiple_choice
+  tags: [compression]
+  difficulty: 4
+  prompt: "When you replace the oldest turns with a running summary to stay under the token budget, what must be true of the summary itself?"
+  options:
+    - { text: "The summary's own tokens count toward the budget, so the summary plus the kept recent turns must still fit under the limit", correct: true }
+    - { text: "The summary is free and never counts against the token budget" }
+    - { text: "The summary may exceed the budget as long as it is shorter than the turns it replaced" }
+    - { text: "The summary should be as long as possible to preserve maximum detail" }
+  explanation: "A summary is still context. Correct budget-triggered compression ensures summary + retained recent messages is <= the budget; otherwise you have not actually solved the overflow."
+
+- id: mc-recall-not-retrieval
+  type: multiple_choice
+  tags: [recall]
+  difficulty: 4
+  prompt: "Why is cross-session recall described as a RANKING problem rather than merely a RETRIEVAL problem?"
+  options:
+    - { text: "Getting semantically-nearby items back is easy; the skill is scoring them so only the top-k that matter for THIS query enter context and everything else stays in the store", correct: true }
+    - { text: "Because retrieval is impossible without first fine-tuning the embedding model" }
+    - { text: "Because the store can only ever return items in insertion order" }
+    - { text: "Because ranking removes the need for any similarity score at all" }
+  explanation: "Nearest-neighbor lookup is the easy part; a system that returns everything or returns items in insertion order has skipped the ranking step that decides what actually matters for the current query — the part that makes long-term memory useful."
+
+- id: mc-recall-recency-importance
+  type: multiple_choice
+  tags: [recall]
+  difficulty: 3
+  prompt: "Beyond pure semantic similarity, what signals are commonly combined into the relevance score used to rank recalled memories?"
+  options:
+    - { text: "Recency and importance — how recently and how significant a memory is, blended with similarity to break ties and surface the memories that most bear on the query", correct: true }
+    - { text: "The alphabetical order of the stored text" }
+    - { text: "The number of GPUs available at query time" }
+    - { text: "The length of the model's system prompt" }
+  explanation: "Production recall rarely ranks on similarity alone: recency and importance are folded into the score so a highly-relevant-but-old or a slightly-less-similar-but-critical memory can still win the top-k slot."
+
+- id: mc-scratchpad-write
+  type: multiple_choice
+  tags: [types]
+  difficulty: 2
+  prompt: "What distinguishes the working scratchpad from the short-term buffer, even though both live in context?"
+  options:
+    - { text: "The scratchpad is structured state the agent actively reads and REWRITES mid-task; the buffer just accumulates raw recent turns", correct: true }
+    - { text: "The scratchpad lives in the vector store while the buffer lives on disk" }
+    - { text: "The buffer is editable mid-task while the scratchpad is append-only" }
+    - { text: "There is no difference; they are two names for the same list of messages" }
+  explanation: "Both are in-context, but the buffer is a raw append-only rolling window of recent turns, while the scratchpad is distilled, structured task state the agent maintains — reading and overwriting it as the task progresses."

@@ -1,0 +1,63 @@
+# Free entry (short answer)
+- id: fe-injection
+  type: text_input
+  tags: [injection]
+  difficulty: 2
+  prompt: "What is the name of the attack where fetched content smuggles in instructions the model obeys? (prompt ____, one word)"
+  answer:
+    regex: '^injection$'
+    normalize: true
+
+- id: fe-separate
+  type: text_input
+  tags: [separation]
+  difficulty: 2
+  prompt: "What must you do with trusted instructions vs. untrusted content to defend against injection? (one word)"
+  answer:
+    regex: '^separate$'
+    normalize: true
+
+- id: fe-sanitize
+  type: text_input
+  tags: [separation]
+  difficulty: 2
+  prompt: "What do you call scrubbing known injection patterns out of untrusted content? (one word)"
+  answer:
+    regex: '^sanitize$'
+    normalize: true
+
+- id: fe-sandbox
+  type: text_input
+  tags: [sandbox]
+  difficulty: 2
+  prompt: "What isolated environment should untrusted code run in? (one word)"
+  answer:
+    regex: '^sandbox$'
+    normalize: true
+
+- id: fe-redact
+  type: text_input
+  tags: [redaction]
+  difficulty: 2
+  prompt: "What do you do to emails and secret tokens before they enter the context? (one word)"
+  answer:
+    regex: '^redact$'
+    normalize: true
+
+- id: fe-pii
+  type: text_input
+  tags: [redaction]
+  difficulty: 2
+  prompt: "Personally identifiable information is abbreviated as ____ (one word)."
+  answer:
+    regex: '^pii$'
+    normalize: true
+
+- id: fe-egress
+  type: text_input
+  tags: [redaction]
+  difficulty: 2
+  prompt: "Sensitive data reaching a destination it should never reach — data leakage or ____ (one word) — is stopped by gating the data-out step."
+  answer:
+    regex: '^exfiltration$'
+    normalize: true

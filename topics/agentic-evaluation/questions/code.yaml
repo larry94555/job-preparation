@@ -1,0 +1,62 @@
+# Coding exercises — engine type: code (graded by tests + concept skill)
+- id: code-llm-judge
+  type: code
+  language: python
+  tags: [judge]
+  difficulty: 3
+  prompt: >-
+    Implement `judge(task, output, criteria, client) -> dict`. Call `client.score(task, output, criteria)`,
+    which returns a JSON string like `{"passed": true, "score": 0.9, "reasoning": "..."}`. Parse it and
+    return `{"passed": bool, "score": float, "reasoning": str}`. Raise `ValueError` if `score` is not a
+    number in [0, 1]. This is the LLM-as-judge call: a separate model scores the output against the criteria
+    and you validate its strict-JSON verdict before trusting it.
+  starter_file: exercises/llm-judge/starter.py
+  test_file: exercises/llm-judge/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-eval-code
+  concept_checks:
+    must_use: ["call client.score to get the verdict", "parse the JSON verdict string", "return passed/score/reasoning", "range-check score in [0,1] and raise ValueError otherwise"]
+    avoid_antipattern: ["trusting the score without range-checking it", "returning silently on an out-of-range score"]
+
+- id: code-eval-suite
+  type: code
+  language: python
+  tags: [suite]
+  difficulty: 3
+  prompt: >-
+    Implement `run_suite(agent, cases, judge) -> dict`. For each case run `agent(case["input"])` to get an
+    output, then `judge(case, output)` which returns a dict with `passed` (bool) and `score` (float). Return
+    `{"pass_rate": float, "avg_score": float, "failed": [inputs that did not pass]}`, where `pass_rate` is
+    the fraction of cases that passed and `avg_score` is the mean score over all cases. `failed` lists the
+    `case["input"]` of every case whose result was not passed.
+  starter_file: exercises/eval-suite/starter.py
+  test_file: exercises/eval-suite/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-eval-code
+  concept_checks:
+    must_use: ["run the agent on each case input", "judge each output", "compute pass_rate as the fraction passed", "collect the inputs that failed"]
+    avoid_antipattern: ["reporting only an aggregate with no failed list", "counting a case as passed without checking the verdict"]
+
+- id: code-deploy-gate
+  type: code
+  language: python
+  tags: [gate]
+  difficulty: 2
+  prompt: >-
+    Implement `gate(results, min_pass_rate) -> bool`. `results` is the dict returned by an eval suite, with
+    a `pass_rate` key. Return `True` if `results["pass_rate"] >= min_pass_rate` and `False` otherwise. The
+    comparison is `>=` so a run landing exactly on the bar passes — the threshold is the minimum acceptable,
+    not something you must beat.
+  starter_file: exercises/deploy-gate/starter.py
+  test_file: exercises/deploy-gate/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-eval-code
+  concept_checks:
+    must_use: ["compare pass_rate against min_pass_rate", "use >= so the boundary passes", "return a bool"]
+    avoid_antipattern: ["using strict > so an on-the-bar run fails", "mutating results or deploying from inside the gate"]

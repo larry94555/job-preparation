@@ -1,0 +1,63 @@
+# Free entry (short answer)
+- id: fe-trace
+  type: text_input
+  tags: [trace]
+  difficulty: 1
+  prompt: "What do you call the full per-step record of one agent run? (one word)"
+  answer:
+    regex: '^trace$'
+    normalize: true
+
+- id: fe-span
+  type: text_input
+  tags: [spans]
+  difficulty: 1
+  prompt: "What is the record of a single step inside a trace called? (one word)"
+  answer:
+    regex: '^span$'
+    normalize: true
+
+- id: fe-latency
+  type: text_input
+  tags: [spans]
+  difficulty: 2
+  prompt: "Which per-span metric measures how long a step took? (one word)"
+  answer:
+    regex: '^latency$'
+    normalize: true
+
+- id: fe-alert
+  type: text_input
+  tags: [alerts]
+  difficulty: 2
+  prompt: "What fires when a metric crosses a budget or SLO threshold? (one word)"
+  answer:
+    regex: '^alert$'
+    normalize: true
+
+- id: fe-dashboard
+  type: text_input
+  tags: [alerts]
+  difficulty: 2
+  prompt: "What is the always-on view of aggregate trends called? (one word)"
+  answer:
+    regex: '^dashboard$'
+    normalize: true
+
+- id: fe-cost
+  type: text_input
+  tags: [metrics]
+  difficulty: 2
+  prompt: "Which production metric multiplies with volume and surprises everyone at scale? (one word)"
+  answer:
+    regex: '^cost$'
+    normalize: true
+
+- id: fe-tail
+  type: text_input
+  tags: [metrics]
+  difficulty: 2
+  prompt: "Median latency looks fine but p95/p99 is what users feel. What is that slow part of the distribution called? (one word)"
+  answer:
+    regex: '^tail$'
+    normalize: true

@@ -1,0 +1,14 @@
+id: lesson-structured-concurrency
+title: "Structured & bounded concurrency"
+material: structured-concurrency.md
+segments:
+  - present: beyond-gather-tasks-and-structured-concurrency
+  - check: mc-coroutine-object
+  - check: mc-create-task
+  - check: mc-taskgroup
+  - present: bounding-concurrency-with-a-semaphore
+  - check: mc-semaphore
+  - apply: essay-bounded-concurrency
+  - present: handling-blocking-work-and-streaming-results
+  - check: mc-executor
+  - check: mc-gather-vs-as-completed

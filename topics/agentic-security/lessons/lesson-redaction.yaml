@@ -1,0 +1,13 @@
+id: lesson-redaction
+title: "Redact PII and filter output"
+material: redaction.md
+segments:
+  - present: redact-pii-and-filter-output
+  - check: mc-redact
+  - check: mc-output-filter
+  - check: cloze-redact
+  - check: cloze-filter
+  - check: fe-redact
+  - check: fe-pii
+  - apply: code-pii-redact
+  - apply: code-output-filter

@@ -1,0 +1,54 @@
+# Missing term (cloze)
+- id: cloze-injection
+  type: text_input
+  tags: [injection]
+  difficulty: 1
+  prompt: "The #1 risk on the OWASP LLM Top 10, where untrusted content smuggles in commands, is prompt ____."
+  answer:
+    regex: '^injection$'
+    normalize: true
+
+- id: cloze-separate
+  type: text_input
+  tags: [separation]
+  difficulty: 1
+  prompt: "The first defense against injection is to ____ trusted instructions from untrusted content."
+  answer:
+    regex: '^separate$'
+    normalize: true
+
+- id: cloze-sandbox
+  type: text_input
+  tags: [sandbox]
+  difficulty: 1
+  prompt: "Untrusted or model-written code should run in an isolated ____ with no host access."
+  answer:
+    regex: '^sandbox$'
+    normalize: true
+
+- id: cloze-redact
+  type: text_input
+  tags: [redaction]
+  difficulty: 1
+  prompt: "Before user text enters the context, ____ the PII by replacing it with placeholders."
+  answer:
+    regex: '^redact$'
+    normalize: true
+
+- id: cloze-untrusted
+  type: text_input
+  tags: [injection]
+  difficulty: 2
+  prompt: "Content the agent fetches from the web or a file must be treated as ____ until proven otherwise."
+  answer:
+    regex: '^untrusted$'
+    normalize: true
+
+- id: cloze-filter
+  type: text_input
+  tags: [redaction]
+  difficulty: 2
+  prompt: "An output ____ inspects a proposed action and blocks disallowed tools before they execute."
+  answer:
+    regex: '^filter$'
+    normalize: true

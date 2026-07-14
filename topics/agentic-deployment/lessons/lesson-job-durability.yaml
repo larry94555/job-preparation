@@ -1,0 +1,12 @@
+id: lesson-job-durability
+title: "Durable jobs: retries, idempotency, and the atomic claim"
+material: job-durability.md
+segments:
+  - present: durable-jobs-retries-idempotency-and-the-atomic-claim
+  - check: mc-idempotent-submit
+  - check: fe-idempotency
+  - check: mc-retry-failed
+  - check: fe-deadletter
+  - check: mc-atomic-claim
+  - apply: essay-worker-pool
+  - apply: essay-idempotent-retries

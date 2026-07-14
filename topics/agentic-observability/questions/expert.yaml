@@ -1,0 +1,48 @@
+# Expert canon (L3) — OpenTelemetry / distributed tracing for agents.
+- id: expert-otel
+  type: multiple_choice
+  tags: [trace]
+  difficulty: 3
+  prompt: "How does OpenTelemetry (OTel) relate to tracing an agent's model and tool calls?"
+  options:
+    - { text: "OTel's data model is exactly the one agent tracing uses — a trace is a tree of spans with attributes and status, and trace context links a span to its parent — so agent traces slot into standard backends", correct: true }
+    - { text: "OTel is a Python library that validates the model's JSON output before a tool runs" }
+    - { text: "OTel is an LLM decoding mode that constrains output to a schema" }
+    - { text: "OTel is a leaderboard that scores how well models call tools" }
+  explanation: "Agent observability is distributed tracing with LLM attributes. OTel standardizes traces/spans/metrics: a trace is a tree of spans, each with attributes and status, and trace context propagates parent-child links. A span per model or tool call (with tokens/cost/latency/tool/error attributes) is that same primitive — which is why LLM-observability tools (Langfuse, LangSmith, Helicone) are OTel-compatible rather than a new invention. It is not a validator, a decoding mode, or a benchmark."
+
+- id: expert-span-tree
+  type: multiple_choice
+  tags: [spans]
+  difficulty: 4
+  prompt: "In OpenTelemetry terms, how should a nested agent step — a tool call that itself makes a model call — be represented across spans?"
+  options:
+    - { text: "As child spans under the step that invoked them, linked by parent-span id within the same trace, so the causal tree is preserved", correct: true }
+    - { text: "As one flat span for the whole nested step, since spans cannot be nested" }
+    - { text: "As separate traces per nested call, with no link back to the parent" }
+    - { text: "As attributes on the root span only, with no spans for the nested calls" }
+  explanation: "OTel spans form a tree via parent-span ids inside one trace. A tool that calls the model is a child span of the tool span, which is a child of the run's root span. Preserving that nesting rather than flattening to one span or splitting into unlinked traces is what lets you attribute a slow or failing nested call back to the step that caused it."
+
+- id: expert-token-metrics
+  type: multiple_choice
+  tags: [metrics]
+  difficulty: 3
+  prompt: "You want cost, latency, and token usage as first-class metrics across thousands of runs. What is the canonical relationship between the spans you record and those metrics?"
+  options:
+    - { text: "The metrics are aggregations over span attributes — sum/percentile of per-span tokens, cost, and latency — so recording the right attributes per span is what makes the metrics computable", correct: true }
+    - { text: "Metrics and spans are independent; you must instrument each metric separately from any span" }
+    - { text: "Metrics replace spans, so once you emit a metric you can drop the spans" }
+    - { text: "Only latency can be derived from spans; cost and tokens must be entered by hand" }
+  explanation: "In the OTel model, traces (spans) and metrics are complementary: aggregate metrics like total cost per hour, p95 latency, or tokens per run are roll-ups over per-span attributes. That is why you record tokens/cost/latency on each span — the metrics you watch in aggregate are computed from exactly those fields, not instrumented independently."
+
+- id: expert-slo-alerting
+  type: multiple_choice
+  tags: [alerts]
+  difficulty: 4
+  prompt: "Applying the SRE SLO/alerting discipline to an agent, what makes a latency alert page on real incidents rather than noise?"
+  options:
+    - { text: "Alert on an SLO breach measured on the tail (p95/p99) sustained over a window or by burn rate, not on a single-point spike or the mean", correct: true }
+    - { text: "Alert on the mean latency of every individual request, firing on each one above average" }
+    - { text: "Alert only after the dashboard has been manually checked, so a human gates every page" }
+    - { text: "Alert on token count, since latency cannot be turned into an SLO" }
+  explanation: "The SRE canon defines alerts off SLOs and pages on sustained symptom breaches — a tail-latency SLO (p95/p99) violated over a window, or a burn-rate rule — rather than single-point noise or the mean. That is what makes the page mean an incident, and it is the same budget/threshold discipline agent alerting borrows."

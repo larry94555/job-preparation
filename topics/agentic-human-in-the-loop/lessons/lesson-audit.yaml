@@ -1,0 +1,10 @@
+id: lesson-audit
+title: "Keep an audit trail"
+material: audit.md
+segments:
+  - present: keep-an-audit-trail
+  - check: mc-audit-trail
+  - check: mc-audit-why
+  - check: cloze-audit
+  - check: fe-audit
+  - apply: code-audit-log

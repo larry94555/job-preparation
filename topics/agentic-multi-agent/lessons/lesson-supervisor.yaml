@@ -1,0 +1,14 @@
+id: lesson-supervisor
+title: "The supervisor pattern"
+material: supervisor.md
+segments:
+  - present: the-supervisor-pattern
+  - check: mc-supervisor
+  - check: cloze-supervisor
+  - check: fe-supervisor
+  - present: specialists-do-one-thing-well
+  - check: mc-specialist
+  - check: mc-coordinate
+  - check: cloze-specialist
+  - check: fe-specialist
+  - apply: code-supervisor

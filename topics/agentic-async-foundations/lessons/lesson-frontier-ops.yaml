@@ -1,0 +1,6 @@
+id: lesson-frontier-ops
+title: "Concurrency at scale"
+material: frontier-ops.md
+segments:
+  - present: concurrency-at-scale
+  - check: frontier-scaling

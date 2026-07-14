@@ -1,0 +1,18 @@
+sections:
+  - id: sec-memories
+    title: "The four memories"
+    lessons: [lesson-four-memories, lesson-memory-types, lesson-expert-context]
+    assessment:
+      title: "Section 1 — The four memories"
+      from_tags: [memory, types]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-compression
+    title: "Compression & recall"
+    lessons: [lesson-compression, lesson-compression-practice, lesson-recall, lesson-frontier-ops]
+    assessment:
+      title: "Section 2 — Compression & recall"
+      from_tags: [compression, recall]
+      count: 5
+      pass_threshold: 0.8

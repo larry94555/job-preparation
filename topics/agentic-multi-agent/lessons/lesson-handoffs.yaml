@@ -1,0 +1,10 @@
+id: lesson-handoffs
+title: "Validate every handoff"
+material: handoffs.md
+segments:
+  - present: validate-every-handoff
+  - check: mc-handoff-validate
+  - check: mc-check-finished
+  - check: cloze-handoff
+  - check: fe-handoff
+  - apply: code-handoff-validate

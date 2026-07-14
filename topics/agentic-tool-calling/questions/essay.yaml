@@ -22,3 +22,39 @@
     - "Unknown tool: the harness rejects the call rather than guessing or executing it — an unregistered name is a hallucinated call."
     - "Missing required field: the call fails schema validation before the handler runs; the harness does not silently default or coerce the argument."
     - "In both cases return a structured, model-facing error and feed it back into the loop so the model can self-correct on the next turn — never crash or run unvalidated input."
+
+- id: essay-schema-contract
+  type: essay
+  length: short
+  tags: [schema]
+  difficulty: 3
+  prompt: "Explain why a tool's input_schema is a contract rather than documentation, and what the harness does with it before any side effect happens."
+  eval_skill: eval-agentic-tools-essay
+  reference_points:
+    - "The input_schema is a typed contract the model targets: it declares each argument's type, the required list of mandatory arguments, and descriptions the model reads to decide when and how to call the tool."
+    - "Before executing, the harness validates the model's proposed arguments against the schema — checking types and the required fields and coercing where safe — so a malformed call is rejected before any side effect runs."
+    - "This makes the harness an untrusting executor: the model is the caller and can propose bad calls, so the contract, not trust, is what gates execution — shape is validated up front, not after the tool has already acted."
+
+- id: essay-structured-vs-validate
+  type: essay
+  length: short
+  tags: [structured]
+  difficulty: 4
+  prompt: "Structured-outputs / JSON-schema mode and a Pydantic validator both defend against bad model JSON. Explain what each guarantees, why they are complementary layers, and give an example of a bug only the validator catches."
+  eval_skill: eval-agentic-tools-essay
+  reference_points:
+    - "Structured-outputs mode constrains the decoder at each step to tokens consistent with the JSON schema, so the returned text is GUARANTEED to parse and match the shape — a hard guarantee, not prompting-and-hoping."
+    - "A validator like Pydantic enforces semantics the schema can't fully express: value ranges, non-empty lists, cross-field rules — turning a bad value into an immediate, localized error at the boundary."
+    - "They are complementary: constrained decoding gets you a parseable object of the right shape; validation gets you a correct one. Example only the validator catches: a confidence field of 1.7 is schema-valid as a number but out of the [0,1] range."
+
+- id: essay-tool-canon
+  type: essay
+  length: long
+  tags: [schema]
+  difficulty: 4
+  prompt: "Trace the tool-calling canon from OpenAI function calling through Anthropic tool use to MCP, and explain what problem each step solved. Then say which layer gives a hard guarantee versus a best effort, and name the practical stack an expert uses today."
+  eval_skill: eval-agentic-tools-essay
+  reference_points:
+    - "OpenAI function calling (2023) put tool use into the mainstream API: you declare functions with a JSON-schema signature and the model returns a structured call (name + arguments) instead of prose — establishing the typed tool signature the model targets."
+    - "Anthropic tool use generalized this into the message loop: a tool_use block with tool_name and tool_input, the harness runs it, and output returns as a tool_result keyed by tool_use_id; MCP (Anthropic, 2024) then standardized the tool boundary so a tool built once is reusable across hosts instead of re-wired per vendor."
+    - "The layer that gives a hard GUARANTEE is constrained/structured-outputs decoding (guaranteed schema-valid shape); validation and argument grounding are best-effort semantic layers. The practical stack: typed tool contracts + the tool loop + constrained structured outputs + validate-and-recover (Pydantic)."

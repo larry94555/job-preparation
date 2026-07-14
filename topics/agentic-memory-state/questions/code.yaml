@@ -1,0 +1,63 @@
+# Coding exercises — engine type: code (graded by tests + concept skill)
+- id: code-memory-buffer
+  type: code
+  language: python
+  tags: [memory]
+  difficulty: 3
+  prompt: >-
+    Implement `class ShortTermBuffer`. The constructor takes a positive int `capacity`. `.add(message)`
+    appends a message; when the buffer already holds `capacity` messages, adding one evicts the OLDEST
+    (FIFO). `.window()` returns the current messages oldest -> newest as a fresh list (mutating it must
+    not corrupt the buffer), and `len(buffer)` returns how many messages are held. The buffer must never
+    hold more than `capacity` messages.
+  starter_file: exercises/memory-buffer/starter.py
+  test_file: exercises/memory-buffer/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-memory-code
+  concept_checks:
+    must_use: ["cap the buffer at capacity", "evict the oldest message when full (FIFO)", "keep the most-recent messages", "return a copy from window()"]
+    avoid_antipattern: ["letting the buffer grow without bound", "evicting the newest message instead of the oldest"]
+
+- id: code-context-compress
+  type: code
+  language: python
+  tags: [compression]
+  difficulty: 3
+  prompt: >-
+    Implement `compress_history(messages, token_budget, summarize) -> list`. Each message is a dict
+    {"role", "content"} and a message's token cost is the number of whitespace-separated words in its
+    "content". If the total already fits in `token_budget`, return the messages unchanged. Otherwise
+    replace the OLDEST messages with a single summary message {"role": "system", "content":
+    summarize(old_messages)}, keeping the most-recent messages intact, so the result (summary + kept
+    recent messages) is <= token_budget. The summary counts toward the budget.
+  starter_file: exercises/context-compress/starter.py
+  test_file: exercises/context-compress/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-memory-code
+  concept_checks:
+    must_use: ["compress only when over the token budget", "summarize the oldest messages via the injected callable", "keep the most-recent messages intact", "ensure the result stays within budget"]
+    avoid_antipattern: ["summarizing on every call regardless of budget", "dropping the most-recent messages", "ignoring the token budget"]
+
+- id: code-recall-store
+  type: code
+  language: python
+  tags: [recall]
+  difficulty: 3
+  prompt: >-
+    Implement `class MemoryStore` with `.remember(text)` and `.recall(query, k) -> list`. `recall` returns
+    up to `k` stored items ranked by RELEVANCE (the count of distinct query terms each item contains,
+    case-insensitive word overlap), most relevant first — NOT insertion order. Items with zero overlapping
+    terms must not be returned, and ties break by insertion order. `k` must be a positive int.
+  starter_file: exercises/recall-store/starter.py
+  test_file: exercises/recall-store/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-memory-code
+  concept_checks:
+    must_use: ["score items by query-term overlap", "rank by relevance, most relevant first", "exclude zero-overlap items", "return at most k items"]
+    avoid_antipattern: ["returning items in insertion order ignoring the query", "returning every stored item regardless of relevance"]

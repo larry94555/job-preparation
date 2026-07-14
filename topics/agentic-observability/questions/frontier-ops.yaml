@@ -1,0 +1,40 @@
+# Frontier drill (L4) — open problems in agent observability.
+- id: frontier-obs
+  type: multiple_choice
+  tags: [metrics]
+  difficulty: 4
+  prompt: >-
+    Your spans show every step's cost and latency, yet a multi-step run still "succeeds" while doing the
+    wrong thing — nothing errors and the cost looks normal. Which named frontier problem is this, and what
+    is the honest read?
+  options:
+    - { text: "Semantic / agent-specific observability and evaluating trajectories in production — an open problem: per-step metrics capture mechanics, not whether the trajectory accomplished the goal, and the failures are silent and semantic", correct: true }
+    - { text: "It is fully solved by recording more attributes on each span" }
+    - { text: "It is a latency problem; a faster model makes the trajectory correct" }
+    - { text: "It is not a real problem — if no step errors and cost is normal, the run is by definition correct" }
+  explanation: >-
+    Spans measure the mechanics of a step (cost, latency, tool, error) but not its meaning — whether the
+    agent should have taken it or whether the whole trajectory reached a correct end state. Scoring
+    unlabeled, drifting production trajectories live (LLM-as-judge, trajectory evals, human review) is a
+    genuine frontier problem, and its failures are silent and semantic: nothing errors, cost looks normal,
+    and the agent still did the wrong thing. More attributes or a faster model do not close it.
+
+- id: frontier-sampling
+  type: multiple_choice
+  tags: [metrics]
+  difficulty: 4
+  prompt: >-
+    At agent scale, many concurrent agents over long horizons emit more spans than anyone can store or
+    read, so you must sample. Which frontier tension does this create, and what is the honest read on the
+    naive fix?
+  options:
+    - { text: "Observability at scale: uniform sampling keeps traces in proportion to frequency, so it drops the rare failing trajectory you most need — the open work is tail/error-biased sampling that stays affordable without losing the one-in-a-thousand failure", correct: true }
+    - { text: "It is solved by uniform random sampling, which represents the tail perfectly" }
+    - { text: "It is purely a storage-cost problem with no effect on what failures you can see" }
+    - { text: "It disappears if you simply record fewer attributes per span" }
+  explanation: >-
+    Sampling at scale is a real frontier edge. Uniform sampling keeps runs in proportion to how often
+    they occur, so the low-frequency failing trajectory — exactly the run you need — is usually thrown
+    away. Error-biased or tail-aware sampling (keep all errors, sample the rest) and propagating trace
+    context across sub-agent boundaries are the open, unsettled techniques; recording fewer attributes
+    does not address which whole traces you keep, and it is not solved by uniform sampling.

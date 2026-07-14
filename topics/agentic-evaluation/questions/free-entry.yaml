@@ -1,0 +1,72 @@
+# Free entry (short answer)
+- id: fe-judge
+  type: text_input
+  tags: [judge]
+  difficulty: 2
+  prompt: "What do you call a separate model call whose job is to score an agent's output? LLM-as-____ (one word)"
+  answer:
+    regex: '^judge$'
+    normalize: true
+
+- id: fe-criteria
+  type: text_input
+  tags: [rubric]
+  difficulty: 2
+  prompt: "A rubric is a list of explicit ____ the output is judged against. (one word)"
+  answer:
+    regex: '^criteria$'
+    normalize: true
+
+- id: fe-pass-rate
+  type: text_input
+  tags: [suite]
+  difficulty: 2
+  prompt: "What is the headline metric an eval suite reports — the fraction of cases that passed? (one term)"
+  answer:
+    regex: '^(pass_rate|pass rate|pass)$'
+    normalize: true
+
+- id: fe-threshold
+  type: text_input
+  tags: [gate]
+  difficulty: 2
+  prompt: "A deploy gate blocks the release when pass-rate falls below a fixed ____. (one word)"
+  answer:
+    regex: '^threshold$'
+    normalize: true
+
+- id: fe-gate
+  type: text_input
+  tags: [gate]
+  difficulty: 2
+  prompt: "The automated check that stops a deploy below the bar is the deploy ____. (one word)"
+  answer:
+    regex: '^gate$'
+    normalize: true
+
+- id: fe-metrics
+  type: text_input
+  tags: [suite]
+  difficulty: 2
+  prompt: "Completion, accuracy, hallucination, and cost are the four ____ you track for an agent. (one word)"
+  answer:
+    regex: '^metrics$'
+    normalize: true
+
+- id: fe-calibration
+  type: text_input
+  tags: [judge]
+  difficulty: 2
+  prompt: "The set of labeled clear-pass and clear-fail exemplars you pin a judge to, so a change that breaks its verdicts is caught, is a ____ set. (one word)"
+  answer:
+    regex: '^calibration$'
+    normalize: true
+
+- id: fe-avg-score
+  type: text_input
+  tags: [suite]
+  difficulty: 2
+  prompt: "Alongside pass_rate, the mean score over all cases — how good the passes were, not just how many — is the ____. (one term)"
+  answer:
+    regex: '^(avg_score|avg score|average score)$'
+    normalize: true

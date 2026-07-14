@@ -1,0 +1,6 @@
+id: lesson-frontier-ops
+title: "The frontier of agent evals"
+material: frontier-ops.md
+segments:
+  - present: the-frontier-of-agent-evals
+  - check: frontier-eval

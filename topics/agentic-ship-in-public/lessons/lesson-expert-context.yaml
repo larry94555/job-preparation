@@ -1,0 +1,6 @@
+id: lesson-expert-context
+title: "Expert context: what a portfolio proves"
+material: expert-context.md
+segments:
+  - present: what-a-portfolio-proves
+  - check: expert-portfolio

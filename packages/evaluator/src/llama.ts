@@ -114,28 +114,45 @@ export class LlamaClient {
 
   /** Chat completion constrained to JSON output. Throws on network/HTTP error. */
   async chatJson(messages: ChatMessage[]): Promise<string> {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), this.timeoutMs);
-    try {
-      const res = await fetch(`${this.baseUrl}/chat/completions`, {
-        method: "POST",
-        headers: { "content-type": "application/json", ...this.authHeaders() },
-        body: JSON.stringify({
-          model: this.model,
-          messages,
-          temperature: 0,
-          top_k: 1, // greedy — decisive with temperature 0, robust to server defaults
-          seed: this.seed,
-          max_tokens: this.maxTokens,
-          response_format: { type: "json_object" },
-        }),
-        signal: ctrl.signal,
-      });
-      if (!res.ok) throw new Error(`llama-server responded ${res.status}`);
-      const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-      return data.choices?.[0]?.message?.content ?? "";
-    } finally {
-      clearTimeout(t);
+    // The single-slot server (--parallel 1, required for determinism) sometimes
+    // times out or returns 5xx under back-to-back grading load. Because decoding
+    // is deterministic (temp 0, greedy), a short backoff + retry recovers the
+    // SAME correct grade rather than a different one — so a transient hiccup no
+    // longer collapses to an un-gradeable result. 4xx (e.g. missing API key) is
+    // a real client error and is surfaced immediately without retrying.
+    let lastErr: unknown;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt > 0) await new Promise((r) => setTimeout(r, 600 * attempt));
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), this.timeoutMs);
+      try {
+        const res = await fetch(`${this.baseUrl}/chat/completions`, {
+          method: "POST",
+          headers: { "content-type": "application/json", ...this.authHeaders() },
+          body: JSON.stringify({
+            model: this.model,
+            messages,
+            temperature: 0,
+            top_k: 1, // greedy — decisive with temperature 0, robust to server defaults
+            seed: this.seed,
+            max_tokens: this.maxTokens,
+            response_format: { type: "json_object" },
+          }),
+          signal: ctrl.signal,
+        });
+        if (res.ok) {
+          const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+          return data.choices?.[0]?.message?.content ?? "";
+        }
+        if (res.status < 500) throw new Error(`llama-server responded ${res.status}`);
+        lastErr = new Error(`llama-server responded ${res.status}`); // 5xx → retry
+      } catch (e) {
+        if (e instanceof Error && /responded 4\d\d/.test(e.message)) throw e; // client error
+        lastErr = e; // network error / timeout abort → retry
+      } finally {
+        clearTimeout(t);
+      }
     }
+    throw lastErr ?? new Error("chatJson: exhausted retries");
   }
 }

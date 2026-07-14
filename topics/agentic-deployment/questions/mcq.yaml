@@ -1,0 +1,240 @@
+# Multiple choice
+- id: mc-async-api
+  type: multiple_choice
+  tags: [asyncapi]
+  difficulty: 2
+  prompt: "How should a service turn a slow agent run into an HTTP endpoint?"
+  options:
+    - { text: "Accept the request, enqueue the work, and return a job id immediately — run the agent on a background worker", correct: true }
+    - { text: "Run the agent inline in the handler and return the result when it finishes" }
+    - { text: "Hold the connection open and stream partial tokens until the run completes" }
+    - { text: "Reject any request that would take longer than one second" }
+  explanation: "An agent run is slow, so the handler must not do it inline. It enqueues the work and returns a job id right away; a background worker does the actual run and writes the result back."
+
+- id: mc-not-block
+  type: multiple_choice
+  tags: [asyncapi]
+  difficulty: 2
+  prompt: "Why must the submit handler never block on the agent run?"
+  options:
+    - { text: "Blocking pins a request thread for the whole run, so a few slow users exhaust the pool and callers time out", correct: true }
+    - { text: "Blocking makes the model produce lower-quality output" }
+    - { text: "Blocking is fine as long as the run is under ten minutes" }
+    - { text: "The HTTP spec forbids a handler from calling a model at all" }
+  explanation: "The request thread is a scarce, latency-sensitive resource. Doing a multi-second agent run inline holds the connection open and pins a worker thread, so under load the server runs out of threads and clients time out."
+
+- id: mc-background-job
+  type: multiple_choice
+  tags: [jobs]
+  difficulty: 2
+  prompt: "What does `submit(task)` return, and in what state is the job?"
+  options:
+    - { text: "A job id for a newly stored job with status \"queued\" — the run has not happened yet", correct: true }
+    - { text: "The finished agent result, computed synchronously" }
+    - { text: "Nothing; the caller must guess the job id from the timestamp" }
+    - { text: "A job already marked \"done\", so no polling is needed" }
+  explanation: "Submitting is a fast write: it creates a job record with status \"queued\", stores it, and returns the id. The response is 202 Accepted — the work is accepted, not yet done."
+
+- id: mc-poll
+  type: multiple_choice
+  tags: [jobs]
+  difficulty: 2
+  prompt: "After submitting and getting a job id, how does the caller get the result?"
+  options:
+    - { text: "It polls a status endpoint with the job id until the job reaches a terminal state", correct: true }
+    - { text: "The server pushes the result back over the original submit connection" }
+    - { text: "It re-submits the same task until one call happens to return the answer" }
+    - { text: "It reads the result directly from the worker's memory" }
+  explanation: "The caller polls: it calls the status endpoint with the job id, and loops — ask, wait a little, ask again — until the status is done or failed, then reads the attached result."
+
+- id: mc-job-status
+  type: multiple_choice
+  tags: [jobs]
+  difficulty: 3
+  prompt: "Which describes a job's status lifecycle correctly?"
+  options:
+    - { text: "queued → running → (done | failed); done and failed are terminal and carry the result or error", correct: true }
+    - { text: "running → queued → done, cycling forever until the caller stops it" }
+    - { text: "There is only one status, \"done\", set the moment the job is submitted" }
+    - { text: "The status is whatever HTTP code the submit call returned" }
+  explanation: "A job is a small state machine: it starts queued, a worker moves it to running, and it ends in a terminal done (with result) or failed (with error). Polling reads that status off the job record."
+
+- id: mc-rate-limit
+  type: multiple_choice
+  tags: [ratelimit]
+  difficulty: 2
+  prompt: "Why rate limit every user of the agent service?"
+  options:
+    - { text: "So one caller can't drain the worker pool and burn the token budget while everyone else waits", correct: true }
+    - { text: "So the model returns answers in a fixed order" }
+    - { text: "So you never have to run more than one worker" }
+    - { text: "Because rate limiting makes each individual agent run faster" }
+  explanation: "Every user shares one worker pool and one budget. Without a per-user limit, a single buggy or hostile caller can flood the queue, starve other tenants, and run up the bill — rate limiting enforces fairness."
+
+- id: mc-token-bucket
+  type: multiple_choice
+  tags: [ratelimit]
+  difficulty: 3
+  prompt: "How does a token bucket rate limiter behave?"
+  options:
+    - { text: "It holds up to `capacity` tokens, refills at a steady rate, and allows a request only if a token is available — permitting bursts but capping the average rate", correct: true }
+    - { text: "It allows exactly one request per second and rejects all others, with no bursts ever" }
+    - { text: "It counts total requests and blocks the user permanently once a threshold is hit" }
+    - { text: "It slows the model down so requests naturally arrive less often" }
+  explanation: "A token bucket refills tokens over time up to a capacity and consumes one per request. It lets a user burst up to `capacity` back-to-back, then throttles them to the sustainable `refill_per_sec` average."
+
+- id: mc-canary
+  type: multiple_choice
+  tags: [rollout]
+  difficulty: 2
+  prompt: "What is a canary rollout of a new agent version?"
+  options:
+    - { text: "Routing a small, deterministic slice of users to the new version first while everyone else stays on stable", correct: true }
+    - { text: "Deploying the new version to 100% of users and watching the dashboards" }
+    - { text: "Running the new and old versions on the same request and comparing outputs live" }
+    - { text: "A load test you run before any real users see the new version" }
+  explanation: "A canary sends a fraction of traffic to the new version — sticky per user via a stable hash — so a bad change hits a slice, not everyone. You then widen the rollout or pull it back."
+
+- id: mc-rollback
+  type: multiple_choice
+  tags: [rollout]
+  difficulty: 2
+  prompt: "The canary shows a worse error rate than stable. What is the right move?"
+  options:
+    - { text: "Rollback — switch traffic back to the last known-good version with one command", correct: true }
+    - { text: "Roll forward: write a fix and deploy it mid-incident before touching the canary" }
+    - { text: "Widen the canary to 100% so more data confirms the regression" }
+    - { text: "Leave it; error rate on a canary is expected and not actionable" }
+  explanation: "Rolling back to something that already worked is instant; rolling forward with a fix takes time you don't have mid-incident. A rollback must be one fast command — set the canary back to 0 or repoint to the previous version."
+
+- id: mc-watch-errors
+  type: multiple_choice
+  tags: [rollout]
+  difficulty: 3
+  prompt: "While a canary is live, what tells you whether to widen or roll back?"
+  options:
+    - { text: "Watching the new slice's error rate, latency, and failed jobs against the stable slice", correct: true }
+    - { text: "Whether the deploy command exited zero" }
+    - { text: "How many lines of code the new version changed" }
+    - { text: "Whether the model is a newer release than the old one" }
+  explanation: "A canary is only useful if you watch it. You compare the new slice's live signals — error rate, latency, failed jobs — against the stable slice, and let that decide whether to grow the rollout or roll it back."
+
+- id: mc-202-accepted
+  type: multiple_choice
+  tags: [asyncapi]
+  difficulty: 3
+  prompt: "Why does the submit endpoint answer `202 Accepted` rather than `200 OK`?"
+  options:
+    - { text: "202 says the work was accepted but not yet done — the body carries a job id, not a result; 200 would imply the run already finished", correct: true }
+    - { text: "202 is faster to serialize than 200, so it lowers submit latency" }
+    - { text: "202 forces the client to open a WebSocket for the result" }
+    - { text: "The status code is cosmetic; 200 and 202 behave identically here" }
+  explanation: "202 Accepted is the honest code for an async submit: the server took the work and will do it later, so it returns a handle (job id) with status queued. A 200 with the answer would be a lie, because the agent run has not happened yet."
+
+- id: mc-worker-decouple
+  type: multiple_choice
+  tags: [asyncapi]
+  difficulty: 3
+  prompt: "What does moving the agent run onto a background worker actually decouple?"
+  options:
+    - { text: "Request latency from run latency — the client's submit/poll calls stay fast no matter how long the agent takes", correct: true }
+    - { text: "The model's accuracy from its prompt, so worse prompts still pass" }
+    - { text: "The database from the queue, so neither needs to be durable" }
+    - { text: "The user's identity from their rate limit, so limits stop applying" }
+  explanation: "Submit is a fast write and poll is a fast read; the worker runs the agent between them. That split means the caller's HTTP latency is bounded and independent of the run duration — the whole reason to go async."
+
+- id: mc-idempotent-submit
+  type: multiple_choice
+  tags: [jobs]
+  difficulty: 4
+  prompt: "A client retries submit after a network blip and you don't want two runs for one task. What makes submit safe to retry?"
+  options:
+    - { text: "An idempotency key on submit: the same key returns the existing job id instead of creating a second job", correct: true }
+    - { text: "Making the worker faster so the duplicate finishes before anyone notices" }
+    - { text: "Rejecting every retry outright, so a dropped response means the task is lost" }
+    - { text: "Storing the result in the client so it never needs to resubmit" }
+  explanation: "Networks drop responses, so clients retry. An idempotency key (client-supplied) lets submit deduplicate: if a job already exists for that key, return its id rather than enqueue a duplicate run. That makes the submit write safe to repeat."
+
+- id: mc-atomic-claim
+  type: multiple_choice
+  tags: [jobs]
+  difficulty: 4
+  prompt: "Several workers drain the same queue. What keeps two of them from running the same job?"
+  options:
+    - { text: "An atomic claim — one worker moves a queued job to running in a single guarded step (e.g. SELECT ... FOR UPDATE SKIP LOCKED), so no other worker can grab it", correct: true }
+    - { text: "Running exactly one worker, since a pool can never claim safely" }
+    - { text: "Having each worker sleep a random amount before claiming" }
+    - { text: "Trusting that the queue happens to hand each job to one worker" }
+  explanation: "A worker pool scales throughput only if claims are disjoint. The claim — flip queued → running — must be atomic so two workers never grab the same job. FOR UPDATE SKIP LOCKED (or an equivalent compare-and-set) is the standard mechanism."
+
+- id: mc-retry-failed
+  type: multiple_choice
+  tags: [jobs]
+  difficulty: 3
+  prompt: "A job failed because a downstream API was briefly down. What is the right built-in behavior?"
+  options:
+    - { text: "Retry with backoff up to a bounded number of attempts, then mark it failed for good (optionally to a dead-letter queue)", correct: true }
+    - { text: "Retry forever with no delay until it eventually succeeds" }
+    - { text: "Immediately mark it done with an empty result so the caller stops polling" }
+    - { text: "Delete the job so no record of the failure remains" }
+  explanation: "Transient failures deserve a bounded retry with backoff so a blip self-heals without hammering the dependency. After the cap, the job is terminally failed (and often parked in a dead-letter queue for inspection) rather than retried forever or silently marked done."
+
+- id: mc-per-user-key
+  type: multiple_choice
+  tags: [ratelimit]
+  difficulty: 3
+  prompt: "You keep one token bucket per user. What is the key you look the bucket up by, and why per-user?"
+  options:
+    - { text: "The caller's identity (user/tenant/API key) — a per-user bucket enforces fairness so one tenant's flood can't consume another's share", correct: true }
+    - { text: "The current wall-clock second, so all users share one rolling bucket" }
+    - { text: "The job id, so each job gets its own fresh bucket and no one is ever limited" }
+    - { text: "The worker's process id, so the limit depends on which worker answers" }
+  explanation: "Rate limiting is multi-tenant fairness, so the bucket is keyed by the caller's identity. A shared global bucket wouldn't isolate tenants, and keying by job id or worker would defeat the limit entirely."
+
+- id: mc-429-backpressure
+  type: multiple_choice
+  tags: [ratelimit]
+  difficulty: 3
+  prompt: "The bucket is empty and denies a request. What should the service return?"
+  options:
+    - { text: "429 Too Many Requests, ideally with a Retry-After hint so the client backs off", correct: true }
+    - { text: "200 OK with an empty body, so the client assumes success" }
+    - { text: "500 Internal Server Error, since a denial is a server bug" }
+    - { text: "Hold the connection open until a token refills, however long that takes" }
+  explanation: "A denied request is 429 Too Many Requests — the standard backpressure signal — and a Retry-After header tells the client when to try again. It is not a 200 (that hides the throttle), not a 500 (nothing broke), and not an indefinite hold (that reintroduces blocking)."
+
+- id: mc-refill-rate
+  type: multiple_choice
+  tags: [ratelimit]
+  difficulty: 4
+  prompt: "In a token bucket, what do `capacity` and `refill_per_sec` each control?"
+  options:
+    - { text: "`capacity` caps the largest instantaneous burst; `refill_per_sec` sets the sustained average rate over time", correct: true }
+    - { text: "`capacity` sets the average rate; `refill_per_sec` sets how long a user is banned" }
+    - { text: "Both set the same thing; one is just an alias for the other" }
+    - { text: "`capacity` is the number of workers; `refill_per_sec` is the queue length" }
+  explanation: "Capacity is how many tokens can pile up, so it bounds the biggest back-to-back burst. Refill rate is how fast tokens return, so it bounds the sustainable long-run average. Tuning them separately lets you allow bursts while still capping throughput."
+
+- id: mc-sticky-hash
+  type: multiple_choice
+  tags: [rollout]
+  difficulty: 4
+  prompt: "Why must canary routing use a STABLE hash of the user id rather than Python's built-in `hash()` or a random draw?"
+  options:
+    - { text: "A stable hash gives every worker the same answer for a user, so routing is deterministic and sticky; salted hash() or randomness would flip a user between versions across calls or processes", correct: true }
+    - { text: "A stable hash is faster to compute than any alternative" }
+    - { text: "Python's hash() cannot take a string argument" }
+    - { text: "Randomness always sends everyone to the canary, which is unsafe" }
+  explanation: "Canary routing must be sticky — a user always lands on the same side — and consistent across all workers. Python's hash() is salted per process and randomness varies per call, so either would route the same user differently across processes or requests. A stable hash (e.g. sum of bytes mod 100) is identical everywhere."
+
+- id: mc-widen-canary
+  type: multiple_choice
+  tags: [rollout]
+  difficulty: 3
+  prompt: "The canary has run at 5% for a while and its error rate and latency match stable. What is the right next step?"
+  options:
+    - { text: "Widen the rollout in steps (e.g. 5% → 25% → 100%), continuing to watch the new slice at each stage", correct: true }
+    - { text: "Immediately jump to 100% since 5% looked fine, skipping the intermediate stages" }
+    - { text: "Roll back to 0%, because a healthy canary means the change is unnecessary" }
+    - { text: "Freeze at 5% forever, since widening can only add risk" }
+  explanation: "A healthy canary earns more traffic, but you widen in stages and keep watching — a regression can surface only at higher load or on a different slice. Jumping straight to 100% throws away the very safety the canary bought."

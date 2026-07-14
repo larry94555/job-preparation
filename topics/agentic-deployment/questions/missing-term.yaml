@@ -1,0 +1,54 @@
+# Missing term (cloze)
+- id: cloze-async
+  type: text_input
+  tags: [asyncapi]
+  difficulty: 1
+  prompt: "Because an agent run is slow, the submit endpoint returns a job id and does the work ____-hronously (one word for the whole style)."
+  answer:
+    regex: '^async$'
+    normalize: true
+
+- id: cloze-job
+  type: text_input
+  tags: [jobs]
+  difficulty: 1
+  prompt: "submit() stores a ____ record with status \"queued\" and returns its id."
+  answer:
+    regex: '^job$'
+    normalize: true
+
+- id: cloze-poll
+  type: text_input
+  tags: [jobs]
+  difficulty: 2
+  prompt: "To get the result, the caller repeatedly calls the status endpoint — it must ____ until the job is done."
+  answer:
+    regex: '^poll$'
+    normalize: true
+
+- id: cloze-bucket
+  type: text_input
+  tags: [ratelimit]
+  difficulty: 2
+  prompt: "The standard per-user rate limiter holds up to `capacity` tokens in a token ____."
+  answer:
+    regex: '^bucket$'
+    normalize: true
+
+- id: cloze-canary
+  type: text_input
+  tags: [rollout]
+  difficulty: 2
+  prompt: "Releasing a new version to a small slice of traffic first is a ____ rollout."
+  answer:
+    regex: '^canary$'
+    normalize: true
+
+- id: cloze-rollback
+  type: text_input
+  tags: [rollout]
+  difficulty: 2
+  prompt: "When the canary looks worse than stable, you ____ to the last known-good version."
+  answer:
+    regex: '^rollback$'
+    normalize: true

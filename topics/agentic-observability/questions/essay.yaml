@@ -1,0 +1,61 @@
+# Essay
+- id: essay-tracing
+  type: essay
+  length: short
+  tags: [trace]
+  difficulty: 3
+  prompt: "Explain what a trace and its spans capture for an agent run, and why per-step tracing beats guessing when a run misbehaves in production."
+  eval_skill: eval-agentic-obs-essay
+  reference_points:
+    - "A trace is the complete per-step record of one agent run, made of spans; each span records one step's tokens, cost, latency, tool, and error."
+    - "A trace_id ties a run back to its exact sequence of steps, so a complaint about a specific run can be looked up and inspected."
+    - "Per-step spans let you attribute a surprise (a slow tool, a cost spike, a failing step) to the exact step that caused it, instead of having only a final output and a guess."
+
+- id: essay-production
+  type: essay
+  length: short
+  tags: [metrics]
+  difficulty: 3
+  prompt: "Describe the metrics that surprise teams when an agent goes from development to production load — cost, latency, and failure rate — and how dashboards and alerts catch them."
+  eval_skill: eval-agentic-obs-essay
+  reference_points:
+    - "Cost, latency, and failure rate are all fine on a small dev sample but bad at scale: cost multiplies with real volume, tail (p95/p99) latency stretches under concurrency, and rare failures appear only at high volume."
+    - "Dev-scale testing sees the median of a small sample; production reveals the aggregate and the tail of a large one, which is why the surprises are systematic rather than random."
+    - "A dashboard shows the aggregate trends you scan (cost per hour, p95 latency, failure rate), and an alert fires when a metric crosses a budget or SLO threshold so you are told without watching — dashboards for trends, alerts for thresholds."
+
+- id: essay-otel-lineage
+  type: essay
+  length: short
+  tags: [trace]
+  difficulty: 4
+  prompt: "Explain why tracing an agent is 'distributed tracing with LLM attributes' rather than a new invention, and what that lineage buys you in practice."
+  eval_skill: eval-agentic-obs-essay
+  reference_points:
+    - "OpenTelemetry's data model is the one agent tracing uses: a trace is a tree of spans, each span carries attributes and a status, and trace context propagates parent-child links across boundaries."
+    - "An agent's model and tool calls are the same request fan-out that distributed tracing (Dapper/Zipkin/Jaeger) was built for; the only agent-specific part is the attributes — tokens, cost, tool, model, error — layered onto each span."
+    - "The practical payoff is reuse: because the primitive is standard, agent traces slot into existing OTel-compatible backends and LLM-observability tools (Langfuse, LangSmith, Helicone) instead of a bespoke system you build and maintain yourself."
+
+- id: essay-alert-design
+  type: essay
+  length: short
+  tags: [alerts]
+  difficulty: 3
+  prompt: "You have spans, a dashboard, and no alerts. Design an alerting scheme for cost, latency, and failure rate, and explain how you keep it from becoming noise the team ignores."
+  eval_skill: eval-agentic-obs-essay
+  reference_points:
+    - "Each alert is a threshold rule on a metric derived from an SLO or budget: a cost ceiling per run or per window, a latency SLO on the tail (p95/p99, not the mean), and a failure-rate limit — dashboards for trends, alerts for these thresholds."
+    - "To avoid alert fatigue, require the breach to persist over a window (or use a burn-rate style rule) rather than firing on a single-point blip, so a page means a real incident."
+    - "Each alert closes the loop from a production surprise to being told next time: a cost surprise sets a cost alert, a tail-latency surprise sets a latency SLO, a failure-rate surprise sets a failure alert — and the trace is where you go to explain the incident you were paged about."
+
+- id: essay-semantic-frontier
+  type: essay
+  length: long
+  tags: [metrics]
+  difficulty: 4
+  prompt: "Your spans record cost, latency, tool, and error for every step, yet a multi-step run can 'succeed' while doing the wrong thing. Explain why per-step metrics miss this, name the frontier problem, and describe honestly how teams try to catch it in production."
+  eval_skill: eval-agentic-obs-essay
+  reference_points:
+    - "Per-step spans capture the mechanics of a step — cost, latency, which tool ran, whether it errored — but not its meaning: whether the agent should have taken that step or whether the whole trajectory reached a correct end state."
+    - "This is semantic / agent-specific observability and evaluating trajectories in production, an open frontier problem; its failures are silent and semantic — nothing errors, cost looks normal, and the agent still did the wrong thing."
+    - "Teams try LLM-as-judge scoring of trajectories, trajectory/outcome evals, and sampled human review, but production runs are unlabeled and drift, so there is no ground-truth label — the honest read is that more span attributes or a faster model do not close the gap; better questions over the trajectory do."
+    - "At scale the problem compounds: too many spans to read means sampling that must not drop the rare failing trajectory, and trace context must propagate across sub-agent boundaries to keep one trajectory in one view."

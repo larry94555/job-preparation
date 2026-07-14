@@ -1,0 +1,72 @@
+# Free entry (short answer)
+- id: fe-readme
+  type: text_input
+  tags: [portfolio]
+  difficulty: 1
+  prompt: "Which artifact explains the agent's architecture and a key design decision? (one word)"
+  answer:
+    regex: '^readme$'
+    normalize: true
+
+- id: fe-evals
+  type: text_input
+  tags: [portfolio]
+  difficulty: 2
+  prompt: "What do you ship to prove you measured the agent's pass rate, not just hoped? (one word)"
+  answer:
+    regex: '^evals?$'
+    normalize: true
+
+- id: fe-demo
+  type: text_input
+  tags: [ship]
+  difficulty: 1
+  prompt: "What short, watchable artifact shows the agent running on a real input? (one word)"
+  answer:
+    regex: '^demo$'
+    normalize: true
+
+- id: fe-thread
+  type: text_input
+  tags: [communicate]
+  difficulty: 2
+  prompt: "A short, linkable public write-up of your build is called a ____ (one word)."
+  answer:
+    regex: '^thread$'
+    normalize: true
+
+- id: fe-loom
+  type: text_input
+  tags: [communicate]
+  difficulty: 2
+  prompt: "Name one form of a short screen-recording demo you can link to. (one word)"
+  answer:
+    regex: '^(loom|demo|video)$'
+    normalize: true
+
+- id: fe-proof
+  type: text_input
+  tags: [proof]
+  difficulty: 1
+  prompt: "One word: a working agent is falsifiable ____ that a skills list is not."
+  answer:
+    regex: '^proof$'
+    normalize: true
+
+- id: fe-step-cap
+  type: text_input
+  tags: [ship]
+  difficulty: 2
+  prompt: "Two words: the hard limit on the agent loop that guarantees it always terminates is the ____."
+  answer:
+    regex: '^step\s*cap$'
+    normalize: true
+
+- id: fe-adr
+  type: text_input
+  tags: [portfolio]
+  difficulty: 2
+  prompt: "A README that records \"chose X over Y because Z\" is, in spirit, an architecture decision ____ (one word)."
+  answer:
+    regex: '^record$'
+    normalize: true

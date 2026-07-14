@@ -1,0 +1,10 @@
+id: agentic-human-in-the-loop
+title: "Human-in-the-Loop"
+description: "Full autonomy sounds great until an agent does something expensive and wrong. Keep a human on the actions that matter: classify actions by risk, gate irreversible ones behind approval, keep an audit trail of what the agent did and why, and make it possible to pause, let a person step in, and resume cleanly."
+track: agentic
+pass_threshold: 0.8
+tag_weights:
+  risk: 1.2
+  approval: 1.2
+  audit: 1.0
+  resume: 1.0

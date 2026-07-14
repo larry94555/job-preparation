@@ -1,0 +1,14 @@
+id: lesson-resilient-calls
+title: "Timeouts, retries, backoff and jitter"
+material: resilient-calls.md
+segments:
+  - present: calls-fail-retry-them-safely
+  - check: mc-retry-transient
+  - check: mc-timeout
+  - check: fe-timeout-fn
+  - present: backoff-and-jitter
+  - check: mc-backoff
+  - check: mc-jitter
+  - check: cloze-backoff
+  - check: cloze-jitter
+  - check: fe-jitter

@@ -1,0 +1,6 @@
+id: lesson-expert-context
+title: "Expert context: multi-agent patterns"
+material: expert-context.md
+segments:
+  - present: multi-agent-patterns
+  - check: expert-multi-agent-patterns

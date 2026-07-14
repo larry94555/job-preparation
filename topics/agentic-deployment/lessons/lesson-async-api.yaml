@@ -1,0 +1,14 @@
+id: lesson-async-api
+title: "Never block the request thread"
+material: async-api.md
+segments:
+  - present: never-block-the-request
+  - check: mc-async-api
+  - check: mc-not-block
+  - check: cloze-async
+  - check: fe-async
+  - present: return-a-job-id
+  - check: mc-background-job
+  - check: cloze-job
+  - check: fe-jobid
+  - apply: essay-deploy

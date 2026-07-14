@@ -1,0 +1,54 @@
+# Free entry (short answer)
+- id: fe-coroutine-kw
+  type: text_input
+  tags: [eventloop]
+  difficulty: 1
+  prompt: "Which keyword before `def` declares a coroutine function? (one word)"
+  answer:
+    regex: '^async$'
+    normalize: true
+
+- id: fe-await-kw
+  type: text_input
+  tags: [eventloop]
+  difficulty: 1
+  prompt: "Which keyword do you put before an awaitable to suspend until it completes? (one word)"
+  answer:
+    regex: '^await$'
+    normalize: true
+
+- id: fe-gather
+  type: text_input
+  tags: [concurrency]
+  difficulty: 2
+  prompt: "Which asyncio function fans out awaitables concurrently and returns their results in order? (one word)"
+  answer:
+    regex: '^gather$'
+    normalize: true
+
+- id: fe-return-exceptions
+  type: text_input
+  tags: [errors]
+  difficulty: 2
+  prompt: "Which gather keyword argument makes a failing call return its exception instead of aborting the batch? (one word)"
+  answer:
+    regex: '^return_exceptions$'
+    normalize: true
+
+- id: fe-timeout-fn
+  type: text_input
+  tags: [resilience]
+  difficulty: 2
+  prompt: "Name one asyncio primitive that bounds how long you wait on an awaitable. (one word)"
+  answer:
+    regex: '^(timeout|wait_for)$'
+    normalize: true
+
+- id: fe-jitter
+  type: text_input
+  tags: [resilience]
+  difficulty: 2
+  prompt: "What do you add to exponential backoff delays to avoid synchronized retries? (one word)"
+  answer:
+    regex: '^jitter$'
+    normalize: true

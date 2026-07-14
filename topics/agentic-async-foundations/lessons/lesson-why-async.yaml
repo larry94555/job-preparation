@@ -1,0 +1,12 @@
+id: lesson-why-async
+title: "Why agents need async"
+material: why-async.md
+segments:
+  - present: agents-spend-their-lives-waiting
+  - check: mc-why-async
+  - check: mc-blocking
+  - present: async-lets-them-wait-together
+  - check: mc-gather
+  - check: cloze-asyncio
+  - check: cloze-gather
+  - apply: essay-why-async

@@ -1,0 +1,86 @@
+# Calibration for eval-agentic-eval-code (exemplars target the llm-judge / eval-suite / deploy-gate exercises).
+skill: eval-agentic-eval-code
+cases:
+  # PASS — the judge exercise done right: calls the client, parses the verdict, range-checks
+  # the score, raises on out-of-range. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      tests_passed=true. technically_correct holds: judge calls client.score, json-loads the verdict string,
+      checks that score is a number in [0, 1], raises ValueError when it isn't, and only then returns
+      passed/score/reasoning. computes_metrics holds: it returns the validated score and passed flag exactly.
+      handles_edge_cases holds: an out-of-range or non-numeric score raises ValueError and bad JSON raises
+      too. matches_intent holds: it validates the strict-JSON verdict before trusting it, as asked.
+      signals.must_use=[call client.score, parse the JSON verdict, range-check score]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, computes_metrics: true, handles_edge_cases: true, matches_intent: true }
+
+  # PASS — the suite exercise done right: runs the agent, judges each case, computes pass_rate and
+  # avg_score, collects failures, uses >= at the gate. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      tests_passed=true. technically_correct holds: run_suite runs the agent on each case input, judges the
+      output, counts the passes, and computes pass_rate as passed/total and avg_score as the mean score.
+      computes_metrics holds: pass_rate is the fraction passed and failed lists exactly the inputs whose
+      verdict was not passed. handles_edge_cases holds: an all-pass suite gives pass_rate 1.0 with an empty
+      failed list and an all-fail suite reports every input. matches_intent holds: it returns pass_rate,
+      avg_score, and failed as specified.
+      signals.must_use=[run the agent per case, judge each output, compute pass_rate, collect failures]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, computes_metrics: true, handles_edge_cases: true, matches_intent: true }
+
+  # FAIL — the judge trusts the score with no range check and never raises, so an out-of-range
+  # verdict slips through. 0/4 = 0.0 → fail; gate technically_correct=false caps fail→fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: judge json-loads the verdict and returns it
+      directly without ever checking that score is a number in [0, 1], so a score of 1.7 is accepted as a
+      valid verdict. computes_metrics does NOT hold: it reports whatever score the client returned with no
+      validation. handles_edge_cases does NOT hold: an out-of-range or non-numeric score returns silently
+      instead of raising ValueError. matches_intent does NOT hold: the prompt required validating the
+      strict-JSON verdict and it does none of that.
+      signals.must_use=[parse the JSON verdict]; avoid=[trusting the score without range-checking, returning silently on an out-of-range score].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, computes_metrics: false, handles_edge_cases: false, matches_intent: false }
+
+  # FAIL — the gate uses strict > so an on-the-bar run fails, and it hard-codes a metric.
+  # 0/4 = 0.0 → fail; gate technically_correct=false caps fail→fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: gate uses `results["pass_rate"] > min_pass_rate`
+      with a strict greater-than, so a run landing exactly on the bar is rejected — the opposite of the
+      required >= behavior. computes_metrics does NOT hold: run_suite hard-codes pass_rate to 1.0 instead of
+      computing the fraction of cases that passed. handles_edge_cases does NOT hold: the exact-boundary case
+      fails and the empty suite divides by zero. matches_intent does NOT hold: neither the gate comparison
+      nor the metric matches what the prompt asked for.
+      signals.must_use=[compare pass_rate against min_pass_rate]; avoid=[using strict > so an on-the-bar run fails, hard-coding the metric].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, computes_metrics: false, handles_edge_cases: false, matches_intent: false }
+
+  # PASS — the deploy-gate exercise done right: compares pass_rate to min_pass_rate with >=, returns a
+  # bool, treats the on-the-bar run as passing. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      tests_passed=true. technically_correct holds: gate reads results["pass_rate"], compares it to
+      min_pass_rate with >=, and returns the boolean result without mutating results or deploying anything.
+      computes_metrics holds: it uses the pass_rate the suite computed rather than recomputing or hard-coding
+      a stand-in. handles_edge_cases holds: a run landing exactly on the bar passes because the comparison is
+      >= and not strict >, and a run just under the bar returns False. matches_intent holds: it is a pure
+      threshold check returning a bool, exactly as the prompt asked.
+      signals.must_use=[compare pass_rate against min_pass_rate, use >= so the boundary passes, return a bool]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, computes_metrics: true, handles_edge_cases: true, matches_intent: true }
+
+  # FAIL — the suite counts a case as passed without checking the verdict and returns no failed list, so
+  # the pass_rate is meaningless. 0/4 = 0.0 → fail; gate technically_correct=false caps fail→fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: run_suite runs the agent and calls judge but
+      counts every case as passed regardless of the verdict's passed flag, so pass_rate is always 1.0 no
+      matter how the agent did. computes_metrics does NOT hold: pass_rate is not the fraction that actually
+      passed and avg_score ignores the returned scores. handles_edge_cases does NOT hold: it never inspects
+      the verdict, so an all-fail suite still reports a perfect run. matches_intent does NOT hold: the prompt
+      required pass_rate/avg_score plus the failed inputs, and it returns neither the real metric nor a
+      failed list.
+      signals.must_use=[]; avoid=[counting a case as passed without checking the verdict, reporting only an aggregate with no failed list].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, computes_metrics: false, handles_edge_cases: false, matches_intent: false }

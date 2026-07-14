@@ -1,0 +1,91 @@
+# Calibration for eval-agentic-llm-essay (exemplars target essay-failure-modes).
+skill: eval-agentic-llm-essay
+cases:
+  # PASS — answers the question, hits every reference point, all claims correct,
+  # names concrete mechanisms. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      Hallucination is fluent, confident output that is not grounded in a real source — an invented
+      citation or a made-up API name — and confidence is not correctness; an agent mitigates it by
+      grounding, fetching the fact with a tool or retrieval and validating claims against that source
+      instead of trusting the model's memory. Lost-in-the-middle is a positional retrieval failure: a fact
+      buried in the middle of a long context is the most likely to be missed (a U-shaped accuracy curve),
+      so the agent puts key information at the start or end and keeps the context tight. Instruction drift
+      is the slow erosion of instruction-following over a long session; the agent re-asserts or re-injects
+      the governing system prompt periodically so it stays salient. Latency is per-token wall-clock time
+      because decoding is one token at a time, so the agent routes to a faster, cheaper tier and trims the
+      token budget to generate less.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # PASS — a second strong, correct, specific answer using different wording.
+  # 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      The four failures each have a concrete defense the agent owns. For hallucination — plausible but
+      fabricated output — the fix is to ground answers in retrieved documents or tool results and verify
+      claims against them rather than the model's memory. For lost-in-the-middle, where retrieval dips for
+      facts placed in the middle of a long prompt, the fix is to move load-bearing content to the start or
+      end and shrink the middle. For instruction drift, the gradual loss of adherence to the original
+      instructions across many turns, the fix is to periodically re-inject the system prompt so the rules
+      stay near the model's attention. For latency, which scales with output tokens because generation is
+      autoregressive, the fix is to route easy work to a smaller faster tier and cut the number of tokens
+      the model has to emit.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — off-topic and technically wrong: conflates the failures and prescribes
+  # non-fixes (bigger model, temperature 0 as a cure-all, no grounding). Fails the
+  # gate plus every other check. 0/4 = 0.0 → fail; gate false caps fail→fail.
+  - answer: >-
+      All of these are really the same problem and they go away if you just use the biggest model with the
+      largest context window, since a big enough window means the model never misses anything and never
+      makes things up. Setting temperature to zero also removes hallucination entirely, and instruction
+      drift is not real — a model always follows its first instruction forever. Latency does not matter
+      because you can always add more GPUs. So there is nothing the agent specifically needs to do.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # PASS — a third strong, correct, specific answer that reframes each failure and its
+  # agent-owned mitigation in fresh wording. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      An LLM inside an agent breaks in four named ways, each with a defense the surrounding agent owns.
+      Hallucination is confident output with no real source behind it — a fabricated citation or a
+      non-existent method — and the fix is grounding: retrieve or tool-fetch the fact and check the claim
+      against that evidence rather than the model's memory. Lost-in-the-middle is the U-shaped dip where a
+      fact placed in the middle of a long prompt is the most likely to be missed, so the agent moves
+      load-bearing content to the start or end and keeps the context tight. Instruction drift is adherence
+      to the original system prompt eroding as turns pile up, so the agent periodically re-asserts the
+      governing instructions to keep them salient. Latency grows with output length because generation is
+      one token per step, so the agent routes hot-path work to a faster, cheaper tier and trims how much
+      the model must emit.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — off-topic and wrong: treats the mitigations as interchangeable and prescribes
+  # non-fixes (raise temperature, buy a bigger model), grounds nothing. Fails the gate and
+  # every check. 0/4 = 0.0 → fail; gate false caps fail→fail.
+  - answer: >-
+      Honestly you fix all of these the same way. Raise the temperature so the model is more creative and it
+      will stop hallucinating, and if a fact is missed just buy a model with a bigger window, which also ends
+      instruction drift and latency at once. Grounding against sources is a waste of time because the model
+      already knows everything from training. There is no meaningful difference between hallucination,
+      lost-in-the-middle, and drift, so the agent needs no per-mode mitigation at all.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # FAIL — on-topic wording but every claim is wrong: denies the failure modes exist,
+  # prescribes non-fixes (temperature zero), and grounds nothing, so it fails the gate and
+  # every check. 0/4 = 0.0 → fail; gate false caps fail→fail.
+  - answer: >-
+      There is nothing to worry about with model failure modes. A modern model does not hallucinate as long
+      as you set the temperature to zero, so grounding facts is unnecessary. Instruction drift is a myth —
+      the model follows the system prompt perfectly no matter how long the conversation runs. Latency is
+      never a concern because responses are effectively instant, and "lost in the middle" is not a real
+      effect. So an agent needs no special mitigation for any of these.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }

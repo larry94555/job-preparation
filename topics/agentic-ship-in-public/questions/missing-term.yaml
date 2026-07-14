@@ -1,0 +1,54 @@
+# Missing term (cloze)
+- id: cloze-portfolio
+  type: text_input
+  tags: [portfolio]
+  difficulty: 1
+  prompt: "Proof of your work — an agent a stranger can open and run — is a ____."
+  answer:
+    regex: '^portfolio$'
+    normalize: true
+
+- id: cloze-readme
+  type: text_input
+  tags: [portfolio]
+  difficulty: 1
+  prompt: "The document that explains what the agent does and one architecture decision is the ____."
+  answer:
+    regex: '^readme$'
+    normalize: true
+
+- id: cloze-demo
+  type: text_input
+  tags: [ship]
+  difficulty: 1
+  prompt: "A short clip or runnable script that shows the agent working is a ____."
+  answer:
+    regex: '^demo$'
+    normalize: true
+
+- id: cloze-ship
+  type: text_input
+  tags: [proof]
+  difficulty: 1
+  prompt: "To get hired, don't just list skills — ____ a real agent in public."
+  answer:
+    regex: '^ship$'
+    normalize: true
+
+- id: cloze-thread
+  type: text_input
+  tags: [communicate]
+  difficulty: 2
+  prompt: "A short public write-up of your build, posted so anyone can read it, is a ____."
+  answer:
+    regex: '^thread$'
+    normalize: true
+
+- id: cloze-proof
+  type: text_input
+  tags: [proof]
+  difficulty: 1
+  prompt: "A working agent is falsifiable ____ that beats a buzzword on a resume."
+  answer:
+    regex: '^proof$'
+    normalize: true

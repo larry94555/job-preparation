@@ -1,0 +1,62 @@
+# Coding exercises — engine type: code (graded by tests + concept skill)
+- id: code-job-queue
+  type: code
+  language: python
+  tags: [jobs]
+  difficulty: 3
+  prompt: >-
+    Implement an async job queue. `JobQueue.submit(task) -> job_id` stores a new job with status
+    "queued" and returns its id. `async run_next(worker) -> None` pops the oldest queued job, marks it
+    "running", awaits `worker(task)`, and on success sets status "done" with the result; if the worker
+    raises, sets status "failed" with the error string (do NOT let the exception escape). `status(job_id)
+    -> dict` returns the job's current record. This is the submit → background-run → poll shape.
+  starter_file: exercises/job-queue/starter.py
+  test_file: exercises/job-queue/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-deploy-code
+  concept_checks:
+    must_use: ["submit stores a queued job and returns an id", "run_next pops the oldest queued job and awaits the worker", "set status done with the result on success", "set status failed with the error when the worker raises"]
+    avoid_antipattern: ["running the worker inside submit", "letting a worker exception escape run_next"]
+
+- id: code-rate-limit
+  type: code
+  language: python
+  tags: [ratelimit]
+  difficulty: 3
+  prompt: >-
+    Implement `TokenBucket(capacity, refill_per_sec)` with `allow(now: float) -> bool`. On each call,
+    refill tokens for the time elapsed since the previous call (capped at `capacity`) using the injected
+    monotonic `now`, then consume one token and return True if at least one is available, else return
+    False. A burst of `capacity` calls at the same `now` should allow then deny; advancing `now` enough
+    to refill should re-allow.
+  starter_file: exercises/rate-limit/starter.py
+  test_file: exercises/rate-limit/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-deploy-code
+  concept_checks:
+    must_use: ["refill tokens from elapsed time using the injected now", "cap tokens at capacity", "consume a token and allow when available, deny otherwise"]
+    avoid_antipattern: ["reading the clock inside instead of using the injected now", "letting tokens exceed capacity"]
+
+- id: code-canary-route
+  type: code
+  language: python
+  tags: [rollout]
+  difficulty: 3
+  prompt: >-
+    Implement `route(user_id, canary_pct) -> str`. Use a STABLE hash of `user_id` (e.g. sum of its bytes
+    mod 100, NOT Python's salted `hash()`): return "canary" if `hash_to_100(user_id) < canary_pct` else
+    "stable". `canary_pct=0` must always return "stable"; `canary_pct=100` must always return "canary";
+    and a given user id must route consistently across calls.
+  starter_file: exercises/canary-route/starter.py
+  test_file: exercises/canary-route/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-deploy-code
+  concept_checks:
+    must_use: ["stable hash of the user id (not Python's salted hash())", "route to canary when the hash is below canary_pct", "0 always stable and 100 always canary"]
+    avoid_antipattern: ["using Python's salted hash() so routing is unstable across processes", "using randomness so a user flips between versions"]

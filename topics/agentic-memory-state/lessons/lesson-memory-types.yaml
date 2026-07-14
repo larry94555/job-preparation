@@ -1,0 +1,10 @@
+id: lesson-memory-types
+title: "Choosing the right memory for the need"
+material: memory-types.md
+segments:
+  - present: matching-a-need-to-a-memory-type
+  - check: mc-choose-memory
+  - check: cloze-scratchpad
+  - check: fe-longterm-store
+  - present: readwrite-patterns-and-tradeoffs
+  - check: fe-external-memory

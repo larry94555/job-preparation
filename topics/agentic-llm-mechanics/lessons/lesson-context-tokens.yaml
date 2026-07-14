@@ -1,0 +1,14 @@
+id: lesson-context-tokens
+title: "Context windows & token budgets"
+material: context-tokens.md
+segments:
+  - present: the-context-window-is-a-hard-limit
+  - check: mc-context-window
+  - check: mc-context-fill
+  - check: cloze-context-window
+  - present: tokens-cost-money-and-time
+  - check: mc-token-cost
+  - check: mc-track-spend
+  - check: cloze-token
+  - check: fe-token
+  - check: fe-budget

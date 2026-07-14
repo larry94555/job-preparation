@@ -1,0 +1,62 @@
+# Coding exercises — engine type: code (graded by tests + concept skill)
+- id: code-agent-trace
+  type: code
+  language: python
+  tags: [trace]
+  difficulty: 3
+  prompt: >-
+    Implement an `AgentTrace` class. `add_step(cost, latency_ms, tool=None)` appends a step to
+    `self.steps` and accumulates `self.total_cost` and `self.total_latency_ms`. `to_dict()` returns
+    `{"steps": <count>, "total_cost": <sum>, "total_latency_ms": <sum>, "tools": [<tool of each step
+    that had one, in order>]}`. A step with `tool=None` contributes to the totals and the step count but
+    adds nothing to `tools`.
+  starter_file: exercises/agent-trace/starter.py
+  test_file: exercises/agent-trace/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-obs-code
+  concept_checks:
+    must_use: ["accumulate total_cost and total_latency_ms per step", "count the steps", "collect the tool names, skipping None", "return the summary dict from to_dict"]
+    avoid_antipattern: ["recomputing totals from scratch on every call in a way that loses steps", "including None in the tools list"]
+
+- id: code-cost-aggregate
+  type: code
+  language: python
+  tags: [metrics]
+  difficulty: 3
+  prompt: >-
+    Implement `summarize(steps) -> dict`. `steps` is a list of dicts each with `"cost"`, `"latency_ms"`,
+    and `"tool"`. Return `{"total_cost": <sum of cost>, "total_latency_ms": <sum of latency_ms>,
+    "count": <len>, "by_tool": {tool: <count of steps using it>}}`. A step whose tool is `None` or the
+    string `"none"` is not counted under any tool in `by_tool` (treat both as "no tool").
+  starter_file: exercises/cost-aggregate/starter.py
+  test_file: exercises/cost-aggregate/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-obs-code
+  concept_checks:
+    must_use: ["sum cost and latency_ms across steps", "count the steps", "tally steps per tool in by_tool", "treat None and 'none' as no tool"]
+    avoid_antipattern: ["counting a None/'none' tool as a real tool in by_tool", "assuming every step has a tool key value"]
+
+- id: code-alert
+  type: code
+  language: python
+  tags: [alerts]
+  difficulty: 3
+  prompt: >-
+    Implement `check_budget(trace, cost_budget, latency_budget) -> list`. `trace` is a dict with
+    `"total_cost"` and `"total_latency_ms"`. Return a list of alert strings for each budget exceeded:
+    `"cost"` when `total_cost > cost_budget`, `"latency"` when `total_latency_ms > latency_budget`.
+    Include `"cost"` before `"latency"` when both are exceeded, and return an empty list when the trace
+    is within budget (a value exactly equal to its budget is within budget).
+  starter_file: exercises/alert/starter.py
+  test_file: exercises/alert/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-obs-code
+  concept_checks:
+    must_use: ["compare total_cost against cost_budget", "compare total_latency_ms against latency_budget", "return an alert string per exceeded budget", "return an empty list when within budget"]
+    avoid_antipattern: ["alerting when the value equals the budget", "raising instead of returning an empty list when within budget"]

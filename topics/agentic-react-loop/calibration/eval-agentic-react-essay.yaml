@@ -1,0 +1,88 @@
+# Calibration for eval-agentic-react-essay (exemplars target essay-react / essay-guardrails).
+# Exactly 3 clear PASS + 3 clear FAIL — no borderline cases.
+skill: eval-agentic-react-essay
+cases:
+  # PASS — answers the question, hits every reference point, all claims correct,
+  # names concrete mechanisms. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      The agent runs a loop. First it Reasons: it writes a Thought about what to do next, and that
+      reasoning is what selects the tool and its input — reasoning and acting are interleaved, not
+      separate. Then it Acts by calling that tool, and Observes by feeding the real result back into the
+      conversation, so the next Thought is grounded in what actually happened instead of a guess. Finally
+      it Decides: with the observation in hand it either concludes it can answer and emits a final, or it
+      reasons and acts again. Each phase matters — the Thought justifies the action, the observation keeps
+      the agent tied to reality, and the decision makes the loop adaptive, repeating until the task is
+      done rather than running a fixed number of steps.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # PASS — a second strong, correct, specific answer on the guardrails question, different wording.
+  # 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      A single agent driving its own loop can go rogue, so four guardrails contain it. A max-steps cap
+      bounds the iterations, so an agent that never emits a final answer becomes a bounded, observable
+      failure instead of spinning forever. A can't-finish path handles hitting that cap honestly: it
+      returns a structured result with answer=None and a reason like step_limit rather than crashing or
+      relabeling the last observation as the answer. Per-step logging records the thought, action, and
+      observation at every iteration, so when the agent is wrong you can see exactly where it drifted.
+      And validating tool outputs rejects empty or malformed observations before they are fed back, so the
+      agent never reasons over garbage. Together they bound the runtime, keep the result truthful, make the
+      run auditable, and keep bad observations out of the loop.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — off-topic and technically wrong: says to skip observing, fabricate an answer at the cap,
+  # and that no step cap is needed. Fails the gate plus every other check. 0/4 = 0.0 → fail.
+  - answer: >-
+      The agent doesn't really need to observe the tool result — it can just assume the call succeeded and
+      keep going, which is faster. There's no reason to cap the loop either; a good model always finishes
+      on its own, so a max-steps limit only gets in the way. If the loop does run long, the cleanest thing
+      is to take whatever the last tool printed and return that as the final answer so the user always gets
+      something. Logging each step is a waste of space, and tool outputs are always fine to feed straight
+      back without checking them.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # FAIL — blatantly wrong and off-topic on the ReAct loop: describes a pure multi-agent voting scheme
+  # with no reason/act/observe/decide. Fails the gate plus every other check. 0/4 = 0.0 → fail.
+  - answer: >-
+      ReAct means running many separate agents at once and having them vote on the final answer; there is
+      no loop and no tools involved. Each agent reads the prompt one time, writes an answer, and the
+      majority answer wins. Reasoning and acting are the same thing, so there is nothing to interleave, and
+      because every agent answers in a single shot there is never any observation to feed back or any
+      decision about whether to continue. The whole point is to avoid loops entirely.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # PASS — a third strong, correct, specific answer, this one on observing/validating the tool result and
+  # why feeding the real result back keeps the agent honest. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      The Observe step takes the tool's actual output and appends it to the conversation, so the agent's
+      next Thought reasons over what really happened rather than what it imagined. Assuming a call succeeded
+      to save a round-trip is the failure mode: one hallucinated observation poisons every step after it,
+      and the agent drifts with no signal that anything broke. Feeding back the genuine result — even an
+      error string or an empty answer — keeps it honest, because it can then retry, pick a different action,
+      or give up cleanly. The same discipline applies to validating that observation at the boundary: a
+      None, an empty string, or an empty dict is rejected before it re-enters the loop, so the agent never
+      reasons over garbage. That mirrors validating tool inputs — data crossing the trust boundary is
+      untrusted in both directions.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — off-topic and technically wrong on validation/observing: claims empty output is fine to feed
+  # back and that the boundary check is pointless. Fails the gate plus every other check. 0/4 = 0.0 → fail.
+  - answer: >-
+      There is no need to validate what a tool returns before feeding it back — an empty string or an empty
+      dict is just as good an observation as any, and the agent will sort it out on the next turn. Checking
+      the output at the boundary is busywork that only makes the code longer; tools never return anything
+      broken, so rejecting a result is pointless. If the call comes back with nothing, the safest move is to
+      feed that nothing straight into the next Thought and let the model keep going, since stopping to check
+      would just slow the loop down.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }

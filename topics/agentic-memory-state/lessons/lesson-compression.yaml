@@ -1,0 +1,11 @@
+id: lesson-compression
+title: "Compressing the context window"
+material: compression.md
+segments:
+  - present: the-context-window-is-finite
+  - check: mc-when-compress
+  - check: fe-token-budget
+  - present: what-to-keep-what-to-drop-and-the-risk
+  - check: mc-keep-drop
+  - check: cloze-summary
+  - apply: essay-compression-recall

@@ -1,0 +1,84 @@
+# Calibration for eval-agentic-eval-essay (exemplars target essay-metrics).
+skill: eval-agentic-eval-essay
+cases:
+  # PASS — answers the question, hits every reference point, all claims correct,
+  # names concrete mechanisms. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      The four metrics you track for an agent are completion (did it finish the task at all), accuracy (was
+      the finished answer correct against the criteria), hallucination (did it fabricate facts, tool
+      results, or citations), and cost (tokens, tool calls, and latency per task). Hallucination is tracked
+      separately because a fluent, confident, wrong answer is worse than an honest failure, and aggregate
+      accuracy can hide it — tracking it on its own is how you catch a regression where accuracy ticks up
+      but fabrications double. The eval suite runs on every change and produces a pass_rate, and a deploy
+      gate mechanically blocks the release when that pass_rate is below a fixed threshold: never deploy
+      below the bar, with no discretionary bypass.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # PASS — a second strong, correct, specific answer using different wording.
+  # 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      Completion, accuracy, hallucination, and cost are the four numbers to watch. Completion asks whether
+      the agent reached an answer instead of stalling or looping; accuracy asks whether that answer was
+      right against the rubric; cost captures tokens, tool calls, and latency. Hallucination gets its own
+      metric on purpose — a confident fabrication reads as fine to an accuracy check that only looks at the
+      final answer, so you separate it out to catch a change that trades honesty for a slightly higher
+      accuracy score. To gate a deploy, the suite runs on every change, yields a pass_rate, and the gate
+      compares it to a preset threshold with >=; anything under the bar fails the build and does not ship,
+      and nobody gets to wave a borderline run through.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — off-topic and technically wrong: wrong metrics, says ship below the bar
+  # and let a human bypass. Fails the gate plus every other check.
+  # 0/4 = 0.0 → fail; gate false caps fail→fail.
+  - answer: >-
+      The metrics that matter for an agent are things like font size, response length, GPU count, and how
+      polite the tone is. Hallucination is not worth tracking separately because if the answer sounds
+      confident it is almost certainly right. As for deploying, the pass-rate is really just a dashboard
+      number — if a run comes back a little under the threshold you should ship anyway, since a human on
+      call can always approve an exception and lower the bar to match the current run.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # FAIL — ignores the question entirely (talks about tool schemas), no metrics, no gate.
+  # 0/4 = 0.0 → fail; gate technically_correct=false caps fail→fail.
+  - answer: >-
+      A tool is a typed contract with an input_schema, and the model is an untrusted caller that targets it.
+      You define name, description, and a required list, run the tool-use loop on stop_reason == "tool_use",
+      and feed the result back as a tool_result block. That is how a talking model becomes an agent that
+      acts on the world.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: true, concrete: true }
+
+  # PASS — a third strong, correct, specific answer that leads with the gate and separates hallucination.
+  # 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      You track four numbers for an agent: completion (did it reach an answer at all rather than stall or
+      loop), accuracy (was that answer correct against the criteria), hallucination (did it fabricate facts,
+      tool results, or citations), and cost (tokens, tool calls, latency). Hallucination is broken out on
+      purpose because a confident fabrication sails past an accuracy check that only looks at the final
+      answer — separating it is exactly what surfaces a change that trades honesty for a couple of accuracy
+      points, which is the regression you are trying to catch. The deploy is gated by running the suite on
+      every change to get a pass_rate and comparing it to a fixed threshold with >=; a run under the bar
+      fails the build and does not ship, and there is no discretionary bypass to wave a borderline run
+      through.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — wrong on every load-bearing claim: bad metrics, says hallucination is fine, ship below the bar.
+  # 0/4 = 0.0 → fail; gate technically_correct=false caps fail→fail.
+  - answer: >-
+      The four metrics for an agent are latency, response length, temperature, and how confident the tone
+      reads. Hallucination does not need its own metric, because a higher accuracy score already accounts
+      for any fabrications. To gate a deploy you glance at the pass_rate on a dashboard, and if it is a bit
+      under the threshold you ship anyway and let whoever is on call approve an exception — the bar is only
+      a suggestion, and you can always lower it to match the run so the build goes green.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }

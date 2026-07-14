@@ -1,0 +1,14 @@
+id: lesson-failure-modes
+title: "Where multi-agent systems break"
+material: failure-modes.md
+segments:
+  - present: where-multi-agent-systems-break
+  - check: mc-silent-bad
+  - present: approval-loops-need-an-exit
+  - check: mc-approval-loop
+  - check: mc-infinite-approval
+  - check: cloze-validate
+  - check: cloze-critic
+  - check: fe-max-tries
+  - check: fe-validate
+  - apply: essay-handoffs

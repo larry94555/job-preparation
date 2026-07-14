@@ -1,0 +1,60 @@
+# Essay
+- id: essay-routing
+  type: essay
+  length: short
+  tags: [routing]
+  difficulty: 3
+  prompt: "Explain why routing tasks across model tiers saves money without losing quality, and describe how you decide which tier a given task goes to. Give a concrete example of a task at each of two tiers."
+  eval_skill: eval-agentic-llm-essay
+  reference_points:
+    - "The best model is the most expensive and highest-latency; most tasks are handled correctly by a cheaper, faster tier, so sending everything to the top model overpays for work a small model does fine."
+    - "You pick a tier by task difficulty: narrow, high-volume, forgiving work (classify / extract / short summary) goes to the cheap tier; multi-step reasoning, planning, or architecture — where a weaker model's errors compound — goes to the best tier; ambiguous cases can escalate on low confidence."
+    - "Concrete example: tag a support ticket with one of five labels → cheap/small model; design a migration plan across an unfamiliar codebase → the top-tier reasoning model."
+
+- id: essay-failure-modes
+  type: essay
+  length: short
+  tags: [failure]
+  difficulty: 3
+  prompt: "Name the main ways an LLM fails inside an agent — hallucination, lost-in-the-middle, instruction drift, and latency — and for each describe one concrete way an agent mitigates it."
+  eval_skill: eval-agentic-llm-essay
+  reference_points:
+    - "Hallucination is fluent, confident output not grounded in a real source; mitigate by grounding in retrieved/tool-fetched facts and validating claims against sources rather than trusting the model's memory."
+    - "Lost-in-the-middle is a positional retrieval failure where facts buried in the middle of a long context are missed; mitigate by putting the key information at the start or end and keeping the context tight instead of stuffing it."
+    - "Instruction drift is the slow erosion of instruction-following over a long session; mitigate by re-asserting or re-injecting the governing instructions periodically. Latency is per-token wall-clock cost; mitigate by routing to a faster/cheaper tier and trimming the token budget."
+
+- id: essay-context-budget
+  type: essay
+  length: short
+  tags: [context]
+  difficulty: 3
+  prompt: "A long-running agent keeps hitting its context window. Explain what the context window is, why an agent's token usage grows over a session, and describe a concrete strategy for keeping each request under the limit without losing what matters."
+  eval_skill: eval-agentic-llm-essay
+  reference_points:
+    - "The context window is a fixed per-call token budget that must hold everything the model sees — system prompt, full history, retrieved documents/tool results, and the tokens it generates; overflow errors or silently drops content."
+    - "Usage grows because a long-running agent accumulates tokens turn after turn — user messages, its own replies, and tool outputs are all re-sent on each call, so the total only climbs."
+    - "A concrete strategy is budget-aware trimming: always keep the leading system prompt and the most recent/relevant turns, drop or summarize the oldest middle turns, and count tokens with the real tokenizer to stay under the limit."
+
+- id: essay-token-cost
+  type: essay
+  length: short
+  tags: [tokens]
+  difficulty: 3
+  prompt: "Explain why tokens — not requests — are the unit of both cost and latency, and show how you would compute what a single agent run costs. Note why input and output are treated separately."
+  eval_skill: eval-agentic-llm-essay
+  reference_points:
+    - "Providers bill per token (input and output priced separately, output usually higher), so a longer prompt or answer is literally more money — a flat per-request fee model is wrong."
+    - "Latency is also per-token: decoding is autoregressive (one token per step), so more output tokens means more wall-clock time regardless of request count."
+    - "Cost per run = sum over calls of (input_tokens × input_price + output_tokens × output_price); input and output are separated because they are priced differently, and re-sending growing history makes later calls' input dominate the bill."
+
+- id: essay-cost-routing-tradeoff
+  type: essay
+  length: long
+  tags: [cost, routing]
+  difficulty: 4
+  prompt: "Your agent's monthly bill is dominated by one high-volume step. Walk through how you would use cost-per-run measurement to decide whether to route that step to a cheaper tier, what evidence would justify the change, and what risk you must guard against."
+  eval_skill: eval-agentic-llm-essay
+  reference_points:
+    - "Attribute the spend first: measure cost per run as Σ(input×price_in + output×price_out) per call and break it down by step, so you can see the high-volume step is the cost driver rather than guessing."
+    - "Justify routing that step to a cheaper tier only if it is narrow, high-volume, and forgiving (e.g. classify/extract/short summary) so the cheap model clears the quality bar; the evidence is measured quality (accuracy on a labeled set) holding while measured cost drops."
+    - "Guard against quality regression: a weaker tier can misfire, so evaluate the cheap tier against the same quality metric, keep an escalation/cascade path for low-confidence cases, and reserve the top tier for compounding-error work."

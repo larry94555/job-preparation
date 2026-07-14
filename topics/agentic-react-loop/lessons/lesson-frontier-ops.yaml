@@ -1,0 +1,6 @@
+id: lesson-frontier-ops
+title: "The frontier of single-agent loops"
+material: frontier-ops.md
+segments:
+  - present: reliability-of-long-horizon-agents
+  - check: frontier-agent-reliability

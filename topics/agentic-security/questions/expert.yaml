@@ -1,0 +1,48 @@
+# Expert canon (L3) — the OWASP LLM Top 10 and injection taxonomy.
+- id: expert-owasp
+  type: multiple_choice
+  tags: [injection]
+  difficulty: 3
+  prompt: "Where does prompt injection sit on the OWASP Top 10 for LLM Applications, and how is the attack split?"
+  options:
+    - { text: "It is the #1 risk, split into direct injection (typed into the prompt) and indirect injection (planted in content the agent fetches)", correct: true }
+    - { text: "It is a minor, tenth-place issue fully solved by input length limits" }
+    - { text: "It is not on the OWASP list because it only affects chatbots" }
+    - { text: "It is a single undivided category with a known, complete patch" }
+  explanation: "OWASP ranks prompt injection #1 for LLM apps. It splits into direct injection (the malicious instruction is typed into the prompt) and indirect injection (Greshake et al.) where the payload is planted in fetched content and detonates when the agent reads it — the practical, dangerous case."
+
+- id: expert-separation-canon
+  type: multiple_choice
+  tags: [separation]
+  difficulty: 3
+  prompt: "In the canon, why is separating trusted instructions from untrusted content the first defense — and what does the literature say it does NOT achieve?"
+  options:
+    - { text: "It attacks the root cause (the model treating content as instructions) by keeping directives in the system channel and marking fetched text as data, but it is defense in depth, not a guarantee — a determined injection can still try to break out of the frame", correct: true }
+    - { text: "It cryptographically proves the content holds no instructions, so no further layer is needed" }
+    - { text: "It works only for direct injection and is useless against indirect injection" }
+    - { text: "It eliminates the need to sanitize, sandbox, redact, or filter" }
+  explanation: "The root cause of injection is a category error — untrusted content treated as trusted instructions. Separation addresses it by channel: your directives live in the system prompt, fetched text is labeled data. But Simon Willison's framing is that no clean fix exists, so separation is the first layer, paired with sanitizing and the guardrails, never a standalone proof."
+
+- id: expert-sandbox-least-priv
+  type: multiple_choice
+  tags: [sandbox]
+  difficulty: 3
+  prompt: "An expert describes the canonical posture for running untrusted or model-written code. Which statement captures it?"
+  options:
+    - { text: "Sandbox with least privilege: an isolated runner with no mounted credentials, no outbound network, an ephemeral filesystem, and bounded CPU/memory/time — the isolation boundary is both the technical control and the tenant-isolation/audit boundary", correct: true }
+    - { text: "Run it with exec() under the host's permissions once the model confirms it looks safe" }
+    - { text: "Grant full host access but log every call for later audit" }
+    - { text: "Sandboxing is only about performance, not about who can reach what data" }
+  explanation: "The canon is least authority plus isolation: confine execution so hostile code can run and fail without touching anything real, and treat the boundary as what an audit points at — the demonstrable line between one tenant's code and another tenant's data. Asking the model whether code is safe is not a control, because the model can be injected or wrong."
+
+- id: expert-redact-filter-owasp
+  type: multiple_choice
+  tags: [redaction]
+  difficulty: 3
+  prompt: "Which OWASP LLM Top 10 risks do PII redaction and output filtering most directly address, and how do the two controls divide the work?"
+  options:
+    - { text: "Redaction addresses sensitive-information disclosure by scrubbing PII before it enters the context; output filtering addresses insecure output handling and excessive agency by gating a proposed action against an allow-list before execution", correct: true }
+    - { text: "Both address only prompt injection and do nothing for data disclosure or excessive agency" }
+    - { text: "Redaction gates tool calls and output filtering scrubs PII — they are simply swapped names for one control" }
+    - { text: "Neither maps to OWASP; they are unrelated performance optimizations" }
+  explanation: "The rest of the OWASP list is the guardrails. Redaction brackets the input side (sensitive information disclosure): what never enters the context cannot leak. Output filtering brackets the action side (insecure output handling, excessive agency): an allow-list check refuses a disallowed tool before the harness runs it — the confused-deputy defense."

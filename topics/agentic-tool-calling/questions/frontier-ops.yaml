@@ -17,3 +17,21 @@
     real state (argument grounding) is a genuine frontier open problem: failures across a chain are silent
     and compound, and a typed contract validates shape but cannot guarantee the argument is grounded in
     reality. Larger schemas or faster models do not close it.
+
+- id: frontier-reliability-at-scale
+  type: multiple_choice
+  tags: [recovery]
+  difficulty: 4
+  prompt: >-
+    Running tool loops across many tools, many turns, and many concurrent agents surfaces distributed-systems
+    edges. Which is the honest, frontier-aware read of "reliability at scale" for agent tool use?
+  options:
+    - { text: "Partial failures, retries that double-apply side effects, and orchestration that must stay correct under load are the active research edge — a single validated call is no longer the whole story, and neither a bigger schema nor a faster model closes the gap", correct: true }
+    - { text: "It is fully solved by wrapping every tool call in an automatic retry" }
+    - { text: "It is purely a hardware problem: add GPUs and the loops become correct" }
+    - { text: "Concurrency is irrelevant because each agent runs in perfect isolation with no shared effects" }
+  explanation: >-
+    At scale the tool loop meets classic distributed-systems failure modes: partial failures, retries that
+    double-apply an effect (non-idempotent side effects), and orchestration that must remain correct under
+    concurrent load. These are an open research edge, not a solved problem — validate-and-recover on one call
+    is necessary but not sufficient, and more compute or larger schemas do not close it.

@@ -1,0 +1,11 @@
+id: lesson-failure-modes
+title: "Where models fail"
+material: failure-modes.md
+segments:
+  - present: where-models-fail
+  - check: mc-hallucination
+  - check: mc-drift
+  - check: cloze-hallucination
+  - check: cloze-drift
+  - check: fe-instruction-drift
+  - apply: essay-failure-modes

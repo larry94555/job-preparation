@@ -1,0 +1,54 @@
+# Free entry (short answer)
+- id: fe-token
+  type: text_input
+  tags: [tokens]
+  difficulty: 1
+  prompt: "What is the unit both context windows and pricing are measured in? (one word)"
+  answer:
+    regex: '^tokens?$'
+    normalize: true
+
+- id: fe-budget
+  type: text_input
+  tags: [context]
+  difficulty: 2
+  prompt: "A fixed token allowance you must fit a request under is a token ____. (one word)"
+  answer:
+    regex: '^budget$'
+    normalize: true
+
+- id: fe-lost-middle
+  type: text_input
+  tags: [context]
+  difficulty: 2
+  prompt: "In the 'lost in the ____' effect, position in a long context determines retrieval accuracy. (one word)"
+  answer:
+    regex: '^middle$'
+    normalize: true
+
+- id: fe-cheapest
+  type: text_input
+  tags: [routing]
+  difficulty: 2
+  prompt: "Route a task to the ____ model tier that can still do it correctly. (one word)"
+  answer:
+    regex: '^cheapest$'
+    normalize: true
+
+- id: fe-route-classify
+  type: text_input
+  tags: [routing]
+  difficulty: 2
+  prompt: "A one-line 'classify this ticket' task should route to which kind of tier? (one word: name a cheap/small/fast tier)"
+  answer:
+    regex: '^(haiku|cheap|small|fast)$'
+    normalize: true
+
+- id: fe-instruction-drift
+  type: text_input
+  tags: [failure]
+  difficulty: 2
+  prompt: "Name the failure where a model slowly stops following its original instructions over a long session. (one or two words)"
+  answer:
+    regex: '^(drift|instruction drift)$'
+    normalize: true

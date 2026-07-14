@@ -14,10 +14,12 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 - ✅ **[L3]** OpenAI function calling (2023) and Anthropic tool use as the origin of typed tool signatures — `lessons/expert-context.md`.
 - ✅ **[L3]** MCP (Anthropic, 2024) as the open standard for the tool boundary — `lessons/expert-context.md`, `questions/expert.yaml`.
 - ✅ **[L3]** Structured-outputs / JSON-schema mode as constrained decoding that guarantees schema-valid output — `lessons/expert-context.md`, `lessons/structured-outputs.md`, `questions/expert.yaml`.
-- ✅ **[L4]** Frontier open problems: reliable multi-tool orchestration, robust argument grounding, reliability at scale — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml`.
+- ✅ **[L3]** JSON-schema `strict` mode (`additionalProperties: false`, all required present) as the tightest constrained-decoding contract — `lessons/structured-outputs.md`, `questions/expert.yaml` (`expert-json-schema-strict`).
+- ✅ **[L4]** Frontier open problems: reliable multi-tool orchestration, robust argument grounding, reliability at scale — drilled in `lessons/frontier-ops.md`, `questions/frontier-ops.yaml` (`frontier-multitool`, `frontier-reliability-at-scale`).
 
 ## D3 — Architecture, design & tradeoff judgment
 - ✅ **[L3]** The tool-use loop as an architecture: continue on tool_use, return on end_turn, cap the steps — `lessons/tool-loop.md`, `questions/mcq.yaml`.
+- ✅ **[L3]** Parallel tool calls in one turn and binding each tool_result by tool_use_id — `lessons/tool-loop.md`, `questions/expert.yaml` (`expert-parallel-tool-calls`), `questions/mcq.yaml` (`mc-tool-use-id`).
 - ✅ **[L3]** Tools as typed contracts and the harness as untrusting executor — `lessons/tool-schema.md`, `questions/mcq.yaml`.
 - ✅ **[L3]** Structured-outputs guarantee (shape) vs. validation (semantics) as complementary layers — `lessons/structured-outputs.md`, `questions/mcq.yaml`.
 
@@ -38,10 +40,11 @@ Index. Each item lists a target level and where the course covers it. Legend: �
 
 ## D8 — Career & professional practice
 - ✅ **[L3]** Whiteboard the shift from talking model to agent and defend validate-and-recover under questioning — `questions/essay.yaml` (`essay-talk-vs-act`, `essay-validate-recover`).
+- ✅ **[L4]** Defend the schema-as-contract and the shape-vs-semantics split, and trace the tool-calling canon end to end under questioning — `questions/essay.yaml` (`essay-schema-contract`, `essay-structured-vs-validate`, `essay-tool-canon`).
 
 ## Coverage summary
-18 items · ✅ 18 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
+21 items · ✅ 21 covered · 🟡 0 partial · ⬜ 0 gap. Weighted coverage (covered=1, partial=0.5) = **100%**.
 This surface is fully covered as of the snapshot; it will revert to partial as the field's frontier
-expands (parallel/streaming tool calls, long-horizon multi-tool orchestration evals).
+expands (streaming tool calls, long-horizon multi-tool orchestration evals).
 
-<!-- coverage: items=18 covered=18 partial=0 gap=0 -->
+<!-- coverage: items=21 covered=21 partial=0 gap=0 -->

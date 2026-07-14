@@ -1,0 +1,13 @@
+id: lesson-resume
+title: "Pause, step in, resume"
+material: resume.md
+segments:
+  - present: pause-step-in-resume
+  - check: mc-pause-resume
+  - check: mc-timeout
+  - check: mc-resume-clean
+  - check: cloze-resume
+  - check: cloze-pause
+  - check: fe-resume
+  - check: fe-timeout
+  - apply: essay-audit

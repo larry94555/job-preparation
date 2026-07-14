@@ -1,0 +1,14 @@
+id: lesson-react-loop
+title: "The ReAct loop"
+material: react-loop.md
+segments:
+  - present: reason-act-observe-decide
+  - check: mc-react-def
+  - check: mc-thought
+  - check: cloze-react
+  - check: fe-react-expand
+  - present: the-loop-runs-until-done
+  - check: mc-loop-step
+  - check: cloze-loop
+  - check: fe-loop
+  - apply: code-react-loop

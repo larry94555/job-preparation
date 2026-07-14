@@ -1,0 +1,6 @@
+id: lesson-expert-context
+title: "Expert context: the OWASP LLM Top 10"
+material: expert-context.md
+segments:
+  - present: the-owasp-llm-top-10
+  - check: expert-owasp

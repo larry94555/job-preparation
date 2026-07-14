@@ -1,0 +1,65 @@
+# Coding exercises — engine type: code (graded by tests + concept skill)
+- id: code-supervisor
+  type: code
+  language: python
+  tags: [supervisor]
+  difficulty: 3
+  prompt: >-
+    Implement `supervise(research_agent, writer_agent, critic_agent, task, max_revisions=3) -> str`.
+    First `research = research_agent(task)`. Then `content = writer_agent(research, None)`. Then loop up
+    to `max_revisions` times: `review = critic_agent(content)` returns `{"approved": bool, "issues": [...]}`;
+    if `review["approved"]` is True, return `content`; otherwise set
+    `content = writer_agent(research, review["issues"])` and continue. After `max_revisions` revisions
+    without approval, return the last `content`. This is the supervisor coordinating a research, a writer,
+    and a critic specialist with a bounded revision loop.
+  starter_file: exercises/supervisor/starter.py
+  test_file: exercises/supervisor/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-multiagent-code
+  concept_checks:
+    must_use: ["research first, then write", "loop up to max_revisions", "return content when the critic approves", "return the last content after max_revisions"]
+    avoid_antipattern: ["looping without a revision cap", "ignoring the critic's approval"]
+
+- id: code-handoff-validate
+  type: code
+  language: python
+  tags: [handoff]
+  difficulty: 3
+  prompt: >-
+    Implement `validate_handoff(output) -> dict`. Reject an empty handoff — `None`, `""`, `{}`, or `[]` —
+    by returning `{"ok": False, "error": "empty_handoff"}`. Otherwise return
+    `{"ok": True, "value": output}`. This is the validation that guards every boundary between agents so a
+    silent bad output can't flow to the next agent.
+  starter_file: exercises/handoff-validate/starter.py
+  test_file: exercises/handoff-validate/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-multiagent-code
+  concept_checks:
+    must_use: ["reject None and empty containers with a structured error", "return the value on a non-empty handoff"]
+    avoid_antipattern: ["passing an empty output through as valid", "raising instead of returning a structured error"]
+
+- id: code-approval-loop
+  type: code
+  language: python
+  tags: [validation]
+  difficulty: 3
+  prompt: >-
+    Implement `revise_until_approved(draft, critic, revise, max_tries=3) -> dict`. Loop, counting tries:
+    `r = critic(draft)` returns `{"approved": bool, "issues": [...]}`; if `r["approved"]` is True, return
+    `{"content": draft, "approved": True, "tries": n}` where `n` is the number of critic calls so far;
+    otherwise `draft = revise(draft, r["issues"])` and continue. After `max_tries` without approval, return
+    `{"content": draft, "approved": False, "tries": max_tries}`. The `max_tries` cap is the exit that keeps
+    the approval loop from running forever when the critic never approves.
+  starter_file: exercises/approval-loop/starter.py
+  test_file: exercises/approval-loop/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-multiagent-code
+  concept_checks:
+    must_use: ["stop and return when the critic approves", "cap the loop at max_tries", "return approved False with tries == max_tries when never approved"]
+    avoid_antipattern: ["looping without a max_tries exit", "returning approved True when the critic never approved"]

@@ -1,0 +1,6 @@
+id: lesson-expert-context
+title: "Expert context: what the research says about long context"
+material: expert-context.md
+segments:
+  - present: what-the-research-says-about-long-context
+  - check: expert-lost-middle

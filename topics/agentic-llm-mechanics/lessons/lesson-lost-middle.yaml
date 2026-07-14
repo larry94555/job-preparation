@@ -1,0 +1,8 @@
+id: lesson-lost-middle
+title: "Lost in the middle"
+material: lost-middle.md
+segments:
+  - present: lost-in-the-middle
+  - check: mc-lost-middle
+  - check: cloze-lost-middle
+  - check: fe-lost-middle

@@ -1,0 +1,11 @@
+id: lesson-reading-metrics
+title: "Reading the metrics"
+material: reading-metrics.md
+segments:
+  - present: reading-the-metrics
+  - check: mc-cost-per-tool
+  - check: mc-p99-vs-avg
+  - check: expert-token-metrics
+  - check: cloze-metrics
+  - check: fe-tail
+  - apply: essay-production

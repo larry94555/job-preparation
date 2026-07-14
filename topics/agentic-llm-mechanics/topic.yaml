@@ -1,0 +1,11 @@
+id: agentic-llm-mechanics
+title: "LLM Fundamentals for Agents"
+description: "Reason about the model as a component, not magic: context windows and token budgets, routing tasks to the cheapest model that can do them, tracking cost per run, and knowing where models fail — hallucination, lost-in-the-middle, instruction drift."
+track: agentic
+pass_threshold: 0.8
+tag_weights:
+  context: 1.2
+  tokens: 1.0
+  routing: 1.2
+  cost: 1.0
+  failure: 1.2

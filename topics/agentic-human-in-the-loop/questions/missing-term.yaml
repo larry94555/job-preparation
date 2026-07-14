@@ -1,0 +1,63 @@
+# Missing term (cloze)
+- id: cloze-approval
+  type: text_input
+  tags: [approval]
+  difficulty: 1
+  prompt: "A high-risk action does not run until a human gives explicit ____."
+  answer:
+    regex: '^approval$'
+    normalize: true
+
+- id: cloze-risk
+  type: text_input
+  tags: [risk]
+  difficulty: 1
+  prompt: "You classify each action by its ____ level: low, medium, or high."
+  answer:
+    regex: '^risk$'
+    normalize: true
+
+- id: cloze-audit
+  type: text_input
+  tags: [audit]
+  difficulty: 1
+  prompt: "The append-only record of what the agent did and why is the ____ trail."
+  answer:
+    regex: '^audit$'
+    normalize: true
+
+- id: cloze-resume
+  type: text_input
+  tags: [resume]
+  difficulty: 2
+  prompt: "After a human steps in, the agent must ____ from the saved state, not from scratch."
+  answer:
+    regex: '^resume$'
+    normalize: true
+
+- id: cloze-irreversible
+  type: text_input
+  tags: [risk]
+  difficulty: 2
+  prompt: "The actions that most need a human are the ones you cannot undo — the ____ ones."
+  answer:
+    regex: '^irreversible$'
+    normalize: true
+
+- id: cloze-pause
+  type: text_input
+  tags: [resume]
+  difficulty: 2
+  prompt: "The lifecycle is: ____, let a human step in, then resume."
+  answer:
+    regex: '^pause$'
+    normalize: true
+
+- id: cloze-checkpoint
+  type: text_input
+  tags: [resume]
+  difficulty: 3
+  prompt: "A framework interrupt halts the run at a ____, waits for human input, then continues from there. (one word)"
+  answer:
+    regex: '^checkpoint$'
+    normalize: true

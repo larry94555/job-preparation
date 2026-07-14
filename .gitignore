@@ -13,3 +13,5 @@ secrets/*.env
 !secrets/*.env.example
 .secrets.env
 .DS_Store
+__pycache__/
+*.pyc

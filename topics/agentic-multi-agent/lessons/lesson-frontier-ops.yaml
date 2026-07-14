@@ -1,0 +1,6 @@
+id: lesson-frontier-ops
+title: "Multi-agent at scale"
+material: frontier-ops.md
+segments:
+  - present: multi-agent-at-scale
+  - check: frontier-multi-agent

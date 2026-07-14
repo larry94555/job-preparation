@@ -1,0 +1,60 @@
+# Essay
+- id: essay-architecture
+  type: essay
+  length: short
+  tags: [portfolio]
+  difficulty: 3
+  prompt: "Describe the architecture of the agent you would ship as your capstone — its task, its loop, and the tools it calls — then name one design decision you made and explain why."
+  eval_skill: eval-agentic-ship-essay
+  reference_points:
+    - "States a concrete task the agent does end to end and the shape of the agent — a bounded reason–act loop that calls tools, reads observations, and returns a result."
+    - "Names the specific tools (or capabilities) the agent uses and where the harness validates observations or tool calls, rather than describing a single one-shot model call."
+    - "Names one concrete design decision (e.g. a step cap, a validation boundary, cutting a tool, constraining output) and defends it with a why — a clear 'chose X over Y because Z'."
+
+- id: essay-what-broke
+  type: essay
+  length: short
+  tags: [communicate]
+  difficulty: 3
+  prompt: "Describe one concrete thing that broke while building your agent and exactly how you fixed it — the symptom, the cause, and the change you made."
+  eval_skill: eval-agentic-ship-essay
+  reference_points:
+    - "Describes a concrete, specific failure (e.g. the loop never terminated, a tool returned garbage the model trusted, an eval case surfaced a wrong answer) rather than a vague 'it had bugs'."
+    - "Identifies the cause of the break — why it happened — not just that it happened."
+    - "Explains the specific fix that resolved it (e.g. added a step cap, validated the observation before trusting it, corrected the tool contract or prompt) and why that fix addresses the cause."
+
+- id: essay-portfolio
+  type: essay
+  length: short
+  tags: [proof]
+  difficulty: 3
+  prompt: "What makes a portfolio that actually gets an agentic engineer hired? Explain why proof of working agents beats listing \"AI\" as a skill."
+  eval_skill: eval-agentic-ship-essay
+  reference_points:
+    - "A hiring portfolio is proof a stranger can verify: real, self-designed working agents someone can open, read, and run — not a list of buzzwords."
+    - "Each shipped agent carries the artifacts that make it legible: a README that defends an architecture decision, an eval suite that measures it, and a demo that shows it running."
+    - "Explains why proof beats a claim: a working agent is falsifiable evidence a reviewer trusts, while a skills list is an unverifiable claim — two more shipped agents beat two more buzzwords."
+
+- id: essay-communicate
+  type: essay
+  length: long
+  tags: [communicate]
+  difficulty: 3
+  prompt: "Write the public write-up of your capstone agent. Structure it as the three beats that make a build read as real engineering, and explain why each beat is more convincing than a marketing-style feature list."
+  eval_skill: eval-agentic-ship-essay
+  reference_points:
+    - "Uses the three beats of a strong write-up: the problem you chose and the shape of the agent (task, bounded loop, tools, where you validate), one surprising decision, and one concrete thing that broke and how you fixed it."
+    - "Names why a surprise is credible — tutorials never have them, so a decision that did not go as expected (a tool cut, a prompt constrained, a loop cap lowered) proves you were actually in the code — and why the break-and-fix is the most convincing beat, because debugging is the job."
+    - "Frames the write-up as a durable, linkable narrative (a build-in-public thread, blog post, or README section, paired with a demo) whose point is a stranger's trust, not reach — contrasting it with a feature list that reads as marketing rather than engineering."
+
+- id: essay-get-hired
+  type: essay
+  length: short
+  tags: [proof]
+  difficulty: 4
+  prompt: "The agentic-engineer title is unstable and means different things at different companies. Explain what actually differentiates a candidate in this market and why shipping in public is the highest-leverage move."
+  eval_skill: eval-agentic-ship-essay
+  reference_points:
+    - "The role is being defined in public and the title is unstable, so a portfolio that shows what you actually do travels better than a title — proof-of-work over pedigree, tracked against real job postings rather than hype."
+    - "The differentiator has risen up the stack: not 'I built an agent' but 'I built an agent, measured it with evals, found where it breaks, and can defend the architecture' — shipped, measured, defensible agents pull ahead of shipped demos as the bar rises."
+    - "Shipping in public is highest-leverage because judgment and communication compound while models and frameworks churn: a linkable repo, README/ADR, evals, and a thread argue for you in rooms you are not in, and the capstone trains exactly those durable muscles."

@@ -1,0 +1,62 @@
+# Coding exercises — engine type: code (graded by tests + concept skill)
+- id: code-async-fanout
+  type: code
+  language: python
+  tags: [concurrency]
+  difficulty: 3
+  prompt: >-
+    Implement `async def gather_calls(client, queries) -> list`. For every query, run
+    `await client.fetch(q)`, but run them ALL CONCURRENTLY (with `asyncio.gather`), not one after
+    another. Return the results as a list in the SAME ORDER as `queries`. A sequential loop that awaits
+    each fetch before starting the next is wrong — the whole point is to overlap the waits.
+  starter_file: exercises/async-fanout/starter.py
+  test_file: exercises/async-fanout/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-async-code
+  concept_checks:
+    must_use: ["build a coroutine per query", "run them concurrently with asyncio.gather", "preserve the input order in the results"]
+    avoid_antipattern: ["awaiting each fetch in a sequential loop", "losing the original ordering"]
+
+- id: code-retry-backoff
+  type: code
+  language: python
+  tags: [resilience]
+  difficulty: 3
+  prompt: >-
+    Implement `async def retry_call(fn, attempts, sleep)`. Await `fn()` and return its value. If it
+    raises, `await sleep(delay)` and retry, using EXPONENTIAL delay (1, 2, 4, … units) between tries, up
+    to `attempts` total tries. If the last attempt still raises, re-raise that exception. `sleep` is an
+    injected async function (so tests can record calls without real waiting) — do not import time or call
+    asyncio.sleep directly.
+  starter_file: exercises/retry-backoff/starter.py
+  test_file: exercises/retry-backoff/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-async-code
+  concept_checks:
+    must_use: ["await fn and return on success", "catch the exception and retry up to attempts", "await the injected sleep with exponential delay between tries", "re-raise the last exception on exhaustion"]
+    avoid_antipattern: ["retrying forever without a cap", "sleeping with real time instead of the injected sleep"]
+
+- id: code-isolate-failures
+  type: code
+  language: python
+  tags: [errors]
+  difficulty: 3
+  prompt: >-
+    Implement `async def run_all(coros) -> list`. Run all the given coroutines CONCURRENTLY and return a
+    list of result dicts in order: `{"ok": True, "value": v}` for one that succeeds, or
+    `{"ok": False, "error": str(e)}` for one that raises. A coroutine that raises must NOT abort the
+    others — isolate each failure (e.g. asyncio.gather with return_exceptions=True, or per-task
+    try/except).
+  starter_file: exercises/isolate-failures/starter.py
+  test_file: exercises/isolate-failures/test_solution.py
+  test_command: "python test_solution.py"
+  runner_image: "quiz-runner-python:3.12"
+  timeout_sec: 30
+  eval_skill: eval-agentic-async-code
+  concept_checks:
+    must_use: ["run all coroutines concurrently", "wrap each result as ok/value or ok/error", "isolate a raising coroutine so others still complete"]
+    avoid_antipattern: ["letting one exception abort the whole batch", "running the coroutines sequentially"]

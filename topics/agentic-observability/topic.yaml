@@ -1,0 +1,10 @@
+id: agentic-observability
+title: "Observability & Tracing"
+description: "When an agent misbehaves in production you need to see inside it — without tracing, debugging is guessing. Record a span per step (tokens, cost, latency, tool, error) into a trace, then watch the metrics that surprise everyone in production: cost and latency under real load, and the tail of runs that fail in ways you never tested."
+track: agentic
+pass_threshold: 0.8
+tag_weights:
+  trace: 1.2
+  spans: 1.0
+  metrics: 1.2
+  alerts: 1.0

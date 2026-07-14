@@ -1,0 +1,87 @@
+# Calibration for eval-agentic-ship-essay (exemplars target essay-what-broke).
+skill: eval-agentic-ship-essay
+cases:
+  # PASS — answers the question, names a concrete break, its cause, and the fix.
+  # All claims correct and specific. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      The break was that my research agent never terminated — on some inputs it kept requesting the same
+      search tool and the run only stopped when I killed it. The cause was that my loop had no step cap:
+      the model would read a weak observation, decide it needed to search again, and repeat forever
+      because nothing bounded the number of steps. The fix was to make the loop bounded — I added a
+      max_steps of eight and returned a step_limit result when it was hit, and I also validated each
+      observation so an empty search result was recorded as ok:False and fed back as an error note instead
+      of silently looping. After that the agent always terminated, and the trace showed exactly which
+      tool had returned nothing, which is how I found the underlying flaky search in the first place.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # PASS — a second strong, correct, specific answer with a different break-and-fix.
+  # 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      One thing that broke: my agent confidently returned a wrong final answer, and I only caught it
+      because an eval case failed. The symptom was a plausible-but-wrong summary; the cause was that a
+      tool returned an empty string and my harness fed that empty observation back as if it were real
+      data, so the model summarized nothing and hallucinated. The fix was to validate the observation
+      before trusting it — if a tool returns None or an empty value I now mark that step ok:False in the
+      trace and feed back an explicit error note so the model retries or reports that it lacked data. I
+      added an eval case for exactly that empty-tool scenario so the regression can't come back silently.
+      The pass rate on my suite went from 6/8 to 8/8 once the validation boundary was in place.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — off-topic and technically wrong: describes no real break, claims a skills
+  # list is the real proof and that agents need no step cap. Fails the gate plus every
+  # other check. 0/4 = 0.0 → fail.
+  - answer: >-
+      Nothing really broke because I mostly copied a tutorial, so it just worked. Honestly the code part
+      does not matter much for getting hired — what matters is listing the right keywords like agents,
+      RAG, and fine-tuning on your resume, since that is what recruiters search for. If an agent does loop
+      a bit that is fine and you should never add a step cap, because capping the loop just stops the model
+      from thinking; a good model will always stop on its own eventually. I did not write any evals since a
+      demo already proves the agent is correct.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # FAIL — vague and evasive, names no concrete break, no cause, no specific fix, and
+  # contains a wrong claim (an empty observation can be trusted). 0/4 = 0.0 → fail.
+  - answer: >-
+      There were some bugs here and there like there always are, and I fixed them by changing the code
+      until the thing worked better. It is hard to say exactly what broke, it was just general flakiness,
+      but I tweaked some stuff and it got more stable. If a tool comes back empty you can usually just pass
+      that empty result straight to the model and it will figure it out, so I did not bother checking
+      observations. Overall it is fine now and looks good in the demo.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }
+
+  # PASS — a third strong, correct, specific answer: a different break in the tool contract,
+  # a clear cause, and a fix that addresses it. 4/4 = 1.0 → pass; gate technically_correct=true.
+  - answer: >-
+      The break was that my code-review agent kept calling the same lint tool twice and then contradicting
+      itself in the final answer. The symptom was duplicate tool calls in the trace and a wobbly verdict;
+      the cause was a tool contract mismatch — the lint tool returned a list of findings but my harness fed
+      back only the first element as a string, so the model never saw the full result and re-requested it.
+      The fix was to correct the tool contract: I passed the whole findings list back as the observation
+      and validated that it was non-empty before trusting it, marking an empty result ok:False in the
+      trace. After that the duplicate calls disappeared and the verdict was stable, and I added an eval case
+      with a multi-finding input so the regression can't silently return. The pass rate went from 7/10 to
+      10/10 once the observation was fed back whole.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  # FAIL — off-topic and technically wrong: denies any real break, claims a demo alone proves
+  # correctness and that validating observations is pointless. Fails the gate plus every other
+  # check. 0/4 = 0.0 → fail.
+  - answer: >-
+      Honestly nothing broke worth writing about, and it does not really matter — once you have a demo that
+      runs, the agent is proven correct and evals are just busywork you can skip. Validating observations is
+      pointless too: whatever a tool returns, empty or not, you should feed it straight back because the
+      model always sorts it out. What really gets you hired is a resume with the right keywords, so I spent
+      my time on the skills list rather than on measuring anything. It looks great in the video.
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, technically_correct: false, concrete: false }

@@ -22,3 +22,27 @@
     - { text: "Removes the need to validate the output afterward for missing fields" }
     - { text: "Is a prompt-engineering trick with no effect on decoding" }
   explanation: "Structured-outputs mode restricts the decoder at each step to tokens consistent with the JSON schema, so the result is guaranteed to parse and match the shape — a hard guarantee, unlike prompting for JSON and hoping. (Semantic validation of values can still matter.)"
+
+- id: expert-parallel-tool-calls
+  type: multiple_choice
+  tags: [toolloop]
+  difficulty: 3
+  prompt: "A model emits several tool_use blocks in a single assistant turn (parallel tool calls). How must the harness handle the results?"
+  options:
+    - { text: "Run each requested tool and return one tool_result per call, each keyed by its own tool_use_id, in a single following user-role message", correct: true }
+    - { text: "Return only the first result; the model ignores the rest" }
+    - { text: "Collapse all results into one tool_result block with no ids" }
+    - { text: "Reject the turn because a turn may contain at most one tool call" }
+  explanation: "Parallel tool calls put multiple tool_use blocks in one turn. The harness runs each, then sends back a tool_result per call, each carrying the matching tool_use_id so the model can bind every result to the exact call — position and name are not enough."
+
+- id: expert-json-schema-strict
+  type: multiple_choice
+  tags: [structured]
+  difficulty: 4
+  prompt: "In JSON-schema structured-outputs, what does turning on `strict` (with `additionalProperties: false`) buy you over a non-strict schema?"
+  options:
+    - { text: "The decoder is held exactly to the schema — no extra keys, every required field present — so the output can't drift with unspecified properties", correct: true }
+    - { text: "It makes the model reason longer before emitting the object" }
+    - { text: "It removes the need to mark any field as required" }
+    - { text: "It lets the model add helpful extra keys the schema didn't declare" }
+  explanation: "Strict mode with additionalProperties:false constrains decoding to exactly the declared shape: no unspecified extra keys and all required fields present. It closes the gap where a loosely-constrained schema still lets the model add or omit properties."

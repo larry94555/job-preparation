@@ -1,0 +1,10 @@
+id: lesson-cost-accounting
+title: "Cost accounting per run"
+material: cost-accounting.md
+segments:
+  - present: cost-per-run-is-a-sum-over-calls
+  - check: mc-cost-per-run
+  - check: expert-cost-per-run
+  - present: why-the-growing-history-dominates-the-bill
+  - check: mc-cost-growth
+  - apply: essay-cost-routing-tradeoff

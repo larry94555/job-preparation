@@ -1,0 +1,6 @@
+id: lesson-frontier-ops
+title: "The autonomy spectrum"
+material: frontier-ops.md
+segments:
+  - present: the-autonomy-spectrum
+  - check: frontier-autonomy

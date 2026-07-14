@@ -1,0 +1,6 @@
+id: lesson-expert-context
+title: "Expert context: task queues and worker pools"
+material: expert-context.md
+segments:
+  - present: task-queues-and-worker-pools
+  - check: expert-deploy-patterns

@@ -1,0 +1,12 @@
+id: lesson-llm-judge
+title: "Measure what you ship"
+material: llm-judge.md
+segments:
+  - present: measure-what-you-ship
+  - check: mc-cant-improve
+  - check: cloze-judge
+  - present: use-a-model-as-the-judge
+  - check: mc-llm-judge
+  - check: mc-best-judge
+  - check: fe-judge
+  - apply: code-llm-judge

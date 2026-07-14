@@ -1,0 +1,10 @@
+id: lesson-operability
+title: "Rate limit every user"
+material: operability.md
+segments:
+  - present: rate-limit-every-user
+  - check: mc-rate-limit
+  - check: mc-token-bucket
+  - check: cloze-bucket
+  - check: fe-bucket
+  - apply: code-rate-limit

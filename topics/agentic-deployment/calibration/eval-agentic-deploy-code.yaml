@@ -1,0 +1,90 @@
+# Calibration for eval-agentic-deploy-code (exemplars target the job-queue / rate-limit / canary-route exercises).
+# Three clear PASS + three clear FAIL, no borderline.
+skill: eval-agentic-deploy-code
+cases:
+  # PASS — job queue done right. All four checks true. gate technically_correct=true.
+  - answer: >-
+      tests_passed=true. technically_correct holds: submit only stores a job with status "queued" and
+      returns its id — it never runs the worker — and run_next pops the oldest queued job, marks it
+      running, awaits the worker, and sets done with the result, catching a worker exception to set failed
+      with the error string instead of letting it escape. correct_behavior holds: a submitted job reads
+      back queued, then done after run_next, and a raising worker yields failed. handles_edge_cases holds:
+      an empty queue is a no-op and the failing worker becomes a failed job, not a crash. matches_intent
+      holds: the worker runs in run_next, not submit, exactly as asked.
+      signals.must_use=[submit stores queued job, run_next awaits worker, done on success, failed on raise]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, correct_behavior: true, handles_edge_cases: true, matches_intent: true }
+
+  # PASS — token bucket done right. All four checks true. gate technically_correct=true.
+  - answer: >-
+      tests_passed=true. technically_correct holds: TokenBucket starts full, and allow() refills tokens by
+      (now - last) * refill_per_sec using the injected now, caps the total at capacity with min(), then
+      consumes one token and returns True when at least one is available, else False. correct_behavior
+      holds: a burst of capacity calls at one now allows then denies, and advancing now enough re-allows.
+      handles_edge_cases holds: refill is capped at capacity so a long idle never overfills, and a partial
+      refill under one token still denies. matches_intent holds: it uses the injected clock rather than
+      reading a real one.
+      signals.must_use=[refill from injected now, cap at capacity, consume-and-allow]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, correct_behavior: true, handles_edge_cases: true, matches_intent: true }
+
+  # FAIL — job queue runs the worker inside submit and lets the exception escape.
+  # gate technically_correct=false; all four checks false → fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: submit awaits the worker and stores the result
+      immediately, so the slow run happens on the submit path instead of in run_next — the whole point of
+      the async job API is defeated, and run_next is left doing nothing. correct_behavior does NOT hold: a
+      just-submitted job is already "done" rather than "queued". handles_edge_cases does NOT hold: a
+      worker that raises propagates out of submit and crashes the caller instead of becoming a failed job.
+      matches_intent does NOT hold: the prompt said do NOT run the task in submit and never let the worker
+      exception escape.
+      signals.must_use=[submit stores queued job]; avoid=[running the worker inside submit, letting the worker exception escape].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, correct_behavior: false, handles_edge_cases: false, matches_intent: false }
+
+  # FAIL — token bucket reads the real clock and lets tokens exceed capacity.
+  # gate technically_correct=false; all four checks false → fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: allow() ignores the injected now and calls
+      time.monotonic() itself, so the limiter is non-deterministic and the tests only pass by luck; it also
+      adds refill without capping at capacity, so an idle bucket accumulates unbounded tokens.
+      correct_behavior does NOT hold: after a long idle the bucket allows far more than capacity requests
+      in a burst. handles_edge_cases does NOT hold: the cap-at-capacity boundary is violated. matches_intent
+      does NOT hold: the prompt required using the injected now and capping tokens at capacity.
+      signals.must_use=[]; avoid=[reading the clock inside instead of using the injected now, letting tokens exceed capacity].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, correct_behavior: false, handles_edge_cases: false, matches_intent: false }
+
+  # PASS — canary router done right: stable unsalted hash, honours 0/100 boundaries.
+  # All four checks true. gate technically_correct=true.
+  - answer: >-
+      tests_passed=true. technically_correct holds: route() computes a stable hash — sum of the user_id
+      bytes mod 100 — not Python's salted hash(), and returns "canary" when that value is below canary_pct
+      else "stable", so the split is deterministic across processes. correct_behavior holds: canary_pct=0
+      routes everyone to stable, canary_pct=100 routes everyone to canary, and a given user id routes the
+      same way on every call. handles_edge_cases holds: the 0 and 100 boundaries are exact and no user
+      flips between versions. matches_intent holds: it uses a stable hash and honours the boundaries rather
+      than a random or salted look-alike.
+      signals.must_use=[stable unsalted hash of user id, canary when hash below canary_pct, 0 always stable and 100 always canary]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { technically_correct: true, correct_behavior: true, handles_edge_cases: true, matches_intent: true }
+
+  # FAIL — canary router uses Python's salted hash() and randomness, so routing is unstable.
+  # gate technically_correct=false; all four checks false → fail.
+  - answer: >-
+      tests_passed=true. technically_correct does NOT hold: route() calls Python's built-in hash(user_id),
+      which is salted per process, so the same user routes differently across workers, and it also mixes in
+      random.random() to decide the split, so a user flips between canary and stable on successive calls.
+      correct_behavior does NOT hold: a given user id does not route consistently, and canary_pct=0 can
+      still send someone to canary. handles_edge_cases does NOT hold: the 0/100 boundaries are not honoured
+      because randomness overrides them. matches_intent does NOT hold: the prompt required a stable hash and
+      no randomness.
+      signals.must_use=[]; avoid=[using Python's salted hash() so routing is unstable across processes, using randomness so a user flips between versions].
+    expect:
+      verdict: fail
+      checks: { technically_correct: false, correct_behavior: false, handles_edge_cases: false, matches_intent: false }

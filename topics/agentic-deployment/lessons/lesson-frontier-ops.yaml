@@ -1,0 +1,6 @@
+id: lesson-frontier-ops
+title: "Progressive delivery"
+material: frontier-ops.md
+segments:
+  - present: progressive-delivery
+  - check: frontier-deploy
