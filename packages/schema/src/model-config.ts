@@ -12,7 +12,7 @@ import { z } from "zod";
  * The `/models` UI only ever changes `selection`. The catalog, each model's
  * `status` (allowed/disallowed), its eligible `roles`, and the master
  * `secondary_model_allowed` switch are file-managed (edited by whoever owns the
- * deploy). Base URL stays in env (`LLAMA_BASE_URL`); this file names models only.
+ * deploy). Base URL stays in env (`LLM_BASE_URL`); this file names models only.
  */
 
 /** Informational hardware/footprint requirements, surfaced in the UI. */
@@ -74,7 +74,7 @@ export const BackendEntry = z.object({
   kind: BackendKind,
   /** Optional cloud/provider tag, e.g. "oracle". */
   provider: z.string().optional(),
-  /** OpenAI-compatible base URL. Overridable at runtime by LLAMA_BASE_URL. */
+  /** OpenAI-compatible base URL. Overridable at runtime by LLM_BASE_URL. */
   base_url: z.string().min(1),
   /** Environments this backend may serve in. */
   environments: z.array(DeployEnv).min(1),

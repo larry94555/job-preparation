@@ -40,7 +40,9 @@ test("chatJson posts pinned deterministic params + auth header and returns conte
 });
 
 test("chatJson defaults: seed 0, max_tokens 1024, no auth header when unkeyed", async () => {
-  const saved = process.env.LLAMA_API_KEY;
+  const savedLlm = process.env.LLM_API_KEY;
+  const savedLlama = process.env.LLAMA_API_KEY;
+  delete process.env.LLM_API_KEY;
   delete process.env.LLAMA_API_KEY;
   try {
     mockFetch(() => ({ ok: true, body: { choices: [{ message: { content: "{}" } }] } }));
@@ -51,7 +53,8 @@ test("chatJson defaults: seed 0, max_tokens 1024, no auth header when unkeyed", 
     assert.equal(body.max_tokens, 1024);
     assert.equal((calls[0].init!.headers as Record<string, string>).authorization, undefined);
   } finally {
-    if (saved !== undefined) process.env.LLAMA_API_KEY = saved;
+    if (savedLlm !== undefined) process.env.LLM_API_KEY = savedLlm;
+    if (savedLlama !== undefined) process.env.LLAMA_API_KEY = savedLlama;
   }
 });
 

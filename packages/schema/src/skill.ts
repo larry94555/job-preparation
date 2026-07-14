@@ -16,10 +16,10 @@ export const EvalSkillFrontmatter = z.object({
   model_hint: z.string().optional(),
   /**
    * Optional per-skill judge override. When set, this skill is graded by the
-   * named model instead of the pinned default grader (LLAMA_MODEL). Use it to
+   * named model instead of the pinned default grader (LLM_MODEL). Use it to
    * route a rubric the small pinned judge can't reproduce to a stronger judge
    * (the "stronger judge tier", DESIGN §7). The model must be served by the same
-   * LLAMA_BASE_URL (e.g. another Ollama model). The gate measures the skill
+   * LLM_BASE_URL (e.g. another Ollama model). The gate measures the skill
    * against whichever judge grades it, so a routed skill must still meet the bar.
    */
   grader_model: z.string().optional(),

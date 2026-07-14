@@ -29,10 +29,10 @@ locally. It is wired into:
 - `.github/workflows/ci.yml` — runs validate/selfcheck/typecheck/test on every push (eval-gate self-skips in
   CI where no model is present; run it locally against a model to actually certify the skills).
 
-Point it at a model with `LLAMA_BASE_URL` / `LLAMA_MODEL`, e.g. Ollama:
+Point it at a model with `LLM_BASE_URL` / `LLM_MODEL`, e.g. Ollama:
 
 ```
-LLAMA_BASE_URL=http://localhost:11434/v1 LLAMA_MODEL=llama3:8b npm run eval-gate
+LLM_BASE_URL=http://localhost:11434/v1 LLM_MODEL=llama3:8b npm run eval-gate
 ```
 
 ## 3. Live results — full sweep (2026-07-10)
@@ -93,7 +93,7 @@ sentence and marks it correct. This is precisely what the design's **confidence 
 model → human review, DESIGN §7) exists to catch; it is a judge-capability limit, not a broken rubric. Tightening
 further hit diminishing returns (one such case regressed under rewrite), so these two are left honestly flagged.
 
-Reproduce any time: `LLAMA_BASE_URL=http://localhost:11434/v1 LLAMA_MODEL=qwen2.5:3b-instruct npm run eval-gate`.
+Reproduce any time: `LLM_BASE_URL=http://localhost:11434/v1 LLM_MODEL=qwen2.5:3b-instruct npm run eval-gate`.
 
 ## What "certified" does and does not mean here
 

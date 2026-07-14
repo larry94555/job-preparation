@@ -9,6 +9,7 @@ import {
   type ModelRole,
 } from "@job-prep/schema";
 import YAML from "yaml";
+import { llmEnv } from "./llama.js";
 
 /**
  * Load, resolve, and persist `model_configuration.yaml` (see the schema in
@@ -94,7 +95,7 @@ export function eligibleBackends(cfg: ModelConfig, env: DeployEnv): BackendEntry
  * (the `backend` selection is ignored) — so a deploy always uses the single
  * intended service. In `local` the `backend` selection wins when it's eligible,
  * else the first eligible backend. Returns null when no backends are configured
- * (callers then fall back to the LLAMA_BASE_URL env / client default).
+ * (callers then fall back to the LLM_BASE_URL env / client default).
  */
 export function resolveBackend(
   cfg: ModelConfig,
@@ -114,7 +115,7 @@ export interface ResolvedGrader {
   env: DeployEnv;
   /** The active backend, or null if none configured. */
   backend: BackendEntry | null;
-  /** OpenAI-compatible base URL (LLAMA_BASE_URL overrides the backend's). */
+  /** OpenAI-compatible base URL (LLM_BASE_URL overrides the backend's). */
   baseUrl: string | undefined;
   /** Effective primary model id. */
   primary: string;
@@ -134,7 +135,7 @@ export function resolveGrader(
 ): ResolvedGrader {
   const backend = resolveBackend(cfg, env);
   const { primary, secondary } = resolveModels(cfg);
-  const baseUrl = process.env.LLAMA_BASE_URL ?? backend?.base_url;
+  const baseUrl = llmEnv("BASE_URL") ?? backend?.base_url;
   return {
     env,
     backend,

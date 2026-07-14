@@ -160,7 +160,7 @@ the unlock.
 
 **C.1 ✅ Signed-in smoke test.** While signed in (from B.4), open a **real** topic, play a
 lesson that includes an essay or code step, and confirm you get a grade. (Grading needs the
-LLM — locally you can point at your Oracle LLM by setting `LLAMA_BASE_URL` and the secrets, or
+LLM — locally you can point at your Oracle LLM by setting `LLM_BASE_URL` and the secrets, or
 just confirm the request is made and defer full grading to the deployed environment in
 Phase F.) Confirm your progress persists after signing out and back in.
 
@@ -168,7 +168,7 @@ If anything about grading looks off, use:
 > **PROMPT ▸ Grading wiring check**
 > "Trace how a signed-in user's essay/code answer flows from the web `/api/apply` route through
 > the grading worker to the Oracle LLM, and list exactly which environment variables the
-> **worker** needs (LLAMA_BASE_URL, LLAMA_API_KEY, MODEL_CONFIG_PATH, SANDBOX_URL, DATABASE_URL,
+> **worker** needs (LLM_BASE_URL, LLM_API_KEY, MODEL_CONFIG_PATH, SANDBOX_URL, DATABASE_URL,
 > QUEUE) and where each is set. Confirm the browser never sees the LLM key."
 
 ---
@@ -290,10 +290,10 @@ AUTH_URL=https://yourdomain.com
 # worker container, "localhost" would be wrong. Use the VM's own IP here, or ask
 # Claude Code (deployment doublecheck prompt) to add a host-gateway mapping.
 DEPLOY_ENV=hosted
-LLAMA_BASE_URL=http://<this-VMs-private-IP>:8080/v1
-LLAMA_API_KEY=<your Oracle LLM key>
+LLM_BASE_URL=http://<this-VMs-private-IP>:8080/v1
+LLM_API_KEY=<your Oracle LLM key>
 MODEL_CONFIG_PATH=/app/model_configuration.yaml
-LLAMA_TIMEOUT_MS=120000
+LLM_TIMEOUT_MS=120000
 # Email (Resend)
 RESEND_API_KEY=<from Resend>
 EMAIL_FROM=verify@yourdomain.com
@@ -309,7 +309,7 @@ STRIPE_WEBHOOK_SECRET=<from step F.6>
 > "Review `docker-compose.prod.yml`, `DEPLOY.md`, and the Dockerfiles, then **update
 > `docker-compose.prod.yml`** so every service receives the environment variables it needs
 > from `secrets/prod.env` for a single-VM deploy. Known gaps to fix: the `worker` service is
-> missing `LLAMA_API_KEY` and `MODEL_CONFIG_PATH` (and `LLAMA_TIMEOUT_MS`); the `web` service
+> missing `LLM_API_KEY` and `MODEL_CONFIG_PATH` (and `LLM_TIMEOUT_MS`); the `web` service
 > is missing the new feature vars (`AUTH_URL`, `DEPLOY_ENV`, `RESEND_API_KEY`, `EMAIL_FROM`,
 > `SUPPORT_EMAIL`, and the three `STRIPE_*` keys); the `db` service should also publish its
 > port **bound to localhost only** (`127.0.0.1:5432:5432`) so one-time setup commands can be
@@ -438,7 +438,7 @@ Then build the actual coaching features behind the `premium` gate.
 | Domain + DNS + support email forwarding | **Cloudflare** | Cloudflare dashboard |
 | Sends verification emails | **Resend** | `RESEND_API_KEY`, `EMAIL_FROM` |
 | Donations (and later premium) | **Stripe** | `STRIPE_*` keys + webhook |
-| The lesson grader (already yours) | **Oracle-hosted Llama-3.1-8B** | `LLAMA_BASE_URL`, `LLAMA_API_KEY` |
+| The lesson grader (already yours) | **Oracle-hosted Llama-3.1-8B** | `LLM_BASE_URL`, `LLM_API_KEY` |
 
 If you get stuck on any step, paste the error into Claude Code in this repo and ask it to
 diagnose — it can read the code, the Docker files, and these documents.

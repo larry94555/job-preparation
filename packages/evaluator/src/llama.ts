@@ -16,8 +16,19 @@ export interface LlamaOptions {
 }
 
 /**
- * Minimal client for a llama.cpp `llama-server` (OpenAI-compatible endpoint).
- * Defaults target a local server; override via env (LLAMA_BASE_URL / LLAMA_MODEL).
+ * Read an LLM grader env var. The canonical prefix is `LLM_` — the grader talks
+ * to any OpenAI-compatible server (llama.cpp, Ollama, vLLM, …), so the config
+ * surface isn't tied to a specific model family. The older `LLAMA_` prefix is
+ * still honored as a deprecated alias so existing configs keep working.
+ */
+export function llmEnv(suffix: string): string | undefined {
+  return process.env[`LLM_${suffix}`] ?? process.env[`LLAMA_${suffix}`];
+}
+
+/**
+ * Minimal client for an OpenAI-compatible chat-completions server (e.g. a
+ * llama.cpp `llama-server`). Defaults target a local server; override via env
+ * (`LLM_BASE_URL` / `LLM_MODEL`; the legacy `LLAMA_*` names still work).
  */
 export class LlamaClient {
   baseUrl: string;
@@ -28,15 +39,15 @@ export class LlamaClient {
   maxTokens: number;
 
   constructor(o: LlamaOptions = {}) {
-    this.baseUrl = o.baseUrl ?? process.env.LLAMA_BASE_URL ?? "http://localhost:8080/v1";
-    this.model = o.model ?? process.env.LLAMA_MODEL ?? "local";
-    // Default 60s; raise via LLAMA_TIMEOUT_MS for slow CPU / reasoning models
+    this.baseUrl = o.baseUrl ?? llmEnv("BASE_URL") ?? "http://localhost:8080/v1";
+    this.model = o.model ?? llmEnv("MODEL") ?? "local";
+    // Default 60s; raise via LLM_TIMEOUT_MS for slow CPU / reasoning models
     // (e.g. DeepSeek-R1 on Oracle Cloud can take 40–90s per grading).
-    this.timeoutMs = o.timeoutMs ?? (Number(process.env.LLAMA_TIMEOUT_MS) || 60000);
-    this.apiKey = o.apiKey ?? process.env.LLAMA_API_KEY;
+    this.timeoutMs = o.timeoutMs ?? (Number(llmEnv("TIMEOUT_MS")) || 60000);
+    this.apiKey = o.apiKey ?? llmEnv("API_KEY");
     // Pin sampling for reproducible grades regardless of server-side defaults.
-    this.seed = o.seed ?? (Number(process.env.LLAMA_SEED) || 0);
-    this.maxTokens = o.maxTokens ?? (Number(process.env.LLAMA_MAX_TOKENS) || 1024);
+    this.seed = o.seed ?? (Number(llmEnv("SEED")) || 0);
+    this.maxTokens = o.maxTokens ?? (Number(llmEnv("MAX_TOKENS")) || 1024);
   }
 
   /** Auth header for a secured llama-server (--api-key); empty when open. */

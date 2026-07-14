@@ -39,10 +39,10 @@ Shared: `DATABASE_URL` (managed Postgres), `AUTH_SECRET` (`openssl rand -base64 
 | `QUEUE`           | `db`                                     | `DbJobQueue`                           |
 | `SANDBOX`         | `http`                                   | code grading runs via the sandbox      |
 | `SANDBOX_URL`     | `http://sandbox:4500`                    | sandbox address                        |
-| `LLAMA_BASE_URL`  | `http://llama:8080/v1`                   | this replica's model slot              |
+| `LLM_BASE_URL`  | `http://llama:8080/v1`                   | this replica's model slot              |
 | `MODEL_CONFIG_PATH` | `/app/model_configuration.yaml`        | catalog of grader models (primary/secondary tiers) |
-| `LLAMA_MODEL`     | `local`                                  | fallback grader model when no config file |
-| `LLAMA_BIG_MODEL` | (optional)                               | fallback escalation model when no config file |
+| `LLM_MODEL`     | `local`                                  | fallback grader model when no config file |
+| `LLM_BIG_MODEL` | (optional)                               | fallback escalation model when no config file |
 
 **sandbox** — `PORT=4500` only. No `DATABASE_URL`, no secrets: it just runs code.
 
@@ -60,9 +60,9 @@ GPU/CPU-only, disk) and a Hugging Face reference, and an allow-list per tier.
   `secondary_model_allowed: false`, only the primary model is ever used.
 - To add a model: add a catalog entry (`status: allowed`), then `ollama pull <id>`
   (or import its GGUF) so the model host can serve it. The `id` is the runtime tag;
-  the base URL stays in `LLAMA_BASE_URL`.
-- If the file is absent/invalid the grader falls back to `LLAMA_MODEL` /
-  `LLAMA_BIG_MODEL`, so the zero-config path still works.
+  the base URL stays in `LLM_BASE_URL`.
+- If the file is absent/invalid the grader falls back to `LLM_MODEL` /
+  `LLM_BIG_MODEL`, so the zero-config path still works.
 - Like `.env`, this file is **node-local**. On a multi-instance deploy, bake it
   into the image or mount it from a shared volume so every replica agrees.
 
@@ -99,7 +99,7 @@ The shipped catalog has three backends:
 3. Run llama-server **single-slot** with a generous context and the API key:
    ```bash
    llama-server -m <model>.gguf --host 0.0.0.0 --port 8080 \
-     -c 16384 --parallel 1 --api-key "$LLAMA_API_KEY"
+     -c 16384 --parallel 1 --api-key "$LLM_API_KEY"
    ```
    - **`--parallel 1` is REQUIRED for correctness.** With more than one slot,
      llama-server batches requests continuously, which reorders floating-point
@@ -112,15 +112,15 @@ The shipped catalog has three backends:
    - `--api-key` protects `/v1/chat/completions` (note: `/v1/models` and `/props`
      stay public by design — a 200 there does not mean the key is unset).
 4. Deploy the app with `DEPLOY_ENV=hosted` and either set the Oracle backend's
-   `base_url` to the instance address or inject it at runtime via `LLAMA_BASE_URL`.
+   `base_url` to the instance address or inject it at runtime via `LLM_BASE_URL`.
    The app now grades every answer with that one model, and /models shows it
    read-only. The grader pins `temperature: 0`, `top_k: 1`, `seed`, and a
-   `max_tokens` cap (overridable via `LLAMA_SEED` / `LLAMA_MAX_TOKENS` /
-   `LLAMA_TIMEOUT_MS`) so grades are reproducible regardless of server defaults.
+   `max_tokens` cap (overridable via `LLM_SEED` / `LLM_MAX_TOKENS` /
+   `LLM_TIMEOUT_MS`) so grades are reproducible regardless of server defaults.
 
 **Securing the model + secrets.** The endpoint should not stay open. Generate a
 key, restart `llama-server` with `--api-key "<key>"`, and give the same key to the
-grader as `LLAMA_API_KEY`. Secrets live in a gitignored `secrets/secrets.env`
+grader as `LLM_API_KEY`. Secrets live in a gitignored `secrets/secrets.env`
 locally, or as real environment variables outside GitHub (CI, the instance) —
 externally-set values always win. See [utils/README.md](utils/README.md) for the
 key generator (`npm run gen-api-key`) and the loader (`npm run secrets:check`).
@@ -158,7 +158,7 @@ docker compose -f docker-compose.prod.yml up -d web worker sandbox
 
 - **Grading throughput:** add `worker` replicas — the single-slot model can't
   grade concurrently, so scale = more workers, each pinned to its own
-  `LLAMA_BASE_URL`. `docker compose -f docker-compose.prod.yml up -d --scale worker=N`.
+  `LLM_BASE_URL`. `docker compose -f docker-compose.prod.yml up -d --scale worker=N`.
 - **Web:** stateless behind Postgres; scale replicas freely behind a load balancer.
   **Multiple web replicas REQUIRE `STORE=pg`.** The file store (`STORE=file`) keeps
   progress on the instance's local disk, so replica B never sees the progress a

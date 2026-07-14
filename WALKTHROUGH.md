@@ -22,7 +22,7 @@ model. The open-ended **essay** and **code** tasks are graded by a small local m
 
 ```bash
 # Windows PowerShell
-$env:LLAMA_BASE_URL="http://localhost:11434/v1"; $env:LLAMA_MODEL="qwen2.5:3b-instruct"; npm run begin-lesson
+$env:LLM_BASE_URL="http://localhost:11434/v1"; $env:LLM_MODEL="qwen2.5:3b-instruct"; npm run begin-lesson
 ```
 
 If no model is running, nothing breaks — open-ended tasks show your submission and the reference points

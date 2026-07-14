@@ -8,6 +8,7 @@ import {
   gradeOpen,
   gradeWithEscalation,
   LlamaClient,
+  llmEnv,
   resolveGrader,
   type Verdict,
 } from "@job-prep/evaluator";
@@ -151,7 +152,7 @@ export async function runWorker(
 /**
  * Build the real production deps: `gradeOpen` (llama-server) wrapped so it fits
  * the escalation `grade` signature, an optional bigger-model tiebreaker
- * (LLAMA_BIG_MODEL), and the code runner from `createCodeRunner()` (in-process
+ * (LLM_BIG_MODEL), and the code runner from `createCodeRunner()` (in-process
  * `LocalRunner` for local dev, isolated `HttpRunner` when SANDBOX=http). No model
  * is contacted and no code is run until a job is actually graded.
  */
@@ -159,11 +160,11 @@ export function wireDefaults(): WorkerDeps {
   // The escalation tiebreaker (bigGrade) is the configured secondary model when
   // model_configuration.yaml is present and the active backend has one (a
   // single-model backend, e.g. hosted Oracle llama-server, reports secondary=null
-  // ⇒ no tiebreaker); otherwise the legacy LLAMA_BIG_MODEL env var. The base URL
-  // comes from the resolved backend (LLAMA_BASE_URL still overrides).
+  // ⇒ no tiebreaker); otherwise the legacy LLM_BIG_MODEL env var. The base URL
+  // comes from the resolved backend (LLM_BASE_URL still overrides).
   const cfg = getModelConfig();
   const g = cfg ? resolveGrader(cfg) : null;
-  const bigModel = g ? g.secondary : process.env.LLAMA_BIG_MODEL;
+  const bigModel = g ? g.secondary : llmEnv("BIG_MODEL");
   const bigBaseUrl = g?.baseUrl;
 
   // Grade with the client chosen for `opts.skill` when `client` is omitted:
