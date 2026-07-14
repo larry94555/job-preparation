@@ -13,7 +13,7 @@ import { getModelConfig, resolveGrader } from "./model-config.js";
  * `primary` if the secondary tier is disabled), and every other skill grades
  * with the configured `primary`. When no config file exists we fall back to the
  * legacy behavior — the skill's literal `grader_model`, else the env default
- * (`LLAMA_MODEL`). Base URL always comes from env (`LLAMA_BASE_URL`).
+ * (`LLM_MODEL`). Base URL always comes from env (`LLM_BASE_URL`).
  *
  * Clients are cached by model name so a sweep reuses one connection per judge.
  */

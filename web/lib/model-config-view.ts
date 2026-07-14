@@ -28,7 +28,7 @@ export interface ModelConfigView {
   env: DeployEnv;
   readOnly: boolean;
   backend: BackendView;
-  /** Resolved base URL the grader will call (backend's, or LLAMA_BASE_URL). */
+  /** Resolved base URL the grader will call (backend's, or LLM_BASE_URL). */
   baseUrl: string | null;
   /** True when the active backend hosts a single model (secondary disabled). */
   singleModel: boolean;

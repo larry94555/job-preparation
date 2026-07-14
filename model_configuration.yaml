@@ -13,9 +13,9 @@
 # here — the catalog, each model's status/roles/requirements, and the master
 # `secondary_model_allowed` switch — is edited in this file by the deploy owner.
 #
-# `id` is the runtime model tag (what Ollama serves at LLAMA_BASE_URL). Pull it
+# `id` is the runtime model tag (what Ollama serves at LLM_BASE_URL). Pull it
 # with `ollama pull <id>` or import the GGUF from the listed `huggingface` repo.
-# The base URL itself is NOT here — it stays in env (LLAMA_BASE_URL).
+# The base URL itself is NOT here — it stays in env (LLM_BASE_URL).
 
 # Master switch. false ⇒ the secondary tier is disabled and EVERY skill is graded
 # by the primary model only.
@@ -36,7 +36,7 @@ selection:
 #
 # `single_model: true` means the server hosts exactly one loaded GGUF (llama.cpp),
 # so only the PRIMARY tier applies — the secondary tier is disabled for it.
-# LLAMA_BASE_URL, if set, overrides a backend's base_url at runtime.
+# LLM_BASE_URL, if set, overrides a backend's base_url at runtime.
 
 # Active backend for LOCAL/dev use (ignored under DEPLOY_ENV=hosted).
 backend: oracle-llamacpp
@@ -73,7 +73,7 @@ backends:
       (DeepSeek-R1-Distill-Qwen-7B-Q4_K_M). It ignores the model field and grades
       with that loaded model. Selectable locally (to test the cloud model) and
       FORCED when DEPLOY_ENV=hosted. Override base_url at deploy time via
-      LLAMA_BASE_URL, and secure it with a llama-server --api-key + LLAMA_API_KEY.
+      LLM_BASE_URL, and secure it with a llama-server --api-key + LLM_API_KEY.
 
 models:
   # ---- Currently installed / in use ----

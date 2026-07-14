@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Minimal, dependency-free secrets loader.
 //
-// Secrets (LLAMA_API_KEY, AUTH_SECRET, DATABASE_URL, …) live in ONE of two places:
+// Secrets (LLM_API_KEY, AUTH_SECRET, DATABASE_URL, …) live in ONE of two places:
 //   • Locally: a gitignored `secrets/secrets.env` file (KEY=value, # comments).
 //   • Outside GitHub: real environment variables (your shell, CI secrets, the
 //     Oracle Cloud instance, a secret manager).

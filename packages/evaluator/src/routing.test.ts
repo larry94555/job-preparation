@@ -16,8 +16,8 @@ process.env.MODEL_CONFIG_PATH = join(tmpdir(), "job-prep-no-model-config-xyz.yam
 
 test("skill without grader_model uses the default judge", () => {
   const c = clientForSkill({ frontmatter: {} });
-  // Default model comes from LLAMA_MODEL or the built-in "local" fallback.
-  assert.equal(c.model, process.env.LLAMA_MODEL ?? "local");
+  // Default model comes from LLM_MODEL (or the legacy LLAMA_MODEL) or "local".
+  assert.equal(c.model, process.env.LLM_MODEL ?? process.env.LLAMA_MODEL ?? "local");
 });
 
 test("skill with grader_model routes to that model", () => {

@@ -32,7 +32,7 @@ async function main(argv: string[]): Promise<number> {
   const only = oIdx >= 0 ? rest[oIdx + 1] : undefined;
 
   // Probe the SAME backend the grader will use (the resolved model_configuration
-  // backend / LLAMA_BASE_URL), not the bare default, so the gate doesn't self-skip
+  // backend / LLM_BASE_URL), not the bare default, so the gate doesn't self-skip
   // against localhost when a remote backend (e.g. Oracle Cloud) is configured.
   const cfg = getModelConfig();
   const healthBaseUrl = cfg ? resolveGrader(cfg).baseUrl : undefined;

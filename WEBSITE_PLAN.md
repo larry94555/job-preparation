@@ -222,7 +222,7 @@ No change to `lesson_progress`, `content_topics`, or `grading_jobs`.
 
 - **No card data ever touches our servers.** Stripe Checkout is hosted by Stripe; we only
   store a payment reference and amount. (This also keeps us out of PCI scope.)
-- **Secrets** (`AUTH_SECRET`, `DATABASE_URL`, `LLAMA_API_KEY`, `RESEND_API_KEY`,
+- **Secrets** (`AUTH_SECRET`, `DATABASE_URL`, `LLM_API_KEY`, `RESEND_API_KEY`,
   `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`) live only in the VM's `.env` / a secrets
   file that is **git-ignored** (the repo already ignores `secrets/*.env`). Never commit them.
 - **The Oracle LLM API key** stays server-side (worker only); browsers never see it.

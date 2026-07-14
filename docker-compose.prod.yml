@@ -81,7 +81,7 @@ services:
 
   # ---- worker tier (async grading pool) ----------------------------------
   # Scale with:  docker compose -f docker-compose.prod.yml up -d --scale worker=N
-  # Each replica owns one llama-server slot; point LLAMA_BASE_URL at it.
+  # Each replica owns one llama-server slot; point LLM_BASE_URL at it.
   worker:
     build:
       context: .
@@ -94,15 +94,15 @@ services:
       SANDBOX_URL: http://sandbox:4500
       # The grading tier IS the only one that talks to the LLM — so it holds the
       # Oracle key. NOTE: llama-server runs on the VM host, outside Docker, so
-      # LLAMA_BASE_URL must use the VM's IP (not localhost/host.docker.internal on
-      # Linux). LLAMA_API_KEY authenticates to it — without it, grading returns 401.
-      LLAMA_BASE_URL: ${LLAMA_BASE_URL:-http://host.docker.internal:8080/v1}
-      LLAMA_API_KEY: ${LLAMA_API_KEY:-}
-      LLAMA_TIMEOUT_MS: ${LLAMA_TIMEOUT_MS:-120000}
+      # LLM_BASE_URL must use the VM's IP (not localhost/host.docker.internal on
+      # Linux). LLM_API_KEY authenticates to it — without it, grading returns 401.
+      LLM_BASE_URL: ${LLM_BASE_URL:-http://host.docker.internal:8080/v1}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_TIMEOUT_MS: ${LLM_TIMEOUT_MS:-120000}
       MODEL_CONFIG_PATH: ${MODEL_CONFIG_PATH:-/app/model_configuration.yaml}
       DEPLOY_ENV: ${DEPLOY_ENV:-hosted}
-      LLAMA_MODEL: ${LLAMA_MODEL:-local}
-      LLAMA_BIG_MODEL: ${LLAMA_BIG_MODEL:-}
+      LLM_MODEL: ${LLM_MODEL:-local}
+      LLM_BIG_MODEL: ${LLM_BIG_MODEL:-}
       NODE_ENV: production
     depends_on:
       db:
