@@ -3,7 +3,7 @@ import type { LoadedTopic } from "@job-prep/engine";
 import { and, asc, eq, sql } from "drizzle-orm";
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { contentHash } from "./content-hash.js";
-import { contentTopics, gradingJobs, lessonProgress, users } from "./schema.js";
+import { contentTopics, donations, gradingJobs, lessonProgress, users } from "./schema.js";
 import type { Job, JobKind, JobStatus, NewJob } from "./queue.js";
 
 /**
@@ -27,9 +27,14 @@ function topicId(topic: LoadedTopic): string {
   return topic.topic?.id ?? basename(topic.dir);
 }
 
-/** Ensure a users row exists so lesson_progress writes never dangle. */
+/**
+ * Ensure a users row exists so lesson_progress writes never dangle. `userId` is
+ * the lowercased email, so we populate `email` too — this way a progress write
+ * that happens to precede sign-up creates a row the Auth.js adapter can find via
+ * `getUserByEmail` (rather than colliding on the `id` primary key in createUser).
+ */
 export async function ensureUser(db: Db, userId: string): Promise<void> {
-  await db.insert(users).values({ id: userId }).onConflictDoNothing();
+  await db.insert(users).values({ id: userId, email: userId }).onConflictDoNothing();
 }
 
 /** Fetch a user's progress for one topic, or null if none saved. */
@@ -169,6 +174,25 @@ export async function projectTopics(
     }
   }
   return { imported, unchanged };
+}
+
+/**
+ * Record a completed donation (idempotent on the Stripe session id, so a
+ * re-delivered webhook is a no-op). Never stores card data.
+ */
+export async function insertDonation(
+  db: Db,
+  d: { id: string; amountCents: number; currency: string; email: string | null },
+): Promise<void> {
+  await db
+    .insert(donations)
+    .values({
+      id: d.id,
+      amountCents: d.amountCents,
+      currency: d.currency,
+      email: d.email,
+    })
+    .onConflictDoNothing();
 }
 
 // ---- grading job queue (DESIGN §8) ---------------------------------------

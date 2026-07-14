@@ -3,12 +3,13 @@
 # (isolated code execution). The dev docker-compose.yml (just `db`) is unchanged
 # and remains the local-first path; this file is the full hosted stack.
 #
-# Bring up:  docker compose -f docker-compose.prod.yml up -d
-# Env:       copy .env.example -> .env and set real DATABASE_URL / AUTH_SECRET /
-#            LLAMA_BASE_URL. Run `npm run db:migrate` (and `db:import`) before
-#            the web/worker tiers accept traffic — see DEPLOY.md.
+# Bring up:  docker compose -f docker-compose.prod.yml --env-file secrets/prod.env up -d --build
+# Env:       fill in secrets/prod.env (see WEBSITE_STEP_BY_STEP.md, Phase F). Run
+#            `npm run db:push` (and `CONTENT=db npm run db:import`) once against the
+#            db before the web/worker tiers serve traffic — see DEPLOY.md.
 #
 # NOTE: authored for Phase 6; images are built/pushed by deploy.yml, not here.
+# The public front door (Caddy + HTTPS) is added in Phase F.4 of the step-by-step.
 
 services:
   # ---- data tier ----------------------------------------------------------
@@ -20,6 +21,10 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-jobprep}
     volumes:
       - jobprep_pgdata:/var/lib/postgresql/data
+    # Bind to localhost ONLY so the one-time setup commands (`db:push`, `db:import`)
+    # can run from the VM shell, without exposing Postgres to the internet.
+    ports:
+      - "127.0.0.1:5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-jobprep} -d ${POSTGRES_DB:-jobprep}"]
       interval: 10s
@@ -36,12 +41,34 @@ services:
       # HTTP sandbox — never the local/file defaults.
       DATABASE_URL: ${DATABASE_URL:-postgres://jobprep:jobprep@db:5432/jobprep}
       AUTH_SECRET: ${AUTH_SECRET:?set AUTH_SECRET (openssl rand -base64 32)}
+      # Auth.js v5 canonical URL (behind Caddy). trustHost is on, but setting this
+      # makes magic-link callback URLs correct.
+      AUTH_URL: ${AUTH_URL:-}
       AUTH_ADMIN_EMAILS: ${AUTH_ADMIN_EMAILS:-}
+      # Optional one-click OAuth — enabled only when both id+secret are set.
+      AUTH_GOOGLE_ID: ${AUTH_GOOGLE_ID:-}
+      AUTH_GOOGLE_SECRET: ${AUTH_GOOGLE_SECRET:-}
+      AUTH_GITHUB_ID: ${AUTH_GITHUB_ID:-}
+      AUTH_GITHUB_SECRET: ${AUTH_GITHUB_SECRET:-}
       STORE: pg
       CONTENT: db
       QUEUE: db
       SANDBOX: http
       SANDBOX_URL: http://sandbox:4500
+      # Hosted grader config (read-only /models page); the web tier never grades,
+      # so it needs the catalog path + DEPLOY_ENV but NOT the LLM credentials.
+      DEPLOY_ENV: ${DEPLOY_ENV:-hosted}
+      MODEL_CONFIG_PATH: ${MODEL_CONFIG_PATH:-/app/model_configuration.yaml}
+      # Email magic-link sign-in (Resend). Without these the app falls back to a
+      # "email sign-in not enabled" notice — set them for real registration.
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-onboarding@resend.dev}
+      # Support mailbox for the Help link + privacy/terms contact.
+      SUPPORT_EMAIL: ${SUPPORT_EMAIL:-support@example.com}
+      # Donations (Stripe). Without these, donation endpoints return a graceful
+      # "not configured" response. STRIPE_WEBHOOK_SECRET is set after F.6.
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
       PORT: "3000"
       NODE_ENV: production
     ports:
@@ -65,7 +92,15 @@ services:
       # The worker also runs code (essay grading may exec) via the same HTTP sandbox.
       SANDBOX: http
       SANDBOX_URL: http://sandbox:4500
+      # The grading tier IS the only one that talks to the LLM — so it holds the
+      # Oracle key. NOTE: llama-server runs on the VM host, outside Docker, so
+      # LLAMA_BASE_URL must use the VM's IP (not localhost/host.docker.internal on
+      # Linux). LLAMA_API_KEY authenticates to it — without it, grading returns 401.
       LLAMA_BASE_URL: ${LLAMA_BASE_URL:-http://host.docker.internal:8080/v1}
+      LLAMA_API_KEY: ${LLAMA_API_KEY:-}
+      LLAMA_TIMEOUT_MS: ${LLAMA_TIMEOUT_MS:-120000}
+      MODEL_CONFIG_PATH: ${MODEL_CONFIG_PATH:-/app/model_configuration.yaml}
+      DEPLOY_ENV: ${DEPLOY_ENV:-hosted}
       LLAMA_MODEL: ${LLAMA_MODEL:-local}
       LLAMA_BIG_MODEL: ${LLAMA_BIG_MODEL:-}
       NODE_ENV: production

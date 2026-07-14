@@ -28,8 +28,11 @@ export async function GET(
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
-  // Local dev: grade one tick so the memory/file queue advances without a worker.
-  if (job.status === "queued") {
+  // Local dev only: grade one tick inline so the memory/file queue advances
+  // without a separate worker process. In production the dedicated worker pool
+  // (which holds the LLM credentials) drains the queue, and this route only
+  // reads — the web service never grades, so the LLM key stays worker-side.
+  if (job.status === "queued" && process.env.NODE_ENV !== "production") {
     await runWorker(queue, wireDefaults(), { max: 1 });
     job = (await queue.get(jobId)) ?? job;
   }

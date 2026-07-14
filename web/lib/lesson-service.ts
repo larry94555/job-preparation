@@ -306,6 +306,150 @@ export async function homeData(userId: string) {
   };
 }
 
+// ---- public catalog (no user, no progress) --------------------------------
+
+/** The topic slug used as the free, no-login sample lesson (see /sample). */
+export const SAMPLE_TOPIC = "agentic-tool-calling";
+
+/**
+ * The public catalog shown to anonymous visitors: every topic's title +
+ * description, grouped exactly like `homeData` (core grid + the six agentic
+ * phases), but WITHOUT any per-user progress or mastery. Derived purely from the
+ * git-tracked content, so it needs no sign-in and no store read.
+ */
+export async function catalogData() {
+  const lessons = await allLessons();
+  const cardOf = (t: LoadedTopic) => ({
+    id: t.topic!.id,
+    title: t.topic!.title,
+    description: t.topic!.description,
+    track: (t.topic!.track ?? "core") as "core" | "agentic",
+  });
+  const all = lessons.map(cardOf);
+  const byId = new Map(all.map((c) => [c.id, c]));
+
+  const items = all.filter((c) => c.track !== "agentic");
+  const agenticPhases = AGENTIC_PHASES.map((ph) => ({
+    title: ph.title,
+    items: ph.slugs.map((slug) => {
+      const card = byId.get(slug);
+      return card
+        ? { id: card.id, title: card.title, description: card.description, built: true as const }
+        : { id: slug, title: AGENTIC_TITLES[slug] ?? slug, description: "", built: false as const };
+    }),
+  }));
+  const agenticBuilt = all.filter((c) => c.track === "agentic").length;
+
+  return {
+    items,
+    agentic: { phases: agenticPhases, built: agenticBuilt, total: AGENTIC_TOTAL },
+    sampleTopic: SAMPLE_TOPIC,
+  };
+}
+
+/** Shape returned by `catalogData` — consumed by the public catalog UI. */
+export type CatalogData = Awaited<ReturnType<typeof catalogData>>;
+
+// ---- free sample lesson (anonymous, stateless, no LLM) --------------------
+
+/** Client-safe question view for a sample check (never carries the answer key). */
+export interface SampleQuestionView {
+  id: string;
+  type: string;
+  prompt: string;
+  options?: string[];
+  inputKind?: "text";
+}
+
+/** One step of the free sample: readable material, a deterministic check, or a
+ *  "locked" placeholder standing in for a gated essay/code/assessment step. */
+export type SampleStep =
+  | { kind: "material"; lessonTitle: string; heading: string; html: string }
+  | { kind: "check"; question: SampleQuestionView }
+  | { kind: "locked" };
+
+/** Fixed seed so the sample playthrough (and thus each check's params) is stable
+ *  across the render and the grade call — the sample keeps no per-user state. */
+const SAMPLE_SEED = seedFromString(SAMPLE_TOPIC);
+
+/**
+ * The free sample flow: the sample topic's playthrough reduced to the steps an
+ * anonymous visitor can use — the "present" material and the multiple-choice /
+ * fill-in checks. Essay/code ("apply") and section assessments are gated: each
+ * is replaced by a single "locked" card (consecutive ones collapse) that the UI
+ * turns into a sign-up prompt. No store, no LLM, no answer keys leave the server.
+ */
+export async function sampleFlow(): Promise<{
+  topicId: string;
+  topicTitle: string;
+  steps: SampleStep[];
+} | null> {
+  const topic = await findTopic(SAMPLE_TOPIC);
+  if (!topic) return null;
+  const pt = buildPlaythrough(topic, SAMPLE_SEED);
+  const steps: SampleStep[] = [];
+  let lastLocked = false;
+  for (const step of pt.steps) {
+    if (step.kind === "material") {
+      steps.push({
+        kind: "material",
+        lessonTitle: step.lessonTitle,
+        heading: step.heading,
+        html: step.html,
+      });
+      lastLocked = false;
+    } else if (step.kind === "check") {
+      const v = step.view as SampleQuestionView;
+      steps.push({
+        kind: "check",
+        question: {
+          id: v.id,
+          type: v.type,
+          prompt: v.prompt,
+          options: v.options,
+          inputKind: v.inputKind,
+        },
+      });
+      lastLocked = false;
+    } else if (!lastLocked) {
+      // apply (essay/code) or assessment → one sign-up card; collapse a run.
+      steps.push({ kind: "locked" });
+      lastLocked = true;
+    }
+  }
+  return { topicId: topic.topic!.id, topicTitle: pt.topicTitle, steps };
+}
+
+/**
+ * Grade one sample check with no persistence. Re-derives the same deterministic
+ * playthrough (fixed seed) and grades the check with the matching question id,
+ * so the answer key never reaches the client. Only the sample topic is graded.
+ */
+export async function gradeSampleCheck(
+  questionId: string,
+  answer: string,
+): Promise<{ correct: boolean; explanation: string }> {
+  const topic = await findTopic(SAMPLE_TOPIC);
+  if (!topic) return { correct: false, explanation: "" };
+  const pt = buildPlaythrough(topic, SAMPLE_SEED);
+  for (const step of pt.steps) {
+    if (step.kind === "check" && step.question.id === questionId) {
+      const q = step.question;
+      const correct =
+        q.type === "multiple_choice"
+          ? gradeMultipleChoice(q, answer)
+          : q.type === "text_input"
+            ? gradeTextInput(q, answer, step.params)
+            : false;
+      return {
+        correct,
+        explanation: q.type === "multiple_choice" ? (q.explanation ?? "") : "",
+      };
+    }
+  }
+  return { correct: false, explanation: "" };
+}
+
 // ---- cross-topic progress -------------------------------------------------
 /**
  * Load every topic's Progress for this user. Mirrors app/server.ts iterating
