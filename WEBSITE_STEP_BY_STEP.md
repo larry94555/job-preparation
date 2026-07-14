@@ -111,7 +111,9 @@ We replace the fake "type any email" login with a real one: the visitor enters t
 gets a link, clicks it (that verifies them), and they're in. No passwords.
 
 **B.1 🌐 Get a Resend API key.** In Resend: create an **API key** and copy it. For now you can
-send from Resend's test sender; in Phase F you'll verify your own domain for reliable delivery.
+send from Resend's test sender (`onboarding@resend.dev`) — **note it can only deliver to the
+email address you signed up to Resend with**, which is fine for testing your own sign-up. In
+Phase F you'll verify your own domain so anyone's inbox can receive the link.
 
 **B.2 🤖 Add magic-link sign-up + verification + troubleshooting.**
 
@@ -138,8 +140,9 @@ can test:
 - 🖥️ `npm run db:up` (starts local Postgres in Docker) — from `HOSTING.md`.
 - 🖥️ `npm run db:push` (creates the tables).
 
-**B.4 ✅ Check it worked.** 🖥️ set `DATABASE_URL`, `RESEND_API_KEY`, `EMAIL_FROM`,
-`AUTH_SECRET` in a local `.env` (see `.env.example`), run `npm run dev`, go to `/signup`,
+**B.4 ✅ Check it worked.** 🖥️ set `STORE=pg`, `DATABASE_URL`, `RESEND_API_KEY`, `EMAIL_FROM`,
+`AUTH_SECRET` in a local `.env` (see `.env.example` — `STORE=pg` makes the app actually use
+the Postgres you just started), run `npm run dev`, go to `/signup`,
 enter a real email, and confirm the link arrives and signs you in. Try `/help/signup` and the
 "Resend link" button.
 
@@ -267,7 +270,10 @@ inbound **TCP 80 and 443**.
 
 ```
 # secrets/prod.env  (on the VM only — do NOT commit)
-DATABASE_URL=postgres://jobprep:<db-password>@db:5432/jobprep
+# POSTGRES_PASSWORD initializes the database container; DATABASE_URL must use the
+# SAME password or the app cannot connect. Pick one strong value for both lines.
+POSTGRES_PASSWORD=<pick-a-strong-db-password>
+DATABASE_URL=postgres://jobprep:<same-db-password>@db:5432/jobprep
 AUTH_SECRET=<run: openssl rand -base64 32>
 AUTH_ADMIN_EMAILS=you@yourdomain.com
 STORE=pg
@@ -280,8 +286,11 @@ SANDBOX_URL=http://sandbox:4500
 AUTH_URL=https://yourdomain.com
 # LLM (already running on this box). DEPLOY_ENV=hosted forces the single Oracle
 # backend and makes the /models config read-only in production.
+# NOTE: llama-server runs on the VM itself, OUTSIDE Docker — so from inside the
+# worker container, "localhost" would be wrong. Use the VM's own IP here, or ask
+# Claude Code (deployment doublecheck prompt) to add a host-gateway mapping.
 DEPLOY_ENV=hosted
-LLAMA_BASE_URL=http://<llm-host-or-container>:8080/v1
+LLAMA_BASE_URL=http://<this-VMs-private-IP>:8080/v1
 LLAMA_API_KEY=<your Oracle LLM key>
 MODEL_CONFIG_PATH=/app/model_configuration.yaml
 LLAMA_TIMEOUT_MS=120000
@@ -295,16 +304,24 @@ STRIPE_PUBLISHABLE_KEY=<Stripe publishable>
 STRIPE_WEBHOOK_SECRET=<from step F.6>
 ```
 
-> **PROMPT ▸ Deployment doublecheck** (run in Claude Code before deploying)
-> "Review `docker-compose.prod.yml`, `DEPLOY.md`, and the Dockerfiles. Produce the exact list
-> of environment variables each service (`web`, `worker`, `sandbox`, `db`) needs for a
-> single-VM deploy, confirm the new features (magic-link email, Stripe donations, support
-> email) read their keys from env, and tell me precisely which values from `secrets/prod.env`
-> map to which service. Flag anything missing."
+> **PROMPT ▸ Deployment doublecheck** (run in Claude Code before deploying — it will also
+> update the compose file, which predates several newer features)
+> "Review `docker-compose.prod.yml`, `DEPLOY.md`, and the Dockerfiles, then **update
+> `docker-compose.prod.yml`** so every service receives the environment variables it needs
+> from `secrets/prod.env` for a single-VM deploy. Known gaps to fix: the `worker` service is
+> missing `LLAMA_API_KEY` and `MODEL_CONFIG_PATH` (and `LLAMA_TIMEOUT_MS`); the `web` service
+> is missing the new feature vars (`AUTH_URL`, `DEPLOY_ENV`, `RESEND_API_KEY`, `EMAIL_FROM`,
+> `SUPPORT_EMAIL`, and the three `STRIPE_*` keys); the `db` service should also publish its
+> port **bound to localhost only** (`127.0.0.1:5432:5432`) so one-time setup commands can be
+> run from the VM shell without exposing Postgres to the internet. Then produce the final
+> mapping of which `secrets/prod.env` values reach which service, and flag anything still
+> missing."
 
 **F.3 🌐 Point your domain at the VM.** In Cloudflare DNS, add an **A record**:
-`yourdomain.com` → your VM's public IP (and a `www` CNAME to `yourdomain.com`). Leave proxy
-either on or off per Caddy guidance below.
+`yourdomain.com` → your VM's public IP (and a `www` CNAME to `yourdomain.com`). **Important:**
+set these records to **"DNS only" (the grey cloud), not "Proxied" (orange cloud)** — Caddy
+needs direct traffic to obtain its Let's Encrypt certificate. (You can experiment with the
+proxy later, after HTTPS works; it is not needed for launch.)
 
 **F.4 🤖 Add Caddy for automatic HTTPS.**
 
@@ -316,13 +333,20 @@ either on or off per Caddy guidance below.
 > and `db` internal-only (no public ports)."
 
 **F.5 🖥️ Start everything.** On the VM:
+- One-time: install Node.js 22 on the VM itself (e.g. `sudo dnf install nodejs22` /
+  `sudo apt install nodejs npm`, or ask Claude Code for your distro's command) and run
+  `npm install` in the repo folder — the two setup commands below run on the VM, not in Docker.
 - `docker compose -f docker-compose.prod.yml --env-file secrets/prod.env up -d --build`
-- Apply the database schema (first time only): with `DATABASE_URL` pointing at the running
-  `db`, run 🖥️ `npm run db:push` once (creates all tables, including the auth tables from
-  Phase B).
+- Apply the database schema (first time only). The database runs inside Docker and (after the
+  doublecheck prompt in F.2) is reachable from the VM shell at `localhost:5432`, so:
+  🖥️ `DATABASE_URL=postgres://jobprep:<same-db-password>@localhost:5432/jobprep npm run db:push`
+  (creates all tables, including the auth tables from Phase B).
 - Import the lesson content into Postgres (the `content_topics` projection) so the site
-  serves topics from the DB: 🖥️ `CONTENT=db npm run db:import` (with `DATABASE_URL` set).
+  serves topics from the DB:
+  🖥️ `CONTENT=db DATABASE_URL=postgres://jobprep:<same-db-password>@localhost:5432/jobprep npm run db:import`
   This is idempotent — safe to re-run after content changes.
+- Restart the app tiers so they see the freshly created tables:
+  🖥️ `docker compose -f docker-compose.prod.yml --env-file secrets/prod.env restart web worker`
 - 🖥️ `docker compose -f docker-compose.prod.yml ps` — confirm `web`, `worker`, `sandbox`,
   `db`, and `caddy` are all "Up."
 
@@ -371,10 +395,11 @@ changed the database shape, run `npm run db:push` once; if you changed lesson co
 `CONTENT=db npm run db:import`.
 
 **H.2 🖥️ Back up the database (do this — it holds your users and donations).** Add a daily
-`pg_dump` of the `db` container to a file, e.g. a cron job:
-`docker exec <db-container> pg_dump -U jobprep jobprep > ~/backups/jobprep-$(date +%F).sql`.
+`pg_dump` of the `db` container to a file, e.g. a cron job running:
+`docker compose -f docker-compose.prod.yml exec -T db pg_dump -U jobprep jobprep > ~/backups/jobprep-$(date +%F).sql`
 Copy those backups somewhere off the VM (e.g. Cloudflare R2 free tier or your own storage)
-so a lost VM doesn't lose your data.
+so a lost VM doesn't lose your data. Ask Claude Code to "set up the daily backup cron job
+from Phase H.2" if you want it done for you.
 
 **H.3 🌐 Uptime monitoring (free).** Create a free **UptimeRobot** monitor that pings
 `https://yourdomain.com` every few minutes and emails you if it goes down. Add a lightweight
