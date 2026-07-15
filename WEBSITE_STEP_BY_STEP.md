@@ -395,6 +395,12 @@ and skip straight to `db:push`/`db:import` against that URL.)
 **F.5 🖥️ Start everything.** On the VM:
 - One-time: run `npm install` in the repo folder (Node 22 is already installed from F.2) — the two
   database setup commands below run on the VM directly, not inside Docker.
+  > **⚠️ Ignore the `npm audit` warnings — and NEVER run `npm audit fix --force`.** npm prints a
+  > vulnerability count and *suggests* `--force`, but that installs **breaking** changes (it will
+  > happily downgrade Next.js by six major versions) and will break your build. The warnings are in
+  > build tooling, not the running site — safe to ignore. If one genuinely worries you, ask before
+  > acting; the plain `npm audit fix` (no `--force`) is safe but usually does nothing here. If you
+  > already ran `--force` and things broke: `git checkout -- .` then `npm ci` restores a good state.
 - `docker compose -f docker-compose.prod.yml --env-file secrets/prod.env up -d --build`
   — this **creates the database** (empty) among the other containers, using your `POSTGRES_PASSWORD`.
 - Apply the database schema (first time only). The database runs inside Docker and (after the
@@ -419,6 +425,32 @@ and swap in the live keys.
 **F.7 🌐 Verify your sending domain in Resend.** In Resend, add `yourdomain.com` and copy the
 DNS records it gives you (SPF/DKIM) into Cloudflare DNS. This makes verification emails land in
 inboxes, not spam. Set `EMAIL_FROM` to an address on your domain (e.g. `verify@yourdomain.com`).
+
+### Common problems (troubleshooting)
+
+| What you see | Likely cause → fix |
+| --- | --- |
+| `TypeError: Unknown encoding: base64url`, `EBADENGINE Unsupported engine`, or odd `npm` errors | **Node is too old.** `node --version` must be **v22.x**. Ubuntu's `apt install nodejs` installs Node **12** — install Node 22 via nvm (F.2). |
+| `npm ci` fails with `ENOTEMPTY` / rename errors | A half-finished `node_modules` (often after an old Node or a bad `--force`). Wipe and reinstall on Node 22: `find . -type d -name node_modules -prune -exec rm -rf {} +` then `npm ci`. |
+| You ran `npm audit fix --force` and the build broke | It installs breaking downgrades. Recover: `git checkout -- .` then `npm ci`. **Never run `--force`.** |
+| `docker: command not found` | Docker isn't installed. Use **Docker's official repo** (F.2) — not `snap`, `docker.io`, or `podman-docker`. |
+| `permission denied … /var/run/docker.sock` | Your user isn't in the `docker` group **in this session**. `sudo usermod -aG docker $USER`, then **log out of SSH and back in** (or `newgrp docker`). |
+| A container `exited (127)` / "dependency failed to start" | Its start command wasn't found. Read the logs: `docker compose -f docker-compose.prod.yml logs <service>` (e.g. `sandbox`, `worker`). Make sure you `git pull`ed the latest images. |
+| Browser can't reach `http://<VM-IP>:3000` | Port 3000 isn't open. Open it in **both** the Oracle **Security List** *and* the VM firewall — see the "No domain yet?" box before F.3. |
+| The verification email never arrives | Resend's test sender only delivers to **your own Resend-account email**; check spam; confirm `RESEND_API_KEY` is set. Delivery to anyone's inbox needs a verified domain (F.7). |
+| Sign-in or the app errors about the database | `POSTGRES_PASSWORD` and the password inside `DATABASE_URL` must match (the generator ensures this). Host is `db` inside Docker, but `localhost:5432` for the VM-shell setup commands. |
+| Essays/code never grade (or time out) | `docker compose logs worker`. The worker needs `LLM_API_KEY` and `LLM_BASE_URL` = the **VM's IP** (`http://<VM-IP>:8080/v1`), **not** `localhost` — llama-server runs outside Docker. |
+| Donations show "not configured" | `STRIPE_SECRET_KEY` isn't set — it's optional; donations stay off until you add it (D.1). |
+
+**Handy commands** (run from the repo folder on the VM):
+```
+docker compose -f docker-compose.prod.yml ps                 # container status
+docker compose -f docker-compose.prod.yml logs -f <service>  # follow a service's logs (web/worker/sandbox/db)
+docker compose -f docker-compose.prod.yml restart <service>  # restart one service
+docker compose -f docker-compose.prod.yml down               # stop everything (data volume is kept)
+```
+
+When you're truly stuck, paste the failing command + its error (and the relevant `logs` output) into Claude Code in this repo — it can read the code, Dockerfiles, and this runbook to diagnose.
 
 ---
 

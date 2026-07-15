@@ -18,12 +18,14 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # Workspace install (root + packages/*). The worker needs @job-prep/store,
-# @job-prep/grading, @job-prep/evaluator, @job-prep/sandbox, and runs under tsx
-# (a root devDependency), so this is a full install — not --omit=dev.
+# @job-prep/grading, @job-prep/evaluator, @job-prep/sandbox, and runs under `tsx`
+# (a root devDependency), so this must be a FULL install. `--include=dev` is
+# required because the `ENV NODE_ENV=production` above would otherwise make
+# `npm ci` omit devDependencies — leaving `tsx` missing (container exits 127).
 COPY package.json package-lock.json ./
 COPY web/package.json ./web/package.json
 COPY packages ./packages
-RUN npm ci
+RUN npm ci --include=dev
 
 COPY tsconfig.base.json ./
 COPY topics ./topics

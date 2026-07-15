@@ -26,11 +26,21 @@ WORKDIR /app
 ENV NODE_ENV=production \
     PORT=4500
 
-# The sandbox depends on @job-prep/sandbox (raw .ts) and runs under tsx.
+# Python 3 for the Python coding exercises — the sandbox spawns
+# `python test_solution.py`; `python-is-python3` makes the unversioned `python`
+# command resolve to python3.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends python3 python-is-python3 \
+ && rm -rf /var/lib/apt/lists/*
+
+# The sandbox depends on @job-prep/sandbox (raw .ts) and runs under `tsx`, which
+# is a root devDependency — so install dev deps too. `--include=dev` is required
+# because NODE_ENV=production would otherwise make `npm ci` omit them (which
+# would leave `tsx` missing and the container exits 127 "command not found").
 COPY package.json package-lock.json ./
 COPY web/package.json ./web/package.json
 COPY packages ./packages
-RUN npm ci
+RUN npm ci --include=dev
 
 COPY tsconfig.base.json ./
 COPY services ./services
