@@ -69,6 +69,9 @@ services:
       LLM_BASE_URL: ${LLM_BASE_URL:-}
       LLM_API_KEY: ${LLM_API_KEY:-}
       LLM_TIMEOUT_MS: ${LLM_TIMEOUT_MS:-120000}
+      # Reword question prompts each session so lessons don't read identically every
+      # time (options are also reshuffled per session). Set PARAPHRASE=off to disable.
+      PARAPHRASE: ${PARAPHRASE:-on}
       # Email magic-link sign-in (Resend). Without these the app falls back to a
       # "email sign-in not enabled" notice — set them for real registration.
       RESEND_API_KEY: ${RESEND_API_KEY:-}

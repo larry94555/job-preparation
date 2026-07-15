@@ -9,6 +9,7 @@ import { gradeSampleCheck } from "@/lib/lesson-service";
 export async function gradeSampleCheckAction(
   questionId: string,
   answer: string,
+  seed: number,
 ): Promise<{ correct: boolean; explanation: string }> {
-  return gradeSampleCheck(questionId, answer);
+  return gradeSampleCheck(questionId, answer, seed);
 }

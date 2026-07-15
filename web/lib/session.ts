@@ -12,3 +12,13 @@ export async function currentUserId(): Promise<string | null> {
   const id = session?.user?.id;
   return id ? id : null;
 }
+
+/**
+ * The per-session id minted at sign-in (see auth.config.ts). Used to vary a
+ * lesson's presentation — option order and reworded prompts — per session while
+ * keeping it consistent within the session. Null when unauthenticated.
+ */
+export async function currentSessionId(): Promise<string | null> {
+  const session = (await auth()) as { sid?: string } | null;
+  return session?.sid ?? null;
+}

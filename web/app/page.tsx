@@ -42,9 +42,6 @@ export default async function HomePage() {
             <Link className="btn ghost" href="/sample">
               Try the sample lesson →
             </Link>
-            <Link className="btn ghost" href="/topics">
-              Browse all topics →
-            </Link>
           </div>
         </div>
 

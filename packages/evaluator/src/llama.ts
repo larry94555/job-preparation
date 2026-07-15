@@ -125,6 +125,20 @@ export class LlamaClient {
 
   /** Chat completion constrained to JSON output. Throws on network/HTTP error. */
   async chatJson(messages: ChatMessage[]): Promise<string> {
+    return this.chat(messages, true);
+  }
+
+  /**
+   * Chat completion with free-form (non-JSON) output. Use when the reply must
+   * carry text that would be fragile inside a JSON string — e.g. prompts that
+   * themselves contain double-quotes, which the model routinely emits unescaped
+   * in JSON mode and breaks JSON.parse. Callers pick a quote-proof delimiter.
+   */
+  async chatText(messages: ChatMessage[]): Promise<string> {
+    return this.chat(messages, false);
+  }
+
+  private async chat(messages: ChatMessage[], jsonMode: boolean): Promise<string> {
     // The single-slot server (--parallel 1, required for determinism) sometimes
     // times out or returns 5xx under back-to-back grading load. Because decoding
     // is deterministic (temp 0, greedy), a short backoff + retry recovers the
@@ -147,7 +161,7 @@ export class LlamaClient {
             top_k: 1, // greedy — decisive with temperature 0, robust to server defaults
             seed: this.seed,
             max_tokens: this.maxTokens,
-            response_format: { type: "json_object" },
+            ...(jsonMode ? { response_format: { type: "json_object" } } : {}),
           }),
           signal: ctrl.signal,
         });
@@ -164,6 +178,6 @@ export class LlamaClient {
         clearTimeout(t);
       }
     }
-    throw lastErr ?? new Error("chatJson: exhausted retries");
+    throw lastErr ?? new Error("chat: exhausted retries");
   }
 }

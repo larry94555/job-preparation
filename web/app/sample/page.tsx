@@ -12,7 +12,10 @@ export const dynamic = "force-dynamic";
 export default async function SamplePage() {
   if (await currentUserId()) redirect(`/lesson/${SAMPLE_TOPIC}`);
 
-  const flow = await sampleFlow();
+  // A fresh seed per page load reshuffles the options each visit (grading
+  // re-derives the same playthrough from the seed the client echoes back).
+  const seed = Math.floor(Math.random() * 0x7fffffff);
+  const flow = await sampleFlow(seed);
   if (!flow) {
     return (
       <main className="wrap">
