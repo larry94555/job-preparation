@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { gradeMultipleChoice, gradeTextInput } from "@job-prep/engine";
 import { recordSnapshot, scheduleReview } from "@job-prep/lesson";
-import { loadContext, mutateProgress } from "@/lib/lesson-service";
+import { explainWrongAnswer, loadContext, mutateProgress } from "@/lib/lesson-service";
 import { currentUserId } from "@/lib/session";
 
 export const runtime = "nodejs";
@@ -44,9 +44,15 @@ export async function POST(req: NextRequest) {
     recordSnapshot(p, pt, now);
   });
 
-  return NextResponse.json({
-    correct,
-    explanation:
-      cur.question.type === "multiple_choice" ? (cur.question.explanation ?? "") : "",
-  });
+  // Feedback: the authored explanation by default; on a wrong answer, prefer a
+  // tailored plain-English "why that's not right" from the LLM (best-effort — it
+  // falls back to the authored explanation if the LLM isn't available).
+  let explanation =
+    cur.question.type === "multiple_choice" ? (cur.question.explanation ?? "") : "";
+  if (!correct) {
+    const tailored = await explainWrongAnswer(cur.question, answer);
+    if (tailored) explanation = tailored;
+  }
+
+  return NextResponse.json({ correct, explanation });
 }

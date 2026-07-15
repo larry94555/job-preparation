@@ -60,10 +60,15 @@ services:
       QUEUE: db
       SANDBOX: http
       SANDBOX_URL: http://sandbox:4500
-      # Hosted grader config (read-only /models page); the web tier never grades,
-      # so it needs the catalog path + DEPLOY_ENV but NOT the LLM credentials.
+      # Hosted grader config (read-only /models page) + the LLM creds the web tier
+      # uses to generate the short plain-English "why that's wrong" explanation on
+      # a wrong check (server-side only — the key never reaches the browser).
+      # Essay/code grading still happens on the worker, not here.
       DEPLOY_ENV: ${DEPLOY_ENV:-hosted}
       MODEL_CONFIG_PATH: ${MODEL_CONFIG_PATH:-/app/model_configuration.yaml}
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_TIMEOUT_MS: ${LLM_TIMEOUT_MS:-120000}
       # Email magic-link sign-in (Resend). Without these the app falls back to a
       # "email sign-in not enabled" notice — set them for real registration.
       RESEND_API_KEY: ${RESEND_API_KEY:-}
