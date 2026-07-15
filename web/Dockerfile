@@ -45,6 +45,13 @@ RUN groupadd --system --gid 1001 nodejs \
 COPY --from=build --chown=nextjs:nodejs /app/web/.next/standalone ./
 COPY --from=build --chown=nextjs:nodejs /app/web/.next/static ./web/.next/static
 
+# Lesson content (topic.yaml / sections / lessons / questions / …). The lesson
+# runner reads material Markdown from disk at runtime (packages/lesson/build.ts),
+# and Next's standalone tracer does NOT capture those dynamic file reads — so copy
+# the topics tree in explicitly. The app serves content from here via CONTENT=file
+# + TOPICS_DIR=/app/topics (see docker-compose.prod.yml).
+COPY --chown=nextjs:nodejs topics ./topics
+
 USER nextjs
 EXPOSE 3000
 

@@ -51,7 +51,12 @@ services:
       AUTH_GITHUB_ID: ${AUTH_GITHUB_ID:-}
       AUTH_GITHUB_SECRET: ${AUTH_GITHUB_SECRET:-}
       STORE: pg
-      CONTENT: db
+      # Content is served from the topics/ tree baked into the web image (the
+      # lesson runner reads material Markdown from disk at runtime). CONTENT=db is
+      # NOT usable here: the projected topic.dir is an absolute path from the
+      # import host that doesn't exist in the container.
+      CONTENT: file
+      TOPICS_DIR: /app/topics
       QUEUE: db
       SANDBOX: http
       SANDBOX_URL: http://sandbox:4500
