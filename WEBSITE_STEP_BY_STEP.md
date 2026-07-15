@@ -428,8 +428,16 @@ and skip straight to `db:push`/`db:import` against that URL.)
   > build tooling, not the running site — safe to ignore. If one genuinely worries you, ask before
   > acting; the plain `npm audit fix` (no `--force`) is safe but usually does nothing here. If you
   > already ran `--force` and things broke: `git checkout -- .` then `npm ci` restores a good state.
-- `docker compose -f docker-compose.prod.yml --env-file secrets/prod.env up -d --build`
+- **Make your secrets automatic for every Docker command.** Docker Compose auto-loads a file named
+  `.env` from the current folder, so symlink your secrets to it once:
+  🖥️ `ln -s secrets/prod.env .env`
+  Now every `docker compose …` command finds `AUTH_SECRET` etc. without needing `--env-file`.
+  (Skip this and you'll hit `required variable AUTH_SECRET is missing a value` on commands like
+  `logs`/`ps` — because Compose parses the whole file every time and `AUTH_SECRET` is marked required.)
+- `docker compose -f docker-compose.prod.yml up -d --build`
   — this **creates the database** (empty) among the other containers, using your `POSTGRES_PASSWORD`.
+  *(No `--env-file` needed thanks to the `.env` symlink above; if you skipped that, add
+  `--env-file secrets/prod.env` to this and every `docker compose` command.)*
 - Apply the database schema (first time only). The database runs inside Docker and (after the
   doublecheck prompt in F.2) is reachable from the VM shell at `localhost:5432`, so:
   🖥️ `DATABASE_URL=postgres://jobprep:<same-db-password>@localhost:5432/jobprep npm run db:push`
@@ -463,13 +471,17 @@ inboxes, not spam. Set `EMAIL_FROM` to an address on your domain (e.g. `verify@y
 | `docker: command not found` | Docker isn't installed. Use **Docker's official repo** (F.2) — not `snap`, `docker.io`, or `podman-docker`. |
 | `permission denied … /var/run/docker.sock` | Your user isn't in the `docker` group **in this session**. `sudo usermod -aG docker $USER`, then **log out of SSH and back in** (or `newgrp docker`). |
 | A container `exited (127)` / "dependency failed to start" | Its start command wasn't found. Read the logs: `docker compose -f docker-compose.prod.yml logs <service>` (e.g. `sandbox`, `worker`). Make sure you `git pull`ed the latest images. |
+| `required variable AUTH_SECRET is missing a value` on a `docker compose` command | The command didn't load your secrets. Make the `.env` symlink (F.5: `ln -s secrets/prod.env .env`), **or** add `--env-file secrets/prod.env` to that command. (A trailing `=` in the secret is fine — that's base64 padding.) |
+| The site loads but **a lesson / the sample** throws "Application error … Digest: …" | The web image needs the `topics/` files and `CONTENT=file` (fixed in `web/Dockerfile` + `docker-compose.prod.yml`). Make sure you `git pull`ed and rebuilt: `docker compose … up -d --build`. The real error is in `docker compose … logs web`. |
 | Browser can't reach `http://<VM-IP>:3000` | Port 3000 isn't open. Open it in **both** the Oracle **Security List** *and* the VM firewall — see the "No domain yet?" box before F.3. |
 | The verification email never arrives | Resend's test sender only delivers to **your own Resend-account email**; check spam; confirm `RESEND_API_KEY` is set. Delivery to anyone's inbox needs a verified domain (F.7). |
 | Sign-in or the app errors about the database | `POSTGRES_PASSWORD` and the password inside `DATABASE_URL` must match (the generator ensures this). Host is `db` inside Docker, but `localhost:5432` for the VM-shell setup commands. |
 | Essays/code never grade (or time out) | `docker compose logs worker`. The worker needs `LLM_API_KEY` and `LLM_BASE_URL` = the **VM's IP** (`http://<VM-IP>:8080/v1`), **not** `localhost` — llama-server runs outside Docker. |
 | Donations show "not configured" | `STRIPE_SECRET_KEY` isn't set — it's optional; donations stay off until you add it (D.1). |
 
-**Handy commands** (run from the repo folder on the VM):
+**Handy commands** (run from the repo folder on the VM). These assume you made the `.env` symlink in
+F.5; if not, add `--env-file secrets/prod.env` to each, or Compose will error with
+`required variable AUTH_SECRET is missing a value`.
 ```
 docker compose -f docker-compose.prod.yml ps                 # container status
 docker compose -f docker-compose.prod.yml logs -f <service>  # follow a service's logs (web/worker/sandbox/db)
