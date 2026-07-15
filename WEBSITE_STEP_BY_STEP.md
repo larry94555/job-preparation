@@ -265,57 +265,44 @@ inbound **TCP 80 and 443**.
   features you generated in Phases A–E** — so make sure you committed and pushed them (see the
   "Save your work as you go" note near the top). Confirm with `git log --oneline -5` that your
   feature commits are present.
-- `cd` into the repo. Create the production secrets file (git-ignored — never commit it). The
-  repo already ignores `secrets/*.env`. Fill in every value:
+- `cd` into the repo, then **generate the random secrets and create the file in one command**:
+  🖥️ `node utils/gen-secrets.mjs --write`
+  This creates `secrets/prod.env` from the template (git-ignored — never committed) and fills in
+  the three values you'd otherwise have to invent — **`POSTGRES_PASSWORD`, `DATABASE_URL` (built
+  with that same password so they can't mismatch), and `AUTH_SECRET`** — then prints a reminder of
+  what's left. Now open `secrets/prod.env` and add the remaining values using the checklist below.
+  (The `STORE`/`CONTENT`/`QUEUE`/`SANDBOX` settings are hard-wired in the compose file — they are
+  **not** in this file, so there's nothing to set for them.)
 
-```
-# secrets/prod.env  (on the VM only — do NOT commit)
-# POSTGRES_PASSWORD initializes the database container; DATABASE_URL must use the
-# SAME password or the app cannot connect. Pick one strong value for both lines.
-POSTGRES_PASSWORD=<pick-a-strong-db-password>
-DATABASE_URL=postgres://jobprep:<same-db-password>@db:5432/jobprep
-AUTH_SECRET=<run: openssl rand -base64 32>
-AUTH_ADMIN_EMAILS=you@yourdomain.com
-STORE=pg
-CONTENT=db
-QUEUE=db
-SANDBOX=http
-SANDBOX_URL=http://sandbox:4500
-# Auth.js v5 canonical URL var (behind the Caddy proxy). trustHost is already on,
-# but setting this makes the magic-link callback URLs correct.
-AUTH_URL=https://yourdomain.com
-# LLM (already running on this box). DEPLOY_ENV=hosted forces the single Oracle
-# backend and makes the /models config read-only in production.
-# NOTE: llama-server runs on the VM itself, OUTSIDE Docker — so from inside the
-# worker container, "localhost" would be wrong. Use the VM's own IP here, or ask
-# Claude Code (deployment doublecheck prompt) to add a host-gateway mapping.
-DEPLOY_ENV=hosted
-LLM_BASE_URL=http://<this-VMs-private-IP>:8080/v1
-LLM_API_KEY=<your Oracle LLM key>
-MODEL_CONFIG_PATH=/app/model_configuration.yaml
-LLM_TIMEOUT_MS=120000
-# Email (Resend)
-RESEND_API_KEY=<from Resend>
-EMAIL_FROM=verify@yourdomain.com
-# Support + payments
-SUPPORT_EMAIL=support@yourdomain.com
-STRIPE_SECRET_KEY=<Stripe live secret when ready; test key until then>
-STRIPE_PUBLISHABLE_KEY=<Stripe publishable>
-STRIPE_WEBHOOK_SECRET=<from step F.6>
-```
+#### Secrets checklist — what to set at this stage, and where each value comes from
 
-> **PROMPT ▸ Deployment doublecheck** (run in Claude Code before deploying — it will also
-> update the compose file, which predates several newer features)
-> "Review `docker-compose.prod.yml`, `DEPLOY.md`, and the Dockerfiles, then **update
-> `docker-compose.prod.yml`** so every service receives the environment variables it needs
-> from `secrets/prod.env` for a single-VM deploy. Known gaps to fix: the `worker` service is
-> missing `LLM_API_KEY` and `MODEL_CONFIG_PATH` (and `LLM_TIMEOUT_MS`); the `web` service
-> is missing the new feature vars (`AUTH_URL`, `DEPLOY_ENV`, `RESEND_API_KEY`, `EMAIL_FROM`,
-> `SUPPORT_EMAIL`, and the three `STRIPE_*` keys); the `db` service should also publish its
-> port **bound to localhost only** (`127.0.0.1:5432:5432`) so one-time setup commands can be
-> run from the VM shell without exposing Postgres to the internet. Then produce the final
-> mapping of which `secrets/prod.env` values reach which service, and flag anything still
-> missing."
+| Variable | Required? | Where the value comes from |
+| --- | --- | --- |
+| `POSTGRES_PASSWORD` | ✅ **Required** | **Auto-generated** by `node utils/gen-secrets.mjs --write` — nothing to invent or write down. |
+| `DATABASE_URL` | ✅ **Required** | **Auto-generated** by the same tool, already built with the matching password. |
+| `AUTH_SECRET` | ✅ **Required** | **Auto-generated** by the same tool (no need to run `openssl`). |
+| `AUTH_URL` | ✅ **Required** | **You set it** to your site URL. No domain yet? Use `http://<VM-PUBLIC-IP>:3000`. With a domain later: `https://yourdomain.com`. |
+| `LLM_BASE_URL` | ✅ **Required** | **You set it** to where your Oracle llama-server listens: `http://<VM-IP>:8080/v1`. |
+| `LLM_API_KEY` | ✅ **Required** | **You already have this** — the key your Oracle `llama-server --api-key` uses (it's in your existing `secrets/secrets.env`; or make one with `node utils/gen-api-key.mjs`). |
+| `RESEND_API_KEY` | ✅ **Required to register** | **Copy from Resend**: dashboard → **API Keys → Create**. (Needed even for testing — the deployed app has no dev sign-in.) |
+| `AUTH_ADMIN_EMAILS` | ⬜ Optional | **Your own email**, to give yourself the admin role. |
+| `SUPPORT_EMAIL` | ⬜ Recommended | **Your support address** — the mailbox the Help link opens (from step E.1, Cloudflare Email Routing). |
+| `STRIPE_SECRET_KEY` | ⬜ Optional (donations) | **Copy from Stripe**: **Developers → API keys → Secret key**. Use **Test** keys until launch. |
+| `STRIPE_WEBHOOK_SECRET` | ⬜ Optional, set **later** | **Copy from Stripe in step F.6**, after you create the webhook. Leave blank for now. |
+| `EMAIL_FROM` | ⬜ Has a default | Leave `onboarding@resend.dev` for testing; switch to your verified-domain sender later (step F.7). |
+| `AUTH_GOOGLE_*` / `AUTH_GITHUB_*` | ⬜ Optional | One-click OAuth credentials from Google Cloud / GitHub. Leave blank to skip. |
+| `DEPLOY_ENV`, `MODEL_CONFIG_PATH`, `LLM_TIMEOUT_MS` | — pre-filled | Leave the template's defaults as-is — these aren't secrets. |
+
+**Minimum to get a testable site up (no domain, no donations):** the **seven ✅ rows** —
+`POSTGRES_PASSWORD`, `DATABASE_URL`, `AUTH_SECRET`, `AUTH_URL`, `LLM_BASE_URL`, `LLM_API_KEY`,
+and `RESEND_API_KEY`. Add `STRIPE_SECRET_KEY` + `SUPPORT_EMAIL` when you want donations and the
+Help link working.
+
+> **PROMPT ▸ Deployment doublecheck** (optional sanity check in Claude Code before deploying)
+> "Verify `docker-compose.prod.yml` passes every value from `secrets/prod.env` to the right
+> service: the `worker` gets `LLM_BASE_URL`/`LLM_API_KEY`/`MODEL_CONFIG_PATH`, the `web` tier
+> gets the auth/email/Stripe vars, and the `db` port is bound to `127.0.0.1` only. Show me the
+> final variable→service mapping and flag anything missing or misrouted."
 
 **F.3 🌐 Point your domain at the VM.** In Cloudflare DNS, add an **A record**:
 `yourdomain.com` → your VM's public IP (and a `www` CNAME to `yourdomain.com`). **Important:**
@@ -332,11 +319,21 @@ proxy later, after HTTPS works; it is not needed for launch.)
 > service should no longer be exposed publicly except through Caddy. Keep `worker`, `sandbox`,
 > and `db` internal-only (no public ports)."
 
+**How the database gets set up (read this first).** You don't install Postgres separately — the
+stack does it for you. The `db` container in `docker-compose.prod.yml` **creates the database the
+first time it starts**, using the `POSTGRES_PASSWORD` you chose in `secrets/prod.env`. So the
+lifecycle is: (1) you *invent* a DB password in `prod.env`; (2) `docker compose up` starts the
+container, which *provisions* an empty database with that password; (3) `db:push` *creates the
+tables*; (4) `db:import` *loads the lessons*. That's the whole database setup — no separate install.
+(If you'd rather use a managed database, point `DATABASE_URL` at it, delete `POSTGRES_PASSWORD`,
+and skip straight to `db:push`/`db:import` against that URL.)
+
 **F.5 🖥️ Start everything.** On the VM:
 - One-time: install Node.js 22 on the VM itself (e.g. `sudo dnf install nodejs22` /
   `sudo apt install nodejs npm`, or ask Claude Code for your distro's command) and run
   `npm install` in the repo folder — the two setup commands below run on the VM, not in Docker.
 - `docker compose -f docker-compose.prod.yml --env-file secrets/prod.env up -d --build`
+  — this **creates the database** (empty) among the other containers, using your `POSTGRES_PASSWORD`.
 - Apply the database schema (first time only). The database runs inside Docker and (after the
   doublecheck prompt in F.2) is reachable from the VM shell at `localhost:5432`, so:
   🖥️ `DATABASE_URL=postgres://jobprep:<same-db-password>@localhost:5432/jobprep npm run db:push`
