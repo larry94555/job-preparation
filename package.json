@@ -23,6 +23,7 @@
     "eval-gate": "node --import tsx --import ./utils/load-secrets.mjs packages/evaluator/src/cli.ts meta-eval topics --threshold 0.7",
     "eval-gate:escalate": "node --import tsx --import ./utils/load-secrets.mjs packages/evaluator/src/cli.ts meta-eval topics --threshold 0.7 --samples 3",
     "gen-api-key": "node utils/gen-api-key.mjs",
+    "gen-secrets": "node utils/gen-secrets.mjs",
     "secrets:check": "node utils/load-secrets.mjs",
     "mastery": "tsx scripts/mastery-index.ts",
     "certify": "npm run validate && npm run selfcheck && npm run typecheck && npm run test && npm run eval-gate",
