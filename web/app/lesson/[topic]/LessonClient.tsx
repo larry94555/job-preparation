@@ -43,6 +43,8 @@ interface State {
   done: boolean;
   currentSectionId: string | null;
   step: Step | null;
+  reviewIndex: number | null;
+  canGoBack: boolean;
   dashboard: DashEntry[];
   legend: Band[];
 }
@@ -76,6 +78,17 @@ export default function LessonClient({ topic }: { topic: string }) {
     setState(s);
     setLoading(false);
   }, [topic]);
+
+  // Jump to an arbitrary step (clamped server-side) — powers Back + Review.
+  const goto = useCallback(
+    async (index: number) => {
+      setLoading(true);
+      const s = await api<State>(`/api/goto?topic=${encodeURIComponent(topic)}`, { index });
+      setState(s);
+      setLoading(false);
+    },
+    [topic],
+  );
 
   if (loading && !state) return <main className="wrap">Loading…</main>;
   if (!state || (state as unknown as { error?: string }).error) {
@@ -111,7 +124,14 @@ export default function LessonClient({ topic }: { topic: string }) {
         {state.done ? (
           <DoneView state={state} />
         ) : state.step ? (
-          <StepView key={state.index} topic={topic} step={state.step} onNext={advance} />
+          <StepView
+            key={state.index}
+            topic={topic}
+            step={state.step}
+            onNext={advance}
+            onBack={state.canGoBack ? () => goto(state.index - 1) : undefined}
+            onReview={state.reviewIndex != null ? () => goto(state.reviewIndex as number) : undefined}
+          />
         ) : null}
       </div>
 
@@ -186,28 +206,56 @@ function OptionInputs({
   );
 }
 
+// ---- shared nav row (Back on the left, primary actions on the right) ------
+function NavRow({ onBack, children }: { onBack?: () => void; children: React.ReactNode }) {
+  return (
+    <div className="row" style={{ justifyContent: "space-between", marginTop: 4 }}>
+      <span>
+        {onBack ? (
+          <button className="ghost" onClick={onBack}>
+            ← Back
+          </button>
+        ) : (
+          <span />
+        )}
+      </span>
+      <span className="row" style={{ gap: 8 }}>
+        {children}
+      </span>
+    </div>
+  );
+}
+
 // ---- step dispatcher ------------------------------------------------------
 function StepView({
   topic,
   step,
   onNext,
+  onBack,
+  onReview,
 }: {
   topic: string;
   step: Step;
   onNext: () => void;
+  onBack?: () => void;
+  onReview?: () => void;
 }) {
-  if (step.kind === "material") return <MaterialStep step={step} onNext={onNext} />;
-  if (step.kind === "check") return <CheckStep topic={topic} step={step} onNext={onNext} />;
-  if (step.kind === "apply") return <ApplyStep topic={topic} step={step} onNext={onNext} />;
-  return <AssessmentStep topic={topic} step={step} onNext={onNext} />;
+  if (step.kind === "material") return <MaterialStep step={step} onNext={onNext} onBack={onBack} />;
+  if (step.kind === "check")
+    return <CheckStep topic={topic} step={step} onNext={onNext} onBack={onBack} onReview={onReview} />;
+  if (step.kind === "apply")
+    return <ApplyStep topic={topic} step={step} onNext={onNext} onBack={onBack} />;
+  return <AssessmentStep topic={topic} step={step} onNext={onNext} onBack={onBack} />;
 }
 
 function MaterialStep({
   step,
   onNext,
+  onBack,
 }: {
   step: Extract<Step, { kind: "material" }>;
   onNext: () => void;
+  onBack?: () => void;
 }) {
   return (
     <div>
@@ -217,9 +265,9 @@ function MaterialStep({
         // Server-rendered, sanitized lesson HTML from the content pipeline.
         dangerouslySetInnerHTML={{ __html: `<h2>${escapeHtml(step.heading)}</h2>` + step.html }}
       />
-      <div className="row">
+      <NavRow onBack={onBack}>
         <button onClick={onNext}>Continue →</button>
-      </div>
+      </NavRow>
     </div>
   );
 }
@@ -232,21 +280,31 @@ function CheckStep({
   topic,
   step,
   onNext,
+  onBack,
+  onReview,
 }: {
   topic: string;
   step: Extract<Step, { kind: "check" }>;
   onNext: () => void;
+  onBack?: () => void;
+  onReview?: () => void;
 }) {
   const [value, setValue] = useState("");
   const [result, setResult] = useState<AnswerResult | null>(null);
+  const [checking, setChecking] = useState(false);
   const q = step.question;
 
   async function check() {
-    if (!value) return;
-    const r = await api<AnswerResult>(`/api/answer?topic=${encodeURIComponent(topic)}`, {
-      answer: value,
-    });
-    setResult(r);
+    if (!value || checking) return;
+    setChecking(true);
+    try {
+      const r = await api<AnswerResult>(`/api/answer?topic=${encodeURIComponent(topic)}`, {
+        answer: value,
+      });
+      setResult(r);
+    } finally {
+      setChecking(false);
+    }
   }
 
   return (
@@ -256,20 +314,33 @@ function CheckStep({
       <OptionInputs q={q} name={`c_${q.id}`} value={value} onChange={setValue} />
       {result ? (
         <div className={"feedback " + (result.correct ? "good" : "soft")}>
-          {(result.correct
-            ? "✓ Correct. "
-            : "Almost — review the material above and keep going. ") + (result.explanation || "")}
+          {result.correct ? "✓ Correct. " : "Not quite. "}
+          {result.explanation}
+          {!result.correct && onReview ? (
+            <div style={{ marginTop: 8 }}>
+              <button className="ghost mini" onClick={onReview}>
+                ↑ Review the material
+              </button>
+            </div>
+          ) : null}
         </div>
       ) : null}
-      <div className="row">
+      <NavRow onBack={onBack}>
         {result ? (
           <button className="ghost" onClick={onNext}>
             Continue →
           </button>
         ) : (
-          <button onClick={check}>Check answer</button>
+          <>
+            <button className="ghost" onClick={onNext}>
+              Skip →
+            </button>
+            <button onClick={check} disabled={checking}>
+              {checking ? "Checking…" : "Check answer"}
+            </button>
+          </>
         )}
-      </div>
+      </NavRow>
     </div>
   );
 }
@@ -297,10 +368,12 @@ function ApplyStep({
   topic,
   step,
   onNext,
+  onBack,
 }: {
   topic: string;
   step: Extract<Step, { kind: "apply" }>;
   onNext: () => void;
+  onBack?: () => void;
 }) {
   const [value, setValue] = useState("");
   const [grading, setGrading] = useState(false);
@@ -400,7 +473,7 @@ function ApplyStep({
           </ul>
         </div>
       ) : null}
-      <div className="row">
+      <NavRow onBack={onBack}>
         {result ? (
           <button className="ghost" onClick={onNext}>
             Continue →
@@ -410,7 +483,7 @@ function ApplyStep({
             Submit for grading
           </button>
         )}
-      </div>
+      </NavRow>
     </div>
   );
 }
@@ -426,10 +499,12 @@ function AssessmentStep({
   topic,
   step,
   onNext,
+  onBack,
 }: {
   topic: string;
   step: Extract<Step, { kind: "assessment" }>;
   onNext: () => void;
+  onBack?: () => void;
 }) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [result, setResult] = useState<AssessResult | null>(null);
@@ -468,7 +543,7 @@ function AssessmentStep({
             : `You've got ${result.correct} / ${result.total} (${pct}%). Almost there — review the material and try again whenever you like.`}
         </div>
       ) : null}
-      <div className="row">
+      <NavRow onBack={onBack}>
         {result ? (
           <>
             <button onClick={() => setResult(null)}>Try again</button>
@@ -479,7 +554,7 @@ function AssessmentStep({
         ) : (
           <button onClick={submit}>Submit assessment</button>
         )}
-      </div>
+      </NavRow>
     </div>
   );
 }

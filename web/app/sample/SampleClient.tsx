@@ -16,6 +16,9 @@ interface Flow {
  * keeps NO server state: material and checks are pre-rendered from the flow, and
  * a check is graded by a stateless server action (answer keys stay server-side).
  * Essay/code/assessment steps arrive as "locked" cards that invite sign-up.
+ *
+ * Navigation: Back / Skip on every step, and — on a wrong check — a "Review the
+ * material" jump to the step that taught it, plus a plain-English explanation.
  */
 export default function SampleClient({ flow }: { flow: Flow }) {
   const [i, setI] = useState(0);
@@ -23,7 +26,19 @@ export default function SampleClient({ flow }: { flow: Flow }) {
   const done = i >= total;
   const step = done ? null : flow.steps[i];
   const pct = total ? Math.round((i / total) * 100) : 0;
+
   const next = () => setI((n) => Math.min(n + 1, total));
+  const back = () => setI((n) => Math.max(0, n - 1));
+  const canBack = i > 0;
+  // Jump to the material step that taught the current check (nearest one before it).
+  const reviewMaterial = () => {
+    for (let j = i - 1; j >= 0; j--) {
+      if (flow.steps[j].kind === "material") {
+        setI(j);
+        return;
+      }
+    }
+  };
 
   return (
     <main className="wrap">
@@ -51,25 +66,60 @@ export default function SampleClient({ flow }: { flow: Flow }) {
 
       <div className="panel" style={{ marginTop: 18 }}>
         {done ? (
-          <DoneView />
+          <DoneView onBack={back} />
         ) : step?.kind === "material" ? (
-          <MaterialStep step={step} onNext={next} />
+          <MaterialStep step={step} onNext={next} onBack={canBack ? back : undefined} />
         ) : step?.kind === "check" ? (
-          <CheckStep key={i} question={step.question} onNext={next} />
+          <CheckStep
+            key={i}
+            question={step.question}
+            onNext={next}
+            onSkip={next}
+            onBack={canBack ? back : undefined}
+            onReview={reviewMaterial}
+          />
         ) : step?.kind === "locked" ? (
-          <LockedStep onNext={next} />
+          <LockedStep onNext={next} onBack={canBack ? back : undefined} />
         ) : null}
       </div>
     </main>
   );
 }
 
+// ---- shared nav row -------------------------------------------------------
+function NavRow({
+  onBack,
+  children,
+}: {
+  onBack?: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="row" style={{ justifyContent: "space-between", marginTop: 4 }}>
+      <span>
+        {onBack ? (
+          <button className="ghost" onClick={onBack}>
+            ← Back
+          </button>
+        ) : (
+          <span />
+        )}
+      </span>
+      <span className="row" style={{ gap: 8 }}>
+        {children}
+      </span>
+    </div>
+  );
+}
+
 function MaterialStep({
   step,
   onNext,
+  onBack,
 }: {
   step: Extract<SampleStep, { kind: "material" }>;
   onNext: () => void;
+  onBack?: () => void;
 }) {
   return (
     <div>
@@ -79,9 +129,9 @@ function MaterialStep({
         // Server-rendered, sanitized lesson HTML from the content pipeline.
         dangerouslySetInnerHTML={{ __html: `<h2>${escapeHtml(step.heading)}</h2>` + step.html }}
       />
-      <div className="row">
+      <NavRow onBack={onBack}>
         <button onClick={onNext}>Continue →</button>
-      </div>
+      </NavRow>
     </div>
   );
 }
@@ -89,9 +139,15 @@ function MaterialStep({
 function CheckStep({
   question,
   onNext,
+  onSkip,
+  onBack,
+  onReview,
 }: {
   question: SampleQuestionView;
   onNext: () => void;
+  onSkip: () => void;
+  onBack?: () => void;
+  onReview: () => void;
 }) {
   const [value, setValue] = useState("");
   const [result, setResult] = useState<{ correct: boolean; explanation: string } | null>(null);
@@ -136,27 +192,38 @@ function CheckStep({
       )}
       {result ? (
         <div className={"feedback " + (result.correct ? "good" : "soft")}>
-          {(result.correct
-            ? "✓ Correct. "
-            : "Almost — review the material above and keep going. ") + (result.explanation || "")}
+          {result.correct ? "✓ Correct. " : "Not quite. "}
+          {result.explanation}
+          {!result.correct ? (
+            <div style={{ marginTop: 8 }}>
+              <button className="ghost mini" onClick={onReview}>
+                ↑ Review the material
+              </button>
+            </div>
+          ) : null}
         </div>
       ) : null}
-      <div className="row">
+      <NavRow onBack={onBack}>
         {result ? (
           <button className="ghost" onClick={onNext}>
             Continue →
           </button>
         ) : (
-          <button onClick={check} disabled={checking}>
-            {checking ? "Checking…" : "Check answer"}
-          </button>
+          <>
+            <button className="ghost" onClick={onSkip}>
+              Skip →
+            </button>
+            <button onClick={check} disabled={checking}>
+              {checking ? "Checking…" : "Check answer"}
+            </button>
+          </>
         )}
-      </div>
+      </NavRow>
     </div>
   );
 }
 
-function LockedStep({ onNext }: { onNext: () => void }) {
+function LockedStep({ onNext, onBack }: { onNext: () => void; onBack?: () => void }) {
   return (
     <div>
       <div className="eyebrow">🔒 Members only</div>
@@ -168,19 +235,19 @@ function LockedStep({ onNext }: { onNext: () => void }) {
         free account unlocks these, along with LLM feedback on your answers and progress
         tracking across every topic.
       </p>
-      <div className="row">
+      <NavRow onBack={onBack}>
         <Link className="btn" href="/signup">
           Sign up free →
         </Link>
         <button className="ghost" onClick={onNext}>
           Skip for now →
         </button>
-      </div>
+      </NavRow>
     </div>
   );
 }
 
-function DoneView() {
+function DoneView({ onBack }: { onBack: () => void }) {
   return (
     <div style={{ textAlign: "center" }}>
       <div style={{ fontSize: 40 }}>🎉</div>
@@ -190,6 +257,9 @@ function DoneView() {
         exercises, section assessments, and mastery tracking across all topics.
       </p>
       <div className="row" style={{ justifyContent: "center" }}>
+        <button className="ghost" onClick={onBack}>
+          ← Back
+        </button>
         <Link className="btn" href="/signup">
           Sign up free →
         </Link>
