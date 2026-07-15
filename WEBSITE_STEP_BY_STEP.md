@@ -291,6 +291,26 @@ inbound **TCP 80 and 443**.
     **new** shell and run `nvm install 22`.
   Verify: 🖥️ `node --version` must print **v22.x** (not v12/v18). Also make sure `git` is installed
   (`sudo apt-get install -y git` or `sudo dnf install -y git`).
+  *(Tip: on Ubuntu, `sudo apt install nodejs` gives an ancient Node 12 — that's the trap. The nvm
+  option above avoids it and is the most reliable.)*
+- **Install Docker** (the app runs as containers). Do **not** use `snap install docker`,
+  `apt install docker.io`, or `podman-docker` — use **Docker's official repo**, which includes the
+  `docker compose` plugin this runbook uses. On **Ubuntu**:
+
+  ```
+  sudo apt-get update && sudo apt-get install -y ca-certificates curl
+  sudo install -m 0755 -d /etc/apt/keyrings
+  sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+  sudo chmod a+r /etc/apt/keyrings/docker.asc
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  sudo apt-get update && sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  sudo usermod -aG docker $USER   # then LOG OUT of SSH and back in (or run: newgrp docker)
+  ```
+
+  Verify: 🖥️ `docker compose version` and `docker run hello-world`. ⚠️ If Docker says
+  `permission denied … /var/run/docker.sock`, you skipped the **log out / back in** after
+  `usermod` — that group change only takes effect in a new login session. *(On Oracle Linux
+  instead, follow docs.docker.com → "Install Docker Engine on RHEL".)*
 - `git clone <your repo URL>` (or `git pull` if already cloned). **This must include all the
   features you generated in Phases A–E** — so make sure you committed and pushed them (see the
   "Save your work as you go" note near the top). Confirm with `git log --oneline -5` that your
@@ -333,6 +353,20 @@ Help link working.
 > service: the `worker` gets `LLM_BASE_URL`/`LLM_API_KEY`/`MODEL_CONFIG_PATH`, the `web` tier
 > gets the auth/email/Stripe vars, and the `db` port is bound to `127.0.0.1` only. Show me the
 > final variable→service mapping and flag anything missing or misrouted."
+
+> **⚠️ No domain yet? Skip F.3 AND F.4.** These two steps are only for a domain + HTTPS. Without a
+> domain you run plain **HTTP** and reach the site at **`http://<VM-PUBLIC-IP>:3000`** (the `web`
+> container publishes port 3000; HTTPS via Let's Encrypt needs a real hostname, so it can't work on
+> a bare IP). To make that URL reachable you must **open port 3000 in two places**:
+> - **Oracle Cloud** → your VM's VCN **Security List** (or NSG): add an ingress rule **TCP 3000,
+>   source `0.0.0.0/0`**.
+> - **The VM's own firewall:** Ubuntu → `sudo iptables -I INPUT -p tcp --dport 3000 -j ACCEPT`
+>   (then `sudo apt install -y iptables-persistent` to save); Oracle Linux →
+>   `sudo firewall-cmd --add-port=3000/tcp --permanent && sudo firewall-cmd --reload`.
+>
+> Set `AUTH_URL=http://<VM-PUBLIC-IP>:3000`. Magic-link sign-in, lessons, and grading all work over
+> HTTP; only live donation **webhooks** wait for a domain (donations are optional to test). Come
+> back and do F.3 + F.4 when you pick a domain, then switch `AUTH_URL` to `https://yourdomain.com`.
 
 **F.3 🌐 Point your domain at the VM.** In Cloudflare DNS, add an **A record**:
 `yourdomain.com` → your VM's public IP (and a `www` CNAME to `yourdomain.com`). **Important:**
