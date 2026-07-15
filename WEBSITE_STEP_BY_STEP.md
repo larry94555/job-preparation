@@ -272,10 +272,37 @@ This is where the site becomes public. You'll run the app's existing containers 
 Always-Free VM (the one running the LLM), put Caddy in front for automatic HTTPS, point your
 domain at it, and set the real keys.
 
-**F.1 🌐 Make sure you have an Oracle Always-Free VM.** In Oracle Cloud, you want an **Ampere
-A1** compute instance (the free tier gives up to 4 cores / 24 GB RAM). If your LLM already runs
-on one, reuse it. Note its **public IP address**. In the VM's network security settings, allow
-inbound **TCP 80 and 443**.
+**F.1 🌐 Make sure you have an Oracle Always-Free VM, and open the right ports.** In Oracle Cloud,
+you want an **Ampere A1** compute instance (the free tier gives up to 4 cores / 24 GB RAM). If your
+LLM already runs on one, reuse it. Note its **public IP address** (Compute → Instances → your
+instance → "Public IP address").
+
+**Open the ports in the Oracle Cloud dashboard (the "Security List").** This is the cloud firewall,
+and a missing rule here is the usual cause of a browser **timeout**. To find it:
+
+1. Sign in at **https://cloud.oracle.com**.
+2. Top-left **☰ menu → Networking → Virtual Cloud Networks**, and click **your VCN**.
+   *(Shortcut: Compute → Instances → your instance → under "Primary VNIC" click the **Subnet** link.)*
+3. Under **Resources → Subnets**, click your **subnet**.
+4. Under **Security Lists**, click **"Default Security List for …"**.
+5. You're now on the **Ingress Rules** list. Compare it to the table below and **add anything
+   missing** with **Add Ingress Rules** (Source Type **CIDR**, Source CIDR **`0.0.0.0/0`**, IP
+   Protocol **TCP**, **Destination Port Range** = the port; leave the rest at defaults).
+
+**The full set of ingress rules you should have:**
+
+| Port | Protocol | Source | Why | When you need it |
+| --- | --- | --- | --- | --- |
+| **22** | TCP | `0.0.0.0/0` | SSH — to manage the VM | Always (usually pre-created) |
+| **3000** | TCP | `0.0.0.0/0` | The web app over plain **HTTP** | **Now — required for the no-domain test (Phase G)** |
+| **8080** | TCP | `0.0.0.0/0` | The Oracle LLM (`llama-server`), protected by `LLM_API_KEY` | If the LLM runs on this VM (likely already open) |
+| **80** | TCP | `0.0.0.0/0` | HTTP → Caddy (Let's Encrypt challenge + redirect) | **Later**, once you add a domain (F.4) |
+| **443** | TCP | `0.0.0.0/0` | HTTPS → Caddy | **Later**, once you add a domain (F.4) |
+
+*(If your instance uses a **Network Security Group** instead of a Security List, add the same rules
+there.)* **Important:** opening the Security List is only half — the **VM's own OS firewall** must
+also allow the port (Ubuntu blocks it by default). That step is in the "No domain yet?" box just
+before F.3 (and in Common Problems). Do **both** or you'll still get a timeout.
 
 **F.2 🖥️ Get the code and secrets onto the VM.** SSH into the VM and:
 - **Install Node.js 22 first.** The app's setup commands (and the secrets generator) need it, and
@@ -456,7 +483,20 @@ When you're truly stuck, paste the failing command + its error (and the relevant
 
 ## Phase G — Launch smoke test (do all of these on the live URL)
 
-Open `https://yourdomain.com` and confirm, in order:
+> **🌐 No domain yet? Use the IP with the port.** Everywhere this section says
+> `https://yourdomain.com`, use **`http://<VM-PUBLIC-IP>:3000`** instead — for example
+> **`http://165.1.79.248:3000/`**. Two things to note:
+> - **The `:3000` is required.** The bare IP (`http://<VM-IP>/`) hits port 80, where nothing is
+>   listening until you add Caddy in F.4 — that's an `ERR_CONNECTION_TIMED_OUT`.
+> - **Port 3000 must be open** in *both* firewalls (Oracle Security List in F.1 **and** the VM's OS
+>   firewall). A timeout almost always means one of those is missing.
+> - In the checklist below, **skip the "padlock (HTTPS)" part of step 1** — you're on plain HTTP
+>   for now. Everything else works; only live donation webhooks wait for a domain.
+>
+> Quick check from the VM itself: `curl -I http://localhost:3000/` should return an HTTP status
+> (e.g. `307`/`200`). If it does but the browser times out, it's purely the firewall/port.
+
+Open `https://yourdomain.com` (or `http://<VM-PUBLIC-IP>:3000/` with no domain) and confirm, in order:
 
 1. ✅ **Anonymous:** the padlock (HTTPS) shows; you see **all topics with descriptions**; the
    **sample lesson** plays; clicking a real topic sends you to sign-up.
