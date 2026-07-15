@@ -175,8 +175,25 @@ If anything about grading looks off, use:
 
 ## Phase D — Donations (live) and the premium preview
 
-**D.1 🌐 Get Stripe keys (Test mode first).** In Stripe (Test mode): copy your **Publishable
-key** and **Secret key**. You'll create a **webhook** in Phase F once you have a public URL.
+**D.1 🌐 Get your Stripe test secret key.** You only need the **Secret key** in **Test mode** (the
+app redirects to Stripe's hosted page, so it doesn't use the publishable key). Test mode works
+immediately — you do **not** need to finish business "activation" first. Steps:
+
+1. Sign in at **https://dashboard.stripe.com**.
+2. Turn on **Test mode**: flip the **Test mode** toggle at the **top-right** of the dashboard.
+   When it's on, the page shows a "Test mode" indicator and the URL contains `/test/`. (Test-mode
+   charges are fake — use the card `4242 4242 4242 4242` later.)
+3. Open the API keys page. Either:
+   - go directly to **https://dashboard.stripe.com/test/apikeys**, **or**
+   - click **Developers** (top-right) → **API keys**, **or** type "API keys" in the dashboard search.
+4. Under **Standard keys** you'll see a **Secret key** that reads `sk_test_••••••••` (hidden). Click
+   **Reveal test key**, then copy the full value — it starts with **`sk_test_`**.
+5. Paste that value into **`STRIPE_SECRET_KEY`** in `secrets/prod.env`. Treat it like a password
+   (don't commit or share it — `secrets/prod.env` is already gitignored).
+
+*(Stripe's own reference, if you want it: their docs page "API keys" at **https://docs.stripe.com/keys**
+explains test vs. live keys.)* The **webhook secret** (`STRIPE_WEBHOOK_SECRET`) is created later, in
+step **F.6**, once the site has a public URL — leave it blank for now.
 
 **D.2 🤖 Add the pay-what-you-can donation flow.**
 
@@ -299,8 +316,8 @@ inbound **TCP 80 and 443**.
 | `LLM_API_KEY` | ✅ **Required** | **You already have this** — the key your Oracle `llama-server --api-key` uses (it's in your existing `secrets/secrets.env`; or make one with `node utils/gen-api-key.mjs`). |
 | `RESEND_API_KEY` | ✅ **Required to register** | **Copy from Resend**: dashboard → **API Keys → Create**. (Needed even for testing — the deployed app has no dev sign-in.) |
 | `AUTH_ADMIN_EMAILS` | ⬜ Optional | **Your own email**, to give yourself the admin role. |
-| `SUPPORT_EMAIL` | ⬜ Recommended | **Your support address** — the mailbox the Help link opens (from step E.1, Cloudflare Email Routing). |
-| `STRIPE_SECRET_KEY` | ⬜ Optional (donations) | **Copy from Stripe**: **Developers → API keys → Secret key**. Use **Test** keys until launch. |
+| `SUPPORT_EMAIL` | ⬜ Recommended | **Any inbox that receives email** — the Help link opens a mailto to it (never used to send). **Your Gmail works now**; switch to `support@yourdomain.com` (Cloudflare Email Routing, E.1) after you pick a domain. |
+| `STRIPE_SECRET_KEY` | ⬜ Optional (donations) | The `sk_test_…` key from Stripe → **Developers → API keys** in **Test mode** — see the detailed walkthrough in **step D.1**. |
 | `STRIPE_WEBHOOK_SECRET` | ⬜ Optional, set **later** | **Copy from Stripe in step F.6**, after you create the webhook. Leave blank for now. |
 | `EMAIL_FROM` | ⬜ Has a default | Leave `onboarding@resend.dev` for testing; switch to your verified-domain sender later (step F.7). |
 | `AUTH_GOOGLE_*` / `AUTH_GITHUB_*` | ⬜ Optional | One-click OAuth credentials from Google Cloud / GitHub. Leave blank to skip. |
