@@ -261,6 +261,19 @@ on one, reuse it. Note its **public IP address**. In the VM's network security s
 inbound **TCP 80 and 443**.
 
 **F.2 🖥️ Get the code and secrets onto the VM.** SSH into the VM and:
+- **Install Node.js 22 first.** The app's setup commands (and the secrets generator) need it, and
+  the distro's *default* Node is too old — an old Node is exactly what produces a
+  `TypeError: Unknown encoding: base64url` (or similar) error. Do **not** use `apt install nodejs`
+  by itself. Install Node 22 for your VM's operating system:
+  - **Ubuntu / Debian** (Oracle "Canonical Ubuntu" image — your prompt shows `/home/ubuntu`):
+    🖥️ `curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - && sudo apt-get install -y nodejs`
+  - **Oracle Linux / RHEL** (Oracle's default image):
+    🖥️ `curl -fsSL https://rpm.nodesource.com/setup_22.x | sudo bash - && sudo dnf install -y nodejs`
+  - **No `sudo`? Use nvm** (installs Node just for your user, no root needed):
+    🖥️ `curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash`, then open a
+    **new** shell and run `nvm install 22`.
+  Verify: 🖥️ `node --version` must print **v22.x** (not v12/v18). Also make sure `git` is installed
+  (`sudo apt-get install -y git` or `sudo dnf install -y git`).
 - `git clone <your repo URL>` (or `git pull` if already cloned). **This must include all the
   features you generated in Phases A–E** — so make sure you committed and pushed them (see the
   "Save your work as you go" note near the top). Confirm with `git log --oneline -5` that your
@@ -329,9 +342,8 @@ tables*; (4) `db:import` *loads the lessons*. That's the whole database setup �
 and skip straight to `db:push`/`db:import` against that URL.)
 
 **F.5 🖥️ Start everything.** On the VM:
-- One-time: install Node.js 22 on the VM itself (e.g. `sudo dnf install nodejs22` /
-  `sudo apt install nodejs npm`, or ask Claude Code for your distro's command) and run
-  `npm install` in the repo folder — the two setup commands below run on the VM, not in Docker.
+- One-time: run `npm install` in the repo folder (Node 22 is already installed from F.2) — the two
+  database setup commands below run on the VM directly, not inside Docker.
 - `docker compose -f docker-compose.prod.yml --env-file secrets/prod.env up -d --build`
   — this **creates the database** (empty) among the other containers, using your `POSTGRES_PASSWORD`.
 - Apply the database schema (first time only). The database runs inside Docker and (after the

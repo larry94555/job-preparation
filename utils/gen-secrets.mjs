@@ -38,10 +38,14 @@ const DB_NAME = "jobprep";
 const DB_HOST = "db";
 const DB_PORT = "5432";
 
-// URL-safe password (base64url uses only A–Z a–z 0–9 - _), so it is safe to embed
-// directly in DATABASE_URL. The session secret is standard base64 (never in a URL).
-const postgresPassword = randomBytes(24).toString("base64url");
-const authSecret = randomBytes(32).toString("base64");
+// URL-safe token (only A–Z a–z 0–9 - _), safe to embed directly in DATABASE_URL.
+// Computed from standard base64 rather than the "base64url" encoding, which older
+// Node versions (pre-14.18) don't support.
+const urlSafe = (buf) =>
+  buf.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+
+const postgresPassword = urlSafe(randomBytes(24));
+const authSecret = randomBytes(32).toString("base64"); // not in a URL — plain base64 is fine
 const databaseUrl = `postgres://${DB_USER}:${postgresPassword}@${DB_HOST}:${DB_PORT}/${DB_NAME}`;
 
 const generated = {
