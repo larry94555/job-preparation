@@ -8,6 +8,7 @@ import { gradeSampleCheckAction } from "./actions";
 interface Flow {
   topicId: string;
   topicTitle: string;
+  seed: number;
   steps: SampleStep[];
 }
 
@@ -73,6 +74,7 @@ export default function SampleClient({ flow }: { flow: Flow }) {
           <CheckStep
             key={i}
             question={step.question}
+            seed={flow.seed}
             onNext={next}
             onSkip={next}
             onBack={canBack ? back : undefined}
@@ -138,12 +140,14 @@ function MaterialStep({
 
 function CheckStep({
   question,
+  seed,
   onNext,
   onSkip,
   onBack,
   onReview,
 }: {
   question: SampleQuestionView;
+  seed: number;
   onNext: () => void;
   onSkip: () => void;
   onBack?: () => void;
@@ -157,7 +161,7 @@ function CheckStep({
     if (!value || checking) return;
     setChecking(true);
     try {
-      setResult(await gradeSampleCheckAction(question.id, value));
+      setResult(await gradeSampleCheckAction(question.id, value, seed));
     } finally {
       setChecking(false);
     }

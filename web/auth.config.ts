@@ -44,6 +44,10 @@ export const authConfig = {
         const email = (user.email ?? "").toLowerCase();
         token.id = email || token.sub || "";
         token.role = roleFor(email);
+        // A fresh per-session id, minted once at sign-in. Lessons vary their
+        // presentation (option order, reworded prompts) by session, so a new
+        // login most likely reads a little differently even for identical content.
+        token.sid = globalThis.crypto.randomUUID();
       } else if (!token.role) {
         token.role = roleFor(typeof token.email === "string" ? token.email : "");
       }
@@ -54,6 +58,7 @@ export const authConfig = {
         session.user.id = (token.id as string) || (token.sub ?? "");
         session.user.role = (token.role as "admin" | "user") ?? "user";
       }
+      (session as { sid?: string }).sid = (token.sid as string) ?? "";
       return session;
     },
   },

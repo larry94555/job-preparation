@@ -35,6 +35,8 @@ import {
 } from "@job-prep/lesson";
 import { LlamaClient } from "@job-prep/evaluator";
 import { createContentSource, createStore } from "@job-prep/store";
+import { paraphrasedPrompts } from "./paraphrase";
+import { currentSessionId } from "./session";
 
 // Curated path order (foundations first); unknown topics sort after, by id.
 // Kept in sync with app/server.ts so both runners present the same ordering.
@@ -186,9 +188,42 @@ export async function loadContext(
   const topic = await findTopic(topicId);
   if (!topic) return null;
   const progress = await loadProgress(userId, topicId);
-  const pt = buildPlaythrough(topic, progress.seed);
+  // Presentation seed varies per SESSION (option order, assessment draws), so a
+  // new login reads a little differently — while staying consistent within the
+  // session. Falls back to the stored per-topic seed when unauthenticated. The
+  // playthrough STRUCTURE (which steps exist) is seed-independent, so progress
+  // stays aligned; grading is unaffected (it matches on answer text/keys).
+  const sid = await currentSessionId();
+  const seed = sid ? seedFromString(`${sid}:${topicId}`) : progress.seed;
+  const pt = buildPlaythrough(topic, seed);
   progress.index = Math.min(progress.index, pt.steps.length);
   return { topic, pt, progress };
+}
+
+/** The multiple-choice prompts in a playthrough (id + displayed prompt) — the
+ *  only prompts we reword (MCQ answers live in the options, so rewording the
+ *  question can't change what's correct). Text/essay/code prompts are left as-is
+ *  because their wording is answer-relevant. */
+function mcqPrompts(pt: Playthrough): { id: string; prompt: string }[] {
+  const out: { id: string; prompt: string }[] = [];
+  for (const s of pt.steps) {
+    if ((s.kind === "check" || s.kind === "apply") && s.question.type === "multiple_choice") {
+      out.push({ id: s.question.id, prompt: s.view.prompt });
+    } else if (s.kind === "assessment") {
+      for (const it of s.items) {
+        if (it.question.type === "multiple_choice") {
+          out.push({ id: it.question.id, prompt: it.view.prompt });
+        }
+      }
+    }
+  }
+  return out;
+}
+
+/** Cache-keyed reworded prompts for a lesson context (per session + topic). */
+export function promptOverridesFor(ctx: LessonContext, sid: string | null): Map<string, string> {
+  const key = `${sid ?? "anon"}:${ctx.pt.topicId}`;
+  return paraphrasedPrompts(key, mcqPrompts(ctx.pt));
 }
 
 // ---- sanitized views (answer keys never reach the client) ----------------
@@ -227,18 +262,41 @@ function precedingMaterialIndex(pt: Playthrough, index: number): number | null {
   return null;
 }
 
-/** The per-topic state payload — the sanitized current step + progress bands. */
-export function stateFor(ctx: LessonContext) {
+/** Apply reworded MCQ prompts (from paraphrase) to a sanitized step in place. */
+function applyPromptOverrides(
+  step: NonNullable<ReturnType<typeof sanitizeStep>>,
+  map: Map<string, string>,
+): typeof step {
+  if (step.kind === "check" || step.kind === "apply") {
+    const p = map.get(step.question.id);
+    if (p) step.question = { ...step.question, prompt: p };
+  } else if (step.kind === "assessment") {
+    step.items = step.items.map((q) => {
+      const p = map.get(q.id);
+      return p ? { ...q, prompt: p } : q;
+    });
+  }
+  return step;
+}
+
+/** The per-topic state payload — the sanitized current step + progress bands.
+ *  `promptOverrides` reworded MCQ prompts (from the paraphrase cache) are applied
+ *  to the displayed step, if provided. */
+export function stateFor(ctx: LessonContext, promptOverrides?: Map<string, string>) {
   const { pt, progress } = ctx;
   const done = progress.index >= pt.steps.length;
   const step = done ? null : pt.steps[progress.index];
+  let sanitized = step ? sanitizeStep(step) : null;
+  if (sanitized && promptOverrides && promptOverrides.size) {
+    sanitized = applyPromptOverrides(sanitized, promptOverrides);
+  }
   return {
     topic: { id: pt.topicId, title: pt.topicTitle },
     index: progress.index,
     total: pt.steps.length,
     done,
     currentSectionId: step ? (step as { sectionId: string }).sectionId : null,
-    step: step ? sanitizeStep(step) : null,
+    step: sanitized,
     // Where "Review the material" jumps to (the teaching step for this check).
     reviewIndex: precedingMaterialIndex(pt, progress.index),
     canGoBack: progress.index > 0,
@@ -401,25 +459,30 @@ export type SampleStep =
   | { kind: "check"; question: SampleQuestionView }
   | { kind: "locked" };
 
-/** Fixed seed so the sample playthrough (and thus each check's params) is stable
- *  across the render and the grade call — the sample keeps no per-user state. */
-const SAMPLE_SEED = seedFromString(SAMPLE_TOPIC);
+/** Default seed for the sample when a per-load seed isn't supplied. */
+export const SAMPLE_SEED = seedFromString(SAMPLE_TOPIC);
 
 /**
  * The free sample flow: the sample topic's playthrough reduced to the steps an
  * anonymous visitor can use — the "present" material and the multiple-choice /
  * fill-in checks. Essay/code ("apply") and section assessments are gated: each
  * is replaced by a single "locked" card (consecutive ones collapse) that the UI
- * turns into a sign-up prompt. No store, no LLM, no answer keys leave the server.
+ * turns into a sign-up prompt. No store, no answer keys leave the server.
+ *
+ * `seed` (per page load) reshuffles the options each visit; it's echoed back so
+ * grading re-derives the identical playthrough. MCQ prompts are reworded via the
+ * paraphrase cache (warmed in the background, once per process for the sample).
  */
-export async function sampleFlow(): Promise<{
+export async function sampleFlow(seed: number = SAMPLE_SEED): Promise<{
   topicId: string;
   topicTitle: string;
+  seed: number;
   steps: SampleStep[];
 } | null> {
   const topic = await findTopic(SAMPLE_TOPIC);
   if (!topic) return null;
-  const pt = buildPlaythrough(topic, SAMPLE_SEED);
+  const pt = buildPlaythrough(topic, seed);
+  const overrides = paraphrasedPrompts("sample", mcqPrompts(pt));
   const steps: SampleStep[] = [];
   let lastLocked = false;
   for (const step of pt.steps) {
@@ -438,7 +501,7 @@ export async function sampleFlow(): Promise<{
         question: {
           id: v.id,
           type: v.type,
-          prompt: v.prompt,
+          prompt: overrides.get(v.id) ?? v.prompt,
           options: v.options,
           inputKind: v.inputKind,
         },
@@ -450,7 +513,7 @@ export async function sampleFlow(): Promise<{
       lastLocked = true;
     }
   }
-  return { topicId: topic.topic!.id, topicTitle: pt.topicTitle, steps };
+  return { topicId: topic.topic!.id, topicTitle: pt.topicTitle, seed, steps };
 }
 
 /**
@@ -502,10 +565,11 @@ export async function explainWrongAnswer(
 export async function gradeSampleCheck(
   questionId: string,
   answer: string,
+  seed: number = SAMPLE_SEED,
 ): Promise<{ correct: boolean; explanation: string }> {
   const topic = await findTopic(SAMPLE_TOPIC);
   if (!topic) return { correct: false, explanation: "" };
-  const pt = buildPlaythrough(topic, SAMPLE_SEED);
+  const pt = buildPlaythrough(topic, seed);
   for (const step of pt.steps) {
     if (step.kind === "check" && step.question.id === questionId) {
       const q = step.question;
