@@ -1,51 +1,108 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import type { AssessmentData, AssessmentTopic } from "@/lib/lesson-service";
+import { clearQA, clearTopicQA, failedOver, isFinished, loadQA } from "@/lib/quick-store";
 
 /**
- * The Assessment page grid (Phase 1). Each box shows a topic + its major
- * subtopics, and for the topic and each subtopic four links: Review, Quick
- * Assessment, Full Assessment, Learn. Only "Learn" is wired (→ the lesson); the
- * other three show a transient "not yet implemented" tip. The box FRAME color
- * reflects assessment status — all white for now (status arrives in a later
- * phase); the CSS classes + legend below already describe the intended scheme.
+ * The Assessment page grid (Phase 2). Each box shows a topic + its major
+ * subtopics; the topic and each subtopic get Quick Assessment (now live) plus
+ * Review / Full Assessment (still a "not yet implemented" tip) and Learn (→ the
+ * lesson). Quick-assessment progress + tallies live in the browser (localStorage),
+ * so the links reflect started/finished state and the box FRAME turns red when
+ * more than 10% of a scope's answers were wrong (bright red for the whole-topic
+ * assessment or when >80% of subtopics are red).
  */
 
-// Frame status → CSS data-status value. Phase 1 always uses "none" (white).
-type Status = "none" | "all-green" | "some-green" | "some-red" | "all-red";
+const BRIGHT_RED = "#dc2626";
+// Light red -> bright red, by fraction of subtopics that are red.
+function mixRed(p: number): string {
+  const a = [254, 202, 202];
+  const b = [220, 38, 38];
+  const f = Math.min(Math.max(p, 0), 1);
+  const c = a.map((v, i) => Math.round(v + (b[i] - v) * f));
+  return `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
+}
 
-const FRAME_LEGEND: { status: Status; label: string }[] = [
-  { status: "none", label: "Not yet tested" },
-  { status: "all-green", label: "All assessments passed" },
-  { status: "some-green", label: "Some passed, some untested" },
-  { status: "some-red", label: "Some failed" },
-  { status: "all-red", label: "Mostly failed / main assessment failed" },
+// Red frame color for a topic from its quick-assessment results, or undefined
+// (neutral/white). Depends on the localStorage state → only call when mounted.
+function frameColor(t: AssessmentTopic): string | undefined {
+  const mainRed = failedOver(loadQA(t.id, null), t.mainTotal);
+  const redSubs = t.sections.filter((s) => failedOver(loadQA(t.id, s.id), s.total)).length;
+  const frac = t.sections.length ? redSubs / t.sections.length : 0;
+  if (mainRed || frac > 0.8) return BRIGHT_RED;
+  if (frac > 0) return mixRed(frac / 0.8);
+  return undefined;
+}
+
+const FRAME_LEGEND: { color: string | undefined; label: string }[] = [
+  { color: undefined, label: "Not yet tested" },
+  { color: mixRed(0.35), label: "Some subtopics failed (>10% wrong)" },
+  { color: BRIGHT_RED, label: "Whole topic or most subtopics failed" },
 ];
 
 export default function AssessmentClient({ data }: { data: AssessmentData }) {
+  const router = useRouter();
   const [tip, setTip] = useState<string | null>(null);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Re-read localStorage after mount and whenever the tab regains focus / storage
+  // changes (e.g. returning from a quiz), so links + frames stay current.
+  const [tick, setTick] = useState(0);
+  const mounted = tick > 0;
+
+  useEffect(() => {
+    const rerender = () => setTick((n) => n + 1);
+    rerender();
+    window.addEventListener("focus", rerender);
+    window.addEventListener("storage", rerender);
+    return () => {
+      window.removeEventListener("focus", rerender);
+      window.removeEventListener("storage", rerender);
+    };
+  }, []);
 
   const showTip = (label: string) => {
     setTip(`${label} — not yet implemented`);
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => setTip(null), 1900);
+    if (tipTimer.current) clearTimeout(tipTimer.current);
+    tipTimer.current = setTimeout(() => setTip(null), 1900);
   };
+
+  // Clear a scope's tallies and (re)start its quiz. Main topic warns first.
+  const startOver = (t: AssessmentTopic, sectionId: string | null) => {
+    const href = quizHref(t.id, sectionId);
+    if (!sectionId) {
+      if (!window.confirm("Start over? This clears all tallies for this topic, including its subtopics.")) {
+        return;
+      }
+      clearTopicQA(t.id, t.sections.map((s) => s.id));
+    } else {
+      clearQA(t.id, sectionId);
+    }
+    setTick((n) => n + 1);
+    router.push(href);
+  };
+
+  const cardProps = (t: AssessmentTopic) => ({
+    t,
+    mounted,
+    showTip,
+    onStartOver: startOver,
+  });
 
   return (
     <>
       <div className="tgrid">
         {data.items.map((t) => (
-          <TopicCard key={t.id} t={t} showTip={showTip} />
+          <TopicCard key={t.id} {...cardProps(t)} />
         ))}
       </div>
 
       <div className="legend" style={{ marginTop: 16 }}>
         {FRAME_LEGEND.map((f) => (
-          <span key={f.status}>
-            <span className={`sw frame-${f.status}`} />
+          <span key={f.label}>
+            <span className="sw" style={{ border: `2px solid ${f.color ?? "var(--line)"}` }} />
             {f.label}
           </span>
         ))}
@@ -61,7 +118,7 @@ export default function AssessmentClient({ data }: { data: AssessmentData }) {
             </div>
             <div className="tgrid">
               {phase.items.map((t) => (
-                <TopicCard key={t.id} t={t} showTip={showTip} />
+                <TopicCard key={t.id} {...cardProps(t)} />
               ))}
             </div>
           </div>
@@ -75,16 +132,18 @@ export default function AssessmentClient({ data }: { data: AssessmentData }) {
 
 function TopicCard({
   t,
+  mounted,
   showTip,
+  onStartOver,
 }: {
   t: AssessmentTopic;
+  mounted: boolean;
   showTip: (label: string) => void;
+  onStartOver: (t: AssessmentTopic, sectionId: string | null) => void;
 }) {
-  const status: Status = "none"; // per-user status arrives in a later phase
-
   if (!t.built) {
     return (
-      <div className="acard" data-status="none" style={{ opacity: 0.5 }}>
+      <div className="acard" style={{ opacity: 0.5 }}>
         <div className="acard-row">
           <h3>{t.title}</h3>
         </div>
@@ -93,41 +152,77 @@ function TopicCard({
     );
   }
 
+  const frame = mounted ? frameColor(t) : undefined;
+
   return (
-    <div className="acard" data-status={status}>
+    <div className="acard" style={frame ? { borderColor: frame } : undefined}>
       <div className="acard-row acard-topic">
         <h3>{t.title}</h3>
-        <LinkRow topicId={t.id} showTip={showTip} />
+        <LinkRow t={t} sectionId={null} total={t.mainTotal} mounted={mounted} showTip={showTip} onStartOver={onStartOver} />
       </div>
       {t.sections.map((s) => (
         <div className="acard-row acard-sub" key={s.id}>
           <span className="sub-title">{s.title}</span>
-          <LinkRow topicId={t.id} showTip={showTip} />
+          <LinkRow t={t} sectionId={s.id} total={s.total} mounted={mounted} showTip={showTip} onStartOver={onStartOver} />
         </div>
       ))}
     </div>
   );
 }
 
+function quizHref(topicId: string, sectionId: string | null): string {
+  return `/assessment/quiz?topic=${encodeURIComponent(topicId)}${
+    sectionId ? `&section=${encodeURIComponent(sectionId)}` : ""
+  }`;
+}
+
 function LinkRow({
-  topicId,
+  t,
+  sectionId,
+  total,
+  mounted,
   showTip,
+  onStartOver,
 }: {
-  topicId: string;
+  t: AssessmentTopic;
+  sectionId: string | null;
+  total: number;
+  mounted: boolean;
   showTip: (label: string) => void;
+  onStartOver: (t: AssessmentTopic, sectionId: string | null) => void;
 }) {
+  const href = quizHref(t.id, sectionId);
+  const state = mounted ? loadQA(t.id, sectionId) : null;
+  const started = !!state;
+  const finished = state ? isFinished(state) : false;
+
   return (
     <span className="alinks">
-      <button type="button" className="alink quick" onClick={() => showTip("Quick Assessment")}>
-        Quick Assessment
-      </button>
+      {!started ? (
+        <Link className="alink quick" href={href}>
+          Quick Assessment
+        </Link>
+      ) : !finished ? (
+        <>
+          <Link className="alink resume" href={href}>
+            Resume
+          </Link>
+          <button type="button" className="alink" onClick={() => onStartOver(t, sectionId)}>
+            Start over
+          </button>
+        </>
+      ) : (
+        <button type="button" className="alink quick" onClick={() => onStartOver(t, sectionId)}>
+          Retake
+        </button>
+      )}
       <button type="button" className="alink" onClick={() => showTip("Review")}>
         Review
       </button>
       <button type="button" className="alink" onClick={() => showTip("Full Assessment")}>
         Full Assessment
       </button>
-      <Link className="alink learn" href={`/lesson/${topicId}`}>
+      <Link className="alink learn" href={`/lesson/${t.id}`}>
         Learn
       </Link>
     </span>

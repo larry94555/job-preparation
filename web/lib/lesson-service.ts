@@ -528,32 +528,49 @@ export async function catalogData() {
 /** Shape returned by `catalogData` — consumed by the public catalog UI. */
 export type CatalogData = Awaited<ReturnType<typeof catalogData>>;
 
-// ---- assessment page (Phase 1: topics + subtopics, no per-user status) ----
+// ---- assessment page + quick assessments ---------------------------------
 
-/** A topic and its major subtopics (section titles) for the Assessment page. */
+type Mcq = Extract<Question, { type: "multiple_choice" }>;
+const isMcq = (q: Question): q is Mcq => q.type === "multiple_choice";
+
+/** A topic + its major subtopics for the Assessment page. `mainTotal` / per-
+ *  section `total` are the quick-assessment sizes (used for the 10%-wrong
+ *  frame-color thresholds on the client). */
 export interface AssessmentTopic {
   id: string;
   title: string;
-  sections: { id: string; title: string }[];
   built: boolean;
+  mainTotal: number;
+  sections: { id: string; title: string; total: number }[];
 }
 
 /**
  * Data for the free Assessment page: every topic (the core grid + the agentic
- * phases, exactly like the home hub) with its major subtopics. Public and
- * progress-free for now — the per-topic mastery status + colors arrive later.
+ * phases, exactly like the home hub) with its major subtopics + quick-assessment
+ * question counts. Public and progress-free — per-user status is client-side.
  */
 export async function assessmentData(): Promise<{
   items: AssessmentTopic[];
   agentic: { phases: { title: string; items: AssessmentTopic[] }[]; total: number };
 }> {
   const lessons = await allLessons();
-  const cardOf = (t: LoadedTopic): AssessmentTopic => ({
-    id: t.topic!.id,
-    title: t.topic!.title,
-    sections: t.sections.map((s) => ({ id: s.id, title: s.title })),
-    built: true,
-  });
+  const cardOf = (t: LoadedTopic): AssessmentTopic => {
+    const mcqs = t.questions.filter(isMcq);
+    return {
+      id: t.topic!.id,
+      title: t.topic!.title,
+      built: true,
+      mainTotal: mcqs.length,
+      sections: t.sections.map((s) => {
+        const tags = new Set(s.assessment.from_tags);
+        return {
+          id: s.id,
+          title: s.title,
+          total: mcqs.filter((q) => q.tags.some((x) => tags.has(x))).length,
+        };
+      }),
+    };
+  };
   const byId = new Map(lessons.map((t) => [t.topic!.id, cardOf(t)]));
   const items = lessons
     .filter((t) => (t.topic!.track ?? "core") !== "agentic")
@@ -565,8 +582,9 @@ export async function assessmentData(): Promise<{
         byId.get(slug) ?? {
           id: slug,
           title: AGENTIC_TITLES[slug] ?? slug,
-          sections: [],
           built: false,
+          mainTotal: 0,
+          sections: [],
         },
     ),
   }));
@@ -575,6 +593,87 @@ export async function assessmentData(): Promise<{
 
 /** Shape returned by `assessmentData` — consumed by the Assessment page UI. */
 export type AssessmentData = Awaited<ReturnType<typeof assessmentData>>;
+
+/** A single quick-assessment question, sanitized for the client (no answer key). */
+export interface QuickQuestion {
+  id: string;
+  prompt: string;
+  options: string[];
+  subtopic: string;
+}
+export interface QuickAssessment {
+  topicId: string;
+  topicTitle: string;
+  sectionId: string | null;
+  sectionTitle: string | null;
+  /** All section ids of the topic (so a main-topic "start over" can clear subs). */
+  sectionIds: string[];
+  questions: QuickQuestion[];
+}
+
+/**
+ * The MC-only quick assessment for a topic (or one subtopic). Draws the topic's
+ * conceptual multiple-choice bank — the whole topic for the main assessment, or
+ * the questions tagged to a section for a subtopic. Sanitized: no correct flags
+ * leave the server (choices are graded server-side by `gradeQuickChoice`).
+ */
+export async function quickAssessmentData(
+  topicId: string,
+  sectionId?: string | null,
+): Promise<QuickAssessment | null> {
+  const topic = await findTopic(topicId);
+  if (!topic) return null;
+  const mcqs = topic.questions.filter(isMcq);
+  const subtopicOf = (q: Mcq): string =>
+    topic.sections.find((s) => q.tags.some((t) => s.assessment.from_tags.includes(t)))?.title ?? "";
+
+  let pool = mcqs;
+  let sectionTitle: string | null = null;
+  if (sectionId) {
+    const sec = topic.sections.find((s) => s.id === sectionId);
+    if (!sec) return null;
+    sectionTitle = sec.title;
+    const tags = new Set(sec.assessment.from_tags);
+    pool = mcqs.filter((q) => q.tags.some((t) => tags.has(t)));
+  }
+  return {
+    topicId: topic.topic!.id,
+    topicTitle: topic.topic!.title,
+    sectionId: sectionId ?? null,
+    sectionTitle,
+    sectionIds: topic.sections.map((s) => s.id),
+    questions: pool.map((q) => ({
+      id: q.id,
+      prompt: q.prompt,
+      options: q.options.map((o) => o.text),
+      subtopic: sectionId ? (sectionTitle ?? "") : subtopicOf(q),
+    })),
+  };
+}
+
+/**
+ * Grade one quick-assessment choice server-side (answer keys never reach the
+ * client). On a correct pick returns the authored "why it's correct" note; on a
+ * wrong pick returns a plain-English "why that's wrong" (LLM best-effort, and it
+ * does NOT reveal which option is correct), falling back to a neutral nudge.
+ */
+export async function gradeQuickChoice(
+  topicId: string,
+  questionId: string,
+  chosen: string,
+): Promise<{ correct: boolean; explanation: string }> {
+  const topic = await findTopic(topicId);
+  const q = topic?.questions.find((x): x is Mcq => x.id === questionId && isMcq(x));
+  if (!q) return { correct: false, explanation: "" };
+  if (gradeMultipleChoice(q, chosen)) {
+    return { correct: true, explanation: q.explanation ?? "Correct." };
+  }
+  const why = await explainWrongAnswer(q, chosen);
+  return {
+    correct: false,
+    explanation: why ?? "That's not the best choice here — reconsider the other options.",
+  };
+}
 
 // ---- free sample lesson (anonymous, stateless, no LLM) --------------------
 
