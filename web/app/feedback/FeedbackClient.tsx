@@ -10,7 +10,6 @@ const ASPECTS = ["Overall experience", "Lesson content quality", "Ease of use"] 
 export default function FeedbackClient() {
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [comment, setComment] = useState("");
-  const [anonymous, setAnonymous] = useState(true);
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<FeedbackResult | null>(null);
@@ -25,8 +24,7 @@ export default function FeedbackClient() {
       const res = await submitFeedback({
         ratings: ASPECTS.map((label) => ({ label, value: ratings[label] ?? 0 })),
         comment,
-        anonymous,
-        email: anonymous ? undefined : email,
+        email: email.trim() || undefined,
       });
       setResult(res);
     } finally {
@@ -54,6 +52,9 @@ export default function FeedbackClient() {
   return (
     <div className="panel" style={{ marginTop: 18 }}>
       <div className="eyebrow">Rate a few things (optional)</div>
+      <p className="muted" style={{ margin: "2px 0 8px", fontSize: 13 }}>
+        1 = poor · 5 = excellent
+      </p>
       {ASPECTS.map((label) => (
         <div
           key={label}
@@ -88,35 +89,18 @@ export default function FeedbackClient() {
       />
 
       <div className="eyebrow" style={{ marginTop: 12 }}>
-        How should we treat this?
+        Email (optional)
       </div>
-      <label className={"opt" + (anonymous ? " sel" : "")}>
-        <input
-          type="radio"
-          name="anon"
-          checked={anonymous}
-          onChange={() => setAnonymous(true)}
-        />
-        <span>Send anonymously (we won&apos;t know who you are)</span>
-      </label>
-      <label className={"opt" + (!anonymous ? " sel" : "")}>
-        <input
-          type="radio"
-          name="anon"
-          checked={!anonymous}
-          onChange={() => setAnonymous(false)}
-        />
-        <span>Include my email so you can follow up</span>
-      </label>
-      {!anonymous ? (
-        <input
-          className="text"
-          type="email"
-          value={email}
-          placeholder="you@example.com"
-          onChange={(e) => setEmail(e.target.value)}
-        />
-      ) : null}
+      <p className="muted" style={{ margin: "2px 0 6px", fontSize: 13 }}>
+        Add your email if you&apos;re open to us following up.
+      </p>
+      <input
+        className="text"
+        type="email"
+        value={email}
+        placeholder="you@example.com"
+        onChange={(e) => setEmail(e.target.value)}
+      />
 
       {result?.error ? <div className="feedback soft">{result.error}</div> : null}
       {result?.mailto ? (

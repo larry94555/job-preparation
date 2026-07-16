@@ -17,8 +17,8 @@ export default function FeedbackPage() {
       <div className="eyebrow">Feedback</div>
       <h1>Tell us how it&apos;s going</h1>
       <p className="muted">
-        Rate a few aspects, leave a comment, and choose whether to stay anonymous. Your
-        feedback is emailed straight to us — it isn&apos;t posted or shown anywhere on the site.
+        Rate a few aspects and leave a comment. Your feedback is emailed straight to us — it
+        isn&apos;t posted or shown anywhere on the site.
       </p>
       <FeedbackClient />
     </main>

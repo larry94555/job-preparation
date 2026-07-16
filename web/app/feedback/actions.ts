@@ -11,8 +11,8 @@ export interface FeedbackRating {
 export interface FeedbackInput {
   ratings: FeedbackRating[];
   comment: string;
-  /** When true, the sender's email is NOT included and no reply-to is set. */
-  anonymous: boolean;
+  /** Optional — provided only if the sender is open to a follow-up. Absent =
+   *  anonymous (no reply-to, never falls back to a sender-revealing mailto). */
   email?: string;
 }
 
@@ -34,13 +34,13 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export async function submitFeedback(input: FeedbackInput): Promise<FeedbackResult> {
   const comment = (input.comment ?? "").trim().slice(0, 5000);
   const ratings = (input.ratings ?? []).filter((r) => r.value >= 1 && r.value <= 5);
-  const anonymous = input.anonymous !== false;
-  const email = !anonymous ? (input.email ?? "").trim() : "";
+  const email = (input.email ?? "").trim().slice(0, 200);
+  const anonymous = !email; // no email = anonymous
 
   if (ratings.length === 0 && !comment) {
     return { ok: false, error: "Please add a rating or a comment before sending." };
   }
-  if (!anonymous && email && !EMAIL_RE.test(email)) {
+  if (email && !EMAIL_RE.test(email)) {
     return { ok: false, error: "That email address doesn't look valid." };
   }
 
