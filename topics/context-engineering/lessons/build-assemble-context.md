@@ -13,6 +13,18 @@ Assembling context is two moves:
 Never just concatenate everything and hope. The point is to spend a scarce budget on the tokens that
 matter most.
 
+```mermaid
+flowchart TD
+  A[Rank sections by priority] --> B[Take next section]
+  B --> C{Fits in remaining budget?}
+  C -->|Yes| D[Include section]
+  C -->|No| E[Skip section]
+  D --> F{More sections?}
+  E --> F
+  F -->|Yes| B
+  F -->|No| G[Assembled context]
+```
+
 ## Why drop not truncate blindly
 
 Two failure modes justify dropping the low-priority overflow:

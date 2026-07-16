@@ -43,3 +43,16 @@ Make the error **model-facing** — specific enough to act on ("field `amount` i
 integer"), not an opaque stack trace. That is the whole recovery loop: validate, reject with a
 structured error, feed it back, let the model correct itself. Crashing the session or silently dropping
 the call gives the model nothing to recover from; a readable error keeps the agent alive and improving.
+
+```mermaid
+flowchart TD
+    C["Tool call: name + args"] --> R{"Tool registered?"}
+    R -->|no| E1["error: unknown_tool"]
+    R -->|yes| A{"Args valid?"}
+    A -->|no| E2["error: invalid_args"]
+    A -->|yes| H["Run handler"]
+    H --> OK["ok: value"]
+    E1 --> FB["Feed tool_result back into loop"]
+    E2 --> FB
+    OK --> FB
+```

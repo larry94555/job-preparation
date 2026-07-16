@@ -26,3 +26,15 @@ model-facing error** describing exactly what was wrong — "unknown tool `delete
 That error goes back into the loop so the model can **retry with a corrected call**. Crashing the
 session or silently dropping the call gives the model nothing to recover from. Well-designed errors
 turn a hallucinated or malformed call into a self-correcting step rather than a failure.
+
+```mermaid
+flowchart TD
+    P["model proposes call"] --> K{"tool in registry?"}
+    K -->|no| E["structured error: unknown_tool"]
+    K -->|yes| V{"args match schema?"}
+    V -->|no| E2["structured error: invalid_args"]
+    V -->|yes| X["execute handler"]
+    E --> R["model retries corrected call"]
+    E2 --> R
+    R --> P
+```

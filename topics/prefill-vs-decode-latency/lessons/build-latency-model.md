@@ -12,6 +12,12 @@ Inference has two phases with different cost drivers, and a good latency model k
 
 Putting them together: `total = TTFT + outputTokens × tpot`.
 
+```mermaid
+flowchart LR
+    R["request"] -->|"TTFT = promptTokens / prefillRate"| F["first token"]
+    F -->|"+ outputTokens x tpot"| E["last token"]
+```
+
 ## Why the phases move independently
 
 The whole point of separating them is that they respond to **different** inputs:

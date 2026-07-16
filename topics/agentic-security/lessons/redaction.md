@@ -38,7 +38,17 @@ def filter_output(action: dict) -> dict:
 
 Redaction filters what goes *into* the context; output filtering gates what comes *out* as an action.
 Together they bracket the model: sensitive data is stripped before it can leak, and dangerous actions are
-stopped before they fire. Neither is a silver bullet — a novel PII format slips redaction, a cleverly
+stopped before they fire.
+
+```mermaid
+flowchart LR
+    In["Untrusted / user text"] --> R["Redact PII (in)"]
+    R --> M[Model]
+    M --> F["Filter output (out)"]
+    F --> Act[Approved action]
+```
+
+ Neither is a silver bullet — a novel PII format slips redaction, a cleverly
 named tool slips a naive filter — so they layer with separation, sanitizing, and sandboxing. Build them in
 from the start, not after the breach.
 

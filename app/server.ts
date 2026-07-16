@@ -309,6 +309,20 @@ const server = createServer(async (req, res) => {
     return;
   }
 
+  // Serve the bundled mermaid UMD build from node_modules so ```mermaid diagrams
+  // render offline (no CDN). If the dep isn't installed, the raw source shows.
+  if (req.method === "GET" && url === "/vendor/mermaid.min.js") {
+    const mermaidPath = join(process.cwd(), "node_modules", "mermaid", "dist", "mermaid.min.js");
+    if (existsSync(mermaidPath)) {
+      res.writeHead(200, { "content-type": "text/javascript; charset=utf-8" });
+      res.end(readFileSync(mermaidPath));
+    } else {
+      res.writeHead(404);
+      res.end("mermaid not installed");
+    }
+    return;
+  }
+
   if (req.method === "GET" && url === "/api/state") return json(state());
   if (req.method === "GET" && url === "/api/home") return json(homeData());
   if (req.method === "GET" && url === "/api/analytics") return json(analyticsData());

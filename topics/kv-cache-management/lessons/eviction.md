@@ -23,3 +23,12 @@ Neither strategy wins everywhere; the choice depends on sequence length and hard
 The rule of thumb: short sequences favor recompute (compute-bound and cheap), long sequences with a
 fast link favor swap (bandwidth-bound but avoids the redo). A scheduler under mixed load picks per
 sequence, evicting lower-priority work first.
+
+```mermaid
+flowchart TD
+  A["KV pool full: must preempt a sequence"] --> B{"sequence short?"}
+  B -->|yes| R["recompute: replay prefill on resume (GPU compute)"]
+  B -->|no| C{"fast interconnect?"}
+  C -->|yes| S["swap: copy KV to host RAM, copy back on resume"]
+  C -->|no| R
+```

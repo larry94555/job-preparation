@@ -60,13 +60,21 @@ export function renderMarkdown(md: string): string {
   while (i < lines.length) {
     const line = lines[i];
 
-    if (/^```/.test(line)) {
+    const fence = /^```\s*([A-Za-z0-9_-]+)?/.exec(line);
+    if (fence) {
       closeList();
+      const lang = (fence[1] ?? "").toLowerCase();
       i++;
       const code: string[] = [];
       while (i < lines.length && !/^```/.test(lines[i])) code.push(lines[i++]);
       i++; // closing fence
-      html += "<pre><code>" + esc(code.join("\n")) + "</code></pre>";
+      // A ```mermaid block becomes a <pre class="mermaid"> that the client renders
+      // to an SVG diagram (see web Material component). The source is HTML-escaped
+      // like any code block — the browser decodes it back to text for mermaid.
+      html +=
+        lang === "mermaid"
+          ? '<pre class="mermaid">' + esc(code.join("\n")) + "</pre>"
+          : "<pre><code>" + esc(code.join("\n")) + "</code></pre>";
       continue;
     }
 

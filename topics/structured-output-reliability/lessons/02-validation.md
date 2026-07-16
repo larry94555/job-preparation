@@ -9,6 +9,17 @@ The safe way to consume model JSON is two explicit steps: **parse, then validate
 2. **Validate** the parsed value against an explicit schema — this is where *semantic* failures
    (missing fields, wrong types, illegal values) are caught.
 
+The two gates catch different failure classes with different tools:
+
+```mermaid
+flowchart TD
+    T["raw model text"] --> P{"JSON.parse"}
+    P -->|syntax error| M["malformed — caught by parser"]
+    P -->|parsed value| V{"schema validate"}
+    V -->|"missing / wrong type / illegal value"| S["semantic failure — caught by schema"]
+    V -->|valid| OK["valid object"]
+```
+
 The two anti-patterns to avoid are **regex-scraping** fields out of the raw text (fragile, silently
 wrong) and **`eval`-ing** the string (unsafe). Parse-then-validate is the only approach that fails
 loudly and precisely.

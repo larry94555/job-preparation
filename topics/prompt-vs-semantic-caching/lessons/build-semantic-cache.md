@@ -16,6 +16,15 @@ A lookup is a **hit** when the most-similar *non-expired* entry has `cos ≥ thr
 **miss**. Example with `threshold = 0.9`: a stored entry embedded as `[1, 0]` is a hit for a query
 `[1, 0]` (cos = 1) and a miss for `[0, 1]` (cos = 0).
 
+```mermaid
+flowchart TD
+    Q[Incoming request] --> E[Embed to vector]
+    E --> N[Find nearest non-expired entry]
+    N --> C{"cos >= threshold?"}
+    C -->|yes| HIT["Hit: return stored answer"]
+    C -->|no| MISS["Miss: call the model"]
+```
+
 ## Thresholds TTL and false positives
 
 - **Threshold too low → false positives.** This is the failure mode unique to semantic caching:

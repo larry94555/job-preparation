@@ -24,3 +24,12 @@ Track a **catch-rate** — the fraction of adversarial cases the system now hand
 suite **alongside** the golden set in the same regression gate. The golden set proves you didn't
 regress on normal usage; the adversarial suite proves you didn't regress on the dangerous edges.
 Neither replaces the other.
+
+```mermaid
+flowchart LR
+  F["Production failure"] --> N["New adversarial case"]
+  N --> A["Adversarial suite: catch-rate"]
+  G["Golden set: happy path"] --> Gate["Same regression gate"]
+  A --> Gate
+  Gate --> R["Merge or block"]
+```

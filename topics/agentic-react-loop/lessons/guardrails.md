@@ -7,6 +7,16 @@ is not. A model can keep emitting `action` steps forever — chasing a goal it c
 between two tools. The first guardrail is a hard **max-steps cap**: the loop may run at most *N*
 iterations, no matter what the agent wants.
 
+```mermaid
+flowchart TD
+    N{"step n within max_steps?"} -->|no| L["Return answer=None, stopped=step_limit"]
+    N -->|yes| S["client.step"]
+    S --> K{"kind == final?"}
+    K -->|yes| R["Return the answer"]
+    K -->|no| O["Run tool, append observation"]
+    O --> N
+```
+
 ```python
 for n in range(1, max_steps + 1):
     step = client.step(messages)

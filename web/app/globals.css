@@ -244,6 +244,22 @@ button.ghost,
   background: transparent;
   padding: 0;
 }
+/* Mermaid diagrams: no code-block chrome. Before the client renders them the raw
+   source shows briefly (and stays as a fallback if rendering fails); after, the
+   element holds a centered, responsive SVG. */
+.material pre.mermaid {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  margin: 16px 0;
+  text-align: center;
+  line-height: 1.4;
+  overflow-x: auto;
+}
+.material pre.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
 
 .prompt {
   font-size: 17px;

@@ -30,6 +30,13 @@ so that prefill work can be **interleaved** with ongoing decode steps rather tha
 Each scheduling step mixes a slice of prefill with the decode of active requests, keeping inter-token
 latency smooth for everyone.
 
+```mermaid
+flowchart LR
+    C1["step 1: prefill chunk 1 + decode others"] --> C2["step 2: prefill chunk 2 + decode others"]
+    C2 --> C3["step 3: prefill chunk 3 + decode others"]
+    C3 --> Done["prompt prefilled, TPOT stays smooth"]
+```
+
 A more aggressive option is **prefill/decode (P/D) disaggregation** (DistServe, Splitwise): run prefill
 and decode on **separate pools of hardware** so a compute-bound prefill can never interfere with a
 bandwidth-bound decode. Each pool is tuned for its own bottleneck, and TTFT and TPOT SLOs are managed

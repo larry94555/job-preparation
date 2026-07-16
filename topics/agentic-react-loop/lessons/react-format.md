@@ -22,7 +22,16 @@ A **final** step is the same format with the Action lines *absent*: a thought-on
 line, is the model saying "I can answer now." That presence-or-absence of the Action line is exactly the
 signal the parser turns into the step **kind** — `action` when an Action line is present, `final` when it
 is not. This is why the format matters: it is what makes each step machine-routable, so the harness knows
-whether to run a tool and loop or to return and stop. It is also why a ReAct agent beats one-shot
+whether to run a tool and loop or to return and stop.
+
+```mermaid
+flowchart TD
+    S["Parse the emitted step"] --> Q{"Action line present?"}
+    Q -->|yes| AC["kind = action: run tool, then loop"]
+    Q -->|no| FI["kind = final: return answer, stop"]
+```
+
+It is also why a ReAct agent beats one-shot
 answering: the structured Thought → Action → Observation cycle lets it fetch real information and reason
 over what actually came back, instead of committing to an answer from the prompt alone.
 

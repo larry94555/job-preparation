@@ -14,6 +14,18 @@ Then:
 - **quantize:** `q = clamp(round(v / scale) + zeroPoint, 0, 255)`
 - **dequantize:** `v ≈ (q − zeroPoint) × scale`
 
+```mermaid
+flowchart LR
+    V["value v (fp)"] --> D["÷ scale"]
+    D --> R["round"]
+    R --> Z["+ zeroPoint"]
+    Z --> C["clamp 0..255"]
+    C --> Q["stored code q (uint8)"]
+    Q --> ZM["− zeroPoint"]
+    ZM --> M["× scale"]
+    M --> V2["v approx"]
+```
+
 Because you're snapping each value to the nearest of 256 levels, the reconstruction error is at most
 about **half a step** — on the order of `scale`. That's the quality you trade for 4× smaller weights.
 

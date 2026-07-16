@@ -7,6 +7,15 @@ calling a tool, observes what came back, and decides whether it is done. That cy
 **Reason → Act → Observe → Decide** — is the ReAct pattern, and it is what turns a model into an agent
 that works toward a goal instead of guessing in one turn.
 
+```mermaid
+flowchart TD
+    T["Thought: reason about next step"] --> A["Action: call a tool"]
+    A --> O["Observation: real result fed back"]
+    O --> D{"Decide: enough to answer?"}
+    D -->|no| T
+    D -->|yes| F["Final: return the answer"]
+```
+
 Each iteration starts with a **Thought**: the agent reasons, in writing, about what to do next. The
 thought is not decoration — it is what selects the next **Action** (a tool) and its input. Reasoning and
 acting are interleaved: the agent thinks, then acts on that thinking, so the tool it picks is justified

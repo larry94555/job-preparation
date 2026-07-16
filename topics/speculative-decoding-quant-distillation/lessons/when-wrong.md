@@ -5,6 +5,14 @@
 Most mistakes here are lever/goal mismatches — reaching for the tool that does not solve the problem in
 front of you. Diagnose the *goal* first, then pick the lever.
 
+```mermaid
+flowchart TD
+    G{"What is the goal?"}
+    G -->|"Memory / cost"| Q["Quantization or distillation"]
+    G -->|"Latency"| S["Speculative decoding"]
+    G -->|"No quality change allowed"| L["Speculative decoding (lossless)"]
+```
+
 - **Problem: memory/cost — the model barely fits, or cost-per-token is too high.** Reach for
   **quantization** (lower precision, smaller footprint) or **distillation** (a permanently smaller
   student). Reaching for **speculative decoding** here is the classic wrong move: it targets latency,

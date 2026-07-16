@@ -18,6 +18,16 @@ def validate_handoff(output):
     return {"ok": True, "value": output}
 ```
 
+```mermaid
+flowchart LR
+    P["producer agent"] -->|"output"| V{"valid?"}
+    V -->|"ok"| N["next agent"]
+    V -->|"empty / malformed"| S["supervisor"]
+    S --> Retry["retry producer"]
+    S --> Route["route elsewhere"]
+    S --> Stop["stop with error"]
+```
+
 When a handoff is rejected, the supervisor is finished making progress on that path — it can retry the
 producing agent, route elsewhere, or stop with a clear error. What it must **not** do is let an empty
 or malformed output flow on as if it were real. A validated handoff turns a silent, far-away corruption

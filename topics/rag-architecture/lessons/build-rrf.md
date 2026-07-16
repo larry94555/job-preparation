@@ -22,6 +22,13 @@ Worked example — two lists, `k = 60`:
 - `score(c) = 1/(60+3) + 1/(60+2) ≈ 0.03200`
 - Fused order: **`[b, a, c]`** — `b` wins because it's near the top of *both* lists.
 
+```mermaid
+flowchart LR
+    LA["List A: a, b, c"] --> F["Sum 1/(k + rank) per doc"]
+    LB["List B: b, c, a"] --> F
+    F --> R["Sort by score desc: b, a, c"]
+```
+
 ## Details and tie-breaking
 
 - **What `k` does:** the `+k` in the denominator flattens the curve so a single first-place finish

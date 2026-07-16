@@ -9,6 +9,16 @@ request — the system prompt, the whole conversation so far, any retrieved docu
 was trained; it is a per-call token allowance, and once you exceed it the request either errors or the
 harness silently drops the oldest content.
 
+```mermaid
+flowchart TD
+    subgraph W["Context window (one fixed token budget)"]
+        S["System prompt"]
+        H["Conversation history"]
+        R["Retrieved docs / tool results"]
+        O["Tokens about to be generated"]
+    end
+```
+
 For an agent this is the constraint that shapes the whole loop. A long-running agent accumulates tokens
 turn after turn — user messages, its own replies, tool outputs — and the total only grows. Left
 unmanaged it will eventually blow past the window. So a real agent treats context as a **budget** it

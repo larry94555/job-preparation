@@ -10,6 +10,15 @@ The mechanical part is easy — the discipline is carrying the *feature* and *su
 your pipeline so every record can be attributed at all. Once you have labeled records, a feature
 rollup is `{ cost: Σcost, successes: #(success===true) }`.
 
+```mermaid
+flowchart LR
+    A["Labeled records"] --> B{"Group by feature"}
+    B --> C["search bucket"]
+    B --> D["chat bucket"]
+    C --> E["cost = sum, successes = count"]
+    D --> F["cost = sum, successes = count"]
+```
+
 ## Cost per successful task
 
 The metric that actually matters is **cost per successful task** = `total cost / number of successes`

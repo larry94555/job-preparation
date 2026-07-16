@@ -26,6 +26,16 @@ pattern is **validate-repair-fallback**:
 3. **Fallback** — if repair still fails, degrade to a safe default rather than crashing or shipping
    garbage downstream (mitigation).
 
+```mermaid
+flowchart TD
+    P[Model output] --> V{"Valid vs schema? (detection)"}
+    V -->|pass| OK[Accept output]
+    V -->|fail| R["Repair / re-ask with error (mitigation)"]
+    R --> V2{Valid now?}
+    V2 -->|pass| OK
+    V2 -->|"still fails"| F["Fallback: safe default (mitigation)"]
+```
+
 Retrying the identical prompt forever is *not* the pattern — it neither repairs nor bounds cost. To
 **prevent** malformed JSON in the first place, constrain generation with strict schemas or
 constrained decoding so the model can't emit invalid output. Hallucinated tool calls follow the same

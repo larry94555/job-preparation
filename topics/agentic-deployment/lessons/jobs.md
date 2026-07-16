@@ -25,6 +25,16 @@ between them. A **job status** is therefore a small state machine: `queued → r
 where `done`/`failed` are terminal and everything the caller needs (`status`, `result`, `error`) lives
 on the job record keyed by its id.
 
+```mermaid
+stateDiagram-v2
+    [*] --> queued
+    queued --> running: worker claims
+    running --> done: result attached
+    running --> failed: error
+    done --> [*]
+    failed --> [*]
+```
+
 This submit/poll split is what makes an agent operable at scale. It decouples request latency from run
 latency, lets many workers drain the queue in parallel (see
 [task queues and worker pools](../lesson-expert-context)), and gives you a natural place to attach

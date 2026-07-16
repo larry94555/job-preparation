@@ -28,3 +28,10 @@ vs. write/mutating — lets the harness apply the right policy:
 
 Read/write separation is the foundation the rest of reliability builds on: you can only decide "is
 this safe to auto-run?" or "is this safe to retry?" once you know a tool's side-effect class.
+
+```mermaid
+flowchart LR
+    T["tool"] --> C{"side-effect class?"}
+    C -->|read| R["auto-run, retry freely"]
+    C -->|write| W["confirm, validate, idempotency key"]
+```

@@ -25,6 +25,17 @@ message. For these, an allow-list isn't enough; the action needs a gate **before
   threshold, **trip** and halt the run, stopping the agent from repeating a failing or dangerous action
   until the condition clears.
 
+```mermaid
+flowchart TD
+    A["action requested"] --> AL{"on allow-list?"}
+    AL -->|no| DENY["deny by default"]
+    AL -->|yes| HR{"high-risk or irreversible?"}
+    HR -->|no| RUN["execute"]
+    HR -->|yes| HITL{"human approves?"}
+    HITL -->|yes| RUN
+    HITL -->|no| HALT["halt / escalate"]
+```
+
 ## The tradeoff
 
 Guardrails trade **autonomy for safety**. Stricter guardrails — more confirmations, tighter

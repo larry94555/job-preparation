@@ -27,6 +27,14 @@ For latency, the sum or the mean lies to you: a mean can stay flat while the **t
 few very slow requests are hidden by many fast ones. Users feel the tail — the p95 and p99 — not the
 average, so latency is watched as a percentile, not a mean.
 
+```mermaid
+flowchart LR
+    S["spans"] --> G["group by tool"] --> CT["cost by tool"]
+    S --> SUM["sum over window"] --> TC["total cost"]
+    S --> P["p95 / p99"] --> TL["tail latency"]
+    S --> R["rate over window"] --> FR["failure rate"]
+```
+
 The reason this matters is that the metric you compute decides what you can see. A mean latency hides the
 run that hangs; a per-tool cost slice finds the step that got expensive; a failure rate over a window
 surfaces the one-in-a-thousand error that no single run reveals. Pick the aggregate that exposes the

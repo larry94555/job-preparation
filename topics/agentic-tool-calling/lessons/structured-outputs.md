@@ -51,3 +51,12 @@ report = Report.model_validate_json(resp.text)   # still validate values
 Use both together. Structured-outputs mode guarantees the *shape* is valid; a validator like Pydantic
 still enforces the *semantics* the schema can't fully express (a confidence in range, a non-empty
 findings list). Constrained decoding gets you a parseable object; validation gets you a *correct* one.
+
+```mermaid
+flowchart LR
+    P["Prompt + JSON schema"] --> D["Constrained decoding: shape guaranteed"]
+    D --> J["Parse JSON"]
+    J --> V["Validate semantics"]
+    V -->|valid| O["Typed object"]
+    V -->|invalid| E["Raise / recover"]
+```

@@ -36,3 +36,17 @@ The short-term buffer and the working scratchpad live **in context** (they are p
 the next call); the long-term store and episodic history live **externally** and are pulled in on
 demand. Keeping the four straight — recent talk, current task state, durable semantic memory, and a
 run log — is the foundation everything else in this topic builds on.
+
+```mermaid
+flowchart TD
+    A[Agent] --> C
+    A --> X
+    subgraph C["In context (part of next prompt)"]
+        B[Short-term buffer]
+        S[Working scratchpad]
+    end
+    subgraph X["External (pulled in on demand)"]
+        L[Long-term vector store]
+        E[Episodic history]
+    end
+```

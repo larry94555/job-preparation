@@ -26,6 +26,18 @@ each sequence's KV cache in **fixed-size, non-contiguous blocks**, addressed thr
 **block table** — exactly like an OS mapping virtual pages to physical frames. Blocks are allocated on
 demand as a sequence grows and freed when it finishes.
 
+```mermaid
+flowchart LR
+    subgraph BT["Per-sequence block table"]
+      L0["logical block 0"]
+      L1["logical block 1"]
+      L2["logical block 2"]
+    end
+    L0 --> P7["physical block 7"]
+    L1 --> P2["physical block 2"]
+    L2 --> P9["physical block 9"]
+```
+
 This is why paged attention is called the **enabler** for high-throughput continuous batching:
 
 - It nearly eliminates KV fragmentation and max-length over-reservation, so far more concurrent

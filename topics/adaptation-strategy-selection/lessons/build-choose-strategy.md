@@ -22,6 +22,17 @@ Because a request can trip more than one axis, precedence matters:
 3. else `lowLatency` → **distillation**
 4. else → **in-context**
 
+```mermaid
+flowchart TD
+    Start["Adaptation need"] --> Q1{"fresh facts or attribution?"}
+    Q1 -->|yes| RAG["RAG"]
+    Q1 -->|no| Q2{"behavior / format change?"}
+    Q2 -->|yes| FT["Fine-tuning"]
+    Q2 -->|no| Q3{"need lower latency / cost?"}
+    Q3 -->|yes| Distill["Distillation"]
+    Q3 -->|no| ICL["In-context / few-shot"]
+```
+
 The order encodes the antipattern fix: a request that needs **both** fresh facts **and** a format
 change resolves to **rag**, because fine-tuning can't keep facts current — you'd layer a format change
 on top separately, but you never reach for fine-tuning to solve the *facts* problem. Get the ordering

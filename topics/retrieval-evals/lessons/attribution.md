@@ -18,6 +18,16 @@ Attribution correctness is a **per-claim** property, so the eval is per-claim to
 - Sample queries against a **labeled / relevance-judged** set, automate the span check, and route
   low-agreement cases to **human review** to keep the automated judge honest.
 
+```mermaid
+flowchart TD
+    A["Cited claim"] --> B["Span / entailment check by LLM-judge or NLI"]
+    B --> C{"Cited span entails the claim?"}
+    C -->|Yes| D["Supported citation"]
+    C -->|No| E["Fabricated citation"]
+    B --> F{"Low judge agreement?"}
+    F -->|Yes| G["Route to human review"]
+```
+
 ## Attribution vs. grounding
 
 Attribution is a **stricter** form of grounding. Grounding asks whether the answer's claims are

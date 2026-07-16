@@ -18,6 +18,14 @@ The payoff is that one expensive verification pass can confirm *many* tokens at 
 token per pass. Crucially, the accepted tokens are exactly what the target model would have generated
 alone — which is why speculative decoding is **lossless**.
 
+```mermaid
+flowchart LR
+    D["Draft k tokens"] --> V["Verify in one parallel pass"]
+    V --> A["Accept longest correct prefix"]
+    A --> S["Substitute target token at first mismatch"]
+    S --> D
+```
+
 ## Acceptance rate and speedup
 
 The lever only pays off when the draft is *good*. The key metric is the **acceptance rate**: the

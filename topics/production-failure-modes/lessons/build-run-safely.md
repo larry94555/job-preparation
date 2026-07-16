@@ -20,6 +20,16 @@ Two rules make the difference between a guard suite and a new failure mode:
   **always** gets a valid value — never an exception, never a silently-wrong one. And report that the
   fallback was used (an `ok: false`), because a fallback that's invisible becomes a *silent* regression.
 
+```mermaid
+flowchart TD
+    S[Start] --> P["produce()"]
+    P --> G{All guards pass?}
+    G -->|yes| OK["Return value, ok: true"]
+    G -->|no| C{"Attempts less than maxAttempts?"}
+    C -->|yes| P
+    C -->|no| FB["Return fallback, ok: false"]
+```
+
 Worked flow: `produce()` yields values `1, 2, 3, …`; with `guards = [v => v >= 3]` and
 `maxAttempts = 5`, it accepts on the third attempt. With a producer that always fails the guard, it
 calls `produce()` exactly `maxAttempts` times and then returns the fallback with `ok: false`. Bounded,

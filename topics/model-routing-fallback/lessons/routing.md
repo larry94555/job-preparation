@@ -27,6 +27,15 @@ cheap, fast model first, then apply a **quality gate** — a confidence score, a
 or a self-check. If the gate accepts the cheap answer, you're done at low cost. Only when the gate
 *rejects* it does the request **escalate** to a stronger, costlier model.
 
+```mermaid
+flowchart LR
+    R[request] --> C["cheap model"]
+    C --> G{"quality gate"}
+    G -->|accept| Done["return answer"]
+    G -->|reject| S["strong model"]
+    S --> Done
+```
+
 Because most requests pass the gate, a well-tuned cascade gets close to strong-model quality at close
 to cheap-model cost. The tuning is the whole game, though:
 

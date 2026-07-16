@@ -21,6 +21,17 @@ The decisive check is simple: **was the needed passage in the retrieved context?
    tighten the prompt, add faithfulness constraints, or run a grounding check that flags claims not
    entailed by the context.
 
+```mermaid
+flowchart TD
+    A["Wrong answer reported"] --> B{"Needed passage in retrieved context?"}
+    B -->|No| C["Retrieval failure - low recall @ k"]
+    C --> D["Fix upstream: chunking, hybrid search, larger k, rerank"]
+    B -->|Yes| E{"Answer follows from the passage?"}
+    E -->|No| F["Grounding failure"]
+    F --> G["Fix generation: tighten prompt, faithfulness check"]
+    E -->|Yes| H["Grounded / faithful answer"]
+```
+
 An answer that only asserts what the retrieved context supports is called **grounded** (or
 **faithful**). Because end-to-end-only evals conflate these two failures, applying the retrieval fix to
 a grounding bug — or the reverse — burns effort without moving the metric. Isolate first, then fix.

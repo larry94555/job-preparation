@@ -27,7 +27,16 @@ def egress_check(destination_host: str) -> dict:
 
 An egress allow-list is **default-deny**, the same discipline as the output filter: a destination that was
 never explicitly permitted fails closed, so a newly injected `attacker.example` URL is refused without
-anyone having to enumerate every bad host in advance. Redaction and an egress allow-list attack the same
+anyone having to enumerate every bad host in advance.
+
+```mermaid
+flowchart TD
+    D["Allowed tool tries to send data out"] --> Q{"Destination on egress allow-list?"}
+    Q -->|yes| S["Send: data leaves"]
+    Q -->|no| B["Blocked: fail closed"]
+```
+
+Redaction and an egress allow-list attack the same
 leak from two ends — redaction removes the secret from the context so there is less to steal, and egress
 control stops whatever remains from reaching an unapproved destination.
 

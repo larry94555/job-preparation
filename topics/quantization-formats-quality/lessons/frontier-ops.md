@@ -68,5 +68,14 @@ you whether the footprint win was worth the quality you spent, and whether a reg
   your leading indicator — a gate that starts failing on a task you did not watch before is exactly the
   silent regression the whole workflow exists to catch.
 
+```mermaid
+flowchart TD
+    Q["quantize build"] --> E["run task evals vs FP16 baseline"]
+    E --> G{"pass gate?"}
+    G -->|yes| S["ship"]
+    G -->|no| M["mitigate: raise bits / per-group scales / protect layer"]
+    M --> Q
+```
+
 The operational stance in one line: **gate on the per-task eval delta against the FP16 baseline, read the
 throughput and memory win against that delta, and never let a flat perplexity number stand in for either.**

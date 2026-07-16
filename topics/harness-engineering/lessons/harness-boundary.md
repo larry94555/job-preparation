@@ -8,6 +8,21 @@ An LLM feature is two parts with a sharp boundary between them.
 - The **harness** is the code around the model. It owns the **tools**, the **state/session**, the
   **permissions**, the **retries**, the **verification**, the persistence, and the user experience.
 
+```mermaid
+flowchart LR
+    subgraph Model
+      R["Reason: read context, emit text or tool calls"]
+    end
+    subgraph Harness
+      H1["Tools and execution"]
+      H2["Validation and permissions"]
+      H3["Retries and verification"]
+      H4["State, budgets, termination"]
+    end
+    R -->|"tool call"| H1
+    H3 -->|"observation"| R
+```
+
 The single most useful mental model in this field: **reliability lives in the harness, not the
 prompt.** When an LLM feature is flaky in production, the fix is almost always harness work
 (validation, retries, verification, control flow) — not a cleverer wording of the prompt.

@@ -53,6 +53,16 @@ async def bounded(coro):
 results = await asyncio.gather(*(bounded(c) for c in coros))
 ```
 
+```mermaid
+flowchart LR
+    A[Pending task] --> B{"Slot free? (max n)"}
+    B -->|no| W[Wait for a slot]
+    W --> B
+    B -->|yes| R[Acquire and run call]
+    R --> D[Release slot on finish]
+    D --> B
+```
+
 Crucially, you keep most of the fan-out speedup: `n` calls still overlap their waits, so total time is
 roughly `batches × slowest-call` rather than the full sequential sum. The discipline is **bounded
 overlap, not maximal overlap** — fast enough to matter, capped enough to stay under the pool and

@@ -7,6 +7,18 @@ it must **observe** the *real* result before it reasons again. Observing means t
 output and putting it back into the conversation, so the next Thought is grounded in what happened
 rather than in what the model imagined would happen.
 
+```mermaid
+sequenceDiagram
+    participant Agent
+    participant Harness
+    participant Tool
+    Agent->>Harness: Action + input
+    Harness->>Tool: run the tool
+    Tool-->>Harness: real result
+    Harness-->>Agent: Observation fed back
+    Note over Agent: Decide with the real result in hand
+```
+
 The failure mode this prevents is the agent narrating a result it never saw. If the loop lets the model
 "assume" a tool returned success and move on, one hallucinated observation poisons every step after it.
 Feeding back the genuine result — even when it is an error or an empty answer — keeps the agent tied to

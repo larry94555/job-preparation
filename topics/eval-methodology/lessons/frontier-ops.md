@@ -69,3 +69,13 @@ The operational discipline: gate on **regression-gate pass rate**, but only *tru
 **judge–human agreement** stays high and **drift/contamination checks** stay green — and never confuse a
 big **golden set** with a well-*covered* one. The real currency of an eval is a calibrated, uncontaminated
 signal, not a headline score.
+
+```mermaid
+flowchart TD
+  PR["Regression-gate pass rate"] --> Gate["Gate blocks the merge"]
+  AG["Judge-human agreement high"] --> Trust{"Trust the number"}
+  DR["Drift and contamination checks green"] --> Trust
+  Gate --> Trust
+  Trust -->|Yes| Ship["Trust the gated release"]
+  Trust -->|No| Recal["Re-calibrate or refresh set"]
+```

@@ -10,6 +10,15 @@ agent's test suite: you run it before you ship, and you run it after every chang
 The loop is mechanical: for each case, run the agent on the input, judge the output against that case's
 criteria, and tally the verdicts.
 
+```mermaid
+flowchart LR
+    C["each case: input + criteria"] --> A["run agent on input"]
+    A --> J["judge output vs criteria"]
+    J --> T["tally verdicts"]
+    T --> C
+    T --> M["pass_rate + avg_score + failures"]
+```
+
 ```python
 def run_suite(agent, cases, judge):
     results = [judge(c, agent(c["input"])) for c in cases]

@@ -8,6 +8,17 @@ previous token, at every layer. Recomputing them from scratch each step would ma
 tensors for all past tokens, per layer, so each new step only computes K and V for the *one* new
 token and reuses the rest.
 
+Each decode step reuses the whole existing cache, computes K/V for just the new token, and appends
+it — so the cache grows by one token's worth of K/V every step:
+
+```mermaid
+flowchart LR
+  P["cached K/V for tokens 1..t-1"] --> A["attention at step t"]
+  N["new token t"] --> KV["compute K/V for token t only"]
+  KV --> A
+  KV --> G["append to cache: now holds 1..t"]
+```
+
 That cache is not free. It is the reason serving deployments run out of memory:
 
 - **Weights** are a *fixed, one-time cost*. You load them once and every request shares them.

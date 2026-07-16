@@ -23,6 +23,18 @@ def supervise(research_agent, writer_agent, critic_agent, task, max_revisions=3)
     return content                               # give up gracefully after the cap
 ```
 
+```mermaid
+flowchart TD
+    S["supervisor"] --> R["research agent"]
+    R --> S
+    S --> W["writer agent"]
+    W --> S
+    S --> C["critic agent"]
+    C -->|"approved?"| S
+    S -->|"no: revise, bounded"| W
+    S -->|"yes"| OUT["final answer"]
+```
+
 That is the whole shape: a coordinator, a few specialists, and a **bounded** loop. The revision cap is
 not optional — it is what stops a never-satisfied critic from spinning forever (the failure mode a
 later lesson drills).

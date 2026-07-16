@@ -24,6 +24,14 @@ def cascade(task, tiers, confident):
     return answer if confident(answer) else tiers["best"](task)  # escalate on low confidence
 ```
 
+```mermaid
+flowchart LR
+    T["task"] --> C["try cheap tier"]
+    C --> Q{"good enough?"}
+    Q -->|"yes"| K["keep answer"]
+    Q -->|"no"| E["escalate to best tier"]
+```
+
 The reason to track this frontier: it is the same cost-vs-quality tradeoff the routing lesson is built
 on, pushed to where the routing decision is learned and measured rather than assumed. See
 [model-routing-fallback](../model-routing-fallback/topic.yaml) and `reading-list.md`.

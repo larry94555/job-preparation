@@ -20,6 +20,23 @@ one contiguous slab, the KV cache is split into **fixed-size blocks**. Each sequ
 table** — a map from its logical token positions to the physical blocks that hold them, exactly like
 an OS page table maps virtual pages to physical frames.
 
+```mermaid
+flowchart LR
+  subgraph Logical["sequence block table"]
+    L0["logical block 0"]
+    L1["logical block 1"]
+    L2["logical block 2"]
+  end
+  subgraph Physical["physical KV blocks (non-contiguous)"]
+    P7["phys block 7"]
+    P2["phys block 2"]
+    P9["phys block 9"]
+  end
+  L0 --> P7
+  L1 --> P2
+  L2 --> P9
+```
+
 The payoff:
 
 - Physical KV memory **need not be contiguous**; a sequence grows one block at a time, on demand, so

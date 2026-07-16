@@ -7,6 +7,17 @@ in order and returns the result of the **first one that succeeds**. If a provide
 out, rate-limits), the router falls through to the next. If they all fail, it returns a **structured**
 `all_failed` rather than crashing — a hard outage should degrade, not throw.
 
+```mermaid
+flowchart TD
+    R[request] --> P1["primary provider"]
+    P1 -->|success| Out["return + record who served"]
+    P1 -->|fail| P2["backup provider"]
+    P2 -->|success| Out
+    P2 -->|fail| P3["next provider"]
+    P3 -->|success| Out
+    P3 -->|all fail| AF["return all_failed"]
+```
+
 One discipline matters: **record which provider actually served the request**. Silent substitution —
 quietly answering from a different model without saying so — is how consistency bugs and surprising
 quality changes sneak in.

@@ -24,6 +24,15 @@ Three ideas carry the whole model:
   the spans they each emit can be **stitched back into one trace** — even across process and network
   boundaries.
 
+```mermaid
+flowchart TD
+    R["trace: one user request"] --> P["span: plan"]
+    R --> T["span: tool call"]
+    R --> Q["span: retrieval"]
+    T --> Y["span: retry"]
+    Y --> S["span: sub-model call"]
+```
+
 Without the correlation ID, spans from different services are just disconnected log lines. With it,
 you can follow a single request end to end, see its structure, pinpoint the slow or failing step, and
 later roll token counts and cost up the tree.

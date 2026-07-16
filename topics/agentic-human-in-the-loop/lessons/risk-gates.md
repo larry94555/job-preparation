@@ -19,6 +19,17 @@ def execute_with_approval(action, params, approve, execute, audit):
     return {"status": "executed", "result": execute(action, params)}
 ```
 
+```mermaid
+flowchart TD
+    A["agent proposes action"] --> R{"risk == high?"}
+    R -- no --> X["execute"]
+    R -- yes --> P{"human approves?"}
+    P -- no --> J["status: rejected — execute NEVER called"]
+    P -- yes --> X
+    X --> AU["append audit record"]
+    J --> AU
+```
+
 Two properties make this a *gate* and not just a log line. First, on rejection `execute` is **never
 called** — the irreversible thing simply does not happen. A gate that logs "rejected" and then runs the
 action anyway is not a gate. Second, both branches leave an **audit** record behind, so whether the

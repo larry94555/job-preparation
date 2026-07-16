@@ -39,6 +39,18 @@ def revise_until_approved(draft, critic, revise, max_tries=3):
     return {"content": draft, "approved": False, "tries": max_tries}   # bounded exit
 ```
 
+```mermaid
+stateDiagram-v2
+    [*] --> Draft
+    Draft --> Review
+    Review --> Done: approved
+    Review --> Revise: rejected, under cap
+    Revise --> Review
+    Review --> Unapproved: cap reached
+    Done --> [*]
+    Unapproved --> [*]
+```
+
 The pattern generalizes: any loop driven by another agent's judgment must be capped, exactly as a
 single agent's tool loop is capped and budgeted — see
 [agent-guardrails-budgets](../agent-guardrails-budgets/) — and any critic should be graded like any

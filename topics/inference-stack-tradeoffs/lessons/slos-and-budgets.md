@@ -29,6 +29,11 @@ it into additive sub-budgets that add up to 900 ms — for example:
 - prefill (TTFT) — 200 ms
 - decode — 400 ms
 
+```mermaid
+flowchart LR
+    A["network 50 ms"] --> B["queue 100 ms"] --> C["retrieval 150 ms"] --> D["prefill 200 ms"] --> E["decode 400 ms"] --> F["end-to-end p99 900 ms"]
+```
+
 Now every layer has a **concrete target**. When the end-to-end p99 blows the SLO, you measure each
 stage's p99 against its sub-budget, find the stage that overran, and apply the lever whose **dominant
 axis** fixes that stage — while checking the change respects the other SLOs.

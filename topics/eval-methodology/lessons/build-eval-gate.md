@@ -17,6 +17,16 @@ An eval becomes a **regression gate** when you attach a threshold: the build **p
 it ships. Crucially, the gate should also **report which cases failed** (by name) so the failure is
 actionable, not just a red number.
 
+```mermaid
+flowchart LR
+  I["Each input"] --> M["Run system"]
+  M --> Cmp["Compare to expected"]
+  Cmp --> A["Aggregate: passRate = passing / total"]
+  A --> G{"passRate >= threshold"}
+  G -->|Yes| Pass["Build passes"]
+  G -->|No| Fail["Fail build, report failing cases"]
+```
+
 Worked example: 3 cases, 2 match → passRate `= 0.667`. With `threshold = 0.9` the gate **fails**
 (and reports the one failing case); with `threshold = 0.5` it **passes**.
 

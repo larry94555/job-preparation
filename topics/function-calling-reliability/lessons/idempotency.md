@@ -23,6 +23,17 @@ The standard mechanism is an **idempotency key**:
 - Any identical retry with the same key returns the **stored result** instead of re-applying the
   effect.
 
+```mermaid
+sequenceDiagram
+    participant H as Harness
+    participant S as Server
+    H->>S: charge amount 10, key k1
+    S->>S: perform once, record under k1
+    S--xH: response lost in transit
+    H->>S: retry charge, key k1
+    S-->>H: stored result, no second charge
+```
+
 Combined with **read/write separation** — reads retry freely, writes carry keys and confirmation
 gates — idempotency keys turn a fragile, double-charging tool into one that is safe to retry. The
 rule of thumb: never make a mutating tool retryable until repeating its call is provably harmless.

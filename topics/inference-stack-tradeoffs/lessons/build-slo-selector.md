@@ -12,6 +12,15 @@ process, and the order is the whole point:
 2. **Rank** the survivors and pick the best — e.g. highest `quality`, breaking ties by lowest `cost`,
    then lowest `latency`.
 
+```mermaid
+flowchart TD
+    A["Candidate configs"] --> B["Filter: meets all 3 SLOs?"]
+    B --> C{"Any feasible?"}
+    C -->|No| D["Return null"]
+    C -->|Yes| E["Rank survivors: quality, then cost, then latency"]
+    E --> F["Pick best config"]
+```
+
 The classic mistake is to skip step 1 and pick by a blended "score." That will happily choose a
 gorgeous-quality config that blows the latency budget — a config you can't actually ship.
 

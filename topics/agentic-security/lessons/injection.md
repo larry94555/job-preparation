@@ -35,6 +35,13 @@ injection turns that authority against you — the classic **confused deputy** p
 agent) has legitimate permissions; the attacker, who has none, tricks the deputy into *using* its
 permissions on the attacker's behalf. The agent is confused about *who* is really giving the order.
 
+```mermaid
+flowchart LR
+    A["Attacker (no authority)"] -->|hides instruction in content| C["Content the agent fetches"]
+    C --> D["Agent (the deputy, has authority)"]
+    D -->|acts on attacker's behalf| T["Send email / issue refund / delete"]
+```
+
 That framing is why injection is so dangerous in agentic systems specifically. A chatbot that gets
 injected says something wrong. An *agent* that gets injected takes a wrong **action** — it actually sends
 the email, issues the refund, deletes the record. The blast radius is every tool the agent can reach.
