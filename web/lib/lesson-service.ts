@@ -539,12 +539,12 @@ export interface SampleQuestionView {
   inputKind?: "text";
 }
 
-/** One step of the free sample: readable material, a deterministic check, or a
- *  "locked" placeholder standing in for a gated essay/code/assessment step. */
+/** One step of the free sample: readable material or a deterministic check. Gated
+ *  essay/code/assessment steps are omitted entirely — a single "registered users
+ *  only" gate is shown once at the very end of the sample (see SampleClient). */
 export type SampleStep =
   | { kind: "material"; lessonTitle: string; heading: string; html: string }
-  | { kind: "check"; question: SampleQuestionView }
-  | { kind: "locked" };
+  | { kind: "check"; question: SampleQuestionView };
 
 /** Default seed for the sample when a per-load seed isn't supplied. */
 export const SAMPLE_SEED = seedFromString(SAMPLE_TOPIC);
@@ -552,9 +552,9 @@ export const SAMPLE_SEED = seedFromString(SAMPLE_TOPIC);
 /**
  * The free sample flow: the sample topic's playthrough reduced to the steps an
  * anonymous visitor can use — the "present" material and the multiple-choice /
- * fill-in checks. Essay/code ("apply") and section assessments are gated: each
- * is replaced by a single "locked" card (consecutive ones collapse) that the UI
- * turns into a sign-up prompt. No store, no answer keys leave the server.
+ * fill-in checks. Essay/code ("apply") and section assessments are OMITTED (not
+ * shown inline); the UI shows a single "registered users only" gate at the end of
+ * the sample instead. No store, no answer keys leave the server.
  *
  * `seed` (per page load) reshuffles the options each visit; it's echoed back so
  * grading re-derives the identical playthrough. Material prose and MCQ prompts are
@@ -575,7 +575,6 @@ export async function sampleFlow(seed: number = SAMPLE_SEED): Promise<{
     ? paraphrasedPrompts("sample", [...lessonPromptItems(pt), ...materialItems(pt)])
     : new Map<string, string>();
   const steps: SampleStep[] = [];
-  let lastLocked = false;
   for (const step of pt.steps) {
     if (step.kind === "material") {
       steps.push({
@@ -584,7 +583,6 @@ export async function sampleFlow(seed: number = SAMPLE_SEED): Promise<{
         heading: step.heading,
         html: applyMaterialOverrides(step.html, overrides),
       });
-      lastLocked = false;
     } else if (step.kind === "check") {
       const v = step.view as SampleQuestionView;
       steps.push({
@@ -597,12 +595,9 @@ export async function sampleFlow(seed: number = SAMPLE_SEED): Promise<{
           inputKind: v.inputKind,
         },
       });
-      lastLocked = false;
-    } else if (!lastLocked) {
-      // apply (essay/code) or assessment → one sign-up card; collapse a run.
-      steps.push({ kind: "locked" });
-      lastLocked = true;
     }
+    // apply (essay/code) and assessment steps are omitted from the sample; the
+    // "registered users only" gate is shown once at the end by the client.
   }
   return { topicId: topic.topic!.id, topicTitle: pt.topicTitle, seed, steps };
 }
