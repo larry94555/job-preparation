@@ -1,18 +1,36 @@
 sections:
   - id: sec-contract
-    title: "Contracts & validation"
-    lessons: [lesson-contract, lesson-validation, lesson-expert-context, lesson-deep-dive]
+    title: "Tools are APIs: the contract"
+    lessons: [lesson-roadmap-contract, lesson-contract]
     assessment:
-      title: "Section 1 — Contracts & validation"
-      from_tags: [contract, validation]
+      title: "Section 1 — Tools are APIs: the contract"
+      from_tags: [contract]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-validation
+    title: "Argument validation & hallucinated calls"
+    lessons: [lesson-roadmap-validation, lesson-validation]
+    assessment:
+      title: "Section 2 — Argument validation & hallucinated calls"
+      from_tags: [validation]
       count: 5
       pass_threshold: 0.8
 
   - id: sec-idempotency
     title: "Idempotency & safe retries"
-    lessons: [lesson-idempotency, lesson-build-dispatcher, lesson-frontier-ops]
+    lessons: [lesson-roadmap-idempotency, lesson-idempotency, lesson-build-dispatcher]
     assessment:
-      title: "Section 2 — Idempotency & safe retries"
+      title: "Section 3 — Idempotency & safe retries"
       from_tags: [idempotency]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-frontier
+    title: "Design tradeoffs, the frontier & interview"
+    lessons: [lesson-roadmap-frontier, lesson-deep-dive, lesson-expert-context, lesson-frontier-ops]
+    assessment:
+      title: "Section 4 — Design tradeoffs, the frontier & interview"
+      from_tags: [review, frontier]
       count: 5
       pass_threshold: 0.8

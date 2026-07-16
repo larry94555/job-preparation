@@ -31,3 +31,7 @@ A related but distinct concern is the **noisy neighbor**: shared capacity means 
 can degrade latency or throughput for others. That is an *availability* problem, not a *confidentiality*
 leak — but it is another reason isolation boundaries matter. Whichever design you pick, you verify it
 with **isolation tests** that probe for cross-tenant leaks, targeting a cross-tenant leak rate of zero.
+
+This map of surfaces and the sharing-versus-isolation tradeoff is the lens for the whole topic: every
+later lever — cache keys, retrieval filters, session scope — is one of these dimensions, so naming
+where the boundary lives is what keeps a leak from hiding in the surface you forgot.

@@ -24,3 +24,6 @@ The **recall/precision tradeoff** is structural: raise k and you can only find m
 are blind to *order* — a relevant doc at rank 1 and at rank k score identically. When the complaint is
 "the right passage is there but buried," reach for an order-sensitive metric like **MRR** (or nDCG), and
 the fix is often **reranking**.
+
+These three metrics are the vocabulary every retrieval eval is built on: getting them right is what lets
+you blame a bad answer on the *right* stage instead of guessing.

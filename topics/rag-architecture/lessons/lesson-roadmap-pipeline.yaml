@@ -1,0 +1,5 @@
+id: lesson-roadmap-pipeline
+title: "Roadmap: the RAG pipeline"
+material: roadmap-pipeline.md
+segments:
+  - present: roadmap-the-rag-pipeline

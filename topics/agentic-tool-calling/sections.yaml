@@ -1,18 +1,36 @@
 sections:
   - id: sec-toolloop
-    title: "Tool schemas & the tool-use loop"
-    lessons: [lesson-why-tools, lesson-tool-schema, lesson-tool-loop, lesson-expert-context]
+    title: "Tools & the tool-use loop"
+    lessons: [lesson-roadmap-toolloop, lesson-why-tools, lesson-tool-loop, lesson-frontier-ops]
     assessment:
-      title: "Section 1 — Tool schemas & the tool-use loop"
-      from_tags: [toolloop, schema]
+      title: "Section 1 — Tools & the tool-use loop"
+      from_tags: [toolloop]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-schema
+    title: "Typed tool schemas"
+    lessons: [lesson-roadmap-schema, lesson-tool-schema, lesson-expert-context]
+    assessment:
+      title: "Section 2 — Typed tool schemas"
+      from_tags: [schema]
       count: 5
       pass_threshold: 0.8
 
   - id: sec-structured
-    title: "Structured outputs & recovery"
-    lessons: [lesson-structured, lesson-recovery, lesson-frontier-ops]
+    title: "Structured outputs & validation"
+    lessons: [lesson-roadmap-structured, lesson-structured]
     assessment:
-      title: "Section 2 — Structured outputs & recovery"
-      from_tags: [structured, recovery]
+      title: "Section 3 — Structured outputs & validation"
+      from_tags: [structured]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-recovery
+    title: "Recovering from bad tool calls"
+    lessons: [lesson-roadmap-recovery, lesson-recovery]
+    assessment:
+      title: "Section 4 — Recovering from bad tool calls"
+      from_tags: [recovery]
       count: 5
       pass_threshold: 0.8

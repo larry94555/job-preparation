@@ -117,3 +117,6 @@ TTFT and TPOT separately; a **demo-ready** design adds chunked prefill so long p
 decode; and a **production-ready** design also decides — with data — whether P/D disaggregation is
 warranted, benchmarks both SLOs under real concurrency, and routes each workload to the phase-correct
 lever.
+
+This checklist matters because reviews and interviews reward the same move: attributing a latency
+symptom to the right phase and naming the lever that fits it, rather than proposing a fix in the abstract.

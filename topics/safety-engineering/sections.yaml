@@ -1,18 +1,27 @@
 sections:
-  - id: sec-injection-boundaries
-    title: "Injection & trust boundaries"
-    lessons: [lesson-injection, lesson-boundary, lesson-expert-context, lesson-deep-dive, lesson-frontier-ops]
+  - id: sec-injection
+    title: "Prompt injection & the attack surface"
+    lessons: [lesson-roadmap-injection, lesson-injection, lesson-expert-context]
     assessment:
-      title: "Section 1 — Injection & boundaries"
-      from_tags: [injection, boundary]
+      title: "Section 1 — Prompt injection"
+      from_tags: [injection]
       count: 5
       pass_threshold: 0.8
 
-  - id: sec-leakage-permissions
-    title: "Data leakage & permission boundaries"
-    lessons: [lesson-permission, lesson-build-authz, lesson-frontier-ops]
+  - id: sec-boundaries
+    title: "Trust boundaries, fencing & design review"
+    lessons: [lesson-roadmap-boundaries, lesson-boundary, lesson-deep-dive]
     assessment:
-      title: "Section 2 — Leakage & permissions"
-      from_tags: [leakage, permission]
+      title: "Section 2 — Trust boundaries & design review"
+      from_tags: [boundary]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-permissions
+    title: "Permissions, leakage & operating in production"
+    lessons: [lesson-roadmap-permissions, lesson-permission, lesson-build-authz, lesson-frontier-ops]
+    assessment:
+      title: "Section 3 — Permissions & leakage"
+      from_tags: [permission, leakage]
       count: 5
       pass_threshold: 0.8

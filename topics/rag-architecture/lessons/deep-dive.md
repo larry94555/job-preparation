@@ -100,3 +100,6 @@ Rating a design as **toy / prototype / demo-ready / production-ready** comes dow
 it answers. A toy dumps whole docs in the prompt; a prototype chunks and does dense top-k; a demo adds
 hybrid + a reranker; a production-ready design also enriches context, bounds and tunes k, and names an
 explicit freshness policy.
+
+This design-space view is what a review or interview actually tests: the value is in naming the lever,
+its cost, and the regime where it wins — not in reciting a single "best" stack.

@@ -45,3 +45,6 @@ The payoff:
 - The indirection unlocks **prefix sharing**: two sequences that begin with the same prompt prefix
   (say, a shared system prompt) can point their block tables at the **same physical blocks**, so the
   shared prefix is computed and stored **once** instead of per request.
+
+Paging matters because KV capacity is what caps concurrency: packing sequences tightly instead of
+reserving worst-case slabs is what converts wasted HBM back into requests you can actually serve.

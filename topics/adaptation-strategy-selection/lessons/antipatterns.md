@@ -28,3 +28,5 @@ Two more antipatterns are about *timing and proportion*:
 - **Premature distillation** — distilling before behavior is validated just mass-produces an
   unvalidated behavior: the student faithfully copies the teacher's flaws too. Validate first, then
   distill for cheaper serving.
+
+Spotting these is what reads as senior in an interview and design review: each antipattern passes a demo and then goes stale, over-spends, or locks in a slow retraining loop under real traffic.

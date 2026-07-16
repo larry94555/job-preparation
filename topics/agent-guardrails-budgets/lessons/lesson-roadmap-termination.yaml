@@ -1,0 +1,5 @@
+id: lesson-roadmap-termination
+title: "Roadmap: termination & progress detection"
+material: roadmap-termination.md
+segments:
+  - present: roadmap-termination-and-progress-detection

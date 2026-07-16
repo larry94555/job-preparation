@@ -1,0 +1,5 @@
+id: lesson-roadmap-rollout
+title: "Roadmap: safe rollout & rollback"
+material: roadmap-rollout.md
+segments:
+  - present: roadmap-safe-rollout-and-rollback

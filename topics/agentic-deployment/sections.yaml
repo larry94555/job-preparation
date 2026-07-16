@@ -1,18 +1,27 @@
 sections:
   - id: sec-jobapi
     title: "Async job API"
-    lessons: [lesson-async-api, lesson-jobs, lesson-job-durability, lesson-expert-context]
+    lessons: [lesson-roadmap-jobapi, lesson-async-api, lesson-jobs, lesson-job-durability, lesson-expert-context]
     assessment:
       title: "Section 1 — Async job API"
       from_tags: [asyncapi, jobs]
       count: 5
       pass_threshold: 0.8
 
-  - id: sec-operability
-    title: "Operability"
-    lessons: [lesson-operability, lesson-rollout, lesson-frontier-ops]
+  - id: sec-ratelimit
+    title: "Rate limiting"
+    lessons: [lesson-roadmap-ratelimit, lesson-operability]
     assessment:
-      title: "Section 2 — Operability"
-      from_tags: [ratelimit, rollout]
+      title: "Section 2 — Rate limiting"
+      from_tags: [ratelimit]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-rollout
+    title: "Safe rollout & rollback"
+    lessons: [lesson-roadmap-rollout, lesson-rollout, lesson-frontier-ops]
+    assessment:
+      title: "Section 3 — Safe rollout & rollback"
+      from_tags: [rollout]
       count: 5
       pass_threshold: 0.8

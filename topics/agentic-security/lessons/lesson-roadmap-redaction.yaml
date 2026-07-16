@@ -1,0 +1,5 @@
+id: lesson-roadmap-redaction
+title: "Roadmap: redaction and egress control"
+material: roadmap-redaction.md
+segments:
+  - present: roadmap-redaction-and-egress-control

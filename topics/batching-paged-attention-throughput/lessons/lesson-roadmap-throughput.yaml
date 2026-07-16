@@ -1,0 +1,5 @@
+id: lesson-roadmap-throughput
+title: "Roadmap: throughput, latency & goodput"
+material: roadmap-throughput.md
+segments:
+  - present: roadmap-throughput-latency-and-goodput

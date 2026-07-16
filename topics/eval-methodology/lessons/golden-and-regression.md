@@ -39,3 +39,6 @@ Two failure modes to guard against:
   never sees, and rotate in fresh cases.
 - **Stale sets** — a golden set that never changes stops reflecting real usage. Feed real production
   failures back into it over time.
+
+The golden set plus a regression gate is the baseline discipline every other technique builds on: it
+converts arguments about quality into a number CI can block on, which is what makes progress cumulative.

@@ -41,3 +41,7 @@ Retrying the identical prompt forever is *not* the pattern — it neither repair
 constrained decoding so the model can't emit invalid output. Hallucinated tool calls follow the same
 shape: validate the call against an allowlist/schema, re-ask on failure, and fall back to refusing
 the action.
+
+**Why it matters.** Detection, mitigation, and prevention are three different jobs; a system that
+blurs them either over-reacts to noise or leaves silent gaps, so naming which one you're doing is
+what turns a pile of guards into a reliable playbook.

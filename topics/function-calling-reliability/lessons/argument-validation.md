@@ -38,3 +38,6 @@ flowchart TD
     E2 --> R
     R --> P
 ```
+
+Validation matters because it is the single seam where an untrusted caller is held to the contract —
+without it, a hallucinated or malformed call becomes a wrong side effect instead of a self-correcting retry.

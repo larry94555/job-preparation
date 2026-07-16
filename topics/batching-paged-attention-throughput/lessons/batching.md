@@ -38,3 +38,7 @@ flowchart TD
     C --> E["Head-of-line blocking: wasted GPU cycles"]
     D --> F["Batch stays full of useful work"]
 ```
+
+**Why it matters.** Batch formation is the single biggest structural lever on serving throughput —
+moving from static to continuous batching is what keeps the GPU doing useful work under real,
+variable-length traffic instead of idling behind one slow request.

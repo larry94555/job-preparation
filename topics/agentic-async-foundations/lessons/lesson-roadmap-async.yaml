@@ -1,0 +1,5 @@
+id: lesson-roadmap-async
+title: "Roadmap: the event loop & async concurrency"
+material: roadmap-async.md
+segments:
+  - present: roadmap-the-event-loop-and-async-concurrency

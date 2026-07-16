@@ -1,0 +1,5 @@
+id: lesson-roadmap-semantic
+title: "Roadmap: semantic caching"
+material: roadmap-semantic.md
+segments:
+  - present: roadmap-semantic-caching

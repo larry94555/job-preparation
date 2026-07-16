@@ -1,18 +1,27 @@
 sections:
-  - id: sec-concurrency
-    title: "Concurrency & the event loop"
-    lessons: [lesson-why-async, lesson-async-patterns, lesson-structured-concurrency, lesson-expert-context]
+  - id: sec-async
+    title: "The event loop & async concurrency"
+    lessons: [lesson-roadmap-async, lesson-why-async, lesson-async-patterns, lesson-structured-concurrency, lesson-expert-context]
     assessment:
-      title: "Section 1 — Concurrency & the event loop"
-      from_tags: [concurrency, eventloop]
+      title: "Section 1 — The event loop & async concurrency"
+      from_tags: [eventloop, concurrency]
       count: 5
       pass_threshold: 0.8
 
   - id: sec-resilience
-    title: "Resilient calls"
-    lessons: [lesson-resilient-calls, lesson-error-isolation, lesson-frontier-ops]
+    title: "Resilient calls: timeouts, retries, backoff & jitter"
+    lessons: [lesson-roadmap-resilience, lesson-resilient-calls, lesson-frontier-ops]
     assessment:
       title: "Section 2 — Resilient calls"
-      from_tags: [resilience, errors]
+      from_tags: [resilience]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-errors
+    title: "Isolating failures in a fan-out"
+    lessons: [lesson-roadmap-errors, lesson-error-isolation]
+    assessment:
+      title: "Section 3 — Isolating failures in a fan-out"
+      from_tags: [errors]
       count: 5
       pass_threshold: 0.8

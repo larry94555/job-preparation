@@ -1,0 +1,5 @@
+id: lesson-roadmap-resilience
+title: "Roadmap: resilient remote calls"
+material: roadmap-resilience.md
+segments:
+  - present: roadmap-resilient-remote-calls

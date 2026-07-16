@@ -1,0 +1,5 @@
+id: lesson-roadmap-failure
+title: "Roadmap: Failure modes & scale"
+material: roadmap-failure.md
+segments:
+  - present: roadmap-failure-modes-and-scale

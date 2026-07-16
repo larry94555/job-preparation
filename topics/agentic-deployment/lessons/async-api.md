@@ -56,3 +56,6 @@ flowchart LR
 
 The one thing the caller now needs is a way to ask *"is my job done yet?"* — which is the next lesson:
 [polling for the result](../lesson-jobs).
+
+This matters because it is the move that turns an agent into a service at all: bounding the request from
+the caller's point of view is what keeps the system responsive no matter how long a run takes.

@@ -55,3 +55,6 @@ regression, and you only see it because you tracked hallucination separately. Th
 suite on every change is to catch regressions *before* they ship — a metric that only moves in reports
 you read after an incident is not protecting anyone. This repo's meta-eval gate is the same idea one
 level up: it runs the judge against calibration cases on every change and reports when a metric slips.
+
+The suite matters because it is what turns one lucky transcript into a measurement you can trust — the
+fixed, repeatable ground the deploy gate stands on.

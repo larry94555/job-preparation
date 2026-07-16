@@ -1,0 +1,5 @@
+id: lesson-roadmap-schema
+title: "Roadmap: typed tool schemas"
+material: roadmap-schema.md
+segments:
+  - present: roadmap-typed-tool-schemas

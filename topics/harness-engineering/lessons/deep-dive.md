@@ -112,3 +112,7 @@ Rating a design as **toy / prototype / demo-ready / production-ready** comes dow
 these it answers. A toy is prompt-only with no harness; a prototype has a tool loop; a demo verifies
 and budgets it; a production-ready design also has typed idempotent tools, an explicit failure/
 recovery policy, and orchestration whose complexity is justified rather than reflexive.
+
+This checklist matters because it is the reusable lens a design review or interview actually rewards:
+it lets you place any harness on the toy→production ladder in minutes and name the one lever that
+would move it up.

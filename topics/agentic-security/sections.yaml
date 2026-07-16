@@ -1,18 +1,36 @@
 sections:
   - id: sec-injection
     title: "Prompt injection"
-    lessons: [lesson-injection, lesson-separation, lesson-expert-context]
+    lessons: [lesson-roadmap-injection, lesson-injection, lesson-expert-context, lesson-frontier-ops]
     assessment:
       title: "Section 1 — Prompt injection"
-      from_tags: [injection, separation]
+      from_tags: [injection]
       count: 5
       pass_threshold: 0.8
 
-  - id: sec-guardrails
-    title: "Guardrails"
-    lessons: [lesson-guardrails, lesson-redaction, lesson-egress, lesson-frontier-ops]
+  - id: sec-separation
+    title: "Separating & sanitizing"
+    lessons: [lesson-roadmap-separation, lesson-separation]
     assessment:
-      title: "Section 2 — Guardrails"
-      from_tags: [sandbox, redaction]
+      title: "Section 2 — Separating & sanitizing"
+      from_tags: [separation]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-sandbox
+    title: "Sandboxing untrusted code"
+    lessons: [lesson-roadmap-sandbox, lesson-guardrails]
+    assessment:
+      title: "Section 3 — Sandboxing untrusted code"
+      from_tags: [sandbox]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-redaction
+    title: "Redaction & egress control"
+    lessons: [lesson-roadmap-redaction, lesson-redaction, lesson-egress]
+    assessment:
+      title: "Section 4 — Redaction & egress control"
+      from_tags: [redaction]
       count: 5
       pass_threshold: 0.8

@@ -1,0 +1,5 @@
+id: lesson-roadmap-drift-capture
+title: "Roadmap: drift, canaries, capture & replay"
+material: roadmap-drift-capture.md
+segments:
+  - present: roadmap-drift-canaries-capture-and-replay

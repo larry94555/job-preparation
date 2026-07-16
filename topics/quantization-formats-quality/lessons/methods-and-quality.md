@@ -34,3 +34,6 @@ domain tasks, and specifically probe long-context and reasoning cases, comparing
 **baseline**. If quality regresses, the mitigations are the levers from the earlier lessons: prefer
 weight-only over weight+activation, raise the bit-width or use per-channel scales, protect sensitive
 layers, or switch to a stronger method (AWQ/GPTQ/SmoothQuant).
+
+This is the crux of the whole topic: the method is what keeps a 4x-smaller model accurate, and the
+right quality metric is what keeps you from shipping a regression you never measured.

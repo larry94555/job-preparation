@@ -33,3 +33,6 @@ Because of this, "just add more context" plateaus and then reverses: past a poin
 task quality instead of raising it. Token **accounting** — knowing how many tokens each candidate
 costs and what remains in the budget — is a core skill. When the budget is tight, the disciplined
 move is to **compress** (summarize) or **drop** low-relevance content, not to keep concatenating.
+
+This budget mindset matters because it is the foundation the rest of context engineering builds on:
+position, selection, and compaction are all just ways of spending a fixed budget well.

@@ -1,18 +1,27 @@
 sections:
-  - id: sec-phases-metrics
-    title: "Foundations: phases & metrics"
-    lessons: [lesson-phases, lesson-metrics, lesson-expert-context]
+  - id: sec-phases
+    title: "The two phases and their bottlenecks"
+    lessons: [lesson-roadmap-phases, lesson-phases]
     assessment:
-      title: "Section 1 — Phases & metrics"
-      from_tags: [phases, metrics]
+      title: "Section 1 — Prefill & decode phases"
+      from_tags: [phases]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-metrics
+    title: "TTFT vs. TPOT: one metric per phase"
+    lessons: [lesson-roadmap-metrics, lesson-metrics]
+    assessment:
+      title: "Section 2 — TTFT & TPOT metrics"
+      from_tags: [metrics]
       count: 5
       pass_threshold: 0.8
 
   - id: sec-optimization
-    title: "Optimization: batching, chunked prefill & disaggregation"
-    lessons: [lesson-batching, lesson-build-latency-model, lesson-deep-dive, lesson-frontier-ops]
+    title: "Optimizing serving: batching, scheduling & disaggregation"
+    lessons: [lesson-roadmap-optimization, lesson-batching, lesson-build-latency-model, lesson-deep-dive, lesson-frontier-ops, lesson-expert-context]
     assessment:
-      title: "Section 2 — Batching & scheduling"
+      title: "Section 3 — Batching, scheduling & disaggregation"
       from_tags: [optimization]
       count: 5
       pass_threshold: 0.8

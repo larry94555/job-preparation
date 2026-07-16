@@ -1,0 +1,5 @@
+id: lesson-roadmap-errors
+title: "Roadmap: isolating failures in a fan-out"
+material: roadmap-errors.md
+segments:
+  - present: roadmap-isolating-failures-in-a-fan-out

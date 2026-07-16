@@ -1,18 +1,36 @@
 sections:
   - id: sec-formats
-    title: "Formats & what to quantize"
-    lessons: [lesson-formats, lesson-what-to-quantize, lesson-expert-context]
+    title: "Numeric formats & footprint"
+    lessons: [lesson-roadmap-formats, lesson-formats, lesson-build-int8-quant]
     assessment:
-      title: "Section 1 — Formats, footprint & targets"
-      from_tags: [formats, quality]
+      title: "Section 1 — Numeric formats & footprint"
+      from_tags: [formats]
       count: 5
       pass_threshold: 0.8
 
-  - id: sec-methods
-    title: "Methods & quality"
-    lessons: [lesson-methods-quality, lesson-build-int8-quant, lesson-deep-dive, lesson-frontier-ops]
+  - id: sec-targets
+    title: "What to quantize: weights, activations & KV cache"
+    lessons: [lesson-roadmap-targets, lesson-what-to-quantize]
     assessment:
-      title: "Section 2 — Methods & when quantization hurts"
-      from_tags: [methods, quality]
+      title: "Section 2 — What to quantize"
+      from_tags: [quality]
+      count: 4
+      pass_threshold: 0.8
+
+  - id: sec-methods
+    title: "Methods: GPTQ, AWQ & SmoothQuant"
+    lessons: [lesson-roadmap-methods, lesson-methods-quality, lesson-deep-dive]
+    assessment:
+      title: "Section 3 — Methods & when quality slips"
+      from_tags: [methods]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-frontier
+    title: "Frontier & production operations"
+    lessons: [lesson-roadmap-frontier, lesson-frontier-ops, lesson-expert-context]
+    assessment:
+      title: "Section 4 — Frontier & production operations"
+      from_tags: [frontier, ops]
       count: 5
       pass_threshold: 0.8

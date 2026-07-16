@@ -1,0 +1,5 @@
+id: lesson-roadmap-drivers
+title: "Roadmap: cost drivers & the granularity trap"
+material: roadmap-drivers.md
+segments:
+  - present: roadmap-cost-drivers-and-the-granularity-trap

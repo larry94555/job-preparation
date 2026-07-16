@@ -1,0 +1,5 @@
+id: lesson-roadmap-supervisor
+title: "Roadmap: When multi-agent helps & the supervisor pattern"
+material: roadmap-supervisor.md
+segments:
+  - present: roadmap-when-multi-agent-helps-and-the-supervisor-pattern

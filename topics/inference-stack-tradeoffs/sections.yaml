@@ -1,18 +1,27 @@
 sections:
-  - id: sec-tradeoffs-levers
-    title: "Foundations: the four-way tradeoff & per-layer levers"
-    lessons: [lesson-tradeoffs, lesson-levers, lesson-expert-context, lesson-deep-dive, lesson-frontier-ops]
+  - id: sec-tradeoffs
+    title: "The four-way tradeoff & no free lunch"
+    lessons: [lesson-roadmap-tradeoffs, lesson-tradeoffs, lesson-deep-dive]
     assessment:
-      title: "Section 1 — Tradeoffs & levers"
-      from_tags: [tradeoffs, levers]
+      title: "Section 1 — The four-way tradeoff"
+      from_tags: [tradeoffs]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-levers
+    title: "Per-layer levers & their dominant axis"
+    lessons: [lesson-roadmap-levers, lesson-levers, lesson-expert-context]
+    assessment:
+      title: "Section 2 — Per-layer levers"
+      from_tags: [levers]
       count: 5
       pass_threshold: 0.8
 
   - id: sec-slos
-    title: "SLOs as the anchor & budget decomposition"
-    lessons: [lesson-slos, lesson-build-slo-selector, lesson-frontier-ops]
+    title: "SLOs, budgets & operating the stack"
+    lessons: [lesson-roadmap-slos, lesson-slos, lesson-build-slo-selector, lesson-frontier-ops]
     assessment:
-      title: "Section 2 — SLOs & budgets"
+      title: "Section 3 — SLOs & operating the stack"
       from_tags: [slos]
       count: 5
       pass_threshold: 0.8

@@ -39,3 +39,6 @@ So a section that doesn't fit is **skipped whole** (keep it simple), and the ass
 Worked example: sections `A(priority 3, 100 tokens)`, `C(priority 2, 100)`, `B(priority 1, 50)`,
 budget `220` → include `A` and `C` (200 tokens); `B` would make 250, so it's dropped. Raise the budget
 to 260 and `B` fits too. The ranking decides *what* survives when the budget is tight.
+
+This rank-then-fit assembler matters because it is the concrete, testable core of context engineering:
+it turns "spend the budget on what matters" from a slogan into code you can run.

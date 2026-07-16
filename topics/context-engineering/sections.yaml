@@ -1,18 +1,36 @@
 sections:
-  - id: sec-budget-position
-    title: "Budget & position"
-    lessons: [lesson-budget, lesson-position, lesson-expert-context]
+  - id: sec-budget
+    title: "The ranked token budget"
+    lessons: [lesson-roadmap-budget, lesson-budget]
     assessment:
-      title: "Section 1 — Budget & position"
-      from_tags: [budget, position]
+      title: "Section 1 — The ranked token budget"
+      from_tags: [budget]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-position
+    title: "Position effects"
+    lessons: [lesson-roadmap-position, lesson-position]
+    assessment:
+      title: "Section 2 — Position effects"
+      from_tags: [position]
       count: 5
       pass_threshold: 0.8
 
   - id: sec-selection
     title: "Selection & retrieval"
-    lessons: [lesson-selection, lesson-build-assemble-context, lesson-deep-dive, lesson-frontier-ops]
+    lessons: [lesson-roadmap-selection, lesson-selection, lesson-build-assemble-context]
     assessment:
-      title: "Section 2 — Selection & retrieval"
+      title: "Section 3 — Selection & retrieval"
       from_tags: [selection]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-frontier
+    title: "Reviewing, operating & the frontier"
+    lessons: [lesson-roadmap-frontier, lesson-deep-dive, lesson-expert-context, lesson-frontier-ops]
+    assessment:
+      title: "Section 4 — Reviewing, operating & the frontier"
+      from_tags: [review, frontier, ops, canon, interview]
       count: 5
       pass_threshold: 0.8

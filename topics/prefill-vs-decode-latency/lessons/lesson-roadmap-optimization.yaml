@@ -1,0 +1,5 @@
+id: lesson-roadmap-optimization
+title: "Roadmap: optimizing prefill and decode"
+material: roadmap-optimization.md
+segments:
+  - present: roadmap-optimizing-prefill-and-decode

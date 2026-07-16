@@ -1,0 +1,5 @@
+id: lesson-roadmap-resilience
+title: "Roadmap: Resilience — breakers, backoff & hedging"
+material: roadmap-resilience.md
+segments:
+  - present: roadmap-resilience-breakers-backoff-hedging

@@ -40,3 +40,6 @@ criteria** rather than "is this good?"; that is the next lesson. A strong model 
 what turns a vibe into a measurement. This repo's own **meta-eval gate** is a worked example: it uses an
 LLM judge, pinned to a fixed model and calibrated against labeled exemplars, to grade the very essays and
 code you are studying now.
+
+The LLM-as-judge matters because it is what makes open-ended agent output *measurable* at all — without a
+judge you can automate, "seems fine" never becomes a number you can track or gate on.

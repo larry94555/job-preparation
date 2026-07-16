@@ -36,3 +36,6 @@ successes `2` → **cost/success = $2**.
 
 One edge case to guard: a feature with **zero** successes has no cost-per-success — return `null`
 (or "N/A"), never `NaN` from dividing by zero.
+
+**Why it matters.** Building the rollup yourself is what turns cost attribution from a slogan into a
+number you can act on — and choosing successes as the denominator is what makes that number honest.

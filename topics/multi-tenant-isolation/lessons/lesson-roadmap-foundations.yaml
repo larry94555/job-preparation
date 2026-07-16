@@ -1,0 +1,5 @@
+id: lesson-roadmap-foundations
+title: "Roadmap: isolation dimensions & the threat model"
+material: roadmap-foundations.md
+segments:
+  - present: roadmap-isolation-dimensions-and-the-threat-model

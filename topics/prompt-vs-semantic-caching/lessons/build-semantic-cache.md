@@ -38,3 +38,7 @@ flowchart TD
   return it if it clears the threshold — don't return the first entry that happens to be near.
 - **Multi-tenant safety (preview of a later topic):** the cache key/namespace must include the tenant
   so one user's cached answer can never surface for another. A tenant-blind semantic cache leaks.
+
+**Why it matters.** Building the cache makes the three decisions concrete — similarity, threshold, and
+expiry are exactly the knobs a real semantic layer exposes, and each one is a place a wrong or stale
+answer can slip through.

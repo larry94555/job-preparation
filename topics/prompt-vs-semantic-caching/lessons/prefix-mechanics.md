@@ -30,3 +30,6 @@ prompt is unchanged:
 
 The rule of thumb: keep the front of the prompt **byte-for-byte identical** across requests, and push
 every source of variation to the end.
+
+**Why it matters.** Prompt structure is the one prefix-cache lever you fully control at serving time,
+and it is free — get it right and every request pays for its short tail instead of the whole prompt.

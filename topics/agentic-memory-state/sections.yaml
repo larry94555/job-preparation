@@ -1,7 +1,7 @@
 sections:
   - id: sec-memories
     title: "The four memories"
-    lessons: [lesson-four-memories, lesson-memory-types, lesson-expert-context]
+    lessons: [lesson-roadmap-memories, lesson-four-memories, lesson-memory-types, lesson-expert-context]
     assessment:
       title: "Section 1 — The four memories"
       from_tags: [memory, types]
@@ -9,10 +9,19 @@ sections:
       pass_threshold: 0.8
 
   - id: sec-compression
-    title: "Compression & recall"
-    lessons: [lesson-compression, lesson-compression-practice, lesson-recall, lesson-frontier-ops]
+    title: "Compressing the context window"
+    lessons: [lesson-roadmap-compression, lesson-compression, lesson-compression-practice]
     assessment:
-      title: "Section 2 — Compression & recall"
-      from_tags: [compression, recall]
+      title: "Section 2 — Compressing the context window"
+      from_tags: [compression]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-recall
+    title: "Recall across sessions"
+    lessons: [lesson-roadmap-recall, lesson-recall, lesson-frontier-ops]
+    assessment:
+      title: "Section 3 — Recall across sessions"
+      from_tags: [recall]
       count: 5
       pass_threshold: 0.8

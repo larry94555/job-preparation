@@ -35,3 +35,6 @@ Truncation is common enough to call out on its own. If a response ends mid-objec
 not the model "giving up" — it is hitting the **output length limit** (`max_tokens` or the equivalent
 output cap). The fix is to raise the output-token budget or reduce how much you ask for; a validator
 should also *detect* truncation and route it into repair rather than passing a half-object downstream.
+
+Naming these classes is the foundation for everything that follows: you can only detect, log, and
+recover from a failure once you can say precisely which kind it is.

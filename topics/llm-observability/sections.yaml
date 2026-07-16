@@ -1,18 +1,36 @@
 sections:
-  - id: sec-traces-signals
-    title: "Traces & the core signals"
-    lessons: [lesson-tracing, lesson-signals, lesson-build-token-rollup, lesson-expert-context]
+  - id: sec-tracing
+    title: "Traces & spans"
+    lessons: [lesson-roadmap-tracing, lesson-tracing]
     assessment:
-      title: "Section 1 — Traces & signals"
-      from_tags: [tracing, signals]
+      title: "Section 1 — Traces & spans"
+      from_tags: [tracing]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-signals
+    title: "The core signals & rollups"
+    lessons: [lesson-roadmap-signals, lesson-signals, lesson-build-token-rollup]
+    assessment:
+      title: "Section 2 — The core signals & rollups"
+      from_tags: [signals]
       count: 5
       pass_threshold: 0.8
 
   - id: sec-drift-capture
-    title: "Drift, canaries & capture/replay"
-    lessons: [lesson-drift-capture, lesson-deep-dive, lesson-frontier-ops]
+    title: "Drift, canaries, capture & replay"
+    lessons: [lesson-roadmap-drift-capture, lesson-drift-capture]
     assessment:
-      title: "Section 2 — Drift & capture"
+      title: "Section 3 — Drift, canaries, capture & replay"
       from_tags: [drift, capture]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-frontier
+    title: "Reviewing & operating at the frontier"
+    lessons: [lesson-roadmap-frontier, lesson-deep-dive, lesson-frontier-ops, lesson-expert-context]
+    assessment:
+      title: "Section 4 — Reviewing & operating at the frontier"
+      from_tags: [frontier, review, ops]
       count: 5
       pass_threshold: 0.8

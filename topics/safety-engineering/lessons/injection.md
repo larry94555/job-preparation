@@ -38,3 +38,7 @@ legitimate requests; tuned loose enough to be usable, it misses attacks.
 So filtering must be treated as **one layer among several** — this is **defense-in-depth**. The other
 layers (fencing untrusted content, least-privilege tools, gating egress) don't try to detect the
 attack at all; they limit what an attack can *do* once it lands.
+
+This matters because injection is the root threat the rest of this topic defends against: once you
+accept that detection can't fully stop it, every later layer — boundaries, least privilege, egress
+control — becomes a deliberate choice about containment rather than a hope that a filter caught it.

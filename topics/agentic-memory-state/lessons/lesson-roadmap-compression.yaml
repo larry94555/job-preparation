@@ -1,0 +1,5 @@
+id: lesson-roadmap-compression
+title: "Roadmap: compressing the context window"
+material: roadmap-compression.md
+segments:
+  - present: roadmap-compressing-the-context-window

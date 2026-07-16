@@ -55,5 +55,9 @@ agent decides when it is done by emitting a `final` — the loop is adaptive, dr
 rather than a counter. (The `max_steps` cap in the last line is the guardrail the next section is
 about; here it is only the backstop.)
 
+This loop is why a single agent is more than a one-shot answer: closing the cycle between thinking,
+acting, and observing is what lets it work toward a goal — and everything later in this topic is a
+guardrail bolted onto it.
+
 See [harness-engineering](../../harness-engineering/) for the harness that owns this loop, and
 [agent-guardrails-budgets](../../agent-guardrails-budgets/) for the budgets that bound it.

@@ -113,3 +113,6 @@ flowchart LR
     B --> C["demo: validate and reject"]
     C --> D["production: read/write split, idempotent, evaluated"]
 ```
+
+This design-space view matters because it is the interview answer in miniature: naming each lever, its
+cost, and the regime where it wins is what separates a shallow "just let the model call the tools" from a senior reliability design.

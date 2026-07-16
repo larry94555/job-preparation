@@ -1,0 +1,5 @@
+id: lesson-roadmap-adversarial
+title: "Roadmap: adversarial & edge-case coverage"
+material: roadmap-adversarial.md
+segments:
+  - present: roadmap-adversarial-and-edge-case-coverage

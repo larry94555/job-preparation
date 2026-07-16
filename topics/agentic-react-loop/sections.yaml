@@ -1,7 +1,7 @@
 sections:
   - id: sec-reactloop
     title: "The ReAct loop"
-    lessons: [lesson-react-loop, lesson-reason-act-observe, lesson-react-format, lesson-expert-context]
+    lessons: [lesson-roadmap-reactloop, lesson-react-loop, lesson-reason-act-observe, lesson-react-format, lesson-expert-context]
     assessment:
       title: "Section 1 — The ReAct loop"
       from_tags: [react, loop]
@@ -10,9 +10,18 @@ sections:
 
   - id: sec-guardrails
     title: "Guardrails on the loop"
-    lessons: [lesson-guardrails, lesson-validate-outputs, lesson-frontier-ops]
+    lessons: [lesson-roadmap-guardrails, lesson-guardrails, lesson-frontier-ops]
     assessment:
       title: "Section 2 — Guardrails on the loop"
-      from_tags: [guardrails, validation]
+      from_tags: [guardrails]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-validation
+    title: "Validating tool outputs"
+    lessons: [lesson-roadmap-validation, lesson-validate-outputs]
+    assessment:
+      title: "Section 3 — Validating tool outputs"
+      from_tags: [validation]
       count: 5
       pass_threshold: 0.8
