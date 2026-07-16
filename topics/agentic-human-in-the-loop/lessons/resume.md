@@ -16,6 +16,18 @@ decision = wait_for_human(state.pending_action)
 result = resume(state, decision)      # continue from the saved state, not from scratch
 ```
 
+```mermaid
+stateDiagram-v2
+    [*] --> Running
+    Running --> Paused: reaches high risk action
+    Paused --> Resumed: human approves or edits
+    Paused --> Rejected: human rejects
+    Paused --> Rejected: timeout fails safe
+    Resumed --> Running: continue from saved state
+    Running --> [*]: task complete
+    Rejected --> [*]
+```
+
 Clean resumption means the pause is **durable**: the agent's state — its plan, its messages, the
 pending action — is saved so a person can take minutes, hours, or days to respond and the agent resumes
 correctly when they do. This is why the pattern needs persisted state, not just an in-memory

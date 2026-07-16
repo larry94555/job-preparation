@@ -13,6 +13,14 @@ query and each stored item (the same embedding search a vector store provides), 
 with recency or importance. You **rank** the stored items by that score and take the top few. The
 agent recalls by asking "what do I know that bears on *this*?" rather than "what do I know?".
 
+```mermaid
+flowchart LR
+    Q[Current query] --> R["Similarity search (external store)"]
+    S[(Long-term store)] --> R
+    R --> K["Rank by relevance, take top-k"]
+    K --> C[Inject only top-k into context]
+```
+
 ## Why ranking matters
 
 The reason relevance and ranking are not optional is that **irrelevant recall is actively harmful**,

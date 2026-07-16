@@ -30,6 +30,17 @@ Each step is a smaller promise than the last: try to get the full structure; if 
 if not, a safe default value; and only then a human. The chain guarantees the caller always gets
 *something valid* — never a crash and never a silently-wrong result.
 
+```mermaid
+flowchart TD
+    CD["constrained decode"] --> V{"validate"}
+    V -->|valid| OK["return valid object"]
+    V -->|invalid| R["bounded repair: feed error back"]
+    R --> V
+    R -->|"attempts exhausted (N)"| SS["simpler schema"]
+    SS --> DEF["deterministic default"]
+    DEF --> HUM["human review"]
+```
+
 Putting it together, robust structured output is four layers: **prevent** (constrained decoding),
 **validate** (schema as contract), **repair** (bounded, error-fed), and **fall back** (a safe chain).
 Budget each layer, log the failures, and the "the model usually returns valid JSON" gamble becomes an

@@ -15,6 +15,15 @@ Because their strengths are complementary, **hybrid search** runs both and fuses
 **rank position** (summing 1/(k + rank)), sidestepping the fact that cosine scores and BM25 scores
 live on incomparable scales.
 
+```mermaid
+flowchart LR
+    Q["Query"] --> D["Dense retrieval (ANN)"]
+    Q --> S["Sparse retrieval (BM25)"]
+    D --> F["RRF fusion"]
+    S --> F
+    F --> L["Fused ranked list"]
+```
+
 ## Reranking and the latency tradeoff
 
 First-stage retrieval is optimized for **recall** — cast a wide net cheaply. A **cross-encoder
@@ -25,3 +34,11 @@ The catch is **latency**. A cross-encoder is too slow to score the whole corpus 
 standard pattern is a funnel: retrieve a larger candidate set cheaply (say top-100 via hybrid search),
 then rerank only that small set down to the top-k that go into context. You pay the reranker's cost on
 a handful of documents, not the millions in your index.
+
+```mermaid
+flowchart LR
+    C[("Corpus: millions")] --> H["Hybrid retrieval (cheap, recall)"]
+    H --> T100["Top-100 candidates"]
+    T100 --> X["Cross-encoder reranker (precise, slow)"]
+    X --> TK["Top-k into context"]
+```

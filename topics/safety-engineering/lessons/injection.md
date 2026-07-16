@@ -18,6 +18,13 @@ There are two flavors:
 Indirect injection is the more dangerous class in agents, because the attack surface is every
 external source the agent touches, and the payload arrives without the user ever seeing it.
 
+```mermaid
+flowchart LR
+    S["External source: web page, doc, email, tool result"] -->|carries hidden instruction| C["Model context"]
+    C --> M["Model follows it as if trusted"]
+    M --> A["Privileged tool action"]
+```
+
 ## Why filtering alone fails
 
 A tempting first defense is a filter — scan the input or output for "ignore previous instructions"

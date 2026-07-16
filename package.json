@@ -26,6 +26,7 @@
     "gen-secrets": "node utils/gen-secrets.mjs",
     "secrets:check": "node utils/load-secrets.mjs",
     "mastery": "tsx scripts/mastery-index.ts",
+    "check-mermaid": "node scripts/check-mermaid.mjs",
     "certify": "npm run validate && npm run selfcheck && npm run typecheck && npm run test && npm run eval-gate",
     "test": "tsx --test packages/engine/src/grade.test.ts packages/engine/src/randomize.test.ts packages/evaluator/src/aggregate.test.ts packages/evaluator/src/routing.test.ts packages/evaluator/src/model-config.test.ts packages/evaluator/src/gradeopen.test.ts packages/evaluator/src/llama.test.ts packages/lesson/src/review.test.ts packages/sandbox/src/runner.test.ts packages/store/src/file.test.ts packages/store/src/content.test.ts packages/store/src/pglite.test.ts packages/store/src/queue.test.ts packages/store/src/factories.test.ts packages/grading/src/worker.test.ts",
     "test:coverage": "node --import tsx --test --experimental-test-coverage \"packages/**/*.test.ts\"",

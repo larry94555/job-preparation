@@ -29,3 +29,12 @@ in its batch — it leaves as soon as it is done, and a new request immediately 
 GPU occupancy high across a stream of requests with wildly different output lengths, which is exactly
 the workload real serving faces. Continuous batching is the single biggest throughput win in modern LLM
 serving, and it is what engines like vLLM, TGI, and TensorRT-LLM do by default.
+
+```mermaid
+flowchart TD
+    A["A short request finishes early"] --> B{"Batching mode"}
+    B -->|Static| C["Slot stays idle until the longest request finishes"]
+    B -->|Continuous| D["Slot freed; a queued request is admitted next step"]
+    C --> E["Head-of-line blocking: wasted GPU cycles"]
+    D --> F["Batch stays full of useful work"]
+```

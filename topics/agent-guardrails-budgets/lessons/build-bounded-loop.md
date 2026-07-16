@@ -14,6 +14,17 @@ production agent loop needs **three** stop conditions, and dropping any one is a
 A loop with only "complete" runs forever on a task it can't finish; a loop with only "budget" wastes
 the entire budget spinning. You need all three.
 
+```mermaid
+flowchart TD
+    S["run step: state to state"] --> C{"complete?"}
+    C -->|yes| DONE["stop: complete"]
+    C -->|no| NP{"no progress?"}
+    NP -->|yes| STUCK["stop: no-progress"]
+    NP -->|no| B{"budget exhausted?"}
+    B -->|yes| CAP["stop: budget"]
+    B -->|no| S
+```
+
 ## Detecting no progress
 
 The simplest, most useful no-progress signal: **the step produced the same state it was handed**. If

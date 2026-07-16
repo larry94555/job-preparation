@@ -11,6 +11,18 @@ The fix is one line of discipline: **the cache key must include the tenant scope
 namespaces every entry by its tenant, so identical `key`s from different tenants never map to the same
 slot.
 
+```mermaid
+flowchart TD
+    A["Tenant A: get(balance)"] --> TB["Tenant-blind key = hash(prompt)"]
+    B["Tenant B: get(balance)"] --> TB
+    TB --> Slot["Same cache slot"]
+    Slot --> Leak["Tenant B served A's answer (LEAK)"]
+    A2["Tenant A: get(A, balance)"] --> TS["Scoped key = tenant : hash(prompt)"]
+    B2["Tenant B: get(B, balance)"] --> TS
+    TS --> SA["Slot A : balance"]
+    TS --> SB["Slot B : balance -> null (MISS, safe)"]
+```
+
 ## Why identical keys must not collide
 
 Make the requirement concrete. Tenant `A` caches `"A's private balance"` under key `"balance"`. Tenant

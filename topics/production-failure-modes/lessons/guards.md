@@ -40,5 +40,15 @@ just drops. Two mechanisms prevent this:
   quality/latency/cost against the baseline, so a regression the offline evals missed shows up on a
   limited blast radius before full rollout.
 
+```mermaid
+flowchart TD
+    C[Quality-affecting change] --> G{"CI eval gate: score above threshold?"}
+    G -->|no| B[Block merge]
+    G -->|yes| CA["Canary: route small traffic slice"]
+    CA --> W{"Quality, latency, cost OK vs baseline?"}
+    W -->|no| RB["Roll back on limited blast radius"]
+    W -->|yes| FR[Full rollout]
+```
+
 Together they close the loop the runtime guards can't: catching the failures that never announce
 themselves.

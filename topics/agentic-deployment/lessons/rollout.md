@@ -34,3 +34,13 @@ or repoint to the previous image) and fast, because it is what you reach for whe
 fire. Rolling *forward* with a fix takes time you don't have mid-incident; rolling *back* to something
 that already worked is instant. The whole loop — canary a slice, watch the errors, rollback on
 regression — is what lets you deploy an agent often without deploying an outage often.
+
+```mermaid
+flowchart TD
+    U["user request"] --> R{"stable hash of user < canary_pct?"}
+    R -->|yes| Can["canary version"]
+    R -->|no| Stab["stable version"]
+    Can --> M{"canary metrics worse?"}
+    M -->|yes| RB["rollback: set canary_pct = 0"]
+    M -->|no| W["widen canary"]
+```

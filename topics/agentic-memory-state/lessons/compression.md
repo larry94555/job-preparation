@@ -14,6 +14,16 @@ durable state, and the conversation continues with that summary standing in for 
 replaced. The trigger is a **budget threshold** — you compress *when* the buffer would otherwise
 overflow, not on every turn.
 
+```mermaid
+flowchart TD
+    T[New turn appended] --> D{Buffer over token budget?}
+    D -->|No| K[Keep raw turns]
+    D -->|Yes| S[Summarize oldest turns]
+    S --> R["Discard raw tokens, keep running summary"]
+    K --> C[Continue conversation]
+    R --> C
+```
+
 ## What to keep, what to drop, and the risk
 
 Compression is lossy on purpose, so *what* you keep is the whole game. Keep the load-bearing content:

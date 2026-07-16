@@ -24,3 +24,11 @@ The tension is **privacy**. Raw prompts frequently contain **PII**, so logging t
 antipattern. The standard fix is **redaction**: remove or tokenize PII *at capture time*, before the
 payload is written to the trace store, and pair it with sampling and access controls. Done right, you
 keep traces that are still useful for debugging without hoarding sensitive user data.
+
+```mermaid
+flowchart LR
+    C["capture: prompt + completion"] --> R["redact / tokenize PII"]
+    R --> S["sample: keep fraction + errors"]
+    S --> W["write to trace store"]
+    W --> P["replay a failing run"]
+```

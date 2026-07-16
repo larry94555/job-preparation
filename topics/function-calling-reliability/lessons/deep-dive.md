@@ -106,3 +106,10 @@ these it answers. A toy trusts and runs whatever the model emits; a prototype ad
 a demo validates and rejects with model-facing errors; a production-ready design also separates
 read from write, makes every mutation idempotent, and evaluates tool-calling against a real
 benchmark rather than vibes.
+
+```mermaid
+flowchart LR
+    A["toy: trust and run"] --> B["prototype: typed contract"]
+    B --> C["demo: validate and reject"]
+    C --> D["production: read/write split, idempotent, evaluated"]
+```

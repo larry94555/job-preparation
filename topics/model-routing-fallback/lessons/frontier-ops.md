@@ -19,6 +19,20 @@ tension: **spend as little as possible without silently lowering answer quality.
   skip that attempt. Both live or die on the same signal — whether the difficulty judgment is right often
   enough that the cheap path handles the work without leaking bad answers.
 
+```mermaid
+flowchart LR
+    subgraph Cascade["FrugalGPT cascade"]
+        A1[request] --> A2["cheap model"]
+        A2 --> A3{"quality gate"}
+        A3 -->|reject| A4["strong model"]
+    end
+    subgraph Learned["RouteLLM learned router"]
+        B1[request] --> B2{"predict difficulty"}
+        B2 -->|easy| B3["cheap model"]
+        B2 -->|hard| B4["strong model"]
+    end
+```
+
 - **Quality-preserving routing and consistency under model swaps.** This is the open frontier, and it's
   where naive routing quietly fails. The hard problem is not "route to something cheaper" — it's routing
   that does **not silently change answer quality**, and keeping outputs **consistent when the underlying

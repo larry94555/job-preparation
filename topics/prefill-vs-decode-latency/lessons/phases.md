@@ -15,6 +15,15 @@ the phase that runs for the length of the answer.
 The prompt is fully available, so prefill is *parallel*; each output token depends on the previous one,
 so decode is *sequential*. That single difference drives everything else.
 
+```mermaid
+flowchart LR
+    P["prefill (parallel, one pass)"] --> T1["token 1"]
+    T1 --> T2["token 2"]
+    T2 --> T3["token 3"]
+    T3 --> Tn["token N"]
+    P -.->|builds| KV["KV cache"]
+```
+
 ## Two opposite bottlenecks
 
 The phases stress different parts of the GPU:

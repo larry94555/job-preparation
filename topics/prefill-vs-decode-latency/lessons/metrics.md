@@ -15,6 +15,14 @@ Together they describe the experience: TTFT is the wait before text starts strea
 it then flows. A chat product usually wants low TTFT (responsiveness) *and* low TPOT (smooth
 streaming), and they are governed by different phases, so they deserve **separate SLOs**.
 
+```mermaid
+flowchart LR
+    R["request"] -->|TTFT| F["first token"]
+    F -->|TPOT| A["token 2"]
+    A -->|TPOT| B["token 3"]
+    B -->|TPOT| C["token N"]
+```
+
 ## How prompt and output length move the metrics
 
 Because each metric maps to a phase, you can predict how workload shape moves them:

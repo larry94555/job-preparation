@@ -25,3 +25,15 @@ and carrying it through **every** downstream call, so no cost record is orphaned
 breaks — a **background/async job** or a shared cache that drops the tags — that spend lands in an
 **unattributed** bucket: still on the provider bill, but invisible to every rollup. Unattributed cost
 is exactly where attribution fails, so the goal is to leave nothing untagged.
+
+```mermaid
+flowchart TD
+    E["Entry point: set tags once"] --> R["Retrieval"]
+    E --> T["Tool calls"]
+    E --> G["Generation"]
+    E --> Y["Async / retry job"]
+    R --> U["Roll up by dimension"]
+    T --> U
+    G --> U
+    Y -. tags dropped .-> X["Unattributed bucket"]
+```

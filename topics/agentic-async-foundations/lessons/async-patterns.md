@@ -18,6 +18,18 @@ async def fetch_one(client, q):
     return resp
 ```
 
+```mermaid
+sequenceDiagram
+    participant A as Coroutine A
+    participant L as Event loop
+    participant B as Task B
+    A->>L: hits await and suspends
+    L->>B: run B while A waits
+    B-->>L: B reaches its own await
+    Note over L: A's awaited op completes
+    L->>A: resume A where it left off
+```
+
 The flip side is that cooperation is a contract you can break. A blocking call — `time.sleep(5)`, a
 synchronous DB driver, a heavy CPU loop — never reaches an `await`, so it never yields, and the *entire*
 single-threaded loop freezes until it finishes. In async code you reach for the awaitable equivalent

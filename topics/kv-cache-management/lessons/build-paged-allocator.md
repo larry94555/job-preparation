@@ -17,6 +17,14 @@ is no **external fragmentation**.
 
 Keep a pool of free block indices. Two operations:
 
+```mermaid
+flowchart TD
+  A["allocate(numTokens)"] --> B["need = ceil(numTokens / blockSize)"]
+  B --> C{"need > free blocks?"}
+  C -->|yes| N["return null: do not over-allocate"]
+  C -->|no| T["take need blocks from pool, return indices"]
+```
+
 - **allocate(numTokens):** compute `need = ceil(numTokens / blockSize)`. If `need` exceeds the number
   of free blocks, **return `null`** — you must *not* over-allocate; handing out memory you don't have
   is how a server OOMs. Otherwise take `need` blocks from the pool and return their indices.

@@ -12,6 +12,13 @@ Validation here is a boundary check: an observation is usable if it carries real
 string or a non-empty structure — and is *not* usable if it is empty or missing. Reject the bad ones at
 the seam, before they reach the agent's next Thought.
 
+```mermaid
+flowchart LR
+    O["Tool output"] --> V{"Non-empty content?"}
+    V -->|yes| F["Feed observation back to loop"]
+    V -->|no| R["Reject: log, then retry or surface failure"]
+```
+
 ```python
 def validate_observation(obs):
     if isinstance(obs, dict) and obs:

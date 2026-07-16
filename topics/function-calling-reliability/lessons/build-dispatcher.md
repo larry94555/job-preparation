@@ -13,6 +13,17 @@ of your tools, in this order:
    `invalid_args` **before** running the handler. Never execute on unvalidated arguments.
 3. **Only then execute.** With a known tool and valid args, run the handler.
 
+```mermaid
+flowchart TD
+    C["tool call"] --> T{"known tool?"}
+    T -->|no| U["return unknown_tool"]
+    T -->|yes| A{"args valid?"}
+    A -->|no| I["return invalid_args"]
+    A -->|yes| M{"mutating and key seen?"}
+    M -->|yes| S["return stored result"]
+    M -->|no| H["run handler, cache by key"]
+```
+
 ## Idempotency for safe retries
 
 Once a tool has **side effects** (charging a card, sending an email), a retry — or a model that emits

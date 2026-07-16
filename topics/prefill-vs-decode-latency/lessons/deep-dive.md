@@ -27,6 +27,16 @@ of independent levers, and real systems combine them:
   TPOT). Knowing which phase a workload stresses tells you which lever to reach for — and prevents the
   classic mistake of optimizing decode to fix a prefill-bound workload.
 
+Prefill/decode disaggregation makes the split physical — each phase gets its own pool, tuned for its
+own bottleneck, with the KV cache shipped between them:
+
+```mermaid
+flowchart LR
+    R["request"] --> PP["prefill pool (compute-bound)"]
+    PP -->|ship KV cache| DP["decode pool (bandwidth-bound)"]
+    DP --> O["streamed tokens"]
+```
+
 ## A tradeoff table for prefill-vs-decode-latency
 
 | Strategy | Buys you | Costs you | Reach for it when |

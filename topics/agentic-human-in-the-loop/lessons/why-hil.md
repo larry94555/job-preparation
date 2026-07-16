@@ -47,6 +47,18 @@ def assess_risk(action: str) -> Risk:
     return Risk.LOW               # reads and lookups
 ```
 
+```mermaid
+flowchart TD
+    A["incoming action"] --> B{"delete / send_email / charge / post_public?"}
+    B -- yes --> H["HIGH: irreversible or public"]
+    B -- no --> C{"create / update / schedule?"}
+    C -- yes --> M["MEDIUM: mutates owned state"]
+    C -- no --> L["LOW: reads and lookups"]
+    H --> G["route through approval gate"]
+    M --> R["runs directly"]
+    L --> R
+```
+
 The word doing the work here is **irreversible**. A wrong reversible action is an inconvenience — you
 undo it. A wrong *irreversible* action is a permanent fact about the world, and no amount of
 after-the-fact logging brings the money back. That is why high risk maps to irreversibility first and

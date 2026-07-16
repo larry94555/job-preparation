@@ -13,6 +13,15 @@ each with the verdict a human already agreed on. You pin the judge to a specific
 the calibration set; if it stops reproducing the known verdicts, the judge changed and you catch it before
 it ships.
 
+```mermaid
+flowchart LR
+    P["pin judge to fixed model"] --> R["run on calibration set"]
+    R --> V["compare verdict to label"]
+    V --> G{"agreement >= threshold?"}
+    G -->|yes| S["judge trusted, ship"]
+    G -->|no| F["fail CI, judge drifted"]
+```
+
 ```python
 def check_judge(judge, calibration):
     # calibration: [{"answer": ..., "expect": "pass" | "fail"}, ...]

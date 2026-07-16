@@ -41,6 +41,16 @@ async def retry_call(fn, attempts, sleep):
             await sleep(2 ** i)             # exponential: 1, 2, 4, ...
 ```
 
+```mermaid
+flowchart TD
+    A[Call fn] --> B{Success?}
+    B -->|yes| C[Return result]
+    B -->|no| D{Last attempt?}
+    D -->|yes| E[Raise error]
+    D -->|no| F["Sleep backoff + jitter"]
+    F --> A
+```
+
 Exponential backoff alone has a subtle failure at scale: if many clients hit the same error and all back
 off on the *same* schedule, they retry in lockstep — at second 2, then 4, then 8 — hammering the service
 in synchronized waves. This is the **thundering herd**, and the fix is **jitter**: add randomness to each

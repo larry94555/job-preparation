@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import Material from "@/components/Material";
 
 // ---- client-safe shapes (mirror the sanitized views the API returns) -----
 interface QuestionView {
@@ -260,11 +261,7 @@ function MaterialStep({
   return (
     <div>
       <div className="eyebrow">{step.lessonTitle}</div>
-      <div
-        className="material"
-        // Server-rendered, sanitized lesson HTML from the content pipeline.
-        dangerouslySetInnerHTML={{ __html: `<h2>${escapeHtml(step.heading)}</h2>` + step.html }}
-      />
+      <Material heading={step.heading} html={step.html} />
       <NavRow onBack={onBack}>
         <button onClick={onNext}>Continue →</button>
       </NavRow>
@@ -576,12 +573,4 @@ function DoneView({ state }: { state: State }) {
       </div>
     </div>
   );
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 }

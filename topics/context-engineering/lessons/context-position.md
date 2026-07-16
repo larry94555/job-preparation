@@ -13,6 +13,11 @@ Plotted against position, retrieval accuracy is roughly **U-shaped**:
 - **The middle** — content in the middle is the most likely to be overlooked, even when it is exactly
   the piece the task needs.
 
+```mermaid
+flowchart LR
+  S["Start: primacy — used well"] --> M["Middle — lost, often overlooked"] --> E["End: recency — used well"]
+```
+
 This is why simply having a fact *somewhere* in a long context is not enough. A relevant document
 dropped into the middle of a large concatenation can be effectively invisible to the model, which is
 one more reason unranked "dump-everything" prompting underperforms.

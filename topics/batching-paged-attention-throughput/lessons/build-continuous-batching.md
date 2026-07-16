@@ -22,6 +22,16 @@ Model time as discrete steps over an active set capped at `batchSize`:
 4. Refill the active set from the waiting queue (in order) up to `batchSize`.
 5. `makespan` is the step at which the **last** request finishes.
 
+```mermaid
+flowchart TD
+    A["Fill active set from queue up to batchSize"] --> B["Step: each active request emits one token, remaining--"]
+    B --> C["Remove requests with remaining == 0, free their slots"]
+    C --> D["Refill active set from queue in order"]
+    D --> E{"Any requests left?"}
+    E -->|Yes| B
+    E -->|No| F["makespan = step of the last finish"]
+```
+
 Worked example — `lengths = [10, 1, 1, 1, 1, 1]`, `batchSize = 2`: continuous batching finishes in
 **10** steps, versus **12** for static (`[10,1]`→10, `[1,1]`→1, `[1,1]`→1). The five short requests
 cycle through the second slot while the length-10 request runs, instead of blocking behind it. That

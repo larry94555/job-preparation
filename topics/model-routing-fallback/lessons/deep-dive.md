@@ -29,6 +29,18 @@ five independent levers, and real gateways (LiteLLM, OpenRouter, home-grown prox
   **silent** or **honest** (a notice, a lowered-confidence indicator, disabled features). This is a
   product lever, not just an infra one, and it is where trust is won or lost.
 
+Those five levers compose into one request pipeline inside the gateway:
+
+```mermaid
+flowchart LR
+    Req[request] --> RP["routing policy"]
+    RP --> CD["cascade depth + quality gate"]
+    CD --> FH["failure handling: breaker, retry, fallback"]
+    FH --> LS["latency shaping: hedging"]
+    LS --> UX["degraded-mode UX"]
+    UX --> Resp[response]
+```
+
 ## A tradeoff table for model-routing-fallback
 
 | Strategy | Buys you | Costs you | Reach for it when |

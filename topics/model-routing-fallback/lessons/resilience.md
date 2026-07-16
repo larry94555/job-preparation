@@ -11,6 +11,15 @@ fallback — instead of waiting on a provider that is already drowning. After a 
 letting a trickle of test requests through; if they succeed it closes again, otherwise it re-opens.
 The breaker protects the provider *and* your latency, because failing fast beats waiting for a timeout.
 
+```mermaid
+stateDiagram-v2
+    [*] --> Closed
+    Closed --> Open: failures cross threshold
+    Open --> HalfOpen: cooldown elapses
+    HalfOpen --> Closed: test requests succeed
+    HalfOpen --> Open: test request fails
+```
+
 **Retries** are still useful for transient blips, but they need discipline:
 
 - **Exponential backoff** — wait progressively longer between attempts (e.g. 1s, 2s, 4s) so you don't

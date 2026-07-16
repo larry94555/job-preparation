@@ -27,3 +27,10 @@ Put together, these axes imply a **default sequence**: try prompting / in-contex
 **RAG** when the gap is *knowledge*, and reserve **fine-tuning** for *behavior* the lighter methods
 can't deliver — then **distillation** once that behavior is validated and you want it cheaper. Reach
 for the heaviest tool last, not first.
+
+```mermaid
+flowchart LR
+    P["Prompting / ICL"] -->|"knowledge gap"| R["RAG"]
+    R -->|"behavior gap"| F["Fine-tuning"]
+    F -->|"validated, want cheaper"| D["Distillation"]
+```

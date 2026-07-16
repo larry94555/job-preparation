@@ -17,6 +17,25 @@ how observable and how bounded your system is.
   most flexible topology and the hardest to trace, bound, and control: interactions are **emergent**, and
   some failures come from the interaction itself rather than any single agent.
 
+```mermaid
+flowchart TD
+    subgraph Supervisor
+        S1["supervisor"] --> A1["specialist"]
+        S1 --> B1["specialist"]
+    end
+    subgraph Hierarchical
+        T["top supervisor"] --> M1["sub-supervisor"]
+        T --> M2["sub-supervisor"]
+        M1 --> C1["specialist"]
+        M2 --> D1["specialist"]
+    end
+    subgraph Network
+        P1["agent"] --- P2["agent"]
+        P2 --- P3["agent"]
+        P3 --- P1
+    end
+```
+
 ```python
 # Supervisor (default): centralized, debuggable.
 result = supervisor.run(task, specialists=[researcher, writer, critic])

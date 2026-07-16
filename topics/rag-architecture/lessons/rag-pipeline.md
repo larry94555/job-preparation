@@ -29,3 +29,17 @@ A classic RAG query flows through fixed stages:
 Everything before generation is *offline* preparation: the corpus is split into chunks, each chunk is
 embedded, and the vectors are stored in an index. The retrieval quality of the whole system is set by
 those upstream choices — chunking and embeddings — long before any prompt is written.
+
+The two paths — offline ingestion and the online query — meet at the shared index:
+
+```mermaid
+flowchart LR
+    subgraph Ingestion["Offline ingestion"]
+        C["Corpus"] --> CH["Chunk"] --> EM["Embed"] --> IX[("Vector index")]
+    end
+    subgraph Query["Query time"]
+        Q["User query"] --> QE["Embed query"] --> R["Retrieve candidates"]
+        R --> RR["Rerank (optional)"] --> AC["Assemble top-k context"] --> G["Generate answer"]
+    end
+    IX -.-> R
+```

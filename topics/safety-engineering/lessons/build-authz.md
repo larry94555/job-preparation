@@ -22,6 +22,17 @@ The rule is small and precise: **block** an action when it is **high-risk** AND 
 - **Untrusted + high-risk** → **blocked** (`untrusted_high_risk`) — the confused-deputy case.
 - **Untrusted + high-risk + confirmed** → allowed (an independent human/second-factor check overrides).
 
+```mermaid
+flowchart TD
+    A[Action requested] --> B{"High-risk?"}
+    B -->|no| ALLOW[Allow]
+    B -->|yes| C{"Provenance untrusted?"}
+    C -->|no, trusted| ALLOW
+    C -->|yes| D{"Independently confirmed?"}
+    D -->|yes| ALLOW
+    D -->|no| BLOCK["Block: untrusted_high_risk"]
+```
+
 This is least-privilege applied to *provenance*: untrusted content can look at things, but it can't
 make the deputy pull the trigger on a dangerous tool without an independent OK. It's one layer of
 defense-in-depth, not the whole story — but it's the one that neutralizes the confused deputy.

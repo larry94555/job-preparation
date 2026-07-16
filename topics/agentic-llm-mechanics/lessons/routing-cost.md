@@ -22,6 +22,15 @@ def route(task):
     return TIERS.get(task, "balanced")   # unknown → safe middle default
 ```
 
+```mermaid
+flowchart TD
+    T["incoming task"] --> D{"how hard?"}
+    D -->|"classify / extract / summarize"| C["cheap tier"]
+    D -->|"draft / analyze"| B["balanced tier"]
+    D -->|"reason / architecture"| X["best tier"]
+    D -->|"unknown"| B
+```
+
 The `model-router` exercise builds exactly this. Note the fallback: an *unknown* task routes to the
 **balanced** middle, not the cheapest — you don't want to send something you can't classify to the
 weakest model. See [model-routing-fallback](../model-routing-fallback/topic.yaml).

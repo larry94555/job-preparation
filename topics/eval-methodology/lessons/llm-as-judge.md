@@ -30,3 +30,13 @@ The workflow: label a calibration set by hand, run the judge over it, and compar
 disagrees with humans, fix the rubric. Re-grade **borderline or unstable** cases (best-of-N) and
 flag them for human review. Only once agreement is high enough do you trust the judge to drive a
 regression gate. Until then, it's a helper, not a gate.
+
+```mermaid
+flowchart TD
+  H["Human-labeled calibration set"] --> J["Run judge over set"]
+  J --> Cmp["Measure agreement (Cohen's kappa)"]
+  Cmp --> Q{"Agreement high enough"}
+  Q -->|No| Fix["Fix rubric, re-grade borderline cases"]
+  Fix --> J
+  Q -->|Yes| Gate["Trust judge to drive regression gate"]
+```

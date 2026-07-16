@@ -11,6 +11,15 @@ When a feature does more than a single call, the harness runs an **agent loop**:
 …then it repeats, under deadlines and interrupts, until a termination condition is met. The model
 supplies the *think*; the harness owns *act* and *observe* — and, crucially, owns **when to stop**.
 
+```mermaid
+flowchart TD
+    T["Think: model proposes action"] --> A["Act: harness validates and executes"]
+    A --> O["Observe: harness feeds result back"]
+    O --> C{"Termination met?"}
+    C -->|no| T
+    C -->|yes| S["Stop"]
+```
+
 ## Guarding the loop
 
 An unguarded loop is a liability. The harness guards it with:

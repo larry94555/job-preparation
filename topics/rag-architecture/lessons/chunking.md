@@ -27,5 +27,18 @@ Better strategies:
   still appears intact in at least one chunk.
 - **Metadata** — attach source, section, and timestamp to each chunk, enabling filtering and citation.
 
+Structure-aware splitting with overlap keeps each chunk coherent while a boundary fact survives in an
+adjacent chunk:
+
+```mermaid
+flowchart LR
+    D["Structured document"] --> S["Split on headings and paragraphs"]
+    S --> C1["Chunk 1 + metadata"]
+    S --> C2["Chunk 2 + metadata"]
+    S --> C3["Chunk 3 + metadata"]
+    C1 -. "overlap" .- C2
+    C2 -. "overlap" .- C3
+```
+
 Get chunking wrong and no amount of clever retrieval or prompting downstream can recover the meaning
 that was destroyed at split time.

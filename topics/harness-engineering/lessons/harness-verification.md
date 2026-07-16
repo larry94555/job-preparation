@@ -10,6 +10,15 @@ Self-verification by the model is unreliable: the same reasoning that produced a
 miss it on review. So verification is a *harness* responsibility, done with deterministic checks,
 not a prompt asking the model "are you sure?".
 
+```mermaid
+flowchart TD
+    M["Model claims action done"] --> V["Harness runs deterministic check"]
+    V --> D{"Check passes?"}
+    D -->|yes| OK["Accept as fact"]
+    D -->|no| R["Recover: retry, re-plan, or escalate"]
+    R --> M
+```
+
 ## Bounding and controlling the loop
 
 Control is what keeps autonomy safe:

@@ -22,6 +22,17 @@ leaving too few (or zero) valid results, and their data has already been fetched
 search. Choosing a per-tenant index over a filtered shared index trades higher cost for stronger,
 simpler isolation.
 
+```mermaid
+flowchart TD
+    Q["Tenant B query"] --> Post["Post-filter path"]
+    Post --> TopK["Unscoped top-k (all tenants)"]
+    TopK --> Remove["Remove other tenants' chunks"]
+    Remove --> Bad["Too few results; A's data already fetched (UNSAFE)"]
+    Q --> Pre["Pre-filter path"]
+    Pre --> Filt["Filtered ANN within tenant B namespace"]
+    Filt --> Good["Only B's chunks considered (SAFE)"]
+```
+
 ## Cross-user context contamination vectors
 
 Beyond cache and index, context can bleed through **stateful** surfaces:

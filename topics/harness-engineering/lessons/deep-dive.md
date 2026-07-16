@@ -101,6 +101,13 @@ checklist:
    into next actions (retry, re-plan, escalate) rather than crashing — and reaches for multiple
    agents only when the task truly needs decomposition or isolation.
 
+```mermaid
+flowchart LR
+    A["Toy: prompt-only, no harness"] --> B["Prototype: tool loop"]
+    B --> C["Demo: verified and budgeted"]
+    C --> D["Production: typed idempotent tools, failure recovery, justified orchestration"]
+```
+
 Rating a design as **toy / prototype / demo-ready / production-ready** comes down to how many of
 these it answers. A toy is prompt-only with no harness; a prototype has a tool loop; a demo verifies
 and budgets it; a production-ready design also has typed idempotent tools, an explicit failure/

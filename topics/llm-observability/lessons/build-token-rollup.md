@@ -10,6 +10,13 @@ To answer "how many tokens did this request use?" you **roll up** the tree: a sp
 **own** tokens **plus** the rolled-up totals of all its children, recursively. A **leaf** span (no
 children) totals just its own tokens. The same recursion gives you latency and cost rollups.
 
+```mermaid
+flowchart TD
+    R["request: own 100, total 450"] --> A["retrieval: own 150, leaf"]
+    R --> B["tool call: own 50, total 200"]
+    B --> C["sub-agent: own 150, leaf"]
+```
+
 ## Why request-level counters aren't enough
 
 You could keep a single top-level token counter — but it hides *where* the tokens went. Was it the

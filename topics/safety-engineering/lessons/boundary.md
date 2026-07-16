@@ -30,3 +30,10 @@ instruction can achieve.
 
 Fencing plus provenance tagging is the boundary layer of defense-in-depth: it keeps untrusted content
 in the *data* lane and out of the *instruction* lane.
+
+```mermaid
+flowchart LR
+    D["Developer instructions"] -->|trusted| I["Instruction lane: obeyed"]
+    U["Untrusted content: web, tool, retrieved doc, upload"] -->|"fenced + tagged"| T["Data lane: analyzed, not obeyed"]
+    T -.blocked.-> I
+```

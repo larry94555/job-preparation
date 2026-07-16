@@ -12,6 +12,14 @@ Every caching decision is really a decision about **how much work you skip versu
 risk you take on**. The two caches sit at opposite ends of that spectrum, and a real system layers
 them. There are a handful of independent levers:
 
+```mermaid
+flowchart LR
+    R[Request] --> P["Prefix cache: reuse prefill"]
+    P --> S{"Semantic hit and safe to serve?"}
+    S -->|yes| A["Return stored answer"]
+    S -->|no| M["Model generates completion"]
+```
+
 - **Which cache (or both).** A **prefix cache** is correctness-safe — it can only ever reuse compute
   for byte-identical leading tokens, so it never returns a wrong answer. A **semantic cache** returns a
   stored response on an *approximate* match, so it saves the whole generation but can be wrong. The

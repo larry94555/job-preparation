@@ -45,5 +45,14 @@ touched a queue and returned. This is exactly the shape of this repo's own async
 [apply route enqueues a job](../../../web/app/api/apply/route.ts) and returns a `jobId` while the
 [grading worker](../../../packages/grading/src/worker.ts) grades it off the request.
 
+```mermaid
+flowchart LR
+    C["client"] -->|"submit task"| H["HTTP handler"]
+    H -->|"enqueue"| Q["job queue"]
+    H -->|"return 202 job_id"| C
+    W["background worker"] -->|"claim"| Q
+    W -->|"run agent, write result"| J["job record"]
+```
+
 The one thing the caller now needs is a way to ask *"is my job done yet?"* — which is the next lesson:
 [polling for the result](../lesson-jobs).

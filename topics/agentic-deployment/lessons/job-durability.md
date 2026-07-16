@@ -25,6 +25,16 @@ attempts**; if it still fails, mark it terminally `failed` and park it in a **de
 inspection. What you must *not* do is retry forever (you hammer the dependency) or silently mark it
 `done` (you lose the failure). A bounded retry lets a blip self-heal without hiding a real outage.
 
+```mermaid
+flowchart TD
+    R["run job"] --> S{"succeeded?"}
+    S -->|yes| D["mark done"]
+    S -->|no| T{"attempts < max?"}
+    T -->|yes| B["backoff, then retry"]
+    B --> R
+    T -->|no| DL["dead-letter queue, mark failed"]
+```
+
 **Claim atomically so a worker pool is correct.** Throughput scales with the number of workers draining
 one queue, not with request threads — but only if each worker claims a *disjoint* job. The claim that
 moves a job `queued → running` must be **atomic**: `SELECT ... FOR UPDATE SKIP LOCKED` (or an equivalent

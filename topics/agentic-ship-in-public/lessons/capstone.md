@@ -33,6 +33,21 @@ def run_capstone(client, task, tools, max_steps=8):
     return {"answer": None, "steps": max_steps, "stopped": "step_limit", "trace": trace}
 ```
 
+```mermaid
+flowchart TD
+    A["task"] --> B["client.step"]
+    B --> C{"final or action?"}
+    C -->|final| D["return answer + trace"]
+    C -->|action| E["run tool"]
+    E --> F{"observation ok?"}
+    F -->|yes| G["record ok:true, feed observation back"]
+    F -->|no| H["record ok:false, feed error note back"]
+    G --> I{"step < max_steps?"}
+    H --> I
+    I -->|yes| B
+    I -->|no| J["return step_limit + trace"]
+```
+
 The three things that make this a *capstone* rather than a toy: the loop is **bounded** (it always
 terminates), every observation is **validated** before it is trusted, and every step is **traced** so you
 can explain what happened. Those are exactly the behaviors an interviewer probes for — and exactly what a

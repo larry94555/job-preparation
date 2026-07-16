@@ -16,6 +16,14 @@ The distinction is not the size of the model or the length of the context. It is
 harness around the model that (1) offers it tools, (2) executes the ones it asks for, and (3) feeds the
 results back so the next turn is grounded in what actually happened.
 
+```mermaid
+flowchart LR
+    U[User request] --> M[Model]
+    M -->|wants a tool| H[Harness executes the tool]
+    H -->|result fed back| M
+    M -->|done| A[Answer to user]
+```
+
 ## Tools turn words into actions
 
 Concretely, a tool is a function plus a description the model can see. When the model decides it needs

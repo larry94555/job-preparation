@@ -24,6 +24,15 @@ Three research directions are where cost-attribution work is actually moving rig
   The headline "match GPT-4 at a fraction of the cost" figure was model- and price-specific; the durable
   idea is route-cheap-first, escalate-on-low-confidence, and measure quality-per-dollar.
 
+```mermaid
+flowchart LR
+    R["Request"] --> C["Cheap model"]
+    C --> Q{"Low confidence?"}
+    Q -- No --> A["Return answer"]
+    Q -- Yes --> F["Frontier model"]
+    F --> A
+```
+
 - **Fair allocation of shared, cached, and async cost.** The hard open problem: a cache hit, a shared
   system prompt, or a background job serves **many tenants and features at once**, and there is **no
   single correct policy** for splitting that cost. Provider prompt/prefix caching sharpened this —

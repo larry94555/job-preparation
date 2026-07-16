@@ -22,6 +22,16 @@ You then wire the golden set into a **regression gate**: run the eval on *every 
 fail the build if the score drops below an agreed threshold. This is what stops a fix for one case
 from silently breaking three others.
 
+```mermaid
+flowchart LR
+  E["Domain experts"] --> G["Golden set: input plus expected"]
+  C["Code or prompt change"] --> R["Run eval in CI"]
+  G --> R
+  R --> S{"score >= threshold"}
+  S -->|Yes| P["Merge"]
+  S -->|No| B["Block build"]
+```
+
 Two failure modes to guard against:
 
 - **Overfitting / teaching to the test** — if you tune prompts against the same small visible set

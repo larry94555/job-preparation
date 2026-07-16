@@ -13,6 +13,18 @@ guards keep it safe:
 
 When the loop stops, it returns **why** — `complete`, `budget`, or `duplicate-call`.
 
+```mermaid
+flowchart TD
+    T["Think: propose action"] --> DUP{"Same as last action?"}
+    DUP -->|yes| SD["Stop: duplicate-call"]
+    DUP -->|no| B{"Step budget left?"}
+    B -->|no| SB["Stop: budget"]
+    B -->|yes| A["Act and Observe"]
+    A --> DONE{"Complete?"}
+    DONE -->|yes| SC["Stop: complete"]
+    DONE -->|no| T
+```
+
 ## Why the harness owns termination
 
 The model *proposes*; the **harness decides when to stop**. You can't trust the model to stop itself —
