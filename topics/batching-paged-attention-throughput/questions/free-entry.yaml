@@ -1,36 +1,48 @@
-# Free entry (short answer)
+# Conceptual multiple-choice (converted from short-answer free entry)
 - id: fe-static-waste
-  type: text_input
+  type: multiple_choice
   tags: [batching]
   difficulty: 2
-  prompt: "In static batching, the whole batch waits for which request to finish? (a few words)"
-  answer:
-    regex: '^(the )?(longest|slowest)( request| one| output| sequence)?$'
-    normalize: true
+  prompt: "In static batching, what is the primary inefficiency when request output lengths differ a lot?"
+  options:
+    - { text: "A short request's GPU slot sits idle after it finishes, wasting compute until the longest request in the batch completes", correct: true }
+    - { text: "The batch consumes more memory bandwidth than a single request would" }
+    - { text: "Each request must be recomputed from scratch every step" }
+    - { text: "The scheduler drops the longest request to keep the batch small" }
+  explanation: "Because the batch runs until its slowest member finishes, capacity freed by early-finishing short requests cannot be reused — idle GPU cycles are the core waste."
 
 - id: fe-hol-name
-  type: text_input
+  type: multiple_choice
   tags: [scheduling]
   difficulty: 3
-  prompt: "Name the problem where a long request blocks short ones in the same fixed batch (a few words)."
-  answer:
-    regex: '^head(-| )of(-| )line( blocking)?$'
-    normalize: true
+  prompt: "Beyond the requests already inside a fixed batch, head-of-line blocking also delays:"
+  options:
+    - { text: "Queued requests awaiting admission, which cannot start until a slot frees when the long request finally finishes", correct: true }
+    - { text: "The model's weight-loading step, which must repeat per request" }
+    - { text: "The KV cache eviction policy, which runs only at shutdown" }
+    - { text: "Nothing else — it affects only the single longest request" }
+  explanation: "A long-output request holds its slot for the whole batch lifetime, so both short in-batch requests and the waiting queue behind them are stalled until it completes."
 
 - id: fe-paged-benefit
-  type: text_input
+  type: multiple_choice
   tags: [paged-attention]
   difficulty: 3
-  prompt: "What KV-cache problem does paged attention mainly reduce? (one word)"
-  answer:
-    regex: '^(fragmentation|waste|over-?reservation)$'
-    normalize: true
+  prompt: "Before paged attention, engines reserved a contiguous KV buffer sized for each sequence's maximum possible length. What was the main downside?"
+  options:
+    - { text: "Most of the reserved memory stayed unused (over-reservation / fragmentation), so far fewer sequences fit concurrently", correct: true }
+    - { text: "The KV cache had to be recomputed on every decoding step" }
+    - { text: "Attention could no longer attend to earlier tokens" }
+    - { text: "Each sequence needed its own dedicated GPU" }
+  explanation: "Worst-case contiguous reservation wastes memory on positions a sequence may never reach; paging allocates fixed-size blocks on demand, packing KV tightly so more sequences fit."
 
 - id: fe-throughput-metric
-  type: text_input
+  type: multiple_choice
   tags: [throughput]
   difficulty: 2
-  prompt: "Name the metric for request/token completion rate that still meets the latency SLO (one word)."
-  answer:
-    regex: '^goodput$'
-    normalize: true
+  prompt: "Why can raw throughput (tokens/sec) be a misleading optimization target for an interactive service?"
+  options:
+    - { text: "It counts work that missed its latency SLO, so a high number can hide many responses that were too slow to be useful", correct: true }
+    - { text: "It always undercounts tokens generated during prefill" }
+    - { text: "It can only be measured offline, never in production" }
+    - { text: "It penalizes large batches even when latency is fine" }
+  explanation: "Raw throughput credits every completed token regardless of latency; goodput counts only SLO-meeting work, which is what actually matters for an interactive user experience."

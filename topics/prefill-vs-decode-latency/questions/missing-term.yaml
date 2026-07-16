@@ -1,45 +1,60 @@
-# Missing term (cloze)
+# Conceptual multiple choice — phases & metrics (understanding, not recall)
 - id: cloze-prefill
-  type: text_input
+  type: multiple_choice
   tags: [phases]
   difficulty: 1
-  prompt: "The phase that processes the entire prompt in one parallel forward pass to build the KV cache is called ____."
-  answer:
-    regex: '^prefill$'
-    normalize: true
+  prompt: "Prefill runs the whole prompt through a single parallel forward pass. What does that pass accomplish for the tokens that come after?"
+  options:
+    - { text: "It populates the KV cache for every prompt token, so each later decode step can attend to them without recomputing", correct: true }
+    - { text: "It generates the first several output tokens in a burst" }
+    - { text: "It compresses the prompt so decode has fewer tokens to read" }
+    - { text: "It trains the model on the prompt before answering" }
+  explanation: "Prefill's parallel pass builds the KV cache for all prompt tokens; decode then reuses that cache instead of reprocessing the prompt each step."
 
 - id: cloze-decode
-  type: text_input
+  type: multiple_choice
   tags: [phases]
   difficulty: 1
-  prompt: "The phase that generates output tokens one at a time, autoregressively, is called ____."
-  answer:
-    regex: '^decode$'
-    normalize: true
+  prompt: "Decode emits output tokens one at a time. What is the direct consequence of this autoregressive structure for latency?"
+  options:
+    - { text: "Total generation time grows roughly linearly with the number of output tokens, since each token needs its own forward pass", correct: true }
+    - { text: "Output length has no effect on latency because tokens are produced in parallel" }
+    - { text: "Longer outputs are cheaper per token because the KV cache shrinks" }
+    - { text: "The first token is the slowest and the rest are effectively free" }
+  explanation: "Each output token is a separate sequential forward pass, so latency scales with output length — you cannot compute token N+1 before token N exists."
 
 - id: cloze-ttft
-  type: text_input
+  type: multiple_choice
   tags: [metrics]
   difficulty: 2
-  prompt: "The metric for how long until the model emits its first output token is abbreviated ____."
-  answer:
-    regex: '^ttft$'
-    normalize: true
+  prompt: "A product wants to reduce how long users wait before any text appears. Which change most directly targets that metric (TTFT)?"
+  options:
+    - { text: "Speeding up or shortening the prompt-processing (prefill) work, e.g. a shorter system prompt", correct: true }
+    - { text: "Generating fewer output tokens" }
+    - { text: "Increasing the decode batch size" }
+    - { text: "Switching to a slower but larger model" }
+  explanation: "TTFT is the time to the first token and is set by prefill; shrinking prefill work lowers it. Output length affects total time via decode, not TTFT."
 
 - id: cloze-tpot
-  type: text_input
+  type: multiple_choice
   tags: [metrics]
   difficulty: 2
-  prompt: "The steady-state time between successive output tokens is abbreviated ____ (the metric set by the decode phase)."
-  answer:
-    regex: '^tpot$'
-    normalize: true
+  prompt: "Two deployments have identical TTFT, but one has a much higher TPOT. What will users notice?"
+  options:
+    - { text: "Text streams out more slowly, token by token, once it starts appearing", correct: true }
+    - { text: "A longer wait before the very first token appears" }
+    - { text: "The model produces less accurate answers" }
+    - { text: "The prompt is truncated more aggressively" }
+  explanation: "TPOT (inter-token latency) is the steady-state gap between output tokens, so a higher TPOT makes generation stream visibly slower even when the first token arrives just as fast."
 
 - id: cloze-bandwidth
-  type: text_input
+  type: multiple_choice
   tags: [phases]
   difficulty: 3
-  prompt: "Because decode reads the full weights to produce a single token, it is limited by memory ____ rather than compute."
-  answer:
-    regex: '^bandwidth$'
-    normalize: true
+  prompt: "Decode is limited by how fast weights can be streamed from memory. Which hardware upgrade would most improve decode speed for a single request?"
+  options:
+    - { text: "Higher memory bandwidth (faster HBM)", correct: true }
+    - { text: "More raw compute (FLOPs) with the same memory bandwidth" }
+    - { text: "A faster network link to the client" }
+    - { text: "A larger disk for the model checkpoint" }
+  explanation: "Because decode is memory-bandwidth-bound, faster memory helps directly; extra FLOPs sit idle since arithmetic is not the bottleneck."

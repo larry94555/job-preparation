@@ -1,4 +1,17 @@
 # Essay
+- id: essay-cost-drivers
+  type: essay
+  length: short
+  tags: [drivers]
+  difficulty: 2
+  prompt: "Beyond the raw count of input and output tokens, what drives the real cost of an LLM call? Walk through the main multipliers and explain how each inflates spend."
+  eval_skill: eval-cost-essay
+  reference_points:
+    - "Token volume in and out is the base, but the model tier's per-token price scales that base up or down."
+    - "Retries and self-repair after malformed output re-pay for the same task, multiplying token spend without a new success."
+    - "Extra tool calls and round-trips each add their own input/output tokens on top of the primary generation."
+    - "Caching (or missing the cache) changes what you actually pay for repeated context, so cache hit rate is a real cost lever."
+
 - id: essay-per-model-wrong
   type: essay
   length: short

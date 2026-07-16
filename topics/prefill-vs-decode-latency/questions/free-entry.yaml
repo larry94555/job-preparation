@@ -1,54 +1,72 @@
-# Free entry (short answer)
+# Conceptual multiple choice — bottlenecks & optimization (understanding, not recall)
 - id: fe-prefill-bottleneck
-  type: text_input
+  type: multiple_choice
   tags: [phases]
   difficulty: 3
-  prompt: "What is the hardware bottleneck of the prefill phase? (one word)"
-  answer:
-    regex: '^(compute|flops|flop|arithmetic)$'
-    normalize: true
+  prompt: "During prefill the GPU's arithmetic units are already saturated. What follows from prefill being compute-bound?"
+  options:
+    - { text: "Adding more FLOPs (or a faster compute chip) shortens prefill, but faster memory alone does little", correct: true }
+    - { text: "Faster memory bandwidth is the main way to speed prefill up" }
+    - { text: "Prefill time is independent of prompt length" }
+    - { text: "Prefill benefits from batching far more than decode does" }
+  explanation: "Prefill does heavy parallel arithmetic per weight read, so it is limited by compute; more FLOPs help, while extra bandwidth mostly does not."
 
 - id: fe-decode-bottleneck
-  type: text_input
+  type: multiple_choice
   tags: [phases]
   difficulty: 3
-  prompt: "What is the hardware bottleneck of the decode phase? (one or two words)"
-  answer:
-    regex: '^(memory bandwidth|bandwidth|memory-bandwidth|memory)$'
-    normalize: true
+  prompt: "A single decode step reads the entire weight matrix just to produce one token. Why does that make decode memory-bandwidth-bound rather than compute-bound?"
+  options:
+    - { text: "It performs very little arithmetic per byte of weights moved, so the GPU finishes the math long before the next weights arrive", correct: true }
+    - { text: "It performs a huge parallel matmul that saturates the arithmetic units" }
+    - { text: "It never touches the model weights, only the KV cache" }
+    - { text: "The bottleneck is the CPU issuing each token" }
+  explanation: "Low arithmetic intensity — one token's worth of math per full weight read — leaves compute idle waiting on memory, so bandwidth is the limiter."
 
 - id: fe-ttft-metric
-  type: text_input
+  type: multiple_choice
   tags: [metrics]
   difficulty: 2
-  prompt: "Which latency metric does a long prompt most directly increase? (abbreviation)"
-  answer:
-    regex: '^(ttft|time to first token)$'
-    normalize: true
+  prompt: "A RAG system stuffs thousands of retrieved tokens into the prompt to improve answers. What is the main latency cost of that choice?"
+  options:
+    - { text: "Higher TTFT, because there is far more prompt to prefill before the first token", correct: true }
+    - { text: "Higher TPOT, because each output token now takes longer" }
+    - { text: "No latency cost, since context is free to process" }
+    - { text: "Lower throughput only, with no effect on any latency metric" }
+  explanation: "More prompt tokens mean more prefill work, which directly inflates TTFT; the per-output-token decode cost (TPOT) is largely unaffected."
 
 - id: fe-batching-phase
-  type: text_input
+  type: multiple_choice
   tags: [optimization]
   difficulty: 3
-  prompt: "Batching many concurrent requests mainly boosts throughput in which phase? (one word)"
-  answer:
-    regex: '^(decode|decoding|generation)$'
-    normalize: true
+  prompt: "Batching more concurrent requests together in decode raises throughput. What is the typical tradeoff?"
+  options:
+    - { text: "Individual per-request latency can rise, and a large prefill in the batch can delay other requests' first tokens", correct: true }
+    - { text: "It always lowers latency for every request as a free win" }
+    - { text: "It reduces total system throughput" }
+    - { text: "It makes decode compute-bound instead of memory-bandwidth-bound" }
+  explanation: "Batching amortizes the bandwidth-bound weight read to lift throughput, but sharing GPU steps can increase individual latency, so throughput and latency must be balanced."
 
 - id: fe-chunked-prefill
-  type: text_input
+  type: multiple_choice
   tags: [optimization]
   difficulty: 4
-  prompt: "Splitting a long prompt into pieces that interleave with ongoing decode is called ____ prefill. (one word)"
-  answer:
-    regex: '^chunked$'
-    normalize: true
+  prompt: "Without chunked prefill, what happens to other users' in-flight generations when one request submits a very long prompt?"
+  options:
+    - { text: "Their decode stalls — the single large prefill monopolizes a GPU step, spiking everyone's inter-token latency", correct: true }
+    - { text: "Their outputs become less accurate" }
+    - { text: "Nothing; prefill and decode never share hardware" }
+    - { text: "Their prompts are silently truncated" }
+  explanation: "A big monolithic prefill blocks the shared step; chunked prefill splits it into pieces that interleave with decode, so other users' generations keep flowing and TPOT stays smooth."
 
 - id: fe-disaggregation
-  type: text_input
+  type: multiple_choice
   tags: [optimization]
   difficulty: 4
-  prompt: "Running prefill and decode on separate hardware pools so they cannot interfere is called prefill/decode ____. (one word)"
-  answer:
-    regex: '^(disaggregation|disaggregating|separation)$'
-    normalize: true
+  prompt: "Why might a large deployment run prefill and decode on separate hardware pools (prefill/decode disaggregation)?"
+  options:
+    - { text: "The two phases have opposite bottlenecks (compute vs memory bandwidth) and interfere when co-located, so isolating them lets each be tuned and scaled independently", correct: true }
+    - { text: "Decode requires a completely different model than prefill" }
+    - { text: "It is the only way to build a KV cache" }
+    - { text: "Separating them removes the need for a KV cache entirely" }
+  explanation: "Prefill is compute-bound and decode is bandwidth-bound; disaggregating prevents a burst of prefill from stalling decode and lets each pool scale to its own bottleneck."

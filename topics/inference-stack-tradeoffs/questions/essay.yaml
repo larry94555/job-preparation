@@ -1,4 +1,17 @@
 # Essay
+- id: essay-pareto-frontier
+  type: essay
+  length: short
+  tags: [tradeoffs]
+  difficulty: 3
+  prompt: "Explain what the Pareto frontier means for an inference stack across the four axes (latency, quality, cost, reliability) and how it guides choosing a serving configuration. Why is a configuration that sits off the frontier always the wrong choice?"
+  eval_skill: eval-tradeoffs-essay
+  reference_points:
+    - "The Pareto frontier is the set of configurations where you cannot improve one axis (latency, quality, cost, reliability) without giving up on another — the non-dominated configs."
+    - "A config off the frontier is dominated: some frontier config beats it on at least one axis while being no worse on the others, so running it is strictly wasteful."
+    - "Selection is therefore two steps — discard dominated configs, then pick a point ON the frontier according to your SLOs and priorities; there is no single best point, only the best for given constraints."
+    - "Moving along the frontier trades one axis for another (e.g. bigger batches trade tail latency for throughput and cost), which is the concrete form of 'no free lunch'."
+
 - id: essay-no-free-lunch
   type: essay
   length: short

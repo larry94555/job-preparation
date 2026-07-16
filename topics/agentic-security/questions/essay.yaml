@@ -59,3 +59,29 @@
     - "Output filtering protects the world (actions coming out): a filter inspects a proposed tool call before the harness executes it and refuses anything not on the allow-list, so even if an injection convinces the model to call send_email or charge_payment, the action is blocked — this is where the confused-deputy defense actually bites."
     - "An allow-list (default-deny) is safer than a block-list because a new or cleverly named dangerous tool fails closed until explicitly permitted, whereas a block-list silently passes anything it forgot to name."
     - "Neither is a silver bullet — a novel PII format slips redaction, a cleverly named tool slips a naive filter — so both layer with separation, sanitizing, and sandboxing, built in from the start rather than bolted on after a breach."
+
+- id: essay-sanitization
+  type: essay
+  length: short
+  tags: [separation]
+  difficulty: 2
+  prompt: "What is sanitizing untrusted content, and what is the standard approach for doing it? Walk through how it works, and explain why it is only best-effort and must layer with separation rather than replace it."
+  eval_skill: eval-agentic-security-essay
+  reference_points:
+    - "Sanitizing scrubs known injection patterns out of untrusted content before the model sees it — e.g. neutralizing strings like 'ignore all previous instructions' or fake delimiters to a harmless marker — so the most obvious attacks are stripped at the door."
+    - "It is content-level filtering, distinct from separation's structural defense: separation keeps your instructions in the system channel and labels fetched text as data, while sanitizing edits the untrusted text itself; the two attack different parts of the same problem."
+    - "Sanitizing is best-effort, not a proof: an attacker can rephrase, obfuscate, or encode a payload to evade the patterns, so it cannot guarantee the content is instruction-free."
+    - "Because it can be evaded, sanitizing layers with separation, sandboxing, redaction, and output filtering — defense in depth — rather than being trusted as a single barrier."
+
+- id: essay-exfiltration
+  type: essay
+  length: short
+  tags: [redaction]
+  difficulty: 3
+  prompt: "What is data exfiltration in an agentic system, and what is the standard approach for controlling the egress step? Walk through it, and explain why egress control is a separate defense from stopping the injection itself."
+  eval_skill: eval-agentic-security-essay
+  reference_points:
+    - "Exfiltration is a data-flow failure: sensitive data reaching a destination it should never reach — for example an injection pointing an allowed HTTP tool at attacker.example with a secret in the query string."
+    - "The standard approach gates the data-out step with an egress allow-list of approved destinations that fails closed, plus human confirmation on external writes (HTTP requests, emails, webhooks), so an unapproved host is refused at the wire even when the tool call itself was permitted."
+    - "Egress control is distinct from stopping injection: an output filter decides which tool runs, but an allowed tool can still be aimed at a hostile destination, so where data flows must be gated independently of what the model was tricked into intending."
+    - "It is one layer among several — separation, sanitizing, sandboxing, redaction, and output filtering — so even a successful injection is stopped at the egress boundary rather than relying on any single upstream control holding."

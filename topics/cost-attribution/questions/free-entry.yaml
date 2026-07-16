@@ -1,36 +1,36 @@
-# Free entry (short answer)
-- id: fe-driver-multiplier
-  type: text_input
-  tags: [drivers]
-  difficulty: 2
-  prompt: "Name one cost multiplier beyond raw input/output tokens. (one or two words)"
-  answer:
-    regex: '^(retries|retry|tool calls?|tool use|caching|cache misses?|model tier|round-?trips?)$'
-    normalize: true
-
+# Conceptual multiple choice — attribution dimensions, unit economics, hidden costs
 - id: fe-attribution-dimension
-  type: text_input
+  type: multiple_choice
   tags: [attribution]
   difficulty: 2
-  prompt: "Name one business dimension you would attribute LLM cost to (besides model). (one or two words)"
-  answer:
-    regex: '^(feature|workflow|tenant|user journey|journey|user|customer)$'
-    normalize: true
+  prompt: "Why is 'feature' a more actionable attribution dimension than 'model' when you want to cut spend?"
+  options:
+    - { text: "You can redesign or gate a feature's behavior, whereas the model is a shared input across many features", correct: true }
+    - { text: "Models are free, so attributing to them is pointless" }
+    - { text: "Features always cost more than models" }
+    - { text: "The provider bills per feature, not per model" }
+  explanation: "Attribution should land on dimensions you can act on. A feature is something you own and can change; a model is a shared lever whose total hides which feature drove the cost."
 
 - id: fe-cost-per-success
-  type: text_input
+  type: multiple_choice
   tags: [economics]
   difficulty: 3
-  prompt: "The unit-economics metric that charges failed/abandoned attempts to the wins is cost per ____ task. (one word)"
-  answer:
-    regex: '^(successful|success)$'
-    normalize: true
+  prompt: "A team's cost per API call stays flat, but its cost per successful task keeps rising. What does that most likely indicate?"
+  options:
+    - { text: "More retries or failures per success, so delivering the same value is getting more expensive", correct: true }
+    - { text: "The provider quietly raised the per-token price" }
+    - { text: "Each successful task is using fewer tokens over time" }
+    - { text: "Nothing meaningful — the two metrics always move together" }
+  explanation: "Flat per-call cost with rising per-success cost means more calls are being burned per successful outcome — the hallmark of growing retry/abandonment waste that per-call metrics hide."
 
 - id: fe-hidden-cost
-  type: text_input
+  type: multiple_choice
   tags: [hidden]
   difficulty: 3
-  prompt: "Name one hidden cost that the happy-path estimate usually misses. (one or two words)"
-  answer:
-    regex: '^(retries|retry|abandonment|abandoned (runs?|sessions?)?|over-?retrieval|failed runs?|oversized context)$'
-    normalize: true
+  prompt: "How do abandoned user sessions inflate the real cost of delivering value?"
+  options:
+    - { text: "They consume tokens that never produce a success, so their spend is amortized over fewer successful tasks", correct: true }
+    - { text: "They increase the provider's per-token price for later calls" }
+    - { text: "They are automatically refunded, so they cost nothing" }
+    - { text: "They only affect storage, never the token bill" }
+  explanation: "Abandoned sessions still burn tokens without yielding a successful outcome; that wasted spend gets spread across the successes that remain, raising true cost per successful task."

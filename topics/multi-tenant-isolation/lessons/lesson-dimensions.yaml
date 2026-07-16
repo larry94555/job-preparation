@@ -7,4 +7,4 @@ segments:
   - check: mc-isolation-dimensions
   - present: the-sharing-versus-isolation-tradeoff
   - check: mc-noisy-neighbor
-  - check: fe-isolation-tradeoff
+  - apply: essay-isolation-tradeoff

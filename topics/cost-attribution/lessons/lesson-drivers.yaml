@@ -5,6 +5,6 @@ segments:
   - present: what-actually-drives-cost
   - check: mc-cost-drivers
   - check: cloze-drivers
-  - check: fe-driver-multiplier
   - present: why-per-model-is-the-wrong-granularity
   - check: mc-per-model-wrong
+  - apply: essay-cost-drivers

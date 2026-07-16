@@ -1,36 +1,49 @@
-# Free entry (short answer)
+# Conceptual multiple-choice on per-layer levers and SLOs
+# (converted from one-word free-entry recall; ids/tags preserved)
 - id: fe-batching-cost
-  type: text_input
+  type: multiple_choice
   tags: [levers]
   difficulty: 2
-  prompt: "Larger batches raise throughput but what do they cost you? (one word)"
-  answer:
-    regex: '^(latency|slower|slowness|delay|tail|wait|queueing|queuing)$'
-    normalize: true
+  prompt: "Batching raises throughput by making requests wait for a batch to fill. Which latency measure does this hurt most, and why?"
+  options:
+    - { text: "Tail latency (p99): a request that arrives just after a batch closes waits the longest, so the slow requests get slower even if the average barely moves", correct: true }
+    - { text: "Mean latency only; the tail is unaffected because every request waits the same fixed time" }
+    - { text: "No latency measure changes — batching is purely a throughput and cost lever" }
+    - { text: "Time-to-first-token improves, because a fuller batch is scheduled sooner" }
+  explanation: "The wait for the batch to fill falls hardest on the requests that just missed the previous batch, so the tail (p99) — the metric SLOs are written against — degrades more than the average."
 
 - id: fe-quant-risk
-  type: text_input
+  type: multiple_choice
   tags: [levers]
   difficulty: 2
-  prompt: "Quantization lowers cost and memory but puts which axis most at risk? (one word)"
-  answer:
-    regex: '^(quality|accuracy|precision)$'
-    normalize: true
+  prompt: "Two teams quantize the same model to INT4. One sees no quality loss, the other sees a clear regression. What best explains this?"
+  options:
+    - { text: "Quantization's quality impact is workload-dependent — reduced precision hurts some tasks and prompts far more than others, so it must be measured on each team's own eval set, not assumed", correct: true }
+    - { text: "One team must have quantized incorrectly; done right, INT4 never affects quality" }
+    - { text: "Quantization only affects latency, so any quality difference is unrelated noise" }
+    - { text: "The regression is caused by cost dropping too fast, which always harms quality" }
+  explanation: "Reduced precision interacts with the specific workload, so the quality hit varies. That is why quantization is a trade to be validated per-workload, not a free win."
 
 - id: fe-fallback-axis
-  type: text_input
+  type: multiple_choice
   tags: [levers]
   difficulty: 3
-  prompt: "A fallback or backup model path mainly buys you which axis? (one word)"
-  answer:
-    regex: '^(reliability|availability|resilience|robustness|uptime)$'
-    normalize: true
+  prompt: "A backup model path is added purely as a fallback and almost never fires in normal operation. In what sense does it still cost you?"
+  options:
+    - { text: "You pay for reliability continuously — the standby capacity, health checks, and added latency/complexity on the retry path exist whether or not the fallback ever triggers", correct: true }
+    - { text: "It costs nothing until it fires; an untriggered fallback is a genuine free improvement to reliability" }
+    - { text: "It lowers quality on every request because two models now disagree" }
+    - { text: "It only costs money the moment it fires, and that cost equals one extra token" }
+  explanation: "Reliability is bought with standing redundancy and extra path complexity, not just a per-trigger fee — so a fallback is a real cost trade even when it sits idle."
 
 - id: fe-slo-role
-  type: text_input
+  type: multiple_choice
   tags: [slos]
   difficulty: 3
-  prompt: "What should you anchor the whole stack's design on, rather than a single metric? (one term / acronym)"
-  answer:
-    regex: '^(slos?|service-?level objectives?|budgets?|latency budget)$'
-    normalize: true
+  prompt: "Why anchor a serving design on an SLO like 'p99 TTFT under 300 ms' rather than on a single number like average latency or cost-per-token?"
+  options:
+    - { text: "The SLO defines the acceptable region for the user experience, including the tail, so every lever is judged by whether it keeps the design inside that region — a lone average can look healthy while the tail or another axis quietly breaches the target", correct: true }
+    - { text: "Averages are impossible to compute for LLM serving, so a percentile is the only option" }
+    - { text: "Cost-per-token and p99 latency are the same quantity, so it makes no difference which you pick" }
+    - { text: "An SLO removes all tradeoffs, letting you optimize latency, quality, and cost independently" }
+  explanation: "An SLO (especially a tail percentile) is the constraint the whole stack must satisfy; optimizing one average in isolation hides tail and cross-axis breaches."

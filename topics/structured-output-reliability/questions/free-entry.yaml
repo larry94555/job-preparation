@@ -1,45 +1,61 @@
-# Free entry (short answer) — engine type: text_input
+# Conceptual multiple-choice — engine type: multiple_choice
+# (Formerly short-answer free entry; converted to test understanding, ids/tags preserved.)
 - id: fe-failure-class
-  type: text_input
+  type: multiple_choice
   tags: [taxonomy]
   difficulty: 2
-  prompt: "Besides malformed JSON, name ONE structured-output failure class."
-  answer:
-    regex: '^(truncation|missing fields?|extra fields?|wrong types?|type mismatch|enum violation|constraint violation|hallucinated (value|enum|field)|schema violation)$'
-    normalize: true
+  prompt: "Why is it useful to classify structured-output failures (truncation, missing field, enum violation, etc.) rather than treating them all as 'bad output'?"
+  options:
+    - { text: "Different classes call for different fixes — truncation needs a higher token limit, an enum violation needs a repair prompt", correct: true }
+    - { text: "Classification lets you safely ignore the rarer failure classes" }
+    - { text: "Knowing the classes lets you turn off schema validation" }
+    - { text: "Each class simply requires switching to a more expensive model" }
+  explanation: "The failure class points to the remedy; a taxonomy turns a vague 'bad output' into an actionable diagnosis such as raise max_tokens, repair, or coerce."
 
 - id: fe-truncation-setting
-  type: text_input
+  type: multiple_choice
   tags: [taxonomy]
   difficulty: 2
-  prompt: "If a JSON response is truncated mid-object, what single setting should you check first?"
-  answer:
-    regex: '^(max[_ ]?tokens|max output tokens|output (length|token) limit)$'
-    normalize: true
+  prompt: "Responses are being cut off mid-object. Besides raising max_tokens, what keeps the pipeline reliable across varying input sizes?"
+  options:
+    - { text: "Detect the truncation (e.g. finish_reason=length or a parse failure) and trigger repair or a shorter-output strategy", correct: true }
+    - { text: "Lower the temperature until the JSON reliably completes" }
+    - { text: "Trust that a large enough limit eliminates all truncation forever" }
+    - { text: "Drop the schema so partial output validates" }
+  explanation: "Raising the limit helps, but detecting truncation via the finish reason or parse failure and reacting (repair, chunking, smaller schema) is what stays reliable as inputs grow."
 
 - id: fe-ts-validator
-  type: text_input
+  type: multiple_choice
   tags: [validation]
   difficulty: 1
-  prompt: "Name a schema-validation library commonly used in TypeScript for this. (one word)"
-  answer:
-    regex: '^(zod|ajv|yup|valibot|io-ts|typebox)$'
-    normalize: true
+  prompt: "What role does a schema-validation library (such as Zod or Ajv) play in a structured-output pipeline?"
+  options:
+    - { text: "It turns the schema into a runtime check that confirms parsed data matches the expected shape and types before use", correct: true }
+    - { text: "It generates the LLM prompt automatically from a few examples" }
+    - { text: "It replaces the need to parse the model's JSON string" }
+    - { text: "It guarantees the model itself produces valid output" }
+  explanation: "Such libraries enforce the contract at runtime — after parsing, they verify shape, types, and constraints, catching schema violations the parser alone cannot."
 
 - id: fe-repair-feedback
-  type: text_input
+  type: multiple_choice
   tags: [repair]
   difficulty: 2
-  prompt: "In a repair loop, what do you feed back to the model to help it fix its output?"
-  answer:
-    regex: '^(the )?(validation |schema )?error( message)?s?$'
-    normalize: true
+  prompt: "To give a repair attempt the best chance of succeeding, what should you include when sending the invalid output back to the model?"
+  options:
+    - { text: "The specific validation error(s) plus the offending output, so the model knows exactly what to fix", correct: true }
+    - { text: "Only a generic 'that was wrong, try again' instruction" }
+    - { text: "A completely different, unrelated prompt" }
+    - { text: "A higher temperature setting and nothing else" }
+  explanation: "Actionable, specific feedback — the exact validation errors and the bad output — lets the model target the real problem instead of guessing."
 
 - id: fe-last-resort
-  type: text_input
+  type: multiple_choice
   tags: [fallback]
   difficulty: 3
-  prompt: "When all automated repairs fail, name a safe final fallback. (two words)"
-  answer:
-    regex: '^(deterministic default|default value|safe default|human review)$'
-    normalize: true
+  prompt: "What property must the final stage of a fallback chain have?"
+  options:
+    - { text: "It must be guaranteed to produce a valid, safe result without relying on the model", correct: true }
+    - { text: "It must call the single most capable model available" }
+    - { text: "It must retry the original request exactly one more time" }
+    - { text: "It must be faster than every earlier stage in the chain" }
+  explanation: "The last resort exists precisely for when the model-dependent stages fail, so it must deterministically yield a safe result — a default value or a human handoff."

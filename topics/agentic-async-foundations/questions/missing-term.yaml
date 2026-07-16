@@ -1,54 +1,72 @@
-# Missing term (cloze)
+# Conceptual multiple-choice (event loop, gather, backoff, jitter, isolation)
 - id: cloze-asyncio
-  type: text_input
+  type: multiple_choice
   tags: [eventloop]
   difficulty: 1
-  prompt: "The Python standard-library module that provides the event loop and coroutines is ____."
-  answer:
-    regex: '^asyncio$'
-    normalize: true
+  prompt: "asyncio runs your coroutines on a single-threaded event loop. What does that model buy you over spinning up one OS thread per concurrent I/O call?"
+  options:
+    - { text: "Concurrency without preemptive thread-switching — one thread interleaves many waits at explicit await points, so you avoid the locking and race conditions that shared-memory threads force on you", correct: true }
+    - { text: "True CPU parallelism — the loop spreads coroutines across every core automatically" }
+    - { text: "It makes each individual network call return faster than a thread would" }
+    - { text: "It removes the need to ever handle errors, since the loop retries failed calls for you" }
+  explanation: "The event loop cooperatively interleaves coroutines on one thread, switching only at await. You get overlapping I/O waits without OS threads — no per-thread stack overhead and far fewer race conditions, because nothing preempts you mid-statement."
 
 - id: cloze-gather
-  type: text_input
+  type: multiple_choice
   tags: [concurrency]
   difficulty: 1
-  prompt: "To run many awaitables concurrently and collect their results in order, call asyncio.____."
-  answer:
-    regex: '^gather$'
-    normalize: true
+  prompt: "You write `results = asyncio.gather(*coros)` but forget the `await`. What is in `results`?"
+  options:
+    - { text: "A future/awaitable that hasn't produced anything yet — the batch only completes once you actually await it", correct: true }
+    - { text: "The finished list of results, already computed synchronously" }
+    - { text: "The result of only the first coroutine in the list" }
+    - { text: "None — gather can't be assigned to a variable" }
+  explanation: "`gather` returns a single awaitable that aggregates the coroutines; like any coroutine result, nothing is delivered until you `await` it. Forgetting the await is a common bug that leaves the batch unresolved."
 
 - id: cloze-await
-  type: text_input
+  type: multiple_choice
   tags: [eventloop]
   difficulty: 1
-  prompt: "The keyword that suspends a coroutine and yields control to the event loop is ____."
-  answer:
-    regex: '^await$'
-    normalize: true
+  prompt: "You try to write `await fetch()` at the top level of a module, outside any `async def`, and Python raises a SyntaxError. Why?"
+  options:
+    - { text: "`await` is only valid inside a coroutine — it's the suspension point that hands control back to the loop, which only exists when a coroutine is running under the loop", correct: true }
+    - { text: "`await` must always be followed by asyncio.gather, never a plain call" }
+    - { text: "Top-level code can't do I/O of any kind in Python" }
+    - { text: "You have to import await from asyncio before you can use it" }
+  explanation: "`await` means 'suspend this coroutine and yield to the event loop.' Outside an `async def` there is no coroutine to suspend and no loop driving it, so it's a syntax error — you enter async code via `asyncio.run(main())`."
 
 - id: cloze-backoff
-  type: text_input
+  type: multiple_choice
   tags: [resilience]
   difficulty: 2
-  prompt: "Growing the wait between retries (1s, 2s, 4s, …) is called exponential ____."
-  answer:
-    regex: '^backoff$'
-    normalize: true
+  prompt: "A downstream service is down and your retry loop reattempts instantly with no growing delay. What does your own retry traffic do?"
+  options:
+    - { text: "It piles more load onto an already-struggling service, slowing or preventing its recovery — a self-inflicted retry storm", correct: true }
+    - { text: "Nothing — instant retries are free because the service is down anyway" }
+    - { text: "It guarantees the call succeeds sooner than a delayed retry would" }
+    - { text: "It automatically routes the request to a healthy replica" }
+  explanation: "Retrying with no delay hammers a recovering service with synchronized traffic, deepening the outage. Growing the wait exponentially (backoff) relieves that pressure and gives the service room to come back."
 
 - id: cloze-jitter
-  type: text_input
+  type: multiple_choice
   tags: [resilience]
   difficulty: 2
-  prompt: "Adding randomness to retry delays so clients don't retry in lockstep is called ____."
-  answer:
-    regex: '^jitter$'
-    normalize: true
+  prompt: "Does adding jitter to retry delays mainly help one isolated client, or a whole fleet of clients?"
+  options:
+    - { text: "A whole fleet — jitter decorrelates many clients that failed at the same instant so they don't all retry on the same schedule; a single lone client barely benefits", correct: true }
+    - { text: "One client — jitter shortens that client's own average wait" }
+    - { text: "Neither — jitter only affects how errors are logged" }
+    - { text: "One client — it guarantees that client retries before all others" }
+  explanation: "Jitter's value is fleet-wide: without it, many clients that hit the same failure back off on identical schedules and retry in synchronized waves. Randomizing each delay spreads them out. For a single client in isolation there's nothing to desynchronize."
 
 - id: cloze-isolate
-  type: text_input
+  type: multiple_choice
   tags: [errors]
   difficulty: 2
-  prompt: "To make gather return exceptions instead of raising the first one, pass ____=True."
-  answer:
-    regex: '^return_exceptions$'
-    normalize: true
+  prompt: "You call `gather(*coros, return_exceptions=True)` and one coroutine fails early. What happens to the rest of the batch?"
+  options:
+    - { text: "The other coroutines all run to completion; the failure is captured and returned in its slot instead of aborting the batch on the first error", correct: true }
+    - { text: "gather cancels the remaining coroutines the moment one fails" }
+    - { text: "The whole call raises immediately and discards every result" }
+    - { text: "gather automatically retries the failed coroutine until it succeeds" }
+  explanation: "`return_exceptions=True` changes gather's contract: instead of raising on the first failure, it lets every coroutine finish and places each exception object in its position. You then inspect the list per item rather than losing the whole batch."

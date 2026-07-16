@@ -1,63 +1,84 @@
-# Free entry (short answer)
+# Conceptual multiple choice (converted from free-entry short answer)
 - id: fe-trace
-  type: text_input
+  type: multiple_choice
   tags: [trace]
   difficulty: 1
-  prompt: "What do you call the full per-step record of one agent run? (one word)"
-  answer:
-    regex: '^trace$'
-    normalize: true
+  prompt: "You want to compare two separate agent runs that both misbehaved. How do traces map onto runs?"
+  options:
+    - { text: "Each run is captured as its own trace, so you pull up and compare the two traces", correct: true }
+    - { text: "A single trace spans every run, so both runs share one trace you filter" }
+    - { text: "Each step gets its own trace, so one run produces many unrelated traces" }
+    - { text: "Traces don't correspond to runs; they only record the final answer" }
+  explanation: "A trace is scoped to exactly one run — the complete per-step record of that run. Comparing two runs means comparing two traces, each a self-contained account of what its run did."
 
 - id: fe-span
-  type: text_input
+  type: multiple_choice
   tags: [spans]
   difficulty: 1
-  prompt: "What is the record of a single step inside a trace called? (one word)"
-  answer:
-    regex: '^span$'
-    normalize: true
+  prompt: "In one run the agent makes a model call, then a tool call, then another model call. How many spans should that run produce?"
+  options:
+    - { text: "Three — one span per step", correct: true }
+    - { text: "One — a single span for the whole run" }
+    - { text: "One span per token the model emitted" }
+    - { text: "None, unless the run fails" }
+  explanation: "A span is the unit of one step. Three steps means three spans, so each step's tokens, cost, latency, tool, and error are recorded separately and can be inspected on their own."
 
 - id: fe-latency
-  type: text_input
+  type: multiple_choice
   tags: [spans]
   difficulty: 2
-  prompt: "Which per-span metric measures how long a step took? (one word)"
-  answer:
-    regex: '^latency$'
-    normalize: true
+  prompt: "Two spans in a run show latency_ms=120 and latency_ms=8200. What does having latency recorded per span let you decide?"
+  options:
+    - { text: "Put your optimization effort on the 8200ms step, since it dominates the run's time", correct: true }
+    - { text: "Both steps are equally responsible, since latency is a run-level number" }
+    - { text: "The run must be fast overall, because one of its spans is small" }
+    - { text: "Nothing — latency can't be compared across spans in the same run" }
+  explanation: "Per-span latency localizes where time went. One step at 8.2s versus another at 0.12s tells you exactly which step to fix; a single run-total duration would hide that split."
 
 - id: fe-alert
-  type: text_input
+  type: multiple_choice
   tags: [alerts]
   difficulty: 2
-  prompt: "What fires when a metric crosses a budget or SLO threshold? (one word)"
-  answer:
-    regex: '^alert$'
-    normalize: true
+  prompt: "An alert fires on a failure-rate breach at 3am. What has actually happened at that moment?"
+  options:
+    - { text: "A metric crossed its threshold and you've been notified — the alert tells you, it doesn't fix anything", correct: true }
+    - { text: "The agent automatically retried and resolved the failing runs" }
+    - { text: "The breaching runs were rolled back to their previous state" }
+    - { text: "The dashboard was refreshed with new data and nothing else" }
+  explanation: "An alert is a notification on a threshold breach, not a remediation. It closes the gap between a production surprise and being told about it, so a human can go look at the trace and act."
 
 - id: fe-dashboard
-  type: text_input
+  type: multiple_choice
   tags: [alerts]
   difficulty: 2
-  prompt: "What is the always-on view of aggregate trends called? (one word)"
-  answer:
-    regex: '^dashboard$'
-    normalize: true
+  prompt: "Cost is drifting slowly upward week over week but never crosses any alert threshold. What catches that drift?"
+  options:
+    - { text: "Scanning the dashboard's trend, since a gradual drift never trips a threshold alert", correct: true }
+    - { text: "An alert, which fires automatically on slow gradual drift" }
+    - { text: "Reading the raw spans of every run by hand" }
+    - { text: "The trace_id, which flags rising cost on its own" }
+  explanation: "Alerts fire on threshold breaches, so a slow drift that stays under the line is invisible to them. The dashboard's always-on trend view is exactly what surfaces gradual movement you notice by scanning — dashboards for trends, alerts for thresholds."
 
 - id: fe-cost
-  type: text_input
+  type: multiple_choice
   tags: [metrics]
   difficulty: 2
-  prompt: "Which production metric multiplies with volume and surprises everyone at scale? (one word)"
-  answer:
-    regex: '^cost$'
-    normalize: true
+  prompt: "Why treat cost as a first-class production metric, on the same footing as latency and failure rate?"
+  options:
+    - { text: "At scale it compounds with volume and can blow a budget, so it needs watching and thresholds like any reliability metric", correct: true }
+    - { text: "Because per-token price is unrelated to how much volume you serve" }
+    - { text: "Because cost only matters during development, not in production" }
+    - { text: "Because the provider requires a cost dashboard before you can deploy" }
+  explanation: "Per-run cost may be a rounding error, but multiplied by real volume it becomes a budget line that can surprise the team. Tracking it in aggregate — with budgets and alerts — is what keeps a scaling agent from quietly overspending."
 
 - id: fe-tail
-  type: text_input
+  type: multiple_choice
   tags: [metrics]
   difficulty: 2
-  prompt: "Median latency looks fine but p95/p99 is what users feel. What is that slow part of the distribution called? (one word)"
-  answer:
-    regex: '^tail$'
-    normalize: true
+  prompt: "You cut mean latency by 20%, but the same users still complain about occasional multi-second hangs. Why didn't the improvement help them?"
+  options:
+    - { text: "The hangs live in the tail (p95/p99); lowering the mean can leave the tail — the part users feel — untouched", correct: true }
+    - { text: "Mean and tail always move together, so a lower mean makes this impossible" }
+    - { text: "Users never actually notice latency, so the complaints are unrelated" }
+    - { text: "The tail is the fastest requests, which the change made slower" }
+  explanation: "The mean can drop while the slow tail stays put — a few very slow requests are averaged away by many fast ones. Users experience the tail, so you have to track p95/p99 directly, not just improve the average."

@@ -1,45 +1,60 @@
-# Missing term (cloze)
+# Conceptual multiple-choice (converted from cloze fill-in-the-blank)
 - id: cloze-prefix
-  type: text_input
+  type: multiple_choice
   tags: [prefix]
   difficulty: 1
-  prompt: "Reusing the model's already-computed attention state for identical leading tokens is called ____ caching (also known as prompt caching)."
-  answer:
-    regex: '^prefix$'
-    normalize: true
+  prompt: "Prefix (prompt) caching can only reuse work for the *leading* tokens of a request. Why not for tokens in the middle?"
+  options:
+    - { text: "Attention is causal — each token's state depends on every earlier token, so the first differing token invalidates everything after it", correct: true }
+    - { text: "The model only stores the first few tokens of any prompt to save memory" }
+    - { text: "Middle tokens are embedded, and embeddings cannot be cached" }
+    - { text: "Only leading tokens are sent to the model; the rest are dropped" }
+  explanation: "Because attention is causal, a token's computed state depends on all tokens before it; the moment two requests diverge, no downstream state can be reused, so only an identical leading prefix is reusable."
 
 - id: cloze-prefill
-  type: text_input
+  type: multiple_choice
   tags: [prefix]
   difficulty: 2
-  prompt: "A prefix-cache hit reuses the ____ computation for the shared leading tokens, but the model still generates the rest."
-  answer:
-    regex: '^prefill$'
-    normalize: true
+  prompt: "On a prefix-cache hit, what is actually reused from the previous request?"
+  options:
+    - { text: "The already-computed attention state (KV cache) for the shared leading tokens", correct: true }
+    - { text: "The final generated response text, returned verbatim" }
+    - { text: "The embedding vector of the whole request" }
+    - { text: "The model weights, which are re-loaded faster" }
+  explanation: "A prefix-cache hit reuses the model's stored attention/KV state for the identical leading tokens, so the model skips recomputing prefill for them and still decodes a fresh completion."
 
 - id: cloze-threshold
-  type: text_input
+  type: multiple_choice
   tags: [semantic]
   difficulty: 2
-  prompt: "A semantic cache returns a stored response when the request's embedding is within a similarity ____."
-  answer:
-    regex: '^threshold$'
-    normalize: true
+  prompt: "Setting a semantic cache's similarity threshold too HIGH (too strict) mainly causes:"
+  options:
+    - { text: "Fewer cache hits and less savings — genuinely equivalent requests fail to match", correct: true }
+    - { text: "More false-positive hits returning wrong answers" }
+    - { text: "The prefix cache to stop working" }
+    - { text: "Slower embedding computation for every request" }
+  explanation: "A stricter threshold demands closer matches, so paraphrases of the same question miss the cache; you trade away hit rate (and savings) for safety — the opposite failure mode from a too-low threshold."
 
 - id: cloze-false-positive
-  type: text_input
+  type: multiple_choice
   tags: [semantic]
   difficulty: 3
-  prompt: "Returning a stored answer for a request that is actually different is a false-____ hit."
-  answer:
-    regex: '^positive$'
-    normalize: true
+  prompt: "Compared with a cache miss, why is a semantic false-positive hit the more dangerous outcome?"
+  options:
+    - { text: "A miss just costs an extra model call, but a false positive serves a confidently wrong answer to the user", correct: true }
+    - { text: "A false positive permanently corrupts the vector database" }
+    - { text: "A miss returns a wrong answer, while a false positive only costs latency" }
+    - { text: "Both are equally harmless because the model is never called" }
+  explanation: "A miss only forgoes the savings and calls the model normally; a false positive returns a stored answer for a genuinely different request, silently giving the user an incorrect response."
 
 - id: cloze-ttl
-  type: text_input
+  type: multiple_choice
   tags: [semantic, tradeoffs]
   difficulty: 3
-  prompt: "To bound how stale a cached response can get, entries are given a time-to-live, abbreviated ____."
-  answer:
-    regex: '^ttl$'
-    normalize: true
+  prompt: "What problem does attaching a time-to-live (TTL) to cached entries primarily address?"
+  options:
+    - { text: "Staleness — it bounds how out-of-date a cached response can be before it must be regenerated", correct: true }
+    - { text: "False-positive matches from a too-permissive similarity threshold" }
+    - { text: "The cost of computing embeddings for new requests" }
+    - { text: "Leakage of one tenant's cached answers to another tenant" }
+  explanation: "A TTL expires entries after a set time, so a cached answer can only be so old before the cache regenerates it — that bounds staleness, a separate concern from the threshold or tenant isolation."

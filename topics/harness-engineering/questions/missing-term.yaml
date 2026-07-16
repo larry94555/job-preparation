@@ -1,36 +1,37 @@
-# Missing term (cloze)
+# Concept checks — pick the right term (converted from cloze fill-in-the-blank).
+# The fundamentally conceptual term (idempotency) is now an open-ended essay.
 - id: cloze-harness
-  type: text_input
+  type: multiple_choice
   tags: [boundary]
-  difficulty: 1
-  prompt: "The code around the model that owns tools, state, safety, and verification is the ____."
-  answer:
-    regex: '^harness$'
-    normalize: true
+  difficulty: 2
+  prompt: "What do we call the layer of code around the model that owns its tools, state, safety, and verification?"
+  options:
+    - { text: "The harness", correct: true }
+    - { text: "The system prompt" }
+    - { text: "The model weights" }
+    - { text: "The context window" }
+  explanation: "The harness is the program around the model: it owns tool execution, state, permissions, verification, and loop control. The prompt only shapes the model's reasoning."
 
 - id: cloze-loop
-  type: text_input
+  type: multiple_choice
   tags: [loop]
-  difficulty: 1
-  prompt: "The agent loop is: think → act → ____."
-  answer:
-    regex: '^observe$'
-    normalize: true
-
-- id: cloze-idempotency
-  type: text_input
-  tags: [control]
-  difficulty: 3
-  prompt: "An operation that is safe to retry because repeating it has no extra effect is called ____."
-  answer:
-    regex: '^idempotent$'
-    normalize: true
+  difficulty: 2
+  prompt: "In the think → act → observe loop, why does the harness feed each tool result back to the model as the 'observe' step?"
+  options:
+    - { text: "So the model's next step is grounded in what actually happened", correct: true }
+    - { text: "To reset the model's context between turns" }
+    - { text: "To lower the token cost of the call" }
+    - { text: "To let the model generate without using any tools" }
+  explanation: "Observation closes the loop: the model proposes, the harness executes, and feeding the real result back keeps the next reasoning step grounded in reality rather than a guess."
 
 - id: cloze-plan
-  type: text_input
+  type: multiple_choice
   tags: [control]
   difficulty: 2
-  prompt: "Separating planning from doing so steps can be verified independently is the ____-then-execute pattern."
-  answer:
-    regex: '^plan$'
-    normalize: true
+  prompt: "What is the main reason to separate planning from doing (the plan-then-execute pattern)?"
+  options:
+    - { text: "Each step can be verified before it is executed", correct: true }
+    - { text: "It removes the need for tools" }
+    - { text: "It guarantees the model never makes a mistake" }
+    - { text: "It always uses fewer tokens" }
+  explanation: "Planning first turns one opaque action into a checkable sequence: the harness can inspect or verify each step before running it, instead of discovering failures only after side effects have happened."

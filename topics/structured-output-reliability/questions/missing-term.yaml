@@ -1,47 +1,61 @@
-# Missing term (cloze) — engine type: text_input
+# Conceptual multiple-choice — engine type: multiple_choice
+# (Formerly cloze fill-in-the-blank; converted to test understanding, ids/tags preserved.)
 - id: cloze-repair-loop
-  type: text_input
+  type: multiple_choice
   tags: [repair]
   difficulty: 1
-  prompt: "A bounded retry that feeds the validator's error back to the model so it can fix its output is called a ____ loop."
-  answer:
-    regex: '^repair$'
-    normalize: true
+  prompt: "What distinguishes a repair loop from a plain retry when a model's output fails validation?"
+  options:
+    - { text: "It includes the specific validation error in the retry prompt so the model can correct that exact problem", correct: true }
+    - { text: "It resends the identical prompt unchanged until the output happens to pass" }
+    - { text: "It raises the temperature on every attempt to add variety" }
+    - { text: "It switches to a different model on each attempt" }
+  explanation: "A repair loop is error-directed: feeding the validator's message back gives the model the information it needs to fix the specific failure, unlike a blind retry."
 
 - id: cloze-schema-contract
-  type: text_input
+  type: multiple_choice
   tags: [validation]
   difficulty: 1
-  prompt: "Treating the schema as the single authority on validity is the 'schema as ____' principle."
-  answer:
-    regex: '^contract$'
-    normalize: true
+  prompt: "Treating the schema as the single contract for validity primarily helps a team because:"
+  options:
+    - { text: "Producers and consumers agree on one explicit definition of valid data instead of reinventing checks at each call site", correct: true }
+    - { text: "It removes the need to handle invalid model output at all" }
+    - { text: "It lets the model decide at runtime which fields are required" }
+    - { text: "It guarantees the model will never emit invalid output" }
+  explanation: "A shared schema contract centralizes the definition of validity, so every producer and consumer checks against one source of truth rather than scattered ad-hoc logic."
 
 - id: cloze-constrained-decoding
-  type: text_input
+  type: multiple_choice
   tags: [constrained-decoding]
   difficulty: 2
-  prompt: "____ decoding uses a grammar to force the model to emit syntactically valid, schema-shaped output. (one word)"
-  answer:
-    regex: '^constrained$'
-    normalize: true
+  prompt: "How does constrained (grammar-based) decoding force schema-shaped output?"
+  options:
+    - { text: "It masks out tokens that would violate the grammar at each decoding step, so only valid continuations can be sampled", correct: true }
+    - { text: "It validates the finished response and retries whenever it fails" }
+    - { text: "It fine-tunes the model on schema examples before inference" }
+    - { text: "It rewrites the model's output after generation to fix the JSON" }
+  explanation: "Constrained decoding restricts the token distribution during generation, masking any token that would break the grammar, so the output is syntactically valid by construction."
 
 - id: cloze-fallback-chain
-  type: text_input
+  type: multiple_choice
   tags: [fallback]
   difficulty: 1
-  prompt: "A layered sequence of recovery strategies ending in a safe default is called a ____ chain."
-  answer:
-    regex: '^fallback$'
-    normalize: true
+  prompt: "Why does a fallback chain end in a deterministic safe default rather than another model call?"
+  options:
+    - { text: "The final stage must always succeed without depending on the model, so the pipeline always returns something valid", correct: true }
+    - { text: "Deterministic defaults are always cheaper to compute than a model call" }
+    - { text: "A model call is never allowed to appear in a fallback chain" }
+    - { text: "Safe defaults produce higher-quality answers than the model" }
+  explanation: "The last link must be guaranteed to succeed independent of the unreliable component, so the pipeline always yields a valid, if degraded, result."
 
 - id: cloze-repair-budget
-  type: text_input
+  type: multiple_choice
   tags: [repair]
   difficulty: 2
-  parameters:
-    n: { random_int: [1, 5] }
-  prompt: "A repair loop capped at {{n}} attempts makes at most how many extra model calls before falling back?"
-  answer:
-    equals: "{{n}}"
-    numeric_tolerance: 0
+  prompt: "A repair loop is capped at N attempts. What should happen once those N attempts are exhausted without a valid result?"
+  options:
+    - { text: "Control passes to the next fallback stage instead of retrying further", correct: true }
+    - { text: "The cap is automatically raised and the loop keeps going" }
+    - { text: "The last invalid output is passed downstream as-is" }
+    - { text: "The request restarts from scratch with a fresh budget" }
+  explanation: "The budget bounds cost and latency; once spent, control hands off to the fallback chain rather than looping forever or shipping invalid data."

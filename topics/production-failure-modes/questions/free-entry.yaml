@@ -1,36 +1,48 @@
-# Free entry (short answer)
+# Conceptual multiple-choice (converted from short-answer free entry)
 - id: fe-name-failure
-  type: text_input
+  type: multiple_choice
   tags: [failures]
   difficulty: 2
-  prompt: "Name one classic LLM-system production failure mode. (a few words)"
-  answer:
-    regex: '^(hallucinated tool calls?|malformed (json|output)|stale retrieval|runaway agents?|silent (eval )?regressions?|hallucination|silent failures?)$'
-    normalize: true
+  prompt: "Hallucinated tool calls, malformed output, stale retrieval, runaway agents, and silent eval regressions share what defining property as a group?"
+  options:
+    - { text: "They are model-layer failures — they arise from what the model produced, not from crashed processes or infra like expired certs and full disks", correct: true }
+    - { text: "They are all caught automatically by standard HTTP error monitoring" }
+    - { text: "They occur only during deployment, never at steady state" }
+    - { text: "They are all prevented simply by using a larger context window" }
+  explanation: "The catalog is unified by being *model-layer* failures: each comes from the model's output, not a generic infra crash. That is exactly why standard error dashboards miss them and why LLM systems need output validators and eval monitoring."
 
 - id: fe-repair-pattern
-  type: text_input
+  type: multiple_choice
   tags: [mitigation]
   difficulty: 3
-  prompt: "The three-step pattern for handling malformed model output is validate, ____, fallback. (one word)"
-  answer:
-    regex: '^(repair|re-?ask|retry|reprompt|re-?prompt)$'
-    normalize: true
+  prompt: "In validate-repair-fallback for malformed JSON, why is a final *fallback* to a safe default needed rather than just validating and re-asking?"
+  options:
+    - { text: "Re-asking can keep failing, so a bounded fallback guarantees a safe degraded response instead of looping forever or shipping garbage downstream", correct: true }
+    - { text: "The fallback is what forces the model to emit valid JSON on the next call" }
+    - { text: "Without the fallback, the schema-validation step is skipped" }
+    - { text: "The fallback removes the need to validate the output at all" }
+  explanation: "Validate detects the bad output and repair/re-ask tries to fix it, but neither is guaranteed to succeed. Retrying forever neither repairs nor bounds cost, so the fallback degrades to a safe default — the step that keeps a persistent failure from crashing or corrupting downstream consumers."
 
 - id: fe-agent-control
-  type: text_input
+  type: multiple_choice
   tags: [mitigation]
   difficulty: 3
-  prompt: "Besides a budget, name the control that halts an agent stuck repeating the same states. (a few words)"
-  answer:
-    regex: '^(loop detection|cycle detection|loop( |-)?guard|repeat detection)$'
-    normalize: true
+  prompt: "Why pair loop detection with a budget when containing a runaway agent, instead of relying on the budget alone?"
+  options:
+    - { text: "Loop detection trips as soon as the agent repeats states, halting a stuck agent before it burns the entire budget", correct: true }
+    - { text: "A budget can only be measured in steps, never in tokens or dollars" }
+    - { text: "Loop detection makes the agent run faster on each step" }
+    - { text: "The budget applies only to retrieval, not to agent steps" }
+  explanation: "A budget bounds the worst case but still lets a stuck agent spend right up to the cap. Loop detection spots repeated actions/states and stops the agent early, so the two controls are complementary — one bounds total spend, the other catches the stuck case sooner."
 
 - id: fe-ci-gate
-  type: text_input
+  type: multiple_choice
   tags: [prevention]
   difficulty: 3
-  prompt: "What CI mechanism blocks a merge when scores on a fixed set drop below a threshold? (a few words)"
-  answer:
-    regex: '^(eval gate|ci eval gate|evaluation gate|eval gates)$'
-    normalize: true
+  prompt: "Why does an eval gate that scores a fixed held-out set belong in CI and block the *merge*, rather than running as a runtime check?"
+  options:
+    - { text: "Silent regressions don't throw at runtime, so the only way to stop one is to score quality before the change ships and refuse to merge on a drop", correct: true }
+    - { text: "Running it in CI is cheaper because production traffic is free" }
+    - { text: "Runtime checks can repair a regression automatically, making a CI gate redundant" }
+    - { text: "A merge block is easier for developers to bypass than a runtime alert" }
+  explanation: "A silent eval regression ships without throwing — no runtime alert fires. A CI eval gate scores each change against a fixed set and fails the build when quality drops below threshold, catching the regression before it can reach production at all."

@@ -9,5 +9,5 @@ segments:
   - check: cloze-indirect
   - present: why-filtering-alone-fails
   - check: mc-filtering-fails
-  - check: fe-defense-depth
+  - apply: essay-layered-defense
   - apply: essay-injection-defense

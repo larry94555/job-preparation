@@ -1,45 +1,60 @@
-# Missing term (cloze)
+# Conceptual multiple-choice: cache-key safety, retrieval scoping, and contamination
 - id: cloze-tenant-scope
-  type: text_input
+  type: multiple_choice
   tags: [cache-safety]
   difficulty: 2
-  prompt: "To stop cross-tenant cache hits, every cache key must include the ____ scope."
-  answer:
-    regex: '^tenant$'
-    normalize: true
+  prompt: "You namespace a shared response cache by tenant so identical prompts from different tenants no longer collide. What is the main cost of this change?"
+  options:
+    - { text: "A lower cache hit rate, because each tenant now warms its own entries — an acceptable price for isolation", correct: true }
+    - { text: "The cache keys stop being deterministic, so lookups become unreliable" }
+    - { text: "The model must be reloaded per tenant with separate weights" }
+    - { text: "Cached answers become incorrect for every tenant" }
+  explanation: "Tenant-scoped keys mean two tenants asking the same thing no longer share an entry, so the hit rate drops somewhat. That is the expected, acceptable trade for preventing cross-tenant hits; it does not affect determinism or correctness."
 
 - id: cloze-poisoning
-  type: text_input
+  type: multiple_choice
   tags: [cache-safety]
   difficulty: 3
-  prompt: "Seeding a malicious entry under a key a victim will later read is called cache ____."
-  answer:
-    regex: '^poisoning$'
-    normalize: true
+  prompt: "Which underlying condition is what makes cache poisoning possible in a multi-tenant cache?"
+  options:
+    - { text: "Attacker and victim can compute the same cache key, so an attacker-written entry is later read by the victim", correct: true }
+    - { text: "The cache evicts entries using a TTL rather than an LRU policy" }
+    - { text: "The embeddings used are high-dimensional" }
+    - { text: "The model is served at a temperature greater than zero" }
+  explanation: "Poisoning depends on a shared, collidable key namespace: if a victim's request hashes to a key an attacker can also write, the victim is served attacker-controlled content. Scoping keys per tenant removes the shared namespace and closes the attack."
 
 - id: cloze-authz-filter
-  type: text_input
+  type: multiple_choice
   tags: [retrieval-scoping]
   difficulty: 2
-  prompt: "Retrieval from a shared index must apply an ____ filter on tenant metadata so search only returns the caller's documents."
-  answer:
-    regex: '^authorization$'
-    normalize: true
+  prompt: "Why can't you rely on the embedding model itself to keep one tenant's chunks out of another tenant's retrieval results?"
+  options:
+    - { text: "Embeddings encode semantic similarity, not ownership, so another tenant's on-topic chunk still ranks near the query", correct: true }
+    - { text: "Embeddings are random, so results are unpredictable across tenants" }
+    - { text: "Embeddings always place each tenant's vectors in a separate cluster" }
+    - { text: "Embeddings expire, so old tenants' vectors stop matching" }
+  explanation: "Vector similarity reflects meaning, not who owns the document. A different tenant's semantically-similar chunk will rank high regardless of tenant, so isolation must come from an explicit authorization/metadata filter, not the geometry."
 
 - id: cloze-namespace
-  type: text_input
+  type: multiple_choice
   tags: [retrieval-scoping]
   difficulty: 3
-  prompt: "Giving each tenant its own partition of a vector store, keyed by tenant id, is called a per-tenant ____."
-  answer:
-    regex: '^namespace$'
-    normalize: true
+  prompt: "A per-tenant namespace (partition) in a vector store enforces isolation by:"
+  options:
+    - { text: "Physically separating each tenant's vectors so a query only ever searches its own partition", correct: true }
+    - { text: "Encrypting each tenant's vectors with a per-tenant key before search" }
+    - { text: "Deduplicating identical embeddings shared across tenants" }
+    - { text: "Reducing the dimensionality of each tenant's vectors" }
+  explanation: "A namespace scopes the search space itself: the query runs against only the caller's partition, so isolation does not depend on a metadata filter being applied correctly on every code path. That structural separation is its advantage over a shared filtered index."
 
 - id: cloze-context-bleed
-  type: text_input
+  type: multiple_choice
   tags: [contamination]
   difficulty: 3
-  prompt: "When one user's history leaks into another user's prompt through reused session state, that is context ____."
-  answer:
-    regex: '^(bleed|contamination)$'
-    normalize: true
+  prompt: "A server keeps a single module-level conversation-history list that is reused across requests. Under concurrent multi-user traffic, what goes wrong?"
+  options:
+    - { text: "One user's appended messages appear in another user's prompt — context bleed across users", correct: true }
+    - { text: "The list grows without bound but each user still sees only their own messages" }
+    - { text: "Embeddings are computed twice, doubling token cost" }
+    - { text: "The cache is poisoned with attacker-chosen entries" }
+  explanation: "Shared mutable state (a module-level history) is written by every concurrent request, so one user's turns leak into another user's context. The fix is to scope conversation/session state per user rather than sharing a single object."

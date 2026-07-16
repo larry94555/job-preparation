@@ -1,54 +1,72 @@
-# Missing term (cloze)
+# Conceptual multiple choice (converted from cloze missing-term)
 - id: cloze-judge
-  type: text_input
+  type: multiple_choice
   tags: [judge]
   difficulty: 1
-  prompt: "To grade open-ended output, use another model call as the LLM-as-____."
-  answer:
-    regex: '^judge$'
-    normalize: true
+  prompt: "For which kind of output is an LLM-as-judge the right grading tool, rather than a cheaper exact-match check?"
+  options:
+    - { text: "Open-ended output like a summary, plan, or trajectory, where there is no single correct string to compare against", correct: true }
+    - { text: "A function's return value that must equal a fixed expected integer" }
+    - { text: "A boolean flag that is either true or false" }
+    - { text: "Any output at all — always prefer the judge over a programmatic check" }
+  explanation: "Exact-match and programmatic checks are cheaper and deterministic; use them whenever the answer is exact-matchable. Reserve the LLM-as-judge for open-ended outputs that can't be compared with ==."
 
 - id: cloze-rubric
-  type: text_input
+  type: multiple_choice
   tags: [rubric]
   difficulty: 1
-  prompt: "The list of explicit criteria the judge scores an output against is its ____."
-  answer:
-    regex: '^rubric$'
-    normalize: true
+  prompt: "Why must the rubric stay fixed across every run of a suite?"
+  options:
+    - { text: "So pass-rates from different runs are comparable — if the measuring instrument changes, a score change could be the rubric moving, not the agent", correct: true }
+    - { text: "So the judge never has to read the rubric more than once" }
+    - { text: "So the rubric file stays small and cheap to store" }
+    - { text: "So the agent can memorize the rubric and score higher" }
+  explanation: "The rubric is the measuring instrument. If it drifts between runs, you can't tell whether a pass-rate change came from the agent or from the ruler moving, so runs stop being comparable."
 
 - id: cloze-criteria
-  type: text_input
+  type: multiple_choice
   tags: [rubric]
   difficulty: 2
-  prompt: "A rubric is a set of explicit ____ the output must meet, each judged independently."
-  answer:
-    regex: '^criteria$'
-    normalize: true
+  prompt: "Which of these is a well-formed rubric criterion the judge can score reliably?"
+  options:
+    - { text: "'Every factual claim in the summary is supported by the source' — specific and independently checkable", correct: true }
+    - { text: "'The summary is good' — leaves the standard up to the judge on each call" }
+    - { text: "'The summary feels professional' — subjective and unmeasurable" }
+    - { text: "'The summary is the kind of thing a user would like' — vague and unverifiable" }
+  explanation: "A good criterion is specific and objectively checkable, so different runs judge the same thing. Vague criteria hand the standard back to the judge's discretion, which is exactly what a rubric is meant to remove."
 
 - id: cloze-suite
-  type: text_input
+  type: multiple_choice
   tags: [suite]
   difficulty: 1
-  prompt: "The fixed set of cases you run on every change is your eval ____."
-  answer:
-    regex: '^suite$'
-    normalize: true
+  prompt: "What should an eval suite's cases cover to be trustworthy?"
+  options:
+    - { text: "The realistic distribution including the awkward and edge inputs, not just the easy cases the agent already handles", correct: true }
+    - { text: "Only the cases the agent currently passes, so the pass-rate looks high" }
+    - { text: "A single hand-picked case that best showcases the agent" }
+    - { text: "Whatever cases are cheapest to run, regardless of what they test" }
+  explanation: "A suite is only as honest as its cases. Stacking it with easy inputs inflates the pass-rate; covering the real distribution including hard and edge cases is what makes the number mean something."
 
 - id: cloze-gate
-  type: text_input
+  type: multiple_choice
   tags: [gate]
   difficulty: 2
-  prompt: "The automated check that blocks a deploy below the bar is the deploy ____."
-  answer:
-    regex: '^gate$'
-    normalize: true
+  prompt: "Your team runs the suite and reads the pass-rate, but nothing stops a low-scoring build from shipping. What is missing, and what is the consequence?"
+  options:
+    - { text: "A deploy gate — without mechanical enforcement, a sub-threshold build ships anyway the first time a deadline pushes 'we'll fix the evals later'", correct: true }
+    - { text: "Nothing — reading the pass-rate is itself a gate" }
+    - { text: "A faster judge, since slow grading is why bad builds ship" }
+    - { text: "More metrics; the pass-rate alone is why the build shipped" }
+  explanation: "Measuring without enforcing is not gating. A gate mechanically blocks a sub-threshold release in the path to production; a number you merely read gets waved past under pressure."
 
 - id: cloze-regression
-  type: text_input
+  type: multiple_choice
   tags: [suite]
   difficulty: 2
-  prompt: "A change that improves one metric while silently degrading another is a ____."
-  answer:
-    regex: '^regression$'
-    normalize: true
+  prompt: "Version 12 of your agent scores lower on the same suite than version 11 did. What is that drop called, and what made it visible?"
+  options:
+    - { text: "A regression — visible only because the same fixed suite was re-run, giving two comparable pass-rates to diff", correct: true }
+    - { text: "Expected noise — pass-rates are random between versions and mean nothing" }
+    - { text: "A judge bias that has no bearing on the agent's actual quality" }
+    - { text: "An improvement, since a newer version is by definition better" }
+  explanation: "A regression is a drop in quality from one version to the next. You can only see it because the suite is fixed and re-run, producing comparable numbers; without a stable suite the drop would be invisible."

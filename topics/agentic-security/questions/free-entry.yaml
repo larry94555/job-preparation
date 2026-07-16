@@ -1,63 +1,60 @@
-# Free entry (short answer)
+# Conceptual multiple choice (converted from short-answer free entry)
 - id: fe-injection
-  type: text_input
+  type: multiple_choice
   tags: [injection]
   difficulty: 2
-  prompt: "What is the name of the attack where fetched content smuggles in instructions the model obeys? (prompt ____, one word)"
-  answer:
-    regex: '^injection$'
-    normalize: true
+  prompt: "How does prompt injection differ from a model simply making a mistake?"
+  options:
+    - { text: "Injection is attacker-controlled content deliberately steering the model, whereas a mistake has no adversary behind it", correct: true }
+    - { text: "A mistake is always more damaging than an injection" }
+    - { text: "Injection only happens offline, while mistakes only happen in production" }
+    - { text: "There is no difference — both are just the model producing wrong output" }
+  explanation: "Threat modeling turns on intent. A mistake is random error you can retry; injection is an adversary planting instructions in content the agent reads to hijack its behavior, so it needs defenses, not just better accuracy."
 
 - id: fe-separate
-  type: text_input
+  type: multiple_choice
   tags: [separation]
   difficulty: 2
-  prompt: "What must you do with trusted instructions vs. untrusted content to defend against injection? (one word)"
-  answer:
-    regex: '^separate$'
-    normalize: true
-
-- id: fe-sanitize
-  type: text_input
-  tags: [separation]
-  difficulty: 2
-  prompt: "What do you call scrubbing known injection patterns out of untrusted content? (one word)"
-  answer:
-    regex: '^sanitize$'
-    normalize: true
+  prompt: "Separation and sanitizing both defend the input against injection. What is the division of labor between them?"
+  options:
+    - { text: "Separation keeps instructions and content in distinct channels/labels; sanitizing scrubs known attack strings out of the content", correct: true }
+    - { text: "They are the same technique under two different names" }
+    - { text: "Separation runs after the tool executes; sanitizing runs before the prompt is built" }
+    - { text: "Sanitizing replaces separation once it has been applied once" }
+  explanation: "Separation is structural — your instructions live in the system channel and fetched text is marked as data. Sanitizing is content-level — it removes obvious attack strings like 'ignore all previous instructions'. Neither is sufficient alone, so they layer."
 
 - id: fe-sandbox
-  type: text_input
+  type: multiple_choice
   tags: [sandbox]
   difficulty: 2
-  prompt: "What isolated environment should untrusted code run in? (one word)"
-  answer:
-    regex: '^sandbox$'
-    normalize: true
+  prompt: "Which code needs to run inside a sandbox?"
+  options:
+    - { text: "Both code fetched from untrusted sources and code the model itself wrote, since model output can be steered by an injection", correct: true }
+    - { text: "Only code downloaded from the public internet; model-written code is inherently safe" }
+    - { text: "Only code that fails a syntax check first" }
+    - { text: "Only code that explicitly imports networking libraries" }
+  explanation: "Model-written code is untrusted too: an injection can steer what the model generates, so exec()-ing it grants an attacker your authority. Anything the agent did not vet by hand — fetched or generated — belongs in the isolated runner."
 
 - id: fe-redact
-  type: text_input
+  type: multiple_choice
   tags: [redaction]
   difficulty: 2
-  prompt: "What do you do to emails and secret tokens before they enter the context? (one word)"
-  answer:
-    regex: '^redact$'
-    normalize: true
+  prompt: "Even when there is no injection in play, why still redact PII before it enters the context?"
+  options:
+    - { text: "Contexts get logged, stored, and replayed in traces, so plaintext PII is a standing compliance and leak exposure regardless of any attack", correct: true }
+    - { text: "PII makes the model slower, so removing it improves latency" }
+    - { text: "Redaction is only ever needed once an attack has been detected" }
+    - { text: "The model cannot parse names and emails unless they are masked" }
+  explanation: "Redaction is not only an anti-injection control. Prompts and contexts routinely end up in logs, traces, and stored transcripts, so sensitive data that enters the window can leak through observability paths — reason enough to scrub it on the way in."
 
 - id: fe-pii
-  type: text_input
+  type: multiple_choice
   tags: [redaction]
   difficulty: 2
-  prompt: "Personally identifiable information is abbreviated as ____ (one word)."
-  answer:
-    regex: '^pii$'
-    normalize: true
-
-- id: fe-egress
-  type: text_input
-  tags: [redaction]
-  difficulty: 2
-  prompt: "Sensitive data reaching a destination it should never reach — data leakage or ____ (one word) — is stopped by gating the data-out step."
-  answer:
-    regex: '^exfiltration$'
-    normalize: true
+  prompt: "A redactor scrubs names and email addresses but leaves a customer's full account number in the context. Is the job done?"
+  options:
+    - { text: "No — account numbers and other identifiers are sensitive too; redaction must cover the range of identifying and secret data, not just names and emails", correct: true }
+    - { text: "Yes — only names and email addresses count as data worth protecting" }
+    - { text: "Yes — an account number is safe because it is numeric" }
+    - { text: "No — but only because the account number should have been encrypted, not redacted" }
+  explanation: "Sensitive data is broad: account numbers, phone numbers, government IDs, and secret-like tokens all belong in scope. A redactor that covers only names and emails leaves real exposure, which is why redaction is best-effort and layers with other controls."

@@ -1,82 +1,96 @@
-# Missing term (cloze) + parameterized numeric
+# Conceptual multiple-choice (converted from cloze + parameterized numeric): memory, paging, eviction, sizing
 - id: cloze-kv-cache
-  type: text_input
+  type: multiple_choice
   tags: [memory]
   difficulty: 1
-  prompt: "The per-token key and value tensors stored so attention need not recompute the past is the ____ cache. (two-letter abbreviation)"
-  answer:
-    regex: '^kv$'
-    normalize: true
+  prompt: "The cache stores keys and values for past tokens, but not their queries. Why are past queries never cached?"
+  options:
+    - { text: "At each step only the current token's query is used; it attends over all past keys/values, and earlier queries are never reused", correct: true }
+    - { text: "Queries are identical to keys, so caching them would be redundant" }
+    - { text: "Queries are too large to fit in GPU memory" }
+    - { text: "Queries are recomputed from the keys on demand, so storing them is unnecessary" }
+  explanation: "Attention reuses past K and V at every future step, but each query is used only once (at its own step), so there is nothing to gain by caching queries."
 
 - id: cloze-fragmentation
-  type: text_input
+  type: multiple_choice
   tags: [paging]
   difficulty: 2
-  prompt: "Reserving a contiguous max-length KV slab per sequence wastes memory between reserved and used length; this waste is called ____."
-  answer:
-    regex: '^(internal )?fragmentation$'
-    normalize: true
+  prompt: "Even paged attention leaves some KV memory wasted. Where does that residual waste mainly come from?"
+  options:
+    - { text: "The last block of each sequence is usually only partially filled (internal fragmentation within a fixed-size block)", correct: true }
+    - { text: "Block tables must be stored on disk, which rounds up every allocation" }
+    - { text: "Every sequence must still reserve one contiguous max-length slab" }
+    - { text: "Paged attention duplicates each block for safety" }
+  explanation: "Fixed-size blocks nearly eliminate external fragmentation, but a sequence's final block is rarely exactly full, leaving some internal fragmentation."
 
 - id: cloze-paged-attention
-  type: text_input
+  type: multiple_choice
   tags: [paging]
   difficulty: 2
-  prompt: "Splitting the KV cache into fixed-size blocks tracked by a block table, so memory need not be contiguous, is called ____ attention. (one word)"
-  answer:
-    regex: '^paged$'
-    normalize: true
+  prompt: "In paged attention, choosing a smaller KV block size mainly trades off in what way?"
+  options:
+    - { text: "Less internal fragmentation (tighter packing) but more blocks and larger block-table / bookkeeping overhead", correct: true }
+    - { text: "More internal fragmentation but faster attention kernels" }
+    - { text: "Lower model accuracy but higher throughput" }
+    - { text: "Nothing changes; block size is purely cosmetic" }
+  explanation: "Smaller blocks waste less space in the final partial block, but multiply the number of blocks and the size and overhead of the block table."
 
 - id: cloze-block-table
-  type: text_input
+  type: multiple_choice
   tags: [paging]
   difficulty: 2
-  prompt: "The per-sequence map from logical KV positions to physical blocks — the analog of an OS page table — is the ____ table. (one word)"
-  answer:
-    regex: '^block$'
-    normalize: true
+  prompt: "Thanks to the block table, how can a sequence's KV cache grow by one more block without disturbing what is already stored?"
+  options:
+    - { text: "A free physical block is allocated and a new entry is appended to the block table; existing blocks stay exactly where they are", correct: true }
+    - { text: "All prior blocks are copied into a new, larger contiguous region" }
+    - { text: "The oldest block is overwritten to make room" }
+    - { text: "The whole cache is recomputed to include the new token" }
+  explanation: "The block table is an indirection layer, so growth just appends a mapping entry pointing at any free physical block — no copying or contiguity required."
 
 - id: cloze-preemption
-  type: text_input
+  type: multiple_choice
   tags: [eviction]
   difficulty: 2
-  prompt: "Pausing a running sequence and reclaiming its KV memory when the server is under pressure is called ____. (one word)"
-  answer:
-    regex: '^(preemption|preempting|eviction)$'
-    normalize: true
+  prompt: "What condition typically forces a serving engine to preempt a running sequence?"
+  options:
+    - { text: "It runs out of free KV memory and cannot allocate the next block a growing sequence needs", correct: true }
+    - { text: "The sequence has produced a stop token and is already finished" }
+    - { text: "The user lowered the sampling temperature mid-request" }
+    - { text: "The model's weights no longer fit in GPU memory" }
+  explanation: "Preemption is driven by KV memory pressure: when there is no free block for a growing sequence, the engine must reclaim another sequence's KV."
 
-# Parameterized numeric — KV size is linear in sequence length.
 - id: num-kv-linear-seq
-  type: text_input
+  type: multiple_choice
   tags: [sizing]
   difficulty: 2
-  parameters:
-    seq: { random_int: [128, 4096] }
-  prompt: "A given config uses exactly 1 KB of KV cache per token. Holding everything else fixed, how many KB of KV cache does a sequence of {{seq}} tokens need?"
-  answer:
-    equals: "{{seq}}"
-    numeric_tolerance: 0
+  prompt: "You know the KV cache costs a fixed number of bytes per token for your config. How do you estimate the total number of tokens (summed across all concurrent sequences) that fit in the KV memory budget?"
+  options:
+    - { text: "Divide the available KV memory by the bytes-per-token; concurrency is one shared token budget, not a per-request limit", correct: true }
+    - { text: "Multiply the bytes-per-token by the number of layers" }
+    - { text: "Take the square root of the KV memory divided by bytes-per-token" }
+    - { text: "It cannot be estimated; token capacity is unrelated to per-token cost" }
+  explanation: "Because KV is linear in tokens, total token capacity is simply the memory budget divided by per-token cost, shared across all active sequences."
 
-# Parameterized numeric — doubling context doubles KV (linear scaling).
 - id: num-kv-double-context
-  type: text_input
+  type: multiple_choice
   tags: [sizing]
   difficulty: 3
-  parameters:
-    tokens: { random_int: [500, 8000] }
-  prompt: "KV memory is linear in sequence length. If a sequence of {{tokens}} tokens fills the cache, how many tokens' worth of KV must you free to make room for one more request of the same size? (KV is symmetric, so the answer equals the sequence length.)"
-  answer:
-    equals: "{{tokens}}"
-    numeric_tolerance: 0
+  prompt: "KV memory is full. To admit one new request whose length equals a currently running sequence, roughly how much KV must you free?"
+  options:
+    - { text: "About the same amount of KV that one full sequence of that length occupies — KV is linear, so equal length means equal memory", correct: true }
+    - { text: "Half of one sequence's KV, since K and V share storage" }
+    - { text: "The square of the sequence length in bytes" }
+    - { text: "A fixed amount, independent of the sequence length" }
+  explanation: "KV scales linearly and symmetrically with length, so making room for an equal-length request means freeing an equal-length request's worth of KV."
 
-# Fixed numeric — full KV byte estimate from layers/heads/head_dim/seq/dtype.
-# KV bytes = 2 (K and V) * layers * heads * head_dim * seq * bytes_per_elem
-#          = 2 * 32 * 32 * 128 * 1024 * 2 = 549,755,813,888? recompute below.
-# 2 * 32 * 32 = 2048; * 128 = 262,144; * 1024 = 268,435,456; * 2 = 536,870,912 bytes.
 - id: num-kv-formula-bytes
-  type: text_input
+  type: multiple_choice
   tags: [sizing, memory]
   difficulty: 4
-  prompt: "Estimate the KV cache size in BYTES for one sequence. Formula: bytes = 2 (K and V) x layers x heads x head_dim x seq_len x bytes_per_element. Use layers=32, heads=32, head_dim=128, seq_len=1024, and FP16 (2 bytes/element). Enter the total number of bytes."
-  answer:
-    equals: "536870912"
-    numeric_tolerance: 0
+  prompt: "Which set of factors together determine a single sequence's KV cache size in bytes?"
+  options:
+    - { text: "2 (for K and V) x number of layers x number of KV heads x head dimension x sequence length x bytes per element", correct: true }
+    - { text: "Vocabulary size x sequence length x bytes per element" }
+    - { text: "Number of layers x hidden size, independent of sequence length" }
+    - { text: "Model parameter count x bytes per element" }
+  explanation: "KV stores a key and a value per token, at every layer and head, so bytes scale with 2 x layers x heads x head_dim x seq_len x dtype size."

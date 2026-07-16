@@ -1,45 +1,60 @@
-# Missing term (cloze)
+# Conceptual multiple-choice (formerly cloze fill-in-the-blank)
 - id: cloze-span
-  type: text_input
+  type: multiple_choice
   tags: [tracing]
   difficulty: 1
-  prompt: "One unit of work within a trace — a single model call, tool call, or retrieval — is called a ____."
-  answer:
-    regex: '^span$'
-    normalize: true
+  prompt: "Why record each model call, tool call, and retrieval as its own span instead of one span covering the whole request?"
+  options:
+    - { text: "So each unit of work carries its own timing, tokens, and errors, letting you pinpoint which step is slow or failing", correct: true }
+    - { text: "So the trace store uses less disk than a single combined record" }
+    - { text: "So the model returns deterministic output for that step" }
+    - { text: "So the correlation ID no longer needs to propagate between steps" }
+  explanation: "A span is one unit of work. Recording each step separately gives per-step timing, tokens, and errors, so you can see the structure of the request and locate the exact step that dominates latency or fails."
 
 - id: cloze-correlation
-  type: text_input
+  type: multiple_choice
   tags: [tracing]
   difficulty: 2
-  prompt: "The identifier propagated through every step so their spans can be joined into one trace is the ____ ID (two words: adjective before 'ID')."
-  answer:
-    regex: '^correlation$'
-    normalize: true
+  prompt: "A downstream tool call is invoked without the correlation/trace ID being propagated into it. What is the consequence for observability?"
+  options:
+    - { text: "Its spans cannot be joined to the originating request, so that step appears orphaned and the trace has a gap", correct: true }
+    - { text: "The tool call runs faster because it skips trace bookkeeping" }
+    - { text: "The prompt is automatically redacted before storage" }
+    - { text: "The request-level latency metric becomes more accurate" }
+  explanation: "The correlation ID is what stitches spans from different steps and services into one trace. Without it propagating, the downstream spans can't be linked back, leaving a blind spot in the request's call graph."
 
 - id: cloze-ttft
-  type: text_input
+  type: multiple_choice
   tags: [signals]
   difficulty: 2
-  prompt: "The latency metric for how long until the model streams its first token is abbreviated ____ (four letters)."
-  answer:
-    regex: '^ttft$'
-    normalize: true
+  prompt: "For a user streaming a chat response, which part of the experience does a high TTFT most directly degrade?"
+  options:
+    - { text: "How long the user stares at a blank screen before any text appears", correct: true }
+    - { text: "How fast tokens scroll once the response has started" }
+    - { text: "The total number of tokens the model is allowed to generate" }
+    - { text: "The dollar cost per token charged by the provider" }
+  explanation: "Time-To-First-Token measures the wait before the first token streams (prefill + queueing). It governs perceived responsiveness at the start; the steady-state scroll speed is TPOT, a separate metric."
 
 - id: cloze-canary
-  type: text_input
+  type: multiple_choice
   tags: [drift]
   difficulty: 2
-  prompt: "Routing a small slice of live traffic to a new prompt or model version to compare signals before full rollout is called a ____ release."
-  answer:
-    regex: '^canary$'
-    normalize: true
+  prompt: "Why route a small slice of live traffic to a candidate version (a canary) instead of only testing it offline before rollout?"
+  options:
+    - { text: "It exercises the candidate on real production traffic and lets you compare its signals side by side with the current version under the same conditions", correct: true }
+    - { text: "It guarantees the candidate can never produce a worse answer than the current version" }
+    - { text: "It removes the need to record latency and cost on the candidate's spans" }
+    - { text: "It permanently replaces the current version with no way to roll back" }
+  explanation: "A canary exposes the candidate to a small fraction of live traffic so you compare latency, cost, error, and eval signals against the current version on the same real inputs, catching regressions an offline test on synthetic data can miss."
 
 - id: cloze-redaction
-  type: text_input
+  type: multiple_choice
   tags: [capture]
   difficulty: 3
-  prompt: "Removing or masking PII from prompts before they are written to the trace store is called ____."
-  answer:
-    regex: '^redaction$'
-    normalize: true
+  prompt: "Why redact or tokenize PII at capture time rather than filtering it out later when someone reads the traces?"
+  options:
+    - { text: "Once raw PII is written to the trace store it is already persisted and exposed; redacting at capture keeps it from ever landing there", correct: true }
+    - { text: "Read-time filtering is impossible in every trace backend" }
+    - { text: "Capture-time redaction makes the spans render faster in the UI" }
+    - { text: "It lets you skip sampling and capture every request in full" }
+  explanation: "If sensitive data reaches the trace store, it has already been retained and is subject to access and breach. Redacting/tokenizing before the write means the store never holds raw PII, so traces stay debuggable without hoarding sensitive data."

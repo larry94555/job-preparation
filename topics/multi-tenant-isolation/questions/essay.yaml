@@ -23,6 +23,19 @@
     - "Post-filtering (filter after top-k) is unsafe: another tenant's more-similar chunks can crowd out the caller's, leaving too few valid results, and their data has already been fetched into the process."
     - "Pre-filtering (filtered ANN search or per-tenant namespaces) keeps the scope inside the search; per-tenant indexes trade higher cost for stronger isolation."
 
+- id: essay-isolation-tradeoff
+  type: essay
+  length: short
+  tags: [isolation]
+  difficulty: 3
+  prompt: "Sharing infrastructure across tenants (pooled) is cheaper than giving each tenant its own (siloed). Explain the fundamental trade-off between the two, and how you decide where on that spectrum to sit."
+  eval_skill: eval-isolation-essay
+  reference_points:
+    - "Pooled/shared resources (one cache, one index, one process) maximize efficiency and utilization but concentrate risk: every shared surface is a place cross-tenant leakage or noisy-neighbor contention can occur, and correctness depends on scoping being applied everywhere."
+    - "Siloed/per-tenant partitioning (separate namespaces, indexes, or keys per tenant) buys stronger isolation and simpler reasoning about safety, at the cost of higher resource use and operational overhead."
+    - "The decision is driven by the sensitivity of the data and the blast radius of a leak versus cost/scale: high-sensitivity or regulated tenants push toward siloing (or hybrid — pooled by default, siloed for premium/sensitive tenants), while many low-risk tenants favor pooling with rigorous per-tenant scoping."
+    - "Whatever the choice, shared surfaces still need per-tenant scoping (tenant-scoped cache keys, authorization filters, per-user session state) and leak testing to verify isolation holds."
+
 - id: essay-contamination
   type: essay
   length: long

@@ -1,54 +1,72 @@
-# Missing term (cloze)
+# Conceptual multiple-choice (converted from cloze fill-in-the-blank)
 - id: cloze-tool-use
-  type: text_input
+  type: multiple_choice
   tags: [toolloop]
   difficulty: 1
-  prompt: "When the model wants to call a tool, its stop_reason is ____."
-  answer:
-    regex: '^tool_use$'
-    normalize: true
+  prompt: "An assistant turn may contain both text and a tool_use block. Why does the loop key its continue/stop decision on stop_reason rather than on whether a tool_use block appears in the message?"
+  options:
+    - { text: "stop_reason is the authoritative control signal that the turn paused to await tool execution; scanning content is fragile and conflates the model's reasoning with its request to act", correct: true }
+    - { text: "A tool_use block can never appear alongside text, so scanning is impossible" }
+    - { text: "stop_reason is computed on the client, so it is cheaper to read than the message body" }
+    - { text: "The message content is encrypted, so the harness cannot inspect blocks directly" }
+  explanation: "stop_reason is the model's explicit control signal for the loop. Branching on it — rather than pattern-matching the content — cleanly separates 'the model is yielding to run a tool' from whatever text the turn also contains."
 
 - id: cloze-tool-result
-  type: text_input
+  type: multiple_choice
   tags: [toolloop]
   difficulty: 2
-  prompt: "Tool output is returned to the model in a ____ block."
-  answer:
-    regex: '^tool_result$'
-    normalize: true
+  prompt: "Why return a tool's output wrapped in a tool_result block instead of just appending the raw output as an ordinary user text message?"
+  options:
+    - { text: "The tool_result block carries the tool_use_id that links the output to its call and marks it as execution output, not a new user instruction", correct: true }
+    - { text: "Raw text is rejected by the API, so wrapping is only a formatting requirement" }
+    - { text: "A tool_result block runs the tool a second time to confirm the output" }
+    - { text: "Wrapping compresses the output so it uses fewer tokens" }
+  explanation: "The tool_result block is the typed channel for execution output: it echoes the tool_use_id so the model can bind it to the right call, and it tells the model this is a tool result to reason over — not a fresh instruction from the user."
 
 - id: cloze-schema
-  type: text_input
+  type: multiple_choice
   tags: [schema]
   difficulty: 1
-  prompt: "The typed description of a tool's arguments is its input ____."
-  answer:
-    regex: '^schema$'
-    normalize: true
+  prompt: "The model has never seen your tool's source code. How does it know which arguments the tool accepts and how to fill them?"
+  options:
+    - { text: "It reads the tool's input_schema — the schema is the model's entire view of the tool's contract", correct: true }
+    - { text: "It inspects the running function signature at execution time" }
+    - { text: "It guesses from the tool's name and corrects itself after the first failure" }
+    - { text: "The harness sends the model the tool's implementation on every call" }
+  explanation: "The input_schema is the only thing the model sees about a tool. Types, the required list, and the descriptions in that schema are what the model targets when it decides how to call the tool — the code stays hidden."
 
 - id: cloze-structured
-  type: text_input
+  type: multiple_choice
   tags: [structured]
   difficulty: 2
-  prompt: "Forcing the model into a typed object gives you ____ output."
-  answer:
-    regex: '^structured$'
-    normalize: true
+  prompt: "You need the model's answer as a typed object your code can index into by field. What does asking for structured output buy you over pulling fields out of free-form prose with a regex?"
+  options:
+    - { text: "A named, typed object you can access and validate directly, instead of brittle text extraction that breaks when the phrasing shifts", correct: true }
+    - { text: "It makes the model generate the answer with fewer reasoning steps" }
+    - { text: "It removes the need to define what fields you expect back" }
+    - { text: "It guarantees the answer's facts are correct, not just its shape" }
+  explanation: "Structured output gives you a machine-readable object with known fields. Regex-scraping prose is fragile: any change in wording breaks the parse, and there is no typed contract to validate against."
 
 - id: cloze-validate
-  type: text_input
+  type: multiple_choice
   tags: [structured]
   difficulty: 2
-  prompt: "Never trust the raw string — ____ it against the schema."
-  answer:
-    regex: '^validate$'
-    normalize: true
+  prompt: "Validation of a model's JSON just failed on one field, while the other fields parsed fine. What should you do with the response as a whole?"
+  options:
+    - { text: "Treat the whole response as untrusted and recover — a partially valid response is not partially usable", correct: true }
+    - { text: "Keep the fields that passed and quietly drop the one that failed" }
+    - { text: "Use every field anyway, since most of them validated" }
+    - { text: "Substitute a default for the bad field and proceed without recording the failure" }
+  explanation: "A validation failure means the model's output did not meet the contract; the good-looking fields may be wrong too. Reject the response and recover (re-prompt or return a model-facing error) rather than salvaging pieces of it."
 
 - id: cloze-recover
-  type: text_input
+  type: multiple_choice
   tags: [recovery]
   difficulty: 2
-  prompt: "When a tool call fails, return a ____ error the model can read."
-  answer:
-    regex: '^structured$'
-    normalize: true
+  prompt: "A tool call fails. Why return a structured, model-readable error object rather than the raw Python traceback string?"
+  options:
+    - { text: "A structured error states what went wrong in terms the model can act on (which field, which constraint); a raw traceback leaks internals and is hard for the model to turn into a fix", correct: true }
+    - { text: "A traceback is too short to contain any useful information" }
+    - { text: "Structured errors are required by the API; tracebacks are rejected" }
+    - { text: "Returning a traceback would run the failed tool a second time" }
+  explanation: "The error is only useful if the model can act on it. A structured, model-facing error names the specific problem so the model can self-correct, whereas a raw stack trace exposes implementation detail and is noisy to parse."

@@ -1,27 +1,25 @@
-# Free entry (short answer)
-- id: fe-invalid-json
-  type: text_input
-  tags: [boundary]
-  difficulty: 2
-  prompt: "When the model returns invalid tool-call JSON, what should the harness do with it? (one word)"
-  answer:
-    regex: '^(validate|reject|repair|retry)$'
-    normalize: true
-
+# Concept checks — pick the right answer (converted from short free-entry).
+# The fundamentally conceptual one (handling invalid tool-call JSON) is now an essay.
 - id: fe-verify-method
-  type: text_input
+  type: multiple_choice
   tags: [verification]
   difficulty: 2
-  prompt: "Name one concrete way a coding harness verifies that an edit actually worked."
-  answer:
-    regex: '^(run(ning)? tests?|tests?|git diff|diff|run the code|type-?check|build)$'
-    normalize: true
+  prompt: "Which of these actually verifies that a code edit worked, rather than just assuming it did?"
+  options:
+    - { text: "Running the test suite (or a build) and checking it passes", correct: true }
+    - { text: "Asking the model whether it is confident in the edit" }
+    - { text: "Re-reading the original task description" }
+    - { text: "Raising the sampling temperature and trying again" }
+  explanation: "Verification has to touch the real world: running tests, a build, or diffing the change gives a deterministic signal. The model's self-assessment is not evidence the edit is correct."
 
 - id: fe-noprogress
-  type: text_input
+  type: multiple_choice
   tags: [control]
   difficulty: 3
-  prompt: "Name one signal that an agent is making no progress."
-  answer:
-    regex: '^(repeated (tool )?calls?|same (action|state)|no state change|oscillat(ing|ion)|loop(ing)?|repeating( actions)?)$'
-    normalize: true
+  prompt: "Which pattern is the clearest signal that an agent has stalled and the loop should intervene?"
+  options:
+    - { text: "The same tool call repeats with no change in state", correct: true }
+    - { text: "A tool call returns successfully" }
+    - { text: "The model's response gets longer" }
+    - { text: "The user asks a follow-up question" }
+  explanation: "No-progress shows up as repetition without state change — the same action or the same error looping. That is the trigger for a duplicate/no-progress guard to break the loop or escalate."

@@ -1,45 +1,60 @@
-# Missing term (cloze)
+# Conceptual multiple-choice (converted from cloze fill-in-the-blank)
 - id: cloze-termination
-  type: text_input
+  type: multiple_choice
   tags: [termination]
   difficulty: 1
-  prompt: "The rule that decides when an agent loop should stop — on success, failure, or exhausted budget — is called a ____ condition."
-  answer:
-    regex: '^termination$'
-    normalize: true
+  prompt: "In an agent's control loop, when is the termination condition checked?"
+  options:
+    - { text: "At each iteration, before deciding whether to take another step", correct: true }
+    - { text: "Only once, when the agent first starts up" }
+    - { text: "Only after the token budget has already been set" }
+    - { text: "Only when a human manually interrupts the run" }
+  explanation: "The termination condition is re-evaluated every loop pass — the runner checks for success, failure/no-progress, or an exhausted budget before continuing to the next step."
 
 - id: cloze-loop-budget
-  type: text_input
+  type: multiple_choice
   tags: [budgets]
   difficulty: 2
-  prompt: "A cap on the number of iterations an agent may run before it is forced to stop is called a loop, or step, ____."
-  answer:
-    regex: '^budget$'
-    normalize: true
+  prompt: "An agent takes many cheap, fast steps that each use few tokens but never make progress. Which cap is designed to stop this specific runaway?"
+  options:
+    - { text: "A step/iteration budget that bounds how many times the loop may run", correct: true }
+    - { text: "A cumulative token budget" }
+    - { text: "A per-request sampling-temperature limit" }
+    - { text: "A vector-index size limit" }
+  explanation: "A loop of cheap steps can stay under a token or cost cap indefinitely. A step/iteration budget bounds the number of loop passes directly, catching a fast no-progress loop that token or cost budgets miss."
 
 - id: cloze-wall-clock
-  type: text_input
+  type: multiple_choice
   tags: [budgets]
   difficulty: 2
-  prompt: "A budget that limits total elapsed real time (guarding against a hung tool) is a ____-clock budget."
-  answer:
-    regex: '^wall$'
-    normalize: true
+  prompt: "An agent's step blocks on a hung external API call that never returns, so its step and token counters stop advancing. Which budget will actually stop the run?"
+  options:
+    - { text: "The wall-clock (elapsed-time) budget", correct: true }
+    - { text: "The step/iteration budget" }
+    - { text: "The cumulative token budget" }
+    - { text: "The per-tool call-count budget" }
+  explanation: "While a call hangs, the step, token, and tool counters don't advance, so those caps never trip. Only a wall-clock timeout measures elapsed real time and can terminate a run stalled on a hung call."
 
 - id: cloze-allow-list
-  type: text_input
+  type: multiple_choice
   tags: [guardrails]
   difficulty: 2
-  prompt: "A deny-by-default guardrail that permits only an explicitly approved set of actions is an ____-list."
-  answer:
-    regex: '^allow$'
-    normalize: true
+  prompt: "Why is a deny-by-default allow-list preferred over a deny-list (block-list) for controlling which tools an agent may call?"
+  options:
+    - { text: "Any new or unforeseen action is blocked by default, so the system fails safe", correct: true }
+    - { text: "It lets the agent call more tools, increasing its autonomy" }
+    - { text: "It removes the need for human confirmation on risky actions" }
+    - { text: "Deny-lists are impossible to configure at runtime" }
+  explanation: "A deny-list fails open — anything nobody thought to forbid is allowed. An allow-list fails safe: only explicitly approved actions run, so an action the designer never anticipated is denied rather than permitted."
 
 - id: cloze-hitl
-  type: text_input
+  type: multiple_choice
   tags: [guardrails]
   difficulty: 3
-  prompt: "Pausing an agent to get explicit human confirmation before a risky action is human-in-the-____."
-  answer:
-    regex: '^loop$'
-    normalize: true
+  prompt: "Which property of an action most strongly argues for requiring human-in-the-loop confirmation before it runs?"
+  options:
+    - { text: "It is irreversible or has a large blast radius (e.g. deleting data, sending money)", correct: true }
+    - { text: "It consumes a large number of tokens" }
+    - { text: "It is implemented with a slow tool" }
+    - { text: "It runs late in the agent's loop" }
+  explanation: "HITL gating is about consequences, not cost or speed. Irreversible or high-blast-radius actions warrant a confirmation gate because a mistake can't be undone; cheap, reversible actions generally don't."

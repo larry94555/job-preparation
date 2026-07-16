@@ -24,13 +24,16 @@
   explanation: "A too-low threshold makes different requests look 'close enough', so you serve a confidently wrong cached answer — the signature semantic-cache risk."
 
 - id: fe-expired-is-miss
-  type: text_input
+  type: multiple_choice
   tags: [semantic]
   difficulty: 2
-  prompt: "An entry older than the TTL should be treated as a cache ____ (one word)."
-  answer:
-    regex: '^miss$'
-    normalize: true
+  prompt: "The most-similar stored entry clears the similarity threshold, but it is older than its TTL. The cache should:"
+  options:
+    - { text: "Treat it as a miss and regenerate — an expired entry must not be served even if it matches", correct: true }
+    - { text: "Serve it anyway, since the similarity match outranks the TTL" }
+    - { text: "Serve it but halve the similarity threshold for next time" }
+    - { text: "Delete the whole cache and start over" }
+  explanation: "Expiry gates the hit: a match past its TTL is stale and must be treated as a miss so the model produces a fresh answer, keeping responses within the staleness bound."
 
 - id: essay-layered-caching
   type: essay

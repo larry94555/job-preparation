@@ -1,54 +1,72 @@
-# Missing term (cloze)
+# Conceptual multiple choice (formerly cloze fill-in-the-blank)
 - id: cloze-react
-  type: text_input
+  type: multiple_choice
   tags: [react]
-  difficulty: 1
-  prompt: "The loop that interleaves reasoning and acting is called ____."
-  answer:
-    regex: '^react$'
-    normalize: true
+  difficulty: 2
+  prompt: "Why does ReAct interleave reasoning and acting in one loop instead of reasoning fully first and then acting?"
+  options:
+    - { text: "So each action is chosen by fresh reasoning over the latest observation, and later reasoning can react to what tools actually returned", correct: true }
+    - { text: "Because interleaving lets the model skip calling tools altogether" }
+    - { text: "Because reasoning and acting must run on two separate models" }
+    - { text: "So the agent can answer on the very first turn without any tool calls" }
+  explanation: "Interleaving means the agent reasons, acts, observes, then reasons again over the real result — so each decision is grounded in what actually happened rather than a plan fixed before any tool ran."
 
 - id: cloze-observe
-  type: text_input
+  type: multiple_choice
   tags: [react]
-  difficulty: 1
-  prompt: "After the agent acts, the step where it reads the real tool result is ____."
-  answer:
-    regex: '^observe$'
-    normalize: true
+  difficulty: 2
+  prompt: "What goes wrong if the agent skips Observe and just assumes its action succeeded?"
+  options:
+    - { text: "It reasons over an imagined result, so one hallucinated observation can silently poison every later step", correct: true }
+    - { text: "Nothing — assuming success is a safe optimization that saves a round-trip" }
+    - { text: "The loop immediately crashes because Observe is mandatory syntax" }
+    - { text: "The tool runs twice, doubling the cost of the step" }
+  explanation: "Observe feeds the tool's real output back in. Skip it and the agent proceeds on a guess; if the guess is wrong, the error compounds through the rest of the loop with no signal that anything failed."
 
 - id: cloze-loop
-  type: text_input
+  type: multiple_choice
   tags: [loop]
-  difficulty: 1
-  prompt: "Reason → Act → Observe → Decide repeats inside a single ____."
-  answer:
-    regex: '^loop$'
-    normalize: true
+  difficulty: 2
+  prompt: "What does repeating the reason-act-observe cycle give an agent that a single pass cannot?"
+  options:
+    - { text: "It can chain tool calls that build on each other — a later action can depend on what an earlier observation returned", correct: true }
+    - { text: "It guarantees the agent always finishes in exactly the same number of steps" }
+    - { text: "It lets the agent call every tool at once and merge the outputs" }
+    - { text: "It removes the need to ever feed observations back into reasoning" }
+  explanation: "One pass allows at most one tool call. Repeating the loop lets each observation inform the next action, so the agent can gather information incrementally and solve tasks that need several dependent steps."
 
 - id: cloze-max-steps
-  type: text_input
+  type: multiple_choice
   tags: [guardrails]
   difficulty: 2
-  prompt: "The max-____ cap bounds how many iterations the loop may run."
-  answer:
-    regex: '^step$'
-    normalize: true
+  prompt: "What is the tradeoff when choosing the value of the max-steps cap?"
+  options:
+    - { text: "Set it too low and legitimately long tasks get cut off; set it too high and a stuck agent wastes compute before it stops", correct: true }
+    - { text: "There is no tradeoff — higher is always strictly better" }
+    - { text: "A lower cap makes the model more accurate on each individual step" }
+    - { text: "The cap only affects logging, not how long the loop runs" }
+  explanation: "The cap bounds runtime, so its value balances two failure modes: too small truncates tasks that genuinely need many steps, too large lets a looping agent burn resources before the backstop trips."
 
 - id: cloze-validate
-  type: text_input
+  type: multiple_choice
   tags: [validation]
   difficulty: 2
-  prompt: "Before feeding an observation back, ____ it so garbage never re-enters the loop."
-  answer:
-    regex: '^validate$'
-    normalize: true
+  prompt: "Which tool result should output validation reject before it is fed back as an observation?"
+  options:
+    - { text: "An empty or malformed result — None, an empty string, or an empty object that carries no real content", correct: true }
+    - { text: "Any result longer than the previous observation" }
+    - { text: "A correct, non-empty result that simply took a while to return" }
+    - { text: "Every result — nothing a tool returns should ever re-enter the loop" }
+  explanation: "Validation is a boundary check that accepts real content and rejects the empty or malformed cases, so the agent never reasons over garbage. A valid non-empty result passes; only genuinely empty or broken output is rejected."
 
 - id: cloze-thought
-  type: text_input
+  type: multiple_choice
   tags: [react]
   difficulty: 2
-  prompt: "The written reasoning the agent produces before an action is its ____."
-  answer:
-    regex: '^thought$'
-    normalize: true
+  prompt: "Why write out the Thought before acting, rather than have the model emit the action directly?"
+  options:
+    - { text: "Externalizing the reasoning improves which tool and input the agent picks and leaves an auditable record of why", correct: true }
+    - { text: "The harness requires the Thought to run the tool and discards the action otherwise" }
+    - { text: "The Thought is what the user sees as the final answer" }
+    - { text: "Writing a Thought makes the model respond faster on the next turn" }
+  explanation: "The Thought is explicit reasoning that selects the next action, and articulating it tends to produce better tool choices. It also becomes part of the trace, so a reviewer can see why the agent did what it did."

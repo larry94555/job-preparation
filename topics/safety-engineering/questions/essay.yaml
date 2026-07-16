@@ -1,4 +1,17 @@
 # Essay
+- id: essay-layered-defense
+  type: essay
+  length: short
+  tags: [injection]
+  difficulty: 3
+  prompt: "Explain what 'defense in depth' means for prompt-injection risk and why no single defense is enough. Name at least two distinct layers and describe how they complement each other."
+  eval_skill: eval-safety-essay
+  reference_points:
+    - "Defense in depth means layering several independent, individually-imperfect controls so that no single failure is catastrophic."
+    - "No single control is robust: input/output filters can be evaded and fencing can be bypassed, so relying on one leaves a single point of failure."
+    - "Complementary layers include fencing untrusted content as data, least privilege to shrink an agent's blast radius, and egress control to gate the data-out step."
+    - "The layers are independent, so even if injection defeats one (e.g. fencing), least privilege and egress gating still contain the damage."
+
 - id: essay-injection-defense
   type: essay
   length: short

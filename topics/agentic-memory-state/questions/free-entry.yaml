@@ -1,45 +1,60 @@
-# Free entry (short answer)
+# Conceptual multiple choice (converted from short-answer free entry)
 - id: fe-longterm-store
-  type: text_input
+  type: multiple_choice
   tags: [memory]
   difficulty: 2
-  prompt: "What kind of external store holds long-term memory for semantic recall across sessions? (one word)"
-  answer:
-    regex: '^vector$'
-    normalize: true
+  prompt: "Long-term cross-session memory is kept in a vector store. What property of that store is what makes semantic recall possible?"
+  options:
+    - { text: "Items are indexed by embedding, so you can retrieve by meaning — finding entries similar to the current query even when they share no exact words", correct: true }
+    - { text: "It keeps every item in the context window at all times, so nothing has to be looked up" }
+    - { text: "It stores items in strict insertion order and can only be read back front to back" }
+    - { text: "It compresses every entry to a single keyword so lookups are exact-match only" }
+  explanation: "A vector store indexes content by embedding, so recall is by semantic similarity to the query rather than exact keyword match — that is what lets an agent surface a relevant memory phrased differently from the current question."
 
 - id: fe-external-memory
-  type: text_input
+  type: multiple_choice
   tags: [types]
   difficulty: 2
-  prompt: "The short-term buffer and scratchpad live in-context; the vector store and episodic log live where? (one word)"
-  answer:
-    regex: '^(external|externally|outside)$'
-    normalize: true
+  prompt: "The vector store and episodic log live outside the context window rather than in it. What is the core tradeoff of putting a memory external?"
+  options:
+    - { text: "You gain effectively unbounded, durable capacity, but every read now costs a retrieval step and can return stale or wrong items", correct: true }
+    - { text: "You get faster reads than in-context memory because external stores are always closer to the model" }
+    - { text: "There is no tradeoff — external memory is strictly better than in-context memory in every way" }
+    - { text: "Data becomes read-only, so the agent can never add anything new to it" }
+  explanation: "In-context memory is read for free on the next call but bounded by the window; external memory trades that free access for a retrieval step (and possible staleness) in exchange for capacity that outlives and outsizes the window."
 
 - id: fe-token-budget
-  type: text_input
+  type: multiple_choice
   tags: [compression]
   difficulty: 2
-  prompt: "Compression is triggered when the buffer would exceed its token ____ (one word)."
-  answer:
-    regex: '^budget$'
-    normalize: true
+  prompt: "The buffer is governed by a token budget. What does that budget actually represent, and what happens if you ignore it?"
+  options:
+    - { text: "It is the hard cap of room the context window can spend on the buffer; exceed it and the oldest content overflows and is truncated or lost", correct: true }
+    - { text: "It is a soft billing target that only affects cost, never what the model can see" }
+    - { text: "It is the minimum number of tokens every turn must contain before the agent may respond" }
+    - { text: "It is the number of summaries the agent is allowed to make per session" }
+  explanation: "The token budget is the finite space the window allots the buffer. It is a hard constraint, not a suggestion: cross it and content falls out of the window, which is exactly why compression is budget-triggered."
 
 - id: fe-topk
-  type: text_input
+  type: multiple_choice
   tags: [recall]
   difficulty: 2
-  prompt: "After ranking recalled memories by relevance, you inject only the top-____ items (one letter or word)."
-  answer:
-    regex: '^k$'
-    normalize: true
+  prompt: "After ranking recalled memories by relevance you inject only the top-k. What does the choice of k control?"
+  options:
+    - { text: "A tradeoff: too small a k drops relevant memories, too large a k wastes context tokens and drags in distracting off-topic items", correct: true }
+    - { text: "Nothing meaningful — k can be set arbitrarily large with no downside since more context is always better" }
+    - { text: "The number of vector stores the agent is allowed to query at once" }
+    - { text: "How many times the embedding model must be retrained before recall works" }
+  explanation: "k is the cutoff on how many ranked items enter context. It is a tradeoff knob: set it too low and you miss things you needed; set it too high and irrelevant recall wastes tokens and distracts the model."
 
 - id: fe-retrieve-inject
-  type: text_input
+  type: multiple_choice
   tags: [recall]
   difficulty: 3
-  prompt: "The pattern of keeping everything in the store and pulling in only the relevant items on demand is called retrieve-then-____ (one word)."
-  answer:
-    regex: '^inject$'
-    normalize: true
+  prompt: "In the retrieve-then-inject pattern, where does the canonical long-term memory live, and what is the injected context?"
+  options:
+    - { text: "The external store is the durable source of truth; the injected items are a transient, per-query subset pulled in only for the current call", correct: true }
+    - { text: "The context window is the source of truth, and the store is just a backup written at the end of the session" }
+    - { text: "Both hold the full memory at all times, kept in constant sync on every turn" }
+    - { text: "The injected items are permanent — once injected they stay in context for the rest of the session" }
+  explanation: "Retrieve-then-inject keeps everything in the external store as the lasting record and pulls only the relevant slice into context for a given query. The injection is disposable and query-specific, not a permanent copy."

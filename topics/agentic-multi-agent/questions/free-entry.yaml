@@ -1,54 +1,72 @@
-# Free entry (short answer)
+# Conceptual multiple-choice — when to split, who owns what, and bounding loops
 - id: fe-single-first
-  type: text_input
+  type: multiple_choice
   tags: [supervisor]
-  difficulty: 1
-  prompt: "How many agents should you reach for first, before going multi-agent? (one word)"
-  answer:
-    regex: '^single$'
-    normalize: true
+  difficulty: 3
+  prompt: "Which of these is a legitimate reason to actually move from a single agent to multiple agents?"
+  options:
+    - { text: "The task needs genuinely different skills or tool sets that don't fit one focused prompt, or one agent's work must be independently reviewed", correct: true }
+    - { text: "A multi-agent design feels more sophisticated and will impress the team" }
+    - { text: "More agents always means more capability, so more is simply better" }
+    - { text: "The single agent works, but splitting it up would look more robust" }
+  explanation: "You earn multi-agent by evidence that a single agent falls short — distinct skills/tools that don't fit one prompt, a context that gets too crowded, or a need for independent review. 'Feels more sophisticated' or 'looks robust' adds prompts and handoffs without buying anything."
 
 - id: fe-supervisor
-  type: text_input
+  type: multiple_choice
   tags: [supervisor]
   difficulty: 2
-  prompt: "What is the coordinating agent that routes sub-tasks to specialists called? (one word)"
-  answer:
-    regex: '^supervisor$'
-    normalize: true
+  prompt: "After the specialists each finish their sub-task, whose job is it to combine their outputs into the final answer?"
+  options:
+    - { text: "The supervisor — it decomposed the task, so it also assembles the specialists' results into one coherent answer", correct: true }
+    - { text: "Whichever specialist happens to finish last takes over as combiner" }
+    - { text: "No one — the caller receives the separate specialist outputs and stitches them together" }
+    - { text: "The critic, whose main role is merging drafts from every agent" }
+  explanation: "Combining results is part of the supervisor's coordinating role: it decomposes, routes, and then synthesizes. A system where specialists return fragments with nothing to merge them hasn't finished the job the supervisor exists to do."
 
 - id: fe-specialist
-  type: text_input
+  type: multiple_choice
   tags: [orchestration]
   difficulty: 2
-  prompt: "What do we call the focused agents the supervisor delegates to? (one word)"
-  answer:
-    regex: '^specialists?$'
-    normalize: true
+  prompt: "What should a specialist agent's tool set look like, and why?"
+  options:
+    - { text: "Small and scoped to its one job — fewer tools means fewer wrong choices, making the agent more reliable and easier to test", correct: true }
+    - { text: "As large as possible, so a single specialist can handle anything that comes up" }
+    - { text: "Identical for every specialist, so they are interchangeable" }
+    - { text: "Empty — specialists should never call tools, only the supervisor may" }
+  explanation: "A specialist's narrow scope should be matched by a narrow tool set. A tight prompt with a few relevant tools gives the agent fewer ways to go wrong and a small surface to evaluate — the opposite of a do-everything agent with every tool available."
 
 - id: fe-handoff
-  type: text_input
+  type: multiple_choice
   tags: [handoff]
   difficulty: 2
-  prompt: "What is the term for passing one agent's output to the next agent? (one word)"
-  answer:
-    regex: '^handoff$'
-    normalize: true
+  prompt: "An agent produces a perfect result, but the next agent receives an empty string. At which point did the system fail, and what does that tell you?"
+  options:
+    - { text: "At the handoff — the boundary where one agent's output becomes the next agent's input is exactly where such failures occur and should be guarded", correct: true }
+    - { text: "Inside the first agent — a correct producer can never be part of a failure" }
+    - { text: "Inside the model weights, which is unfixable at the system level" }
+    - { text: "Nowhere — an empty string is a valid input the next agent should just accept" }
+  explanation: "The producer was fine and the consumer never got usable input, so the failure is located precisely at the handoff between them. That is why handoffs are the seam you validate: reject the empty value at the boundary instead of letting it flow on."
 
 - id: fe-max-tries
-  type: text_input
+  type: multiple_choice
   tags: [validation]
-  difficulty: 2
-  prompt: "What must an approval loop have so it can't run forever — a max-tries ____? (one word)"
-  answer:
-    regex: '^(max_tries|limit)$'
-    normalize: true
+  difficulty: 3
+  prompt: "Putting a max-tries cap on a writer/critic approval loop trades what for what?"
+  options:
+    - { text: "It trades a small chance of returning an unapproved draft for a guarantee that the loop terminates with bounded cost", correct: true }
+    - { text: "It trades speed for quality — the cap makes every answer strictly better" }
+    - { text: "It trades nothing — a cap has only upside and no downside at all" }
+    - { text: "It trades correctness for latency, since bounded loops are always wrong" }
+  explanation: "Without a cap, a critic that never approves makes the loop run forever, burning cost. The cap guarantees termination; the price is that occasionally you stop with the best-so-far draft marked unapproved. That is a deliberate, worthwhile tradeoff — a terminating loop beats an infinite one."
 
 - id: fe-validate
-  type: text_input
+  type: multiple_choice
   tags: [validation]
-  difficulty: 2
-  prompt: "What do you do to every handoff to catch a silent bad output? (one word)"
-  answer:
-    regex: '^validate$'
-    normalize: true
+  difficulty: 3
+  prompt: "You already have a critic agent that reviews content quality. Do you still need cheap handoff validation between agents?"
+  options:
+    - { text: "Yes — they are different layers: the handoff guard cheaply rejects None/empty/malformed output at the seam, while the critic judges quality; neither replaces the other", correct: true }
+    - { text: "No — a critic reviews everything, so structural handoff checks are redundant" }
+    - { text: "No — handoff validation and content review are the same operation under two names" }
+    - { text: "Yes, but only if you remove the critic first, since you can't run both" }
+  explanation: "Handoff validation is a cheap boundary guard for the obviously broken cases — None, empty string, empty container — caught at every seam. A critic does deep quality review of non-empty content. They operate at different layers, so keeping both is what gives you full coverage."

@@ -1,36 +1,48 @@
-# Free entry (short answer)
+# Conceptual multiple-choice (formerly short-answer free entry)
 - id: fe-trace-unit
-  type: text_input
+  type: multiple_choice
   tags: [tracing]
   difficulty: 2
-  prompt: "What do you call the whole end-to-end record of one request, made up of nested spans? (one word)"
-  answer:
-    regex: '^(trace|request trace)$'
-    normalize: true
+  prompt: "What does viewing the full trace give you that inspecting individual span metrics in isolation does not?"
+  options:
+    - { text: "The parent/child structure of the request, so you can see the critical path and which nested step dominates the total time", correct: true }
+    - { text: "The model's internal attention weights for each token" }
+    - { text: "A guarantee that no step contains PII" }
+    - { text: "The exact dollar price the provider will charge next month" }
+  explanation: "A trace is the whole request assembled from nested spans. The tree structure reveals the call graph and critical path — which step's duration actually drives the request total — something a list of isolated span timings can't show."
 
 - id: fe-latency-metric
-  type: text_input
+  type: multiple_choice
   tags: [signals]
   difficulty: 3
-  prompt: "Name one streaming-latency metric worth tracking on an LLM span (an abbreviation or short phrase)."
-  answer:
-    regex: '^(ttft|tpot|time to first token|time per output token|time-to-first-token|time-per-output-token|tokens per second|p95( latency)?|p99( latency)?|latency)$'
-    normalize: true
+  prompt: "Besides TTFT, why also track time-per-output-token (or tokens/second) on an LLM span?"
+  options:
+    - { text: "It captures steady-state decode throughput, which predicts how much slower a long generation will feel after streaming starts", correct: true }
+    - { text: "It measures the network round-trip and nothing else" }
+    - { text: "It replaces the need to record token counts for cost" }
+    - { text: "It reports how many users are online at once" }
+  explanation: "TTFT explains the initial wait; TPOT (or tokens/sec) explains the ongoing decode rate. A response can start quickly yet crawl afterward, so tracking both separates prefill latency from steady-state throughput."
 
 - id: fe-drift-signal
-  type: text_input
+  type: multiple_choice
   tags: [drift]
   difficulty: 3
-  prompt: "What trend do you watch over time to detect quality drift when no code changed? (a few words)"
-  answer:
-    regex: '^(eval scores?|eval score trend|quality scores?|offline eval scores?|score trend|input distribution|output distribution|distribution shift)$'
-    normalize: true
+  prompt: "You ship no code, error rates stay flat, yet users report answers got worse. Which signal is most likely to catch this?"
+  options:
+    - { text: "A downward trend in eval/quality scores or a shift in input/output distribution over time", correct: true }
+    - { text: "A spike in HTTP 500s from the load balancer" }
+    - { text: "An increase in the process's CPU temperature" }
+    - { text: "A change in the correlation ID format" }
+  explanation: "Drift degrades quality without a deploy and without throwing errors. Error counters stay flat; you detect it by trending eval/quality scores and watching input/output distribution stats."
 
 - id: fe-capture-cost
-  type: text_input
+  type: multiple_choice
   tags: [capture]
   difficulty: 3
-  prompt: "Name one thing you must guard against when capturing full prompts for replay. (a word or short phrase)"
-  answer:
-    regex: '^(pii|privacy|sensitive data|leaking pii|storage cost|cost|logging raw pii|pii leakage|personal data)$'
-    normalize: true
+  prompt: "Capturing every prompt and completion verbatim for replay creates what operational problem, and how is it usually mitigated?"
+  options:
+    - { text: "It generates huge trace volume and storage cost, so you sample a fraction of requests rather than capturing everything", correct: true }
+    - { text: "It speeds up the model, so you must throttle it back down" }
+    - { text: "It makes correlation IDs collide, so you disable them" }
+    - { text: "It encrypts the traces, so you must publish the keys" }
+  explanation: "Full capture is invaluable for deterministic replay but explodes storage and cost at scale. Sampling a representative fraction (alongside PII redaction) keeps replay useful without hoarding every payload."

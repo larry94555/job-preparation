@@ -1,45 +1,60 @@
-# Missing term (cloze)
+# Conceptual multiple-choice — formats, scale, outliers, perplexity, SmoothQuant
 - id: cloze-quantization
-  type: text_input
+  type: multiple_choice
   tags: [formats]
   difficulty: 1
-  prompt: "Storing a model's weights in fewer bits (e.g. INT4 instead of FP16) to shrink its footprint is called ____."
-  answer:
-    regex: '^quantization$'
-    normalize: true
+  prompt: "Quantizing a model shrinks it by:"
+  options:
+    - { text: "Reducing the bits used to store each weight (precision), while keeping the same number of parameters", correct: true }
+    - { text: "Removing whole parameters or layers from the network" }
+    - { text: "Retraining the model on a smaller dataset" }
+    - { text: "Lowering the number of tokens the model processes at inference" }
+  explanation: "Quantization lowers the numeric precision of each weight (e.g. INT4 instead of FP16); the parameter count is unchanged. Dropping parameters/layers instead is pruning, a different technique."
 
 - id: cloze-scale
-  type: text_input
+  type: multiple_choice
   tags: [formats]
   difficulty: 2
-  prompt: "The floating-point multiplier that maps a stored integer back to an approximate real value during dequantization is the ____."
-  answer:
-    regex: '^scale$'
-    normalize: true
+  prompt: "A quantization scale is usually derived from the largest-magnitude value in the group it covers. A key consequence is that:"
+  options:
+    - { text: "A single large outlier forces a coarse scale, so the many smaller values lose resolution", correct: true }
+    - { text: "The outlier is stored losslessly while everything else is discarded" }
+    - { text: "The scale has no effect on how much quantization error is introduced" }
+    - { text: "Bigger groups sharing one scale always give lower error" }
+  explanation: "The scale maps integers back to floats and must span the group's range; one outlier stretches that range, making each integer step larger and robbing precision from the ordinary values — which is why grouping and outlier handling matter."
 
 - id: cloze-outliers
-  type: text_input
+  type: multiple_choice
   tags: [quality]
   difficulty: 3
-  prompt: "The few very large activation values that make activations hard to quantize at low bit-width are called ____."
-  answer:
-    regex: '^outliers?$'
-    normalize: true
+  prompt: "A handful of very large outlier values in a tensor hurt low-bit quantization mainly because they:"
+  options:
+    - { text: "Widen the value range so the shared scale turns coarse and the many normal values lose precision", correct: true }
+    - { text: "Consume extra storage bits of their own on top of the tensor" }
+    - { text: "Always sit in the same channel of every layer" }
+    - { text: "Can only ever be represented in floating point, never as integers" }
+  explanation: "Outliers stretch the min/max range a scale must cover, so each quantization step becomes larger and the bulk of near-zero values collapse into a few codes — the core reason activation quantization is hard and why methods like SmoothQuant exist."
 
 - id: cloze-perplexity
-  type: text_input
+  type: multiple_choice
   tags: [quality]
   difficulty: 2
-  prompt: "The averaged language-modeling loss metric that can look fine even when a quantized model has degraded on real tasks is ____."
-  answer:
-    regex: '^perplexity$'
-    normalize: true
+  prompt: "Perplexity, commonly reported after quantization, is fundamentally a measure of:"
+  options:
+    - { text: "How well the model predicts the next token on held-out text (an averaged language-modeling loss)", correct: true }
+    - { text: "The model's accuracy on multi-step reasoning benchmarks" }
+    - { text: "How much memory the quantized model saves" }
+    - { text: "Inference latency per generated token" }
+  explanation: "Perplexity is the exponentiated average next-token loss over generic text. Because it averages over many easy tokens, it can stay flat even when task-specific quality drops — which is why it is a weak shipping gate on its own."
 
 - id: cloze-smoothquant
-  type: text_input
+  type: multiple_choice
   tags: [methods]
   difficulty: 3
-  prompt: "The method that migrates activation-outlier difficulty into the weights via per-channel scaling so both can be quantized is ____."
-  answer:
-    regex: '^smoothquant$'
-    normalize: true
+  prompt: "SmoothQuant is most relevant when your goal is to:"
+  options:
+    - { text: "Quantize both weights AND activations (e.g. to INT8), where activation outliers would otherwise break activation quantization", correct: true }
+    - { text: "Quantize weights only while leaving activations in FP16" }
+    - { text: "Compress the KV cache to extend context length" }
+    - { text: "Train a model from scratch directly in low precision" }
+  explanation: "SmoothQuant targets the weight+activation quantization case: it migrates activation-outlier difficulty into the weights via per-channel scaling so both sides become quantizable. Weight-only quantization sidesteps the outlier problem and doesn't need it."

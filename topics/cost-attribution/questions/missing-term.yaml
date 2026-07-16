@@ -1,45 +1,60 @@
-# Missing term (cloze)
+# Conceptual multiple choice — cost drivers, attribution, and unit economics
 - id: cloze-drivers
-  type: text_input
+  type: multiple_choice
   tags: [drivers]
   difficulty: 1
-  prompt: "The two largest per-call cost drivers are the count of input and ____ tokens."
-  answer:
-    regex: '^output$'
-    normalize: true
+  prompt: "A summarization feature sends tiny prompts but streams back very long answers. Which token count dominates its per-call cost?"
+  options:
+    - { text: "Output tokens, because generation volume, not the short prompt, drives most of the spend here", correct: true }
+    - { text: "Input tokens, because the prompt is always the largest share of cost" }
+    - { text: "Neither — token counts don't affect cost, only the model tier does" }
+    - { text: "Cost is fixed per call regardless of how many tokens are produced" }
+  explanation: "Per-call cost scales with both input and output token volume; when prompts are short and responses are long, output tokens dominate the bill."
 
 - id: cloze-attribution-tag
-  type: text_input
+  type: multiple_choice
   tags: [attribution]
   difficulty: 2
-  prompt: "A label attached to a call so its cost can be rolled up by feature, tenant, or journey is an attribution ____."
-  answer:
-    regex: '^tag$'
-    normalize: true
+  prompt: "What does attaching an attribution tag (feature, tenant, journey) to each LLM call actually buy you?"
+  options:
+    - { text: "Raw per-call cost can be rolled up into feature, tenant, and journey totals you can act on", correct: true }
+    - { text: "It lowers the provider's per-token price for that call" }
+    - { text: "It forces the model to use fewer tokens on tagged calls" }
+    - { text: "It guarantees the call will not be retried" }
+  explanation: "A tag doesn't change what a call costs; it lets you aggregate raw call cost by the business dimensions where you can actually take action."
 
 - id: cloze-propagation
-  type: text_input
+  type: multiple_choice
   tags: [attribution]
   difficulty: 3
-  prompt: "Carrying the attribution context set at the entry point through every downstream call is called tag ____."
-  answer:
-    regex: '^propagation$'
-    normalize: true
+  prompt: "Why set the attribution context once at the request entry point rather than re-tagging inside each downstream service?"
+  options:
+    - { text: "Only the entry point reliably knows the originating feature and tenant; deep services can't reconstruct it", correct: true }
+    - { text: "Entry points are cheaper to run than downstream services" }
+    - { text: "Downstream services are not allowed to read tags at all" }
+    - { text: "Re-tagging downstream would lower the per-token price" }
+  explanation: "The originating feature/tenant/journey is known at the boundary; propagating that context downstream keeps every call correctly labeled, which per-service re-tagging can't guarantee."
 
 - id: cloze-unit-economics
-  type: text_input
+  type: multiple_choice
   tags: [economics]
   difficulty: 2
-  prompt: "Cost per successful task, cost per tenant, and margin are all measures of a system's unit ____."
-  answer:
-    regex: '^economics$'
-    normalize: true
+  prompt: "Cost per successful task, cost per tenant, and margin are unit-economics metrics. What can they judge that a raw monthly bill cannot?"
+  options:
+    - { text: "Whether each unit of value — a task or a tenant — is actually profitable and sustainable as you scale", correct: true }
+    - { text: "The exact wall-clock latency of each request" }
+    - { text: "Which physical region the provider served the call from" }
+    - { text: "The color-coding used on the finance dashboard" }
+  explanation: "A lump-sum bill tells you total spend; unit economics ties cost to a unit of value so you can tell whether growth makes you more or less profitable."
 
 - id: cloze-marginal
-  type: text_input
+  type: multiple_choice
   tags: [economics]
   difficulty: 3
-  prompt: "The incremental cost a new feature adds per task, as opposed to the blended average, is its ____ cost."
-  answer:
-    regex: '^marginal$'
-    normalize: true
+  prompt: "Two features are reported under one blended average cost per task — one is cheap, one expensive. What does the blended number hide?"
+  options:
+    - { text: "That the expensive feature may be unprofitable on its own while the average still looks acceptable", correct: true }
+    - { text: "That both features must cost exactly the same amount" }
+    - { text: "That token counts no longer affect cost once blended" }
+    - { text: "That the provider is overcharging for the cheap feature" }
+  explanation: "Blending averages costs across features, masking the marginal cost each one adds; a single expensive feature can be bleeding money while the blended figure stays comfortable."

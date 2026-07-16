@@ -1,36 +1,48 @@
-# Free entry (short answer)
+# Conceptual multiple-choice (formerly one-word short answer)
 - id: fe-budget-tradeoff
-  type: text_input
+  type: multiple_choice
   tags: [budget]
   difficulty: 2
-  prompt: "Name one cost of stuffing marginally-relevant tokens into the window. (one word)"
-  answer:
-    regex: '^(dilution|cost|latency|noise|distraction)$'
-    normalize: true
+  prompt: "A marginally-relevant chunk 'can't hurt to include.' What cost does it still carry?"
+  options:
+    - { text: "Opportunity cost — it occupies budget and attention a higher-value chunk could have used", correct: true }
+    - { text: "None, as long as it is at least slightly relevant" }
+    - { text: "It permanently enlarges the context window" }
+    - { text: "It forces the model to raise its temperature" }
+  explanation: "Even a harmless-looking chunk spends finite budget and dilutes attention, crowding out content that would have helped more."
 
 - id: fe-position-fix
-  type: text_input
+  type: multiple_choice
   tags: [position]
   difficulty: 2
-  prompt: "To beat the lost-in-the-middle effect, where in the window should key evidence go? (one word)"
-  answer:
-    regex: '^(start|beginning|top|end|edges?|front)$'
-    normalize: true
+  prompt: "You have ten ranked chunks to place in a single window. How should you order them to respect position effects?"
+  options:
+    - { text: "Put the top-ranked chunks at the start and end, and the least-important ones in the middle", correct: true }
+    - { text: "Place them strictly in retrieval order, ignoring rank" }
+    - { text: "Cluster all the top-ranked chunks together in the exact middle" }
+    - { text: "Randomize the order to avoid any bias" }
+  explanation: "Because the edges are attended to best, the most important chunks belong near the start or end and the weakest can absorb the middle."
 
 - id: fe-selection-method
-  type: text_input
+  type: multiple_choice
   tags: [selection]
   difficulty: 2
-  prompt: "Name the two-step pattern for filling the window: rank, then ____ to budget. (one word)"
-  answer:
-    regex: '^(fit|pack)$'
-    normalize: true
+  prompt: "Using rank-then-fit, what happens to still-relevant chunks once the token budget is exhausted?"
+  options:
+    - { text: "They are dropped or compressed so the assembly stays within budget", correct: true }
+    - { text: "The budget is automatically expanded to fit them all" }
+    - { text: "They are relocated to the exact middle of the window" }
+    - { text: "They replace the highest-ranked chunk already admitted" }
+  explanation: "Fit-to-budget is a hard constraint: once the budget is spent, remaining candidates are dropped or compressed rather than added."
 
 - id: fe-selection-signal
-  type: text_input
+  type: multiple_choice
   tags: [selection]
   difficulty: 3
-  prompt: "By what property do you primarily order candidate chunks before fitting them to the budget? (one word)"
-  answer:
-    regex: '^(relevance|relevancy|score|similarity)$'
-    normalize: true
+  prompt: "Why order candidate chunks primarily by relevance rather than by recency or length before fitting them to the budget?"
+  options:
+    - { text: "Relevance to the query best predicts which chunks improve the answer per token spent", correct: true }
+    - { text: "Length is the only signal the budget accounting cares about" }
+    - { text: "Recency always correlates perfectly with relevance" }
+    - { text: "The ordering signal has no effect on output quality" }
+  explanation: "The budget is finite, so you want the chunks most likely to help; relevance is the signal that tracks that, unlike raw recency or length."

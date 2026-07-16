@@ -1,45 +1,60 @@
-# Missing term (cloze)
+# Conceptual multiple choice (contract, schema, idempotency, validation)
 - id: cloze-contract
-  type: text_input
+  type: multiple_choice
   tags: [contract]
   difficulty: 1
-  prompt: "Treating a tool as an API means its schema is a ____ the caller must satisfy."
-  answer:
-    regex: '^contract$'
-    normalize: true
+  prompt: "If a tool's schema is a contract the caller must satisfy, what should happen when a call violates it?"
+  options:
+    - { text: "The harness rejects the call before executing, just as an API rejects a malformed request", correct: true }
+    - { text: "The tool runs anyway and hopes the arguments work out" }
+    - { text: "The contract is rewritten to match whatever the model sent" }
+    - { text: "The call is trusted because the model usually gets it right" }
+  explanation: "A contract only means something if violations are enforced: a call that breaks the schema is rejected before any side effect, exactly like a strict API endpoint."
 
 - id: cloze-schema
-  type: text_input
+  type: multiple_choice
   tags: [contract]
   difficulty: 2
-  prompt: "The typed description of a tool's arguments, types, and shape is its ____."
-  answer:
-    regex: '^(tool )?schema$'
-    normalize: true
+  prompt: "Beyond argument names, what does a well-specified tool schema pin down so the harness can enforce the contract?"
+  options:
+    - { text: "The type and shape of each argument, plus which are required", correct: true }
+    - { text: "The model's internal weights and attention pattern" }
+    - { text: "The wall-clock time the tool will take to run" }
+    - { text: "The user's per-call approval preferences" }
+  explanation: "A schema declares each argument's type, structure, and whether it's required — the machine-checkable shape the harness validates every call against."
 
 - id: cloze-idempotent
-  type: text_input
+  type: multiple_choice
   tags: [idempotency]
   difficulty: 2
-  prompt: "An operation that is safe to retry because repeating it has no extra effect is ____."
-  answer:
-    regex: '^idempotent$'
-    normalize: true
+  prompt: "Which operation is already idempotent, so repeating it causes no additional effect?"
+  options:
+    - { text: "Setting a user's status to `active` (same end state no matter how many times it runs)", correct: true }
+    - { text: "Incrementing an account balance by $10" }
+    - { text: "Appending a new row to an audit log" }
+    - { text: "Charging a card for the order total" }
+  explanation: "Assigning an absolute value (`status = active`) lands in the same end state however often it runs — idempotent. Increment, append, and charge accumulate effects on each repeat."
 
 - id: cloze-idempotency-key
-  type: text_input
+  type: multiple_choice
   tags: [idempotency]
   difficulty: 3
-  prompt: "A client-supplied ____ key lets a server dedupe retries and return the stored result."
-  answer:
-    regex: '^idempotency$'
-    normalize: true
+  prompt: "For an idempotency key to prevent a duplicate charge across a retry, what must be true of the key?"
+  options:
+    - { text: "The client reuses the same key on the retry that it sent on the original call", correct: true }
+    - { text: "The client generates a fresh key for every attempt" }
+    - { text: "The server ignores the key and trusts the request timestamp instead" }
+    - { text: "The key encrypts the request body so it can't be replayed" }
+  explanation: "Dedupe works only if the retry carries the identical key as the first attempt; a new key each time looks like a new operation and re-applies the effect."
 
 - id: cloze-validate
-  type: text_input
+  type: multiple_choice
   tags: [validation]
   difficulty: 2
-  prompt: "Before executing a tool call, the harness must ____ the arguments against the schema."
-  answer:
-    regex: '^validate$'
-    normalize: true
+  prompt: "At what point must the harness validate a tool call's arguments against the schema?"
+  options:
+    - { text: "Before executing the tool, so a malformed call never triggers a side effect", correct: true }
+    - { text: "After executing, so it can log what went wrong" }
+    - { text: "Only when the model flags the call as risky" }
+    - { text: "Never — the tool validates its own inputs at runtime" }
+  explanation: "Validation is a gate in front of execution: checking after the side effect has fired defeats the purpose. Malformed calls must be caught before dispatch."

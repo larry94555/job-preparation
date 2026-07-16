@@ -1,54 +1,73 @@
-# Missing term (cloze)
+# Conceptual multiple-choice — context, tokens, routing, and failure-mode understanding
+# (converted from cloze fill-in-the-blank; ids/tags preserved for lesson + assessment references)
 - id: cloze-context-window
-  type: text_input
+  type: multiple_choice
   tags: [context]
-  difficulty: 1
-  prompt: "The hard token limit for a single model call is its ____ window."
-  answer:
-    regex: '^context$'
-    normalize: true
+  difficulty: 2
+  prompt: "Request A has a huge prompt but asks for a one-word answer; request B has a tiny prompt but asks for a 3,000-token essay. How does the context window constrain them?"
+  options:
+    - { text: "Both the prompt and the generated output draw from the same fixed token budget, so either a large prompt or a large output can approach the limit", correct: true }
+    - { text: "Only the prompt counts against the window; generated output is unlimited" }
+    - { text: "Only the output counts against the window; the prompt is free" }
+    - { text: "The window is applied per message, so neither request can ever exceed it" }
+  explanation: "The context window is one shared token budget covering everything in a call — system prompt, history, retrieved text, and the tokens generated. A big prompt or a long answer can each eat it up; input is not free and output is not unlimited."
 
 - id: cloze-token
-  type: text_input
+  type: multiple_choice
   tags: [tokens]
   difficulty: 1
-  prompt: "Providers bill per ____, and the model generates them one at a time."
-  answer:
-    regex: '^tokens?$'
-    normalize: true
+  prompt: "Why does the same unit — the token — appear in both the context-window limit and the price of a call?"
+  options:
+    - { text: "The model's attention budget and the provider's metering both operate on tokens, the sub-word chunks the text is split into", correct: true }
+    - { text: "It is a coincidence; the window is measured in words and the price in tokens" }
+    - { text: "Tokens measure price only; the window is actually measured in characters" }
+    - { text: "The window is measured in API requests, and tokens affect price alone" }
+  explanation: "Tokens are the fundamental unit the model processes, so both the capacity limit (window) and the meter (price) are counted in them. That is why one budget number bounds cost and fit at the same time."
 
 - id: cloze-lost-middle
-  type: text_input
+  type: multiple_choice
   tags: [context]
   difficulty: 2
-  prompt: "In a long context, a fact is most likely to be missed when placed in the ____."
-  answer:
-    regex: '^middle$'
-    normalize: true
+  prompt: "You must include a long reference document plus one critical instruction in a prompt. Given the lost-in-the-middle effect, where should the critical instruction go?"
+  options:
+    - { text: "At the start or the end of the prompt, where models attend most reliably", correct: true }
+    - { text: "In the exact middle, which is the most reliably read position" }
+    - { text: "Anywhere — position has no measurable effect on long-context retrieval" }
+    - { text: "Split into single characters scattered through the document" }
+  explanation: "Retrieval accuracy over position is U-shaped: the start and end are used well, the middle is where facts get missed. Put the instruction that must not be dropped at an edge, not buried in the document."
 
 - id: cloze-routing
-  type: text_input
+  type: multiple_choice
   tags: [routing]
   difficulty: 2
-  prompt: "Route simple, high-volume tasks to the ____ capable model that can still do them."
-  answer:
-    regex: '^(cheap|cheaper|cheapest)$'
-    normalize: true
+  prompt: "The routing heuristic is 'the cheapest model that can still do the task correctly.' What goes wrong if you keep only the 'cheapest' half and drop 'can still do it correctly'?"
+  options:
+    - { text: "You save money per call but push tasks onto a tier too weak for them, so the error rate rises and reliability drops", correct: true }
+    - { text: "Nothing — the cheapest tier handles every task equally well" }
+    - { text: "Latency increases, because cheap models are always slower than expensive ones" }
+    - { text: "The provider blocks the request for using the wrong tier" }
+  explanation: "Cheapest-capable balances price against a quality floor. Optimizing for price alone sends hard work to a model that can't do it, trading dollars saved for failures — the opposite of the point."
 
 - id: cloze-hallucination
-  type: text_input
+  type: multiple_choice
   tags: [failure]
   difficulty: 2
-  prompt: "Confident, fluent output that is not grounded in any real source is a ____."
-  answer:
-    regex: '^hallucination$'
-    normalize: true
+  prompt: "An agent states a confident fact that appears nowhere in the documents it was given and simply isn't true. Which diagnosis fits, and what does it imply about the fix?"
+  options:
+    - { text: "Hallucination — the output isn't grounded in any source, so the fix is to ground and verify claims against real data, not to enlarge the context", correct: true }
+    - { text: "Lost-in-the-middle — the fact was in the documents but buried, so a bigger window fixes it" }
+    - { text: "Instruction drift — re-inject the system prompt to restore the correct fact" }
+    - { text: "Context overflow — the fact was dropped, so trimming history restores it" }
+  explanation: "Because the claim is grounded in nothing, it is a hallucination, not a retrieval or budget problem. The targeted fix is grounding — fetch and check against a real source — which a larger window or re-injection does not provide."
 
 - id: cloze-drift
-  type: text_input
+  type: multiple_choice
   tags: [failure]
   difficulty: 2
-  prompt: "The slow erosion of instruction-following over a long session is instruction ____."
-  answer:
-    regex: '^drift$'
-    normalize: true
+  prompt: "Early in a long session an agent follows its formatting rules; forty turns later it quietly ignores them. Why does this happen, and what is the mechanism called?"
+  options:
+    - { text: "Instruction drift — as the conversation grows, the original instructions compete with accumulating context and lose salience", correct: true }
+    - { text: "Hallucination — the model fabricated a new set of formatting rules" }
+    - { text: "Tokenizer drift — the tokenizer degraded over the course of the session" }
+    - { text: "Context overflow — the window filled, which always improves instruction-following" }
+  explanation: "Instruction drift is the slow erosion of adherence as more context piles up and dilutes the original instructions. It is fixed by re-asserting them periodically — not a fabrication, tokenizer, or overflow issue."

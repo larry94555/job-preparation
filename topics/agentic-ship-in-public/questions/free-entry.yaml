@@ -1,72 +1,96 @@
-# Free entry (short answer)
+# Conceptual multiple choice (converted from free-entry short answer)
 - id: fe-readme
-  type: text_input
+  type: multiple_choice
   tags: [portfolio]
   difficulty: 1
-  prompt: "Which artifact explains the agent's architecture and a key design decision? (one word)"
-  answer:
-    regex: '^readme$'
-    normalize: true
+  prompt: "A reviewer opens your agent repo and finds working code but no README. What is the practical consequence?"
+  options:
+    - { text: "The proof is unreadable — they can run it but cannot tell what it does or why it is built that way", correct: true }
+    - { text: "Nothing — clean code documents itself, so a README is redundant" }
+    - { text: "The agent will fail to run until a README is added" }
+    - { text: "It signals confidence, because strong engineers skip documentation" }
+  explanation: "A README is what makes a repo legible: without it a reviewer cannot see the task, the architecture, or the decisions, so the working code stops being usable proof."
 
 - id: fe-evals
-  type: text_input
+  type: multiple_choice
   tags: [portfolio]
   difficulty: 2
-  prompt: "What do you ship to prove you measured the agent's pass rate, not just hoped? (one word)"
-  answer:
-    regex: '^evals?$'
-    normalize: true
+  prompt: "What are the minimum pieces that make something an eval suite rather than a single lucky run?"
+  options:
+    - { text: "A set of cases, a judge that scores them, and a reported pass rate over the set", correct: true }
+    - { text: "One representative input that returns the expected output" }
+    - { text: "A longer system prompt that lists the behaviours you want" }
+    - { text: "A screenshot of the agent producing a correct answer once" }
+  explanation: "An eval suite is cases plus a judge plus an aggregate pass rate. That structure is what lets you say \"passes N of M\" instead of \"it worked when I tried it.\""
 
 - id: fe-demo
-  type: text_input
+  type: multiple_choice
   tags: [ship]
   difficulty: 1
-  prompt: "What short, watchable artifact shows the agent running on a real input? (one word)"
-  answer:
-    regex: '^demo$'
-    normalize: true
+  prompt: "You ship an agent with a strong README and an eval suite but no demo. What is left unproven to a busy reviewer?"
+  options:
+    - { text: "That it actually runs — they can read and see the numbers but never watch it work on a real input", correct: true }
+    - { text: "Nothing — the README already describes every step, so a demo adds no information" }
+    - { text: "The architecture, which only a demo can explain" }
+    - { text: "The pass rate, which a demo would report more precisely than evals" }
+  explanation: "Each artifact closes a hole: no README = unreadable, no evals = unmeasured, no demo = unseen. Without a demo the reviewer never watches the agent run end to end."
 
 - id: fe-thread
-  type: text_input
+  type: multiple_choice
   tags: [communicate]
   difficulty: 2
-  prompt: "A short, linkable public write-up of your build is called a ____ (one word)."
-  answer:
-    regex: '^thread$'
-    normalize: true
+  prompt: "Why publish your build as a public, linkable write-up instead of keeping notes you share only when asked?"
+  options:
+    - { text: "A durable link argues for you unattended — a stranger can find it and understand the build without you in the room", correct: true }
+    - { text: "Public posts are graded by algorithms that rank engineers automatically" }
+    - { text: "It lets you avoid publishing the repo, since the write-up replaces the code" }
+    - { text: "Private notes are illegal to reference in interviews" }
+  explanation: "The point of a public write-up is that it is linkable and openable by anyone at any time, so the work keeps making your case even when you are not there to present it."
 
 - id: fe-loom
-  type: text_input
+  type: multiple_choice
   tags: [communicate]
   difficulty: 2
-  prompt: "Name one form of a short screen-recording demo you can link to. (one word)"
-  answer:
-    regex: '^(loom|demo|video)$'
-    normalize: true
+  prompt: "Why link a short screen-recording alongside the written story of your build?"
+  options:
+    - { text: "It makes the claims visible — the reader watches the agent actually run in about ninety seconds instead of taking your word for it", correct: true }
+    - { text: "A recording replaces the need for the code to be published" }
+    - { text: "Video is the only format hiring managers are allowed to review" }
+    - { text: "It hides the architecture so reviewers focus on the result" }
+  explanation: "A screen-recording turns the narrative into something a reviewer can see happening quickly, pairing the written argument with visible, running proof."
 
 - id: fe-proof
-  type: text_input
+  type: multiple_choice
   tags: [proof]
   difficulty: 1
-  prompt: "One word: a working agent is falsifiable ____ that a skills list is not."
-  answer:
-    regex: '^proof$'
-    normalize: true
+  prompt: "What single property of a working agent makes it count as proof rather than a claim?"
+  options:
+    - { text: "It is falsifiable — anyone can open it, run it, and see for themselves whether it works", correct: true }
+    - { text: "It is impressive-sounding when described in a resume bullet" }
+    - { text: "It uses a popular framework that reviewers recognise" }
+    - { text: "It is long enough that a reviewer assumes effort went in" }
+  explanation: "Proof is something a reviewer can independently verify. A working agent can be run and checked; a buzzword on a resume can only be believed or doubted."
 
 - id: fe-step-cap
-  type: text_input
+  type: multiple_choice
   tags: [ship]
   difficulty: 2
-  prompt: "Two words: the hard limit on the agent loop that guarantees it always terminates is the ____."
-  answer:
-    regex: '^step\s*cap$'
-    normalize: true
+  prompt: "What failure does an agent loop risk when it has no hard cap on the number of steps?"
+  options:
+    - { text: "A misbehaving model can spin forever, so the loop never terminates and the run hangs", correct: true }
+    - { text: "The agent always answers on the first step, so it never uses tools" }
+    - { text: "Observations become impossible to validate" }
+    - { text: "The README becomes harder to write" }
+  explanation: "Without a step cap a model that will not stop keeps the loop running indefinitely. A cap forces termination and lets you return an explicit step-limit result instead of hanging."
 
 - id: fe-adr
-  type: text_input
+  type: multiple_choice
   tags: [portfolio]
   difficulty: 2
-  prompt: "A README that records \"chose X over Y because Z\" is, in spirit, an architecture decision ____ (one word)."
-  answer:
-    regex: '^record$'
-    normalize: true
+  prompt: "Why record \"chose X over Y because Z\" in the README instead of just describing the final design?"
+  options:
+    - { text: "It exposes the tradeoff and your judgment — the decisions are exactly what a reviewer interrogates", correct: true }
+    - { text: "It makes the README longer, which reviewers reward" }
+    - { text: "It proves the design has no remaining flaws" }
+    - { text: "It lets you skip shipping evals" }
+  explanation: "Describing only the endpoint hides the thinking. Recording the tradeoff shows judgment under constraints, which is the signal a reviewer reads a portfolio to find."

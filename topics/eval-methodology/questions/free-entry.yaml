@@ -1,36 +1,48 @@
-# Free entry (short answer)
+# Conceptual multiple choice (converted from short-answer free entry)
 - id: fe-golden-source
-  type: text_input
+  type: multiple_choice
   tags: [golden]
   difficulty: 2
-  prompt: "Who or what should decide the expected output in a golden set? (one word)"
-  answer:
-    regex: '^(humans?|human|expert|experts|reviewer|reviewers)$'
-    normalize: true
+  prompt: "Who should determine the expected outputs in a golden set, and why does the source matter?"
+  options:
+    - { text: "Humans or domain experts, because ground truth must be established independently of the model being tested", correct: true }
+    - { text: "The model under test, because it knows its own outputs best" }
+    - { text: "Whichever model is largest, because size implies correctness" }
+    - { text: "An automated script that copies the most frequent output" }
+  explanation: "Ground truth has to come from a source independent of the system under test — humans or experts — otherwise the eval just measures the model against itself."
 
 - id: fe-judge-bias
-  type: text_input
+  type: multiple_choice
   tags: [judge]
   difficulty: 3
-  prompt: "Name one documented bias of an LLM judge."
-  answer:
-    regex: '^(position|order|verbosity|length|self|self-?preference|self-?bias)( bias)?$'
-    normalize: true
+  prompt: "A judge consistently rates longer answers higher regardless of whether they're correct. Which bias is this, and how do you counter it?"
+  options:
+    - { text: "Verbosity bias — control for length in the rubric and don't reward it", correct: true }
+    - { text: "Position bias — always place the longer answer second" }
+    - { text: "Calibration bias — raise the judge's temperature until scores spread out" }
+    - { text: "Regression bias — rerun the judge until the scores stabilize" }
+  explanation: "Verbosity (length) bias makes a judge equate 'more text' with 'better'; a rubric that scores specific criteria — not length — mitigates it."
 
 - id: fe-adversarial-target
-  type: text_input
+  type: multiple_choice
   tags: [adversarial]
   difficulty: 3
-  prompt: "Name one thing an adversarial eval suite deliberately targets."
-  answer:
-    regex: '^(edge cases?|failure modes?|prompt injection|injection|jailbreaks?|ambiguity|ambiguous inputs?|corner cases?)$'
-    normalize: true
+  prompt: "Which kind of input is an adversarial suite specifically built to include that a golden set typically leaves out?"
+  options:
+    - { text: "A prompt-injection attempt designed to make the model ignore its instructions", correct: true }
+    - { text: "A common, well-formed request representative of typical usage" }
+    - { text: "An input identical to one already passing in the golden set" }
+    - { text: "The single most frequent query from production logs" }
+  explanation: "Adversarial suites deliberately include injection, jailbreaks, ambiguity, and boundary inputs — the failure modes a happy-path golden set doesn't sample."
 
 - id: fe-regression-frequency
-  type: text_input
+  type: multiple_choice
   tags: [regression]
   difficulty: 2
-  prompt: "How often should the regression eval run to catch quality drops early? (one word/phrase)"
-  answer:
-    regex: '^(every change|every commit|on every change|per commit|per change|continuously|in ci|each pr|every pr)$'
-    normalize: true
+  prompt: "How often should a regression eval run, and why that cadence?"
+  options:
+    - { text: "On every change in CI, so a drop is caught immediately and attributed to the change that caused it", correct: true }
+    - { text: "Once per quarter, to avoid spending compute too often" }
+    - { text: "Only right before a major release, after all changes have landed" }
+    - { text: "Only when a user reports a bug in production" }
+  explanation: "Running on every change makes regressions cheap to catch and easy to trace to their cause; batching changes hides which one broke quality."

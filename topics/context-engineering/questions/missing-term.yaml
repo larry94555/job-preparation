@@ -1,45 +1,60 @@
-# Missing term (cloze)
+# Conceptual multiple-choice (formerly cloze fill-in-the-blank)
 - id: cloze-budget
-  type: text_input
+  type: multiple_choice
   tags: [budget]
   difficulty: 1
-  prompt: "Treating the context window as a finite, ranked resource means treating it as a token ____."
-  answer:
-    regex: '^budget$'
-    normalize: true
+  prompt: "Calling the context window a 'ranked' token budget emphasizes that you must:"
+  options:
+    - { text: "Prioritize candidates against each other, since not all of them can be included", correct: true }
+    - { text: "Include tokens in the order they happened to be written" }
+    - { text: "Fill the window to capacity on every request" }
+    - { text: "Treat every relevant token as equally important" }
+  explanation: "'Ranked' means candidates compete for a finite budget: you order them by value and admit the best until the budget is spent."
 
 - id: cloze-lost-middle
-  type: text_input
+  type: multiple_choice
   tags: [position]
   difficulty: 2
-  prompt: "The tendency to under-use information placed mid-context is called 'lost in the ____'."
-  answer:
-    regex: '^middle$'
-    normalize: true
+  prompt: "A key fact is present in a long prompt but the model still overlooks it. Which placement best explains this 'lost in the middle' failure?"
+  options:
+    - { text: "The fact sits in the middle of the context, where models attend least", correct: true }
+    - { text: "The fact is the very first sentence, which models over-weight" }
+    - { text: "The fact is the final sentence, which models over-weight" }
+    - { text: "The context was too short for position to matter" }
+  explanation: "Retrieval accuracy is U-shaped over position; evidence buried mid-context is the most likely to be missed even when it is present."
 
 - id: cloze-recency
-  type: text_input
+  type: multiple_choice
   tags: [position]
   difficulty: 2
-  prompt: "Stronger use of tokens at the *end* of the window is the ____ effect."
-  answer:
-    regex: '^recency$'
-    normalize: true
+  prompt: "Why do many prompt designs put the actual user question at the very end of the assembled context?"
+  options:
+    - { text: "The recency effect means end-of-window tokens get the strongest use, so the live question lands there", correct: true }
+    - { text: "The start of the window is reserved exclusively for retrieved documents" }
+    - { text: "The tokenizer only functions when the question is last" }
+    - { text: "Ordering is cosmetic and has no effect on the answer" }
+  explanation: "Tokens near the end of the window are used more strongly (recency), so the current question and critical instructions belong there."
 
 - id: cloze-primacy
-  type: text_input
+  type: multiple_choice
   tags: [position]
   difficulty: 2
-  prompt: "Stronger use of tokens at the *start* of the window is the ____ effect."
-  answer:
-    regex: '^primacy$'
-    normalize: true
+  prompt: "You place a critical constraint at the very top of the system prompt. Which position effect are you relying on?"
+  options:
+    - { text: "Primacy — early tokens receive stronger, more reliable use", correct: true }
+    - { text: "Recency — only the last tokens carry weight" }
+    - { text: "Dilution — spreading the constraint out strengthens it" }
+    - { text: "Caching — position determines how tokens are stored" }
+  explanation: "Primacy means the beginning of the window is attended to strongly, so it is a good home for high-value instructions."
 
 - id: cloze-selection
-  type: text_input
+  type: multiple_choice
   tags: [selection]
   difficulty: 2
-  prompt: "Choosing which candidate chunks enter the window is the ____ (or retrieval) step."
-  answer:
-    regex: '^selection$'
-    normalize: true
+  prompt: "In a context-assembly pipeline, the selection (retrieval) step is responsible for:"
+  options:
+    - { text: "Deciding which candidate chunks enter the window before generation", correct: true }
+    - { text: "Producing the model's final answer text" }
+    - { text: "Setting the sampling temperature" }
+    - { text: "Compressing the model's weights" }
+  explanation: "Selection sits before generation: it scores candidates and chooses which ones make it into the bounded window."
