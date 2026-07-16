@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { goToStep, promptOverridesFor, stateFor } from "@/lib/lesson-service";
+import { goToStep, paraphraseOverridesFor, stateFor } from "@/lib/lesson-service";
 import { currentSessionId, currentUserId } from "@/lib/session";
 
 export const runtime = "nodejs";
@@ -19,5 +19,5 @@ export async function POST(req: NextRequest) {
   }
   const ctx = await goToStep(userId, topicId, index);
   if (!ctx) return NextResponse.json({ error: "unknown topic" }, { status: 404 });
-  return NextResponse.json(stateFor(ctx, promptOverridesFor(ctx, await currentSessionId())));
+  return NextResponse.json(stateFor(ctx, paraphraseOverridesFor(ctx, await currentSessionId())));
 }

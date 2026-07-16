@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { loadContext, promptOverridesFor, stateFor } from "@/lib/lesson-service";
+import { loadContext, paraphraseOverridesFor, stateFor } from "@/lib/lesson-service";
 import { currentSessionId, currentUserId } from "@/lib/session";
 
 export const runtime = "nodejs";
@@ -12,5 +12,5 @@ export async function GET(req: NextRequest) {
   const topic = req.nextUrl.searchParams.get("topic") ?? "";
   const ctx = await loadContext(userId, topic);
   if (!ctx) return NextResponse.json({ error: "unknown topic" }, { status: 404 });
-  return NextResponse.json(stateFor(ctx, promptOverridesFor(ctx, await currentSessionId())));
+  return NextResponse.json(stateFor(ctx, paraphraseOverridesFor(ctx, await currentSessionId())));
 }

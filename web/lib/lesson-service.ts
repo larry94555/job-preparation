@@ -35,7 +35,11 @@ import {
 } from "@job-prep/lesson";
 import { LlamaClient } from "@job-prep/evaluator";
 import { createContentSource, createStore } from "@job-prep/store";
-import { paraphrasedPrompts } from "./paraphrase";
+import {
+  paraphraseLessonsEnabled,
+  paraphrasedPrompts,
+  paraphraseTestsEnabled,
+} from "./paraphrase";
 import { currentSessionId } from "./session";
 
 // Curated path order (foundations first); unknown topics sort after, by id.
@@ -200,30 +204,110 @@ export async function loadContext(
   return { topic, pt, progress };
 }
 
-/** The multiple-choice prompts in a playthrough (id + displayed prompt) — the
- *  only prompts we reword (MCQ answers live in the options, so rewording the
- *  question can't change what's correct). Text/essay/code prompts are left as-is
- *  because their wording is answer-relevant. */
-function mcqPrompts(pt: Playthrough): { id: string; prompt: string }[] {
-  const out: { id: string; prompt: string }[] = [];
+// ---- paraphrase item collection -------------------------------------------
+// We only ever reword MCQ *prompts* (answers live in the options, so rewording
+// the question can't change what's correct) and prose *material* paragraphs.
+// Text/essay/code prompts are left as-is because their wording is answer-relevant.
+
+interface ParaItem {
+  id: string;
+  text: string;
+}
+
+/** Formative check/apply MCQ prompts — the "lessons" paraphrase surface. */
+function lessonPromptItems(pt: Playthrough): ParaItem[] {
+  const out: ParaItem[] = [];
   for (const s of pt.steps) {
     if ((s.kind === "check" || s.kind === "apply") && s.question.type === "multiple_choice") {
-      out.push({ id: s.question.id, prompt: s.view.prompt });
-    } else if (s.kind === "assessment") {
-      for (const it of s.items) {
-        if (it.question.type === "multiple_choice") {
-          out.push({ id: it.question.id, prompt: it.view.prompt });
-        }
-      }
+      out.push({ id: s.question.id, text: s.view.prompt });
     }
   }
   return out;
 }
 
-/** Cache-keyed reworded prompts for a lesson context (per session + topic). */
-export function promptOverridesFor(ctx: LessonContext, sid: string | null): Map<string, string> {
+/** Section-assessment MCQ prompts — the "tests" paraphrase surface. */
+function testPromptItems(pt: Playthrough): ParaItem[] {
+  const out: ParaItem[] = [];
+  for (const s of pt.steps) {
+    if (s.kind !== "assessment") continue;
+    for (const it of s.items) {
+      if (it.question.type === "multiple_choice") out.push({ id: it.question.id, text: it.view.prompt });
+    }
+  }
+  return out;
+}
+
+/** Stable id for a material paragraph, derived from its content (djb2), so the
+ *  warm pass and the render pass agree on which rewrite belongs to which block
+ *  (and identical paragraphs dedupe to one rewrite). */
+function paragraphId(inner: string): string {
+  let h = 5381;
+  for (let i = 0; i < inner.length; i++) h = ((h << 5) + h + inner.charCodeAt(i)) | 0;
+  return "mat:" + (h >>> 0).toString(36);
+}
+
+/** The `<p>` paragraphs in rendered material we're willing to reword: PURE prose
+ *  only (inner HTML has no `<`), so any paragraph carrying inline code, emphasis,
+ *  links, etc. is left untouched — the safe subset for HTML-level rewriting. */
+function materialParagraphs(html: string): string[] {
+  const out: string[] = [];
+  const re = /<p>([\s\S]*?)<\/p>/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html))) {
+    const inner = m[1];
+    if (!inner.includes("<") && inner.trim()) out.push(inner);
+  }
+  return out;
+}
+
+/** Material prose paragraphs across a playthrough — the "lessons" surface. */
+function materialItems(pt: Playthrough): ParaItem[] {
+  const out: ParaItem[] = [];
+  const seen = new Set<string>();
+  for (const s of pt.steps) {
+    if (s.kind !== "material") continue;
+    for (const inner of materialParagraphs(s.html)) {
+      const id = paragraphId(inner);
+      if (seen.has(id)) continue;
+      seen.add(id);
+      out.push({ id, text: inner });
+    }
+  }
+  return out;
+}
+
+/** Swap reworded prose back into material HTML. Only pure-prose paragraphs are
+ *  eligible, and a rewrite that (against instructions) introduced a `<` is
+ *  rejected here — material is rendered via dangerouslySetInnerHTML, so a stray
+ *  tag must never reach it. */
+function applyMaterialOverrides(html: string, map: Map<string, string>): string {
+  return html.replace(/<p>([\s\S]*?)<\/p>/g, (full, inner: string) => {
+    if (inner.includes("<")) return full;
+    const rw = map.get(paragraphId(inner));
+    return rw && !rw.includes("<") ? `<p>${rw}</p>` : full;
+  });
+}
+
+/**
+ * Cache-keyed reworded text for a lesson context (per session + topic). Combines
+ * both paraphrase surfaces, each gated by its own flag: lessons (material +
+ * check/apply prompts) and tests (assessment prompts). Returns the overrides map
+ * to apply to the displayed step (empty until the background warm completes).
+ */
+export function paraphraseOverridesFor(
+  ctx: LessonContext,
+  sid: string | null,
+): Map<string, string> {
+  const items: ParaItem[] = [];
+  if (paraphraseLessonsEnabled()) {
+    items.push(...lessonPromptItems(ctx.pt), ...materialItems(ctx.pt));
+  }
+  if (paraphraseTestsEnabled()) {
+    items.push(...testPromptItems(ctx.pt));
+  }
+  if (!items.length) return new Map();
   const key = `${sid ?? "anon"}:${ctx.pt.topicId}`;
-  return paraphrasedPrompts(key, mcqPrompts(ctx.pt));
+  return paraphrasedPrompts(key, items);
 }
 
 // ---- sanitized views (answer keys never reach the client) ----------------
@@ -262,12 +346,15 @@ function precedingMaterialIndex(pt: Playthrough, index: number): number | null {
   return null;
 }
 
-/** Apply reworded MCQ prompts (from paraphrase) to a sanitized step in place. */
-function applyPromptOverrides(
+/** Apply reworded prompts + material prose (from paraphrase) to a sanitized step
+ *  in place. Prompts are matched by question id; material by paragraph content. */
+function applyOverrides(
   step: NonNullable<ReturnType<typeof sanitizeStep>>,
   map: Map<string, string>,
 ): typeof step {
-  if (step.kind === "check" || step.kind === "apply") {
+  if (step.kind === "material") {
+    step.html = applyMaterialOverrides(step.html, map);
+  } else if (step.kind === "check" || step.kind === "apply") {
     const p = map.get(step.question.id);
     if (p) step.question = { ...step.question, prompt: p };
   } else if (step.kind === "assessment") {
@@ -280,15 +367,15 @@ function applyPromptOverrides(
 }
 
 /** The per-topic state payload — the sanitized current step + progress bands.
- *  `promptOverrides` reworded MCQ prompts (from the paraphrase cache) are applied
- *  to the displayed step, if provided. */
+ *  `promptOverrides` reworded text (MCQ prompts + material prose, from the
+ *  paraphrase cache) is applied to the displayed step, if provided. */
 export function stateFor(ctx: LessonContext, promptOverrides?: Map<string, string>) {
   const { pt, progress } = ctx;
   const done = progress.index >= pt.steps.length;
   const step = done ? null : pt.steps[progress.index];
   let sanitized = step ? sanitizeStep(step) : null;
   if (sanitized && promptOverrides && promptOverrides.size) {
-    sanitized = applyPromptOverrides(sanitized, promptOverrides);
+    sanitized = applyOverrides(sanitized, promptOverrides);
   }
   return {
     topic: { id: pt.topicId, title: pt.topicTitle },
@@ -470,8 +557,9 @@ export const SAMPLE_SEED = seedFromString(SAMPLE_TOPIC);
  * turns into a sign-up prompt. No store, no answer keys leave the server.
  *
  * `seed` (per page load) reshuffles the options each visit; it's echoed back so
- * grading re-derives the identical playthrough. MCQ prompts are reworded via the
- * paraphrase cache (warmed in the background, once per process for the sample).
+ * grading re-derives the identical playthrough. Material prose and MCQ prompts are
+ * reworded via the paraphrase cache (warmed in the background, once per process
+ * for the sample) when the "lessons" surface is enabled.
  */
 export async function sampleFlow(seed: number = SAMPLE_SEED): Promise<{
   topicId: string;
@@ -482,7 +570,10 @@ export async function sampleFlow(seed: number = SAMPLE_SEED): Promise<{
   const topic = await findTopic(SAMPLE_TOPIC);
   if (!topic) return null;
   const pt = buildPlaythrough(topic, seed);
-  const overrides = paraphrasedPrompts("sample", mcqPrompts(pt));
+  // The sample is a lesson, so it uses the "lessons" surface (material + checks).
+  const overrides = paraphraseLessonsEnabled()
+    ? paraphrasedPrompts("sample", [...lessonPromptItems(pt), ...materialItems(pt)])
+    : new Map<string, string>();
   const steps: SampleStep[] = [];
   let lastLocked = false;
   for (const step of pt.steps) {
@@ -491,7 +582,7 @@ export async function sampleFlow(seed: number = SAMPLE_SEED): Promise<{
         kind: "material",
         lessonTitle: step.lessonTitle,
         heading: step.heading,
-        html: step.html,
+        html: applyMaterialOverrides(step.html, overrides),
       });
       lastLocked = false;
     } else if (step.kind === "check") {
