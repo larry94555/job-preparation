@@ -50,6 +50,7 @@ function SiteFooter() {
         <Link href="/topics">Topics</Link>
         <Link href="/premium">Premium</Link>
         <Link href="/donate">Donate</Link>
+        <Link href="/feedback">Feedback</Link>
         <a href={helpMailto}>Help / Troubleshoot</a>
         <Link href="/privacy">Privacy</Link>
         <Link href="/terms">Terms</Link>

@@ -22,6 +22,7 @@ const PUBLIC_BASES = [
   "/help", // help + /help/signup troubleshooting
   "/login", // sign-in page
   "/donate", // "pay what you can" donations (no sign-in required)
+  "/feedback", // public feedback form (emailed to support; not stored)
   "/premium", // premium preview (marketing)
   "/privacy", // privacy policy
   "/terms", // terms of use

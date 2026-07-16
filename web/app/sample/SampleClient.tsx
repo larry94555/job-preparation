@@ -17,7 +17,8 @@ interface Flow {
  * The free sample runner — a fully client-side walk through the sample flow. It
  * keeps NO server state: material and checks are pre-rendered from the flow, and
  * a check is graded by a stateless server action (answer keys stay server-side).
- * Essay/code/assessment steps arrive as "locked" cards that invite sign-up.
+ * Gated essay/code/assessment steps are omitted; a single "registered users only"
+ * gate is shown once at the very end (never inline).
  *
  * Navigation: Back / Skip on every step, and — on a wrong check — a "Review the
  * material" jump to the step that taught it, plus a plain-English explanation.
@@ -68,7 +69,7 @@ export default function SampleClient({ flow }: { flow: Flow }) {
 
       <div className="panel" style={{ marginTop: 18 }}>
         {done ? (
-          <DoneView onBack={back} />
+          <EndGate onBack={back} />
         ) : step?.kind === "material" ? (
           <MaterialStep step={step} onNext={next} onBack={canBack ? back : undefined} />
         ) : step?.kind === "check" ? (
@@ -81,8 +82,6 @@ export default function SampleClient({ flow }: { flow: Flow }) {
             onBack={canBack ? back : undefined}
             onReview={reviewMaterial}
           />
-        ) : step?.kind === "locked" ? (
-          <LockedStep onNext={next} onBack={canBack ? back : undefined} />
         ) : null}
       </div>
     </main>
@@ -224,50 +223,27 @@ function CheckStep({
   );
 }
 
-function LockedStep({ onNext, onBack }: { onNext: () => void; onBack?: () => void }) {
+// The single end-of-sample gate. Shown ONCE, only after the last material/check —
+// never inline. Graded essays, coding, section assessments, and progress tracking
+// are for registered users. Choices: Back, Provide feedback, Sign up.
+function EndGate({ onBack }: { onBack: () => void }) {
   return (
     <div>
-      <div className="eyebrow">🔒 Members only</div>
-      <div className="prompt" style={{ marginBottom: 8 }}>
-        Sign up to unlock graded essays &amp; coding exercises
-      </div>
+      <div className="eyebrow">🔒 Registered users only</div>
+      <h2 style={{ marginTop: 4 }}>That&apos;s the free sample</h2>
       <p className="muted">
-        This step is a graded exercise — an essay, a coding task, or a section assessment. A
-        free account unlocks these, along with LLM feedback on your answers and progress
-        tracking across every topic.
+        You&apos;ve reached the end of the sample. Graded essays and coding exercises, section
+        assessments, LLM feedback on your answers, and mastery tracking across every topic are
+        for registered users — and creating an account is free.
       </p>
       <NavRow onBack={onBack}>
+        <Link className="btn ghost" href="/feedback">
+          Provide feedback
+        </Link>
         <Link className="btn" href="/signup">
           Sign up free →
         </Link>
-        <button className="ghost" onClick={onNext}>
-          Skip for now →
-        </button>
       </NavRow>
-    </div>
-  );
-}
-
-function DoneView({ onBack }: { onBack: () => void }) {
-  return (
-    <div style={{ textAlign: "center" }}>
-      <div style={{ fontSize: 40 }}>🎉</div>
-      <h2>That&apos;s the sample</h2>
-      <p className="muted">
-        Create a free account to run every lesson end-to-end — graded essays and coding
-        exercises, section assessments, and mastery tracking across all topics.
-      </p>
-      <div className="row" style={{ justifyContent: "center" }}>
-        <button className="ghost" onClick={onBack}>
-          ← Back
-        </button>
-        <Link className="btn" href="/signup">
-          Sign up free →
-        </Link>
-        <Link className="btn ghost" href="/topics">
-          Browse all topics
-        </Link>
-      </div>
     </div>
   );
 }
