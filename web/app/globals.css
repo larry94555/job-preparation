@@ -273,6 +273,17 @@ button.ghost,
   border-color: var(--accent);
   font-weight: 600;
 }
+/* Quick Assessment is the emphasized primary action — yellow. */
+.alink.quick {
+  background: #facc15;
+  border-color: #eab308;
+  color: #422006;
+  font-weight: 600;
+}
+.alink.quick:hover {
+  background: #eab308;
+  border-color: #ca8a04;
+}
 /* Frame-color swatches for the assessment legend (override the base .sw border). */
 .sw.frame-none {
   border: 2px solid var(--line);
