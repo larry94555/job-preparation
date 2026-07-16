@@ -118,11 +118,11 @@ function LinkRow({
 }) {
   return (
     <span className="alinks">
+      <button type="button" className="alink quick" onClick={() => showTip("Quick Assessment")}>
+        Quick Assessment
+      </button>
       <button type="button" className="alink" onClick={() => showTip("Review")}>
         Review
-      </button>
-      <button type="button" className="alink" onClick={() => showTip("Quick Assessment")}>
-        Quick Assessment
       </button>
       <button type="button" className="alink" onClick={() => showTip("Full Assessment")}>
         Full Assessment
