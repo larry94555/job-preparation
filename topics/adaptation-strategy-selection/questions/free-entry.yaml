@@ -1,36 +1,48 @@
-# Free entry (short answer)
+# Conceptual multiple-choice (converted from free-entry short-answer)
 - id: fe-behavior-method
-  type: text_input
+  type: multiple_choice
   tags: [approaches]
   difficulty: 2
-  prompt: "Which adaptation method durably changes behavior/format by updating weights? (one word)"
-  answer:
-    regex: '^(fine-?tuning|finetuning|sft|lora|peft)$'
-    normalize: true
+  prompt: "You made a model follow a house style with a long system prompt, but the instructions get dropped as conversations grow. Why does fine-tuning solve this where prompting struggles?"
+  options:
+    - { text: "Fine-tuning bakes the behavior into the weights, so it persists regardless of prompt length or context pressure", correct: true }
+    - { text: "Fine-tuning gives the model a larger context window to hold the instructions" }
+    - { text: "Fine-tuning retrieves the style guide from an index on every call" }
+    - { text: "Fine-tuning lowers latency, which prevents instruction drift" }
+  explanation: "Durable behavior lives in the weights, not the prompt; fine-tuning updates weights so the style holds even when prompt instructions get crowded out."
 
 - id: fe-fresh-method
-  type: text_input
+  type: multiple_choice
   tags: [decision]
   difficulty: 2
-  prompt: "For knowledge that must stay current, which method updates context instead of retraining? (one term)"
-  answer:
-    regex: '^(rag|retrieval|retrieval-augmented generation|retrieval augmented generation)$'
-    normalize: true
+  prompt: "Your assistant must reflect policy documents revised every week. What is the operational advantage of RAG over fine-tuning here?"
+  options:
+    - { text: "You update the retrieval index when documents change, with no retraining or redeploy of the model", correct: true }
+    - { text: "The model memorizes each revision permanently in its weights" }
+    - { text: "Retrieval removes the need to store the documents anywhere" }
+    - { text: "Each revision automatically shrinks the model for cheaper serving" }
+  explanation: "RAG keeps knowledge current by updating the index, not the weights, so weekly revisions never require a training run or redeploy."
 
 - id: fe-cheap-deploy-method
-  type: text_input
+  type: multiple_choice
   tags: [decision]
   difficulty: 2
-  prompt: "Which method produces a smaller, cheaper model to cut deployment cost/latency? (one word)"
-  answer:
-    regex: '^(distillation|distilling|distill)$'
-    normalize: true
+  prompt: "Inference cost and latency at scale are your binding constraint, and the model's behavior is already validated. Which approach most directly addresses this, and at what cost?"
+  options:
+    - { text: "Distillation — train a smaller student to reproduce the behavior, trading upfront training effort for cheaper, faster serving", correct: true }
+    - { text: "RAG — add retrieval so each query becomes cheaper and faster" }
+    - { text: "A longer system prompt — more instructions reduce per-token cost" }
+    - { text: "Fine-tuning the same large model — it lowers the parameter count" }
+  explanation: "Distillation yields a smaller/cheaper student that keeps the validated behavior; RAG and longer prompts add per-query cost, and fine-tuning the same model doesn't shrink it."
 
 - id: fe-wrong-tool-facts
-  type: text_input
+  type: multiple_choice
   tags: [antipatterns]
   difficulty: 3
-  prompt: "Name the adaptation method that is the WRONG tool for constantly-changing facts. (one word)"
-  answer:
-    regex: '^(fine-?tuning|finetuning|distillation)$'
-    normalize: true
+  prompt: "A model was fine-tuned last month on the company's product catalog. Several products have since been discontinued. What behavior should you expect?"
+  options:
+    - { text: "It will confidently describe discontinued products as available, because the outdated facts are frozen in its weights", correct: true }
+    - { text: "It will automatically omit the discontinued products once they change" }
+    - { text: "It will refuse to answer any catalog question until retrained" }
+    - { text: "It will fetch the current catalog at query time on its own" }
+  explanation: "Baked-in facts don't update themselves, so the model serves stale answers confidently until retrained — which is why volatile facts belong in retrieval, not weights."

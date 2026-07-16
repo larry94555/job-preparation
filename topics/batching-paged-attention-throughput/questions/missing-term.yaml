@@ -1,45 +1,60 @@
-# Missing term (cloze)
+# Conceptual multiple-choice (converted from cloze fill-in-the-blank)
 - id: cloze-continuous
-  type: text_input
+  type: multiple_choice
   tags: [batching]
   difficulty: 2
-  prompt: "The batching strategy that swaps finished requests out and queued ones in at every decoding step, keeping the batch full, is called ____ batching."
-  answer:
-    regex: '^continuous$'
-    normalize: true
+  prompt: "When request output lengths vary widely, what is the main effect of continuous batching on the GPU?"
+  options:
+    - { text: "Slots freed by finished requests are refilled every decoding step, so the GPU stays near full occupancy instead of idling until the longest request completes", correct: true }
+    - { text: "It reduces the model's parameter count so each forward pass is cheaper" }
+    - { text: "It guarantees every request finishes in the same number of steps" }
+    - { text: "It runs prefill and decode on separate GPUs to double throughput" }
+  explanation: "Continuous batching refills vacated slots at token granularity, keeping occupancy high rather than letting short requests' slots sit idle until the slowest request in a fixed batch finishes."
 
 - id: cloze-head-of-line
-  type: text_input
+  type: multiple_choice
   tags: [scheduling]
   difficulty: 3
-  prompt: "When a short request must wait for a long one sharing its fixed batch to finish, that stall is called ____-of-line blocking."
-  answer:
-    regex: '^head$'
-    normalize: true
+  prompt: "A static batch holds one 2000-token request alongside nine 20-token requests. What is the consequence?"
+  options:
+    - { text: "The nine short requests finish early but keep occupying their slots, idle, until the 2000-token request completes", correct: true }
+    - { text: "The nine short requests are evicted and resubmitted automatically" }
+    - { text: "The long request is split across the other nine slots to balance load" }
+    - { text: "All ten requests are forced to stop at 20 tokens" }
+  explanation: "With fixed batch membership, the long request holds the whole batch (and the queue behind it), so the short requests waste GPU capacity waiting — the essence of head-of-line blocking."
 
 - id: cloze-iteration
-  type: text_input
+  type: multiple_choice
   tags: [scheduling]
   difficulty: 3
-  prompt: "Orca re-decides the running set once per forward pass; this is called ____-level scheduling."
-  answer:
-    regex: '^iteration$'
-    normalize: true
+  prompt: "Why is iteration-level scheduling a prerequisite for continuous batching?"
+  options:
+    - { text: "Batch membership can only change mid-generation if the scheduler re-decides the running set on every forward pass", correct: true }
+    - { text: "It lets the model be quantized to fewer bits during decoding" }
+    - { text: "It forces all requests to share one contiguous KV buffer" }
+    - { text: "It schedules once at admission, which is what continuous batching needs" }
+  explanation: "Admitting and evicting requests at token granularity requires a scheduling decision every iteration; without per-iteration re-evaluation the batch would be locked for its lifetime."
 
 - id: cloze-paged
-  type: text_input
+  type: multiple_choice
   tags: [paged-attention]
   difficulty: 2
-  prompt: "vLLM's technique that stores the KV cache in fixed-size non-contiguous blocks, like OS virtual memory, is called ____ attention."
-  answer:
-    regex: '^paged$'
-    normalize: true
+  prompt: "With a sequence's KV cache spread across non-contiguous blocks, how does PagedAttention find the right entries during attention?"
+  options:
+    - { text: "A per-sequence block table maps logical token positions to physical block ids, like an OS page table", correct: true }
+    - { text: "It scans all GPU memory each step to locate the sequence's blocks" }
+    - { text: "It recomputes the KV cache from the prompt on every token" }
+    - { text: "It requires the blocks to be physically adjacent after all" }
+  explanation: "Each sequence carries a block table translating logical positions to physical block addresses, so the KV cache need not be contiguous — mirroring virtual-memory paging."
 
 - id: cloze-goodput
-  type: text_input
+  type: multiple_choice
   tags: [throughput]
   difficulty: 3
-  prompt: "The throughput counting only requests completed within their latency SLO is called ____."
-  answer:
-    regex: '^goodput$'
-    normalize: true
+  prompt: "You raise batch size; tokens/sec climbs, but p95 latency now exceeds the SLO for 30% of requests. What happens to goodput?"
+  options:
+    - { text: "Goodput falls, because requests that miss their latency SLO do not count toward it even though raw throughput rose", correct: true }
+    - { text: "Goodput rises in lockstep with tokens/sec since more work completed" }
+    - { text: "Goodput is unaffected because it ignores latency entirely" }
+    - { text: "Goodput becomes negative once any request misses the SLO" }
+  explanation: "Goodput counts only SLO-meeting completions, so pushing batch size past the point where latency violates the SLO raises raw throughput while lowering goodput."

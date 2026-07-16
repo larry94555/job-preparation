@@ -1,54 +1,62 @@
-# Missing term (cloze)
+# Conceptual multiple-choice on core serving terms
+# (converted from cloze fill-in-the-blank recall; ids/tags preserved).
+# cloze-pareto was promoted to essay-pareto-frontier (questions/essay.yaml).
 - id: cloze-slo
-  type: text_input
+  type: multiple_choice
   tags: [slos]
   difficulty: 1
-  prompt: "The measurable target that anchors a serving design — e.g. 'p99 TTFT under 300 ms' — is a service-level ____ (three-letter acronym)."
-  answer:
-    regex: '^slo$'
-    normalize: true
+  prompt: "What distinguishes a service-level objective (SLO) from just another metric on a dashboard?"
+  options:
+    - { text: "An SLO is a committed target with a threshold and consequences (e.g. 'p99 TTFT < 300 ms') that a config must meet, whereas a bare metric only reports what happened without defining pass/fail", correct: true }
+    - { text: "An SLO is measured in milliseconds while a metric is always a percentage" }
+    - { text: "An SLO applies only to cost, while metrics apply only to latency" }
+    - { text: "There is no difference; 'SLO' is just a synonym for any latency measurement" }
+  explanation: "An SLO turns a metric into a design constraint with a target and a pass/fail line — that is what lets it anchor the design and act as a gate."
 
 - id: cloze-batching
-  type: text_input
+  type: multiple_choice
   tags: [levers]
   difficulty: 2
-  prompt: "The lever that amortizes GPU work across many requests to raise throughput, at the cost of higher per-request latency, is ____."
-  answer:
-    regex: '^batching$'
-    normalize: true
+  prompt: "Why does serving many requests together in one batch lower the cost per token?"
+  options:
+    - { text: "It amortizes the fixed cost of loading weights and launching GPU kernels across many requests at once, raising utilization so each token carries a smaller share of that fixed work", correct: true }
+    - { text: "It reduces the number of tokens each request must generate" }
+    - { text: "It switches the model to a cheaper quantized precision automatically" }
+    - { text: "It lowers cost by skipping the slowest requests entirely" }
+  explanation: "Batching raises hardware utilization by amortizing fixed per-step GPU work over more requests; the price is that requests wait for the batch, raising latency."
 
 - id: cloze-quantization
-  type: text_input
+  type: multiple_choice
   tags: [levers]
   difficulty: 2
-  prompt: "Reducing the numerical precision of weights (FP16 → INT8/INT4) to cut cost and memory, risking some quality, is called ____."
-  answer:
-    regex: '^quantization$'
-    normalize: true
+  prompt: "Quantizing weights from FP16 to INT8/INT4 often speeds up inference as well as cutting memory. Why?"
+  options:
+    - { text: "Lower-precision weights are fewer bytes to move, and decode is largely memory-bandwidth-bound, so reading smaller weights each step eases the bandwidth bottleneck and can raise speed", correct: true }
+    - { text: "Integer arithmetic always produces shorter outputs, so fewer tokens are generated" }
+    - { text: "Quantization removes layers from the model, making it structurally smaller" }
+    - { text: "It raises numerical precision, which lets the GPU skip error-correction steps" }
+  explanation: "Memory-bound decode benefits when weights shrink and less bandwidth is spent per step; the trade is the quality risk from reduced precision."
 
 - id: cloze-budget
-  type: text_input
+  type: multiple_choice
   tags: [slos]
   difficulty: 3
-  prompt: "Splitting an end-to-end latency SLO into additive per-stage targets (network, queue, prefill, decode) is called budget ____."
-  answer:
-    regex: '^decomposition$'
-    normalize: true
-
-- id: cloze-pareto
-  type: text_input
-  tags: [tradeoffs]
-  difficulty: 3
-  prompt: "The set of configurations where you cannot improve one axis without worsening another is called the ____ frontier."
-  answer:
-    regex: '^pareto$'
-    normalize: true
+  prompt: "You split a 900 ms p99 latency SLO into additive per-stage sub-budgets (network, queue, prefill, decode). Beyond bookkeeping, what does this give you when the SLO is breached?"
+  options:
+    - { text: "It localizes the problem — you compare each stage's measured p99 against its sub-budget to find the one stage that blew its target, then apply the lever that fixes that stage instead of guessing", correct: true }
+    - { text: "It guarantees the end-to-end SLO can never be violated once the sub-budgets are written down" }
+    - { text: "It lets each stage independently use the full 900 ms, since the budgets are not additive" }
+    - { text: "It converts the latency SLO into a cost SLO automatically" }
+  explanation: "Additive sub-budgets that sum to the SLO turn a breach into a diagnosis: find the stage over its budget and target it, rather than tuning the whole stack blindly."
 
 - id: cloze-tail
-  type: text_input
+  type: multiple_choice
   tags: [tradeoffs]
   difficulty: 3
-  prompt: "Latency measured at a high percentile like p99 — the slow requests that batching can worsen — is called ____ latency."
-  answer:
-    regex: '^tail$'
-    normalize: true
+  prompt: "Latency SLOs are usually written on a high percentile like p99 rather than on the mean. Why does the tail matter more?"
+  options:
+    - { text: "The mean can look healthy while a meaningful fraction of requests are far slower; those tail requests are real user-visible failures, and levers like batching worsen the tail more than the average, so a mean-based target would miss the regression", correct: true }
+    - { text: "p99 is simply easier to compute than the mean on GPU hardware" }
+    - { text: "The tail is always identical to the mean, so the choice is cosmetic" }
+    - { text: "A high percentile ignores slow requests, which is why it is preferred" }
+  explanation: "The mean masks the slow requests; the tail (p99) captures the worst user experience and is exactly what serving levers most threaten, so SLOs anchor on it."

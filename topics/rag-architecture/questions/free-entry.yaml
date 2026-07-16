@@ -1,36 +1,48 @@
-# Free entry (short answer)
+# Conceptual multiple choice (converted from short free-entry answers)
 - id: fe-when-rag
-  type: text_input
+  type: multiple_choice
   tags: [pipeline]
   difficulty: 2
-  prompt: "Name one situation where RAG is a better fit than fine-tuning. (a few words)"
-  answer:
-    regex: '^(private data|current|fresh|up-?to-?date|changing (data|corpus)|new data|proprietary data|citations?|source attribution|frequently updated)$'
-    normalize: true
+  prompt: "Your knowledge base gains new documents every day. Why does RAG handle that better than fine-tuning on the same documents?"
+  options:
+    - { text: "Retrieval reads the current index at query time, so new documents are usable immediately with no retraining", correct: true }
+    - { text: "Fine-tuning automatically re-indexes new documents as they arrive" }
+    - { text: "RAG silently retrains the base model every night" }
+    - { text: "Embedding a document permanently writes it into the model's weights" }
+  explanation: "RAG decouples knowledge from the weights: adding a document just updates the index, so answers stay fresh, whereas fine-tuning would require a new training run for every batch of changes."
 
 - id: fe-chunk-structure
-  type: text_input
+  type: multiple_choice
   tags: [chunking]
   difficulty: 3
-  prompt: "Instead of fixed-size character splitting, chunk on document ____ (one word) like headings and paragraphs."
-  answer:
-    regex: '^(structure|boundaries|headings|sections|semantics|semantic)$'
-    normalize: true
+  prompt: "Why does splitting a document on its structure (headings, paragraphs) tend to retrieve better than fixed character-count splitting?"
+  options:
+    - { text: "Each chunk is a coherent unit about one topic, so its embedding cleanly represents that single idea", correct: true }
+    - { text: "It always produces more chunks, which raises recall" }
+    - { text: "It removes any need to add overlap between chunks" }
+    - { text: "It forces every chunk to be exactly the same length" }
+  explanation: "A structure-aligned chunk holds one coherent thought, so its single embedding is a sharp signal; fixed-size cuts mix half-topics together and blur the vector."
 
 - id: fe-sparse-name
-  type: text_input
+  type: multiple_choice
   tags: [retrieval]
   difficulty: 2
-  prompt: "Name a sparse / lexical retrieval method (one term)."
-  answer:
-    regex: '^(bm25|tf-?idf|keyword( search)?|lexical|okapi bm25)$'
-    normalize: true
+  prompt: "What makes a retrieval method like BM25 or TF-IDF 'sparse'?"
+  options:
+    - { text: "It represents text as a vector with one dimension per vocabulary term, almost all of which are zero for a given document", correct: true }
+    - { text: "It keeps only a small number of documents in the index" }
+    - { text: "It uses a smaller embedding model than dense retrieval" }
+    - { text: "It returns fewer results per query than dense retrieval" }
+  explanation: "'Sparse' describes the representation: a bag-of-terms vector over the whole vocabulary where a document lights up only its few present terms — the opposite of a small dense embedding where every dimension is active."
 
 - id: fe-rerank-cost
-  type: text_input
+  type: multiple_choice
   tags: [reranking]
   difficulty: 3
-  prompt: "What is the main cost of adding a cross-encoder reranker? (one word)"
-  answer:
-    regex: '^(latency|slow(er|ness)?|cost|compute|time)$'
-    normalize: true
+  prompt: "Why is a cross-encoder reranker so much more expensive at query time than the first-stage retriever?"
+  options:
+    - { text: "It runs a full transformer forward pass for every query-document pair, instead of a single cheap vector comparison", correct: true }
+    - { text: "It retrains the model from scratch on each new query" }
+    - { text: "It must load the entire corpus into memory for every query" }
+    - { text: "It re-embeds the whole index each time a query arrives" }
+  explanation: "First-stage retrieval compares precomputed vectors with a cheap dot product; the reranker feeds each candidate plus the query through a full model, so cost scales with the number of candidates — which is why you rerank only a small set."

@@ -9,8 +9,8 @@ segments:
   - present: bounding-and-controlling-the-loop
   - check: mc-plan-execute
   - check: cloze-plan
-  - check: cloze-idempotency
   - check: mc-multiagent-when
   - check: fe-noprogress
+  - apply: essay-idempotency
   - apply: essay-verify-why
   - apply: essay-design-harness

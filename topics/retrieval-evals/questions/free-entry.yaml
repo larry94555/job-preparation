@@ -1,36 +1,49 @@
-# Free entry (short answer)
+# Conceptual multiple-choice on metric selection, recall levers, grounding, and attribution.
+# (Formerly short-answer text_input; converted to understanding-focused MC.)
 - id: fe-metric-first-hit
-  type: text_input
+  type: multiple_choice
   tags: [metrics]
   difficulty: 2
-  prompt: "Which retrieval metric rewards putting the FIRST relevant result as high as possible? (abbreviation or name)"
-  answer:
-    regex: '^(mrr|mean reciprocal rank|reciprocal rank)$'
-    normalize: true
+  prompt: "Your users only ever read the single top result. Why is recall@k a poor metric for judging their experience?"
+  options:
+    - { text: "recall@k ignores position within the top-k, so a relevant doc at rank 1 and one at rank k score the same", correct: true }
+    - { text: "recall@k penalizes returning too many results, which is fine for these users" }
+    - { text: "recall@k cannot be computed unless k equals 1" }
+    - { text: "recall@k only measures irrelevant results, not relevant ones" }
+  explanation: "recall@k is position-blind: it only asks whether the relevant doc is in the window. When only the first result matters, an order-sensitive metric like MRR reflects the experience better."
 
 - id: fe-low-recall-fix
-  type: text_input
+  type: multiple_choice
   tags: [metrics]
   difficulty: 3
-  prompt: "recall@k is too low: the right passage rarely reaches the top-k. Name one lever that raises recall. (a few words)"
-  answer:
-    regex: '^(increase k|bigger k|larger k|raise k|hybrid( search)?|add sparse|better embeddings?|rerank(ing|er)?|better chunking|smaller chunks|query expansion|more candidates)$'
-    normalize: true
+  prompt: "recall@k is too low — the right passage rarely reaches the top-k. Which change is MOST likely to raise recall@k?"
+  options:
+    - { text: "Increase k or add hybrid (sparse + dense) retrieval so more true relevant docs enter the window", correct: true }
+    - { text: "Lower k so fewer results compete for the top slots" }
+    - { text: "Add a stricter reranker that drops borderline results from the top-k" }
+    - { text: "Shorten the generated answer so it cites fewer passages" }
+  explanation: "Recall rises when more of the relevant set lands in the top-k: a bigger k, better embeddings, hybrid search, or better chunking all help. Lowering k or dropping results does the opposite."
 
 - id: fe-grounding-term
-  type: text_input
+  type: multiple_choice
   tags: [grounding]
   difficulty: 2
-  prompt: "What is the one-word property of an answer that only asserts claims the retrieved context supports? (grounded / ____)"
-  answer:
-    regex: '^(faithful|faithfulness|grounded|groundedness)$'
-    normalize: true
+  prompt: "An answer is fully grounded in the retrieved context, yet it is still factually wrong. How is that possible?"
+  options:
+    - { text: "Grounding only checks that claims are supported by the context; if the retrieved context itself is wrong, a faithful answer inherits its errors", correct: true }
+    - { text: "It is not possible — a grounded answer is always factually correct" }
+    - { text: "The answer must have exceeded the top-k window" }
+    - { text: "Grounding measures precision@k, which was low" }
+  explanation: "Groundedness/faithfulness measures support-by-context, not truth. A retrieval failure that surfaces a wrong passage can produce an answer that is faithful to bad evidence — hence isolating retrieval from grounding matters."
 
 - id: fe-attribution-problem
-  type: text_input
+  type: multiple_choice
   tags: [attribution]
   difficulty: 2
-  prompt: "What do you call a citation whose source does not actually support (or does not exist for) the claim? (one or two words)"
-  answer:
-    regex: '^(fabricated( citation)?|hallucinated( citation)?|fake( citation)?|false citation|unsupported citation)$'
-    normalize: true
+  prompt: "Why can an answer be well-grounded overall yet still contain a fabricated citation?"
+  options:
+    - { text: "Grounding asks whether claims are supported; attribution additionally requires the SPECIFIC cited source to be the correct support, which can be wrong or nonexistent", correct: true }
+    - { text: "A fabricated citation always lowers recall@k, so grounding is unaffected" }
+    - { text: "Grounding and attribution are the same check, so this cannot happen" }
+    - { text: "Fabricated citations only occur when precision@k is 1.0" }
+  explanation: "Attribution is a stricter form of grounding: a claim can be supported somewhere in context (grounded) while the cited span points to the wrong or a nonexistent source (fabricated citation)."

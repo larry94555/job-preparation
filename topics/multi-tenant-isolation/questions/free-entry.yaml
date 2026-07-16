@@ -1,36 +1,36 @@
-# Free entry (short answer)
+# Conceptual multiple-choice: cache keys, retrieval defense, and contamination surfaces
 - id: fe-cache-key-field
-  type: text_input
+  type: multiple_choice
   tags: [cache-safety]
   difficulty: 2
-  prompt: "Name the field you must add to a shared cache key to make it tenant-safe. (a word or two)"
-  answer:
-    regex: '^(tenant( ?id)?|tenant scope|user( ?id)?|tenant/user|org( ?id)?|account( ?id)?)$'
-    normalize: true
+  prompt: "A shared response cache is keyed only on a hash of the prompt text. Two different tenants submit the identical prompt. What happens?"
+  options:
+    - { text: "The second tenant is served the first tenant's cached response — a cross-tenant data leak", correct: true }
+    - { text: "The cache refuses the second request because the key already exists" }
+    - { text: "Each tenant transparently gets its own separate entry anyway" }
+    - { text: "The model regenerates a fresh answer, ignoring the cache" }
+  explanation: "A prompt-only key is tenant-blind, so identical inputs from different tenants collide on the same entry and one tenant reads another's answer. Adding the tenant/user scope to the key prevents the collision."
 
 - id: fe-retrieval-defense
-  type: text_input
+  type: multiple_choice
   tags: [retrieval-scoping]
   difficulty: 3
-  prompt: "Name one mechanism that scopes retrieval to a single tenant in a shared index. (a few words)"
-  answer:
-    regex: '^(authorization filter|authz filter|metadata filter|tenant filter|row-?level security|rls|per-?tenant namespace|namespace|partition|filtered search|tenant scoping)$'
-    normalize: true
+  prompt: "A shared vector index applies no tenant filter and simply returns the top-k chunks by similarity. What is the risk to the querying tenant?"
+  options:
+    - { text: "The most-similar chunks may belong to other tenants, pulling their documents into the caller's context", correct: true }
+    - { text: "The query will always return zero results because tenants are mixed" }
+    - { text: "Only the caller's own chunks can ever match, so nothing leaks" }
+    - { text: "Latency rises but the results are still correctly scoped" }
+  explanation: "Similarity ranking ignores ownership, so another tenant's on-topic chunks can appear in the top-k and enter the prompt. Isolation requires an authorization/metadata filter at query time or a per-tenant namespace — not similarity alone."
 
 - id: fe-contamination-vector
-  type: text_input
+  type: multiple_choice
   tags: [contamination]
   difficulty: 3
-  prompt: "Name one surface where cross-user context can contaminate a request. (one term)"
-  answer:
-    regex: '^(session|memory|conversation( history)?|history|cache|logs?|system prompt|context)$'
-    normalize: true
-
-- id: fe-isolation-tradeoff
-  type: text_input
-  tags: [isolation]
-  difficulty: 3
-  prompt: "Sharing resources across tenants buys efficiency; what does per-tenant partitioning buy instead? (one word)"
-  answer:
-    regex: '^(isolation|safety|security)$'
-    normalize: true
+  prompt: "Which practice most directly prevents one user's context from contaminating the next user's session?"
+  options:
+    - { text: "Scope and reset session/memory state per user so nothing carries over between users", correct: true }
+    - { text: "Increase the model's context window so old messages fit" }
+    - { text: "Lower the sampling temperature to make outputs deterministic" }
+    - { text: "Cache more aggressively so repeated requests are faster" }
+  explanation: "Contamination comes from reused, unscoped state (session, memory, buffers). Isolating and resetting that state per user is the fix; window size, temperature, and caching do not stop context from bleeding across users."

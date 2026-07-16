@@ -1,54 +1,72 @@
-# Missing term (cloze)
+# Conceptual multiple choice (converted from cloze fill-in-the-blank)
 - id: cloze-portfolio
-  type: text_input
+  type: multiple_choice
   tags: [portfolio]
   difficulty: 1
-  prompt: "Proof of your work — an agent a stranger can open and run — is a ____."
-  answer:
-    regex: '^portfolio$'
-    normalize: true
+  prompt: "What turns a set of projects into a hiring portfolio for an agentic engineer?"
+  options:
+    - { text: "They are working agents a stranger can open and run — verifiable proof, not a described list", correct: true }
+    - { text: "They are listed by name with the frameworks each one used" }
+    - { text: "They sit in a private repo you can screen-share on request" }
+    - { text: "They are summarised as skills bullets on a resume" }
+  explanation: "A portfolio here is proof someone can verify: real agents that open and run. A list of project names a reviewer cannot execute is a claim, not a portfolio."
 
 - id: cloze-readme
-  type: text_input
+  type: multiple_choice
   tags: [portfolio]
   difficulty: 1
-  prompt: "The document that explains what the agent does and one architecture decision is the ____."
-  answer:
-    regex: '^readme$'
-    normalize: true
+  prompt: "Two agent repos both run correctly, but only one has a README. Why does that one send a stronger hiring signal?"
+  options:
+    - { text: "Its judgment is legible — the reader can see the task, the architecture, and a defended decision", correct: true }
+    - { text: "A README makes the code execute faster" }
+    - { text: "Repos without a README will not clone" }
+    - { text: "The README guarantees the agent has no bugs" }
+  explanation: "Both running is table stakes. The README is where the reader sees what you built and why, so the repo with one lets your engineering judgment show."
 
 - id: cloze-demo
-  type: text_input
+  type: multiple_choice
   tags: [ship]
   difficulty: 1
-  prompt: "A short clip or runnable script that shows the agent working is a ____."
-  answer:
-    regex: '^demo$'
-    normalize: true
+  prompt: "A demo can be a screen-recording or a runnable script. What do both forms share that makes them a demo?"
+  options:
+    - { text: "Both show the agent actually running on a real input, rather than describing what it would do", correct: true }
+    - { text: "Both remove the need for the agent to be published" }
+    - { text: "Both report the exact pass rate the evals would" }
+    - { text: "Both explain the architecture decisions in prose" }
+  explanation: "Whatever the format, a demo is a demonstration of behaviour: the agent working on a real input, which is proof a reader can see rather than take on faith."
 
 - id: cloze-ship
-  type: text_input
+  type: multiple_choice
   tags: [proof]
   difficulty: 1
-  prompt: "To get hired, don't just list skills — ____ a real agent in public."
-  answer:
-    regex: '^ship$'
-    normalize: true
+  prompt: "You have six months to stand out as an agentic engineer. Why is building and publishing a real agent higher-leverage than collecting more certificates?"
+  options:
+    - { text: "A shipped agent is verifiable proof of what you can do; a certificate is a claim a reviewer must take on trust", correct: true }
+    - { text: "Certificates expire, but they are otherwise the stronger signal" }
+    - { text: "Employers are legally required to prefer shipped work" }
+    - { text: "A certificate cannot be listed on a resume" }
+  explanation: "Certificates say a course was completed; a shipped agent shows the ability directly and can be opened and run. Proof-of-work travels further than accumulated claims."
 
 - id: cloze-thread
-  type: text_input
+  type: multiple_choice
   tags: [communicate]
   difficulty: 2
-  prompt: "A short public write-up of your build, posted so anyone can read it, is a ____."
-  answer:
-    regex: '^thread$'
-    normalize: true
+  prompt: "A build-in-public thread and the repo README carry much the same content. What does the thread change?"
+  options:
+    - { text: "The form — it tells the build as a linkable narrative a reviewer can absorb quickly, not reference docs", correct: true }
+    - { text: "The audience — it is written only for people who already have the code" }
+    - { text: "The proof — it replaces the repo so the code never has to ship" }
+    - { text: "The facts — it exaggerates results to gain reach" }
+  explanation: "The thread re-tells the same build as a short story anyone can follow from a link. It is the README's content in narrative form, optimised for a reader to grasp fast."
 
 - id: cloze-proof
-  type: text_input
+  type: multiple_choice
   tags: [proof]
   difficulty: 1
-  prompt: "A working agent is falsifiable ____ that beats a buzzword on a resume."
-  answer:
-    regex: '^proof$'
-    normalize: true
+  prompt: "A resume says \"expert at building agents\" but links nothing. Why does that carry little weight with a technical reviewer?"
+  options:
+    - { text: "It is an unverifiable claim — there is nothing to open or run, so the reviewer would have to take it on faith", correct: true }
+    - { text: "Reviewers never read the skills section of a resume" }
+    - { text: "The wording is too short to be taken seriously" }
+    - { text: "It names agents, which reviewers consider a red flag" }
+  explanation: "A claim with no link gives the reviewer nothing to check. Proof they can run beats a description they must simply believe."

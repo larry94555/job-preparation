@@ -1,36 +1,48 @@
-# Free entry (short answer)
+# Conceptual multiple-choice (converted from short-answer): sizing, memory, paging, eviction
 - id: fe-kv-scales-with
-  type: text_input
+  type: multiple_choice
   tags: [sizing]
   difficulty: 2
-  prompt: "Holding the model fixed, KV cache size for a request grows with what property of the request? (one term)"
-  answer:
-    regex: '^(sequence length|seq(uence)? len(gth)?|context length|number of tokens|token count|tokens|length)$'
-    normalize: true
+  prompt: "A multi-turn chat session keeps using more KV cache memory as the conversation goes on, even though the model never changes. Why?"
+  options:
+    - { text: "Each new token appends its key/value to the cache, so the growing context length means proportionally more KV memory", correct: true }
+    - { text: "The model reloads a larger copy of its weights for each new turn" }
+    - { text: "KV memory is fixed per model, so the increase must be a memory leak" }
+    - { text: "Longer conversations switch the model to a higher-precision dtype automatically" }
+  explanation: "KV bytes are proportional to the number of cached tokens; as context grows turn by turn, KV grows linearly with it."
 
 - id: fe-memory-consumers
-  type: text_input
+  type: multiple_choice
   tags: [memory]
   difficulty: 3
-  prompt: "Besides the KV cache, name one of the other major consumers of GPU memory during serving. (one term)"
-  answer:
-    regex: '^(weights|model weights|parameters|params|activations|activation memory)$'
-    normalize: true
+  prompt: "During serving, GPU memory holds model weights, activations, and the KV cache. Which of these stays essentially constant no matter how many concurrent requests you run?"
+  options:
+    - { text: "The model weights — loaded once and shared across all requests", correct: true }
+    - { text: "The KV cache, since each request reuses the same blocks" }
+    - { text: "Activations, because they are cached permanently" }
+    - { text: "None of them; all three scale with the number of requests" }
+  explanation: "Weights are a one-time cost shared by every request; KV and activation memory grow with concurrent load, but the weights do not."
 
 - id: fe-paging-analogy
-  type: text_input
+  type: multiple_choice
   tags: [paging]
   difficulty: 3
-  prompt: "Paged attention borrows which classic operating-systems idea for managing memory in fixed blocks? (one or two words)"
-  answer:
-    regex: '^(paging|virtual memory|pages|page table|demand paging)$'
-    normalize: true
+  prompt: "Paged attention is described as borrowing OS virtual memory. Which property of virtual memory makes the analogy apt for KV cache management?"
+  options:
+    - { text: "A table maps a logical, contiguous-looking sequence of blocks onto arbitrary physical blocks, so physical memory need not be contiguous", correct: true }
+    - { text: "It compresses data so each block holds more tokens" }
+    - { text: "It moves all memory to disk to create the illusion of more RAM" }
+    - { text: "It guarantees every sequence one fixed physical address for its lifetime" }
+  explanation: "Like virtual memory, paged attention decouples a sequence's logical block order from physical placement via an indirection table, removing the contiguity requirement."
 
 - id: fe-eviction-strategies
-  type: text_input
+  type: multiple_choice
   tags: [eviction]
   difficulty: 3
-  prompt: "Name one of the two standard ways to reclaim a preempted sequence's KV. (one word)"
-  answer:
-    regex: '^(recompute|recomputation|swap|swapping|offload)$'
-    normalize: true
+  prompt: "To recover a preempted sequence by recomputation, what must the server have retained?"
+  options:
+    - { text: "The sequence's token ids (prompt plus tokens generated so far), so the forward pass can rebuild the K/V", correct: true }
+    - { text: "A compressed copy of the discarded KV cache" }
+    - { text: "The model's gradients from the original forward pass" }
+    - { text: "Nothing — recompute regenerates the tokens themselves from scratch" }
+  explanation: "Recompute drops the KV but rebuilds it by re-running the model over the retained tokens, so the token ids must be kept."

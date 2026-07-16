@@ -36,3 +36,31 @@
     - "Loop control: think→act→observe with step/tool budgets, duplicate-call and no-progress guards, termination."
     - "Verification: run tests / git diff after edits; don't trust, check."
     - "Recovery: turn failures into next actions; idempotent mutations; escalate when stuck."
+
+# Converted from cloze/short-answer: fundamentally conceptual terms are better as
+# open-ended "explain the concept / the standard approach" prompts.
+- id: essay-idempotency
+  type: essay
+  length: short
+  tags: [control]
+  difficulty: 3
+  prompt: "Explain what it means for a tool operation to be idempotent, and why idempotency matters for a harness that retries failed calls."
+  eval_skill: eval-harness-essay
+  reference_points:
+    - "Idempotent = performing the operation more than once has no effect beyond the first time (same resulting state)."
+    - "Retries are only safe when the operation is idempotent; otherwise a retry can double-apply the effect."
+    - "Non-idempotent side effects (charge a card, send an email, append a row) can execute twice on a retry or a duplicate tool call."
+    - "The harness makes mutations safe by designing them to be idempotent or guarding them with an idempotency key / dedupe."
+
+- id: essay-invalid-json
+  type: essay
+  length: short
+  tags: [boundary]
+  difficulty: 3
+  prompt: "What is the standard way for a harness to handle invalid tool-call JSON returned by the model? Walk through the steps."
+  eval_skill: eval-harness-essay
+  reference_points:
+    - "Validate the model's tool call against the tool's schema before acting on it."
+    - "On failure, attempt repair: re-ask the model with the parse/validation error, or programmatically fix obvious issues."
+    - "Bound the number of repair attempts; never pass unvalidated arguments through to the tool."
+    - "If repair keeps failing, stop and surface/escalate rather than executing a malformed call."

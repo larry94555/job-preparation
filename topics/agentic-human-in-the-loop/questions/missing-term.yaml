@@ -1,63 +1,84 @@
-# Missing term (cloze)
+# Conceptual multiple-choice (was cloze fill-in-the-blank)
 - id: cloze-approval
-  type: text_input
+  type: multiple_choice
   tags: [approval]
   difficulty: 1
-  prompt: "A high-risk action does not run until a human gives explicit ____."
-  answer:
-    regex: '^approval$'
-    normalize: true
+  prompt: "An approval gate requires an EXPLICIT human yes before a high-risk action runs. Why not treat the absence of an objection as consent?"
+  options:
+    - { text: "Because silence is not agreement — an irreversible action must wait for a positive decision, so no-response can never be what triggers it", correct: true }
+    - { text: "Because implicit approval is slower to compute than explicit approval" }
+    - { text: "Because the model cannot detect when a human stays silent" }
+    - { text: "Because explicit approvals use less storage in the audit log" }
+  explanation: "Requiring an explicit yes means an irreversible effect only happens when a human affirmatively chooses it. If silence or inaction counted as approval, the gate would leak exactly the actions it exists to hold — the human must positively decide."
 
 - id: cloze-risk
-  type: text_input
+  type: multiple_choice
   tags: [risk]
   difficulty: 1
-  prompt: "You classify each action by its ____ level: low, medium, or high."
-  answer:
-    regex: '^risk$'
-    normalize: true
+  prompt: "What is the point of tagging every action with a risk level (low / medium / high) BEFORE it runs?"
+  options:
+    - { text: "It turns 'should a human approve this?' into a deterministic routing lookup, so gating is consistent instead of a case-by-case guess", correct: true }
+    - { text: "It makes the model more confident about which tool to call" }
+    - { text: "It lets the agent skip the audit log for low-risk actions" }
+    - { text: "It speeds up the tool call by precomputing its arguments" }
+  explanation: "Classifying up front converts the gating question into a lookup: the level decides the route (run directly vs. require approval). That makes oversight predictable and repeatable rather than the model deciding in the moment whether something felt risky."
 
 - id: cloze-audit
-  type: text_input
+  type: multiple_choice
   tags: [audit]
   difficulty: 1
-  prompt: "The append-only record of what the agent did and why is the ____ trail."
-  answer:
-    regex: '^audit$'
-    normalize: true
+  prompt: "Which of the agent's actions belong in the audit trail — only the ones that required human approval, or all of them?"
+  options:
+    - { text: "All of them — reads, recoverable writes, and gated high-risk actions — so the full behavior can be reconstructed, not just the gated subset", correct: true }
+    - { text: "Only high-risk actions, since the rest are harmless and not worth recording" }
+    - { text: "Only actions that were rejected, since approvals need no record" }
+    - { text: "Only the final action, since the earlier steps don't affect the outcome" }
+  explanation: "An audit trail is a reconstruction of what the agent did. If it logs only the gated actions, you can't explain the sequence that led there or catch a low-risk action that misbehaved. Every action goes on the record, with its risk level and decision."
 
 - id: cloze-resume
-  type: text_input
+  type: multiple_choice
   tags: [resume]
   difficulty: 2
-  prompt: "After a human steps in, the agent must ____ from the saved state, not from scratch."
-  answer:
-    regex: '^resume$'
-    normalize: true
+  prompt: "After a human steps in, why must the agent resume from its saved state rather than restart the task from scratch?"
+  options:
+    - { text: "Restarting redoes completed work and loses the context that made the pending action correct, and can re-fire side effects already performed", correct: true }
+    - { text: "Restarting is impossible once a human has been involved" }
+    - { text: "Restarting would require re-training the model on the human's answer" }
+    - { text: "Restarting always violates the audit log's append-only rule" }
+  explanation: "A pause can last minutes or days. Resuming from saved state means the plan, history, and pending decision are intact, so the agent continues mid-task. Starting over throws away work and the context that justified the gated action — and may repeat effects that already ran."
 
 - id: cloze-irreversible
-  type: text_input
+  type: multiple_choice
   tags: [risk]
   difficulty: 2
-  prompt: "The actions that most need a human are the ones you cannot undo — the ____ ones."
-  answer:
-    regex: '^irreversible$'
-    normalize: true
+  prompt: "Why does irreversibility, more than almost any other property, push an action to the top of the risk scale?"
+  options:
+    - { text: "Because if the action is wrong there is no recovery path — the human check is the only safeguard left, so it must happen before the action runs", correct: true }
+    - { text: "Because irreversible actions always cost more money than reversible ones" }
+    - { text: "Because irreversible actions are the only ones that get an audit record" }
+    - { text: "Because reversible actions cannot be classified as risky at all" }
+  explanation: "For a reversible action a mistake can be undone afterward. For an irreversible one there is no 'afterward' fix — the deletion or charge is a permanent fact. That absence of a recovery path is why the human check has to sit in front of it."
 
 - id: cloze-pause
-  type: text_input
+  type: multiple_choice
   tags: [resume]
   difficulty: 2
-  prompt: "The lifecycle is: ____, let a human step in, then resume."
-  answer:
-    regex: '^pause$'
-    normalize: true
+  prompt: "In the pause -> step-in -> resume lifecycle, what is the PAUSE step actually for?"
+  options:
+    - { text: "To hold the high-risk action before it executes, so a human can decide while nothing irreversible has happened yet", correct: true }
+    - { text: "To give the model time to become more confident about its plan" }
+    - { text: "To flush the audit log to disk before continuing" }
+    - { text: "To let the agent retry the action a few times on its own first" }
+  explanation: "The pause opens a decision window at exactly the right moment — after the agent has proposed the action but before the effect occurs. That ordering is the whole value: the human decides while the action is still preventable, not after it has already fired."
 
 - id: cloze-checkpoint
-  type: text_input
+  type: multiple_choice
   tags: [resume]
   difficulty: 3
-  prompt: "A framework interrupt halts the run at a ____, waits for human input, then continues from there. (one word)"
-  answer:
-    regex: '^checkpoint$'
-    normalize: true
+  prompt: "A framework interrupt saves a checkpoint at the pause. Why store that checkpoint durably (e.g. in a database) instead of in a local variable?"
+  options:
+    - { text: "Because the human may take hours or days and the process can crash or restart — an in-memory variable is lost, a durable checkpoint survives", correct: true }
+    - { text: "Because a database is always faster to read than a local variable" }
+    - { text: "Because local variables cannot hold the agent's message history" }
+    - { text: "Because durable storage automatically approves the pending action" }
+  explanation: "Durability is what makes pause-for-human real. If the pause lives only in process memory, any restart or long wait destroys it and the agent forgets it was waiting. A checkpoint in a durable store lets the run be resumed later, on a fresh process, exactly where it stopped."

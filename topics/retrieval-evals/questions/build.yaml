@@ -24,13 +24,16 @@
   explanation: "MRR only cares about where the FIRST relevant result lands: 1 / rank, or 0 if none appear."
 
 - id: fe-zero-relevant-guard
-  type: text_input
+  type: multiple_choice
   tags: [metrics]
   difficulty: 2
-  prompt: "If the relevant set is empty, recall's denominator is zero. In one word, what must the code avoid doing?"
-  answer:
-    regex: '^(divide|dividing|division)$'
-    normalize: true
+  prompt: "A query has an empty relevant set, so recall@k's denominator (total relevant docs) is zero. What must a correct implementation handle to avoid a crash or NaN?"
+  options:
+    - { text: "Division by zero — guard it by returning 0 (or skipping the query) instead of dividing", correct: true }
+    - { text: "Integer overflow from summing too many relevant docs" }
+    - { text: "An unstable sort of the retrieved results" }
+    - { text: "An off-by-one error when slicing the top-k" }
+  explanation: "With no relevant docs, recall = 0/0. The code must special-case the empty relevant set (return 0 or exclude the query) rather than perform the division."
 
 - id: essay-retrieval-eval-harness
   type: essay

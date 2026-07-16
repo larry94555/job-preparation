@@ -1,45 +1,60 @@
-# Missing term (cloze)
+# Conceptual multiple-choice: lossless, draft model, acceptance, quantization, distillation
 - id: cloze-lossless
-  type: text_input
+  type: multiple_choice
   tags: [speculative]
   difficulty: 1
-  prompt: "Because it produces exactly the tokens the target model would have, speculative decoding is described as ____ (it does not change the output distribution)."
-  answer:
-    regex: '^lossless$'
-    normalize: true
+  prompt: "What does it mean that speculative decoding is 'lossless'?"
+  options:
+    - { text: "The tokens it generates are exactly what the target model would have produced on its own — only reached faster", correct: true }
+    - { text: "The draft model never makes an incorrect proposal" }
+    - { text: "No proposed tokens are ever rejected during verification" }
+    - { text: "The output is slightly lower quality but uses far less memory" }
+  explanation: "Lossless means the output distribution is unchanged: verification guarantees the accepted tokens match the target model's own choices. Speculative decoding trades compute, not quality."
 
 - id: cloze-draft
-  type: text_input
+  type: multiple_choice
   tags: [speculative]
   difficulty: 2
-  prompt: "In speculative decoding, the small, cheap model that proposes candidate tokens is called the ____ model."
-  answer:
-    regex: '^draft$'
-    normalize: true
+  prompt: "Why does speculative decoding use a small, cheap model to propose tokens rather than the target model itself?"
+  options:
+    - { text: "Cheap proposals let several tokens be guessed quickly, and the expensive target model then verifies them all in one parallel pass", correct: true }
+    - { text: "The small model is more accurate than the target model" }
+    - { text: "The target model is unable to generate tokens without help" }
+    - { text: "It permanently reduces the target model's memory footprint" }
+  explanation: "The draft model is a fast guesser. Proposing a run cheaply and verifying it in a single parallel target pass is what turns many sequential steps into fewer, batched ones."
 
 - id: cloze-acceptance
-  type: text_input
+  type: multiple_choice
   tags: [speculative]
   difficulty: 2
-  prompt: "The fraction of proposed tokens the target model accepts during verification is the ____ rate."
-  answer:
-    regex: '^acceptance$'
-    normalize: true
+  prompt: "What makes the acceptance rate in speculative decoding higher?"
+  options:
+    - { text: "A draft model whose next-token predictions closely match what the target model would choose", correct: true }
+    - { text: "Storing the target model's weights at lower precision" }
+    - { text: "Increasing the target model's parameter count" }
+    - { text: "Routing a larger share of requests to the draft model" }
+  explanation: "Acceptance rate rises when the draft model agrees more often with the target model, so more of each proposed run survives verification and more tokens land per parallel pass."
 
 - id: cloze-quantization
-  type: text_input
+  type: multiple_choice
   tags: [quantization]
   difficulty: 2
-  prompt: "Storing a model's weights in a lower bit-width like INT8 or INT4 to cut memory is called ____."
-  answer:
-    regex: '^quantization$'
-    normalize: true
+  prompt: "Why does storing a model's weights in INT4 instead of FP16 reduce its memory footprint?"
+  options:
+    - { text: "Each weight is represented with fewer bits, so the same number of parameters occupies less space", correct: true }
+    - { text: "The model ends up with fewer parameters overall" }
+    - { text: "Some of the model's layers are dropped entirely" }
+    - { text: "The activations are no longer computed" }
+  explanation: "Quantization keeps every parameter but encodes each in a lower bit-width. Fewer bits per weight means less memory (and often faster compute), at the risk of some precision loss."
 
 - id: cloze-distillation
-  type: text_input
+  type: multiple_choice
   tags: [distillation]
   difficulty: 2
-  prompt: "Training a smaller student model to mimic a larger teacher model is called ____."
-  answer:
-    regex: '^distillation$'
-    normalize: true
+  prompt: "After distillation, what is the student model?"
+  options:
+    - { text: "A permanently smaller, cheaper model trained to reproduce the teacher's behavior", correct: true }
+    - { text: "A lower-precision copy of the teacher with the same parameter count" }
+    - { text: "A draft model used only to propose tokens for the teacher to verify" }
+    - { text: "An exact, lossless copy of the teacher's outputs" }
+  explanation: "Distillation is a training-time investment that yields a genuinely smaller student whose parameters were learned by mimicking the teacher — cheaper to serve, but not guaranteed to match the teacher exactly."

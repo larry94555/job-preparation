@@ -1,54 +1,73 @@
-# Free entry (short answer)
+# Conceptual multiple-choice — applied reasoning about tokens, context budgets, routing, and drift
+# (converted from short-answer free entry; ids/tags preserved for lesson + assessment references)
 - id: fe-token
-  type: text_input
+  type: multiple_choice
   tags: [tokens]
-  difficulty: 1
-  prompt: "What is the unit both context windows and pricing are measured in? (one word)"
-  answer:
-    regex: '^tokens?$'
-    normalize: true
+  difficulty: 2
+  prompt: "A provider invoices input tokens and output tokens on separate lines at different rates. Why separate them at all?"
+  options:
+    - { text: "Generating output is more compute-intensive than reading input, so output is usually priced higher — you must track them separately to compute cost", correct: true }
+    - { text: "It is a formatting choice; input and output always cost the same per token" }
+    - { text: "Input tokens are always free, so the split is purely cosmetic" }
+    - { text: "Output tokens don't affect cost at all, only latency" }
+  explanation: "Decoding output token-by-token costs more than ingesting the prompt, so providers price output above input. Cost per run therefore has to sum the two terms separately — treating a call as one flat number hides where the money goes."
 
 - id: fe-budget
-  type: text_input
+  type: multiple_choice
   tags: [context]
   difficulty: 2
-  prompt: "A fixed token allowance you must fit a request under is a token ____. (one word)"
-  answer:
-    regex: '^budget$'
-    normalize: true
+  prompt: "A team caps each agent step at an 8k-token budget even though the model allows 128k. What is the point of a self-imposed budget well under the hard limit?"
+  options:
+    - { text: "Smaller prompts are cheaper, faster, and less prone to lost-in-the-middle, so a tight budget improves cost, latency, and reliability at once", correct: true }
+    - { text: "The model rejects any prompt over 8k regardless of its actual window" }
+    - { text: "A budget under the hard limit has no effect; only the window matters" }
+    - { text: "Setting a budget doubles the model's effective context window" }
+  explanation: "A token budget is a discipline, not a hard error boundary. Staying well under the window keeps each call cheap and quick and reduces the amount of middle where a fact can get lost — you fit under the limit and read better."
 
 - id: fe-lost-middle
-  type: text_input
+  type: multiple_choice
   tags: [context]
   difficulty: 2
-  prompt: "In the 'lost in the ____' effect, position in a long context determines retrieval accuracy. (one word)"
-  answer:
-    regex: '^middle$'
-    normalize: true
+  prompt: "Someone proposes fixing a missed-fact problem by switching to a model with a 10x larger window and stuffing in even more text. Why might this make retrieval worse, not better?"
+  options:
+    - { text: "More text lengthens the context, giving the key fact more room to land in the poorly-attended middle — a bigger window doesn't remove the positional weakness", correct: true }
+    - { text: "A larger window guarantees every token is read equally well" }
+    - { text: "A bigger window reduces the token count of the same text" }
+    - { text: "The extra capacity is reserved for output, so input retrieval improves automatically" }
+  explanation: "Window size (what fits) and effective long-context use (what actually gets read) are different axes. Padding the prompt enlarges the weak middle; the reliable move is to keep the context tight and place key facts at the edges."
 
 - id: fe-cheapest
-  type: text_input
+  type: multiple_choice
   tags: [routing]
   difficulty: 2
-  prompt: "Route a task to the ____ model tier that can still do it correctly. (one word)"
-  answer:
-    regex: '^cheapest$'
-    normalize: true
+  prompt: "Before moving a high-volume step to a cheaper model tier, what evidence actually justifies the switch?"
+  options:
+    - { text: "Measured quality (e.g. accuracy on a labeled set) holds on the cheap tier while measured cost per run drops", correct: true }
+    - { text: "The cheap tier is newer, so it is assumed to be better" }
+    - { text: "The cheap tier returns answers faster, which by itself proves quality is preserved" }
+    - { text: "No evidence is needed; cheaper is always the correct default" }
+  explanation: "A routing change is justified by data, not assumption: measure quality on the cheap tier against the same bar and confirm cost per run falls. Speed or novelty alone says nothing about whether the answers are still good enough."
 
 - id: fe-route-classify
-  type: text_input
+  type: multiple_choice
   tags: [routing]
   difficulty: 2
-  prompt: "A one-line 'classify this ticket' task should route to which kind of tier? (one word: name a cheap/small/fast tier)"
-  answer:
-    regex: '^(haiku|cheap|small|fast)$'
-    normalize: true
+  prompt: "A one-line 'detect the language of this message' task arrives millions of times a day. Which tier should it route to, and why?"
+  options:
+    - { text: "The cheapest capable tier — the task is narrow, high-volume, and forgiving, so a small fast model clears the bar and the volume makes cost dominate", correct: true }
+    - { text: "The most expensive reasoning tier, because the high volume demands the best model" }
+    - { text: "A different tier chosen at random per request, to spread load" }
+    - { text: "Whichever tier has the largest context window, regardless of task difficulty" }
+  explanation: "Language detection is simple, repetitive, and cheap to get right, and huge volume makes per-call cost the dominant factor — the textbook case for the cheapest capable tier. The hard-reasoning tier would overpay for work a small model does fine."
 
 - id: fe-instruction-drift
-  type: text_input
+  type: multiple_choice
   tags: [failure]
   difficulty: 2
-  prompt: "Name the failure where a model slowly stops following its original instructions over a long session. (one or two words)"
-  answer:
-    regex: '^(drift|instruction drift)$'
-    normalize: true
+  prompt: "Which mitigation actually targets instruction drift specifically, rather than a different failure mode?"
+  options:
+    - { text: "Periodically re-assert or re-inject the governing instructions so they stay salient as context accumulates", correct: true }
+    - { text: "Ground answers in retrieved facts and verify claims against sources" }
+    - { text: "Place the key fact at the start or end of the prompt" }
+    - { text: "Route to a faster tier to cut per-token latency" }
+  explanation: "Drift is loss of instruction salience over a long session, so the fix is to re-assert the instructions. Grounding targets hallucination, edge-placement targets lost-in-the-middle, and faster tiers target latency — right fixes for the wrong failure here."

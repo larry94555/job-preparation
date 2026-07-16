@@ -1,45 +1,60 @@
-# Missing term (cloze)
+# Conceptual multiple choice (converted from cloze fill-in-the-blank)
 - id: cloze-rag
-  type: text_input
+  type: multiple_choice
   tags: [pipeline]
   difficulty: 1
-  prompt: "Fetching relevant documents at query time and adding them to the model's context is called retrieval-augmented ____."
-  answer:
-    regex: '^generation$'
-    normalize: true
+  prompt: "At what point does retrieval-augmented generation bring external documents into the model's reasoning?"
+  options:
+    - { text: "At query time, by injecting retrieved passages into the prompt context the model reads before answering", correct: true }
+    - { text: "During pretraining, by adding the documents to the training corpus" }
+    - { text: "By permanently updating the model's weights with the document text" }
+    - { text: "While training the tokenizer, so the terms become vocabulary" }
+  explanation: "RAG leaves the weights untouched: it fetches relevant passages at inference and places them into the context window, grounding that single response in outside data."
 
 - id: cloze-overlap
-  type: text_input
+  type: multiple_choice
   tags: [chunking]
   difficulty: 2
-  prompt: "Duplicating a little text across adjacent chunks so boundary-straddling facts survive is called chunk ____."
-  answer:
-    regex: '^overlap$'
-    normalize: true
+  prompt: "What is the downside of setting a very large overlap between adjacent chunks?"
+  options:
+    - { text: "Duplicated text inflates the index and can surface several near-identical chunks for one query", correct: true }
+    - { text: "It removes the need to embed the chunks at all" }
+    - { text: "It guarantees strictly better recall in every case" }
+    - { text: "It makes boundary-straddling facts more likely to be split" }
+  explanation: "Overlap protects boundary facts, but too much of it duplicates content, bloats storage, and lets redundant chunks crowd out diverse results — so it is a tradeoff, not a free win."
 
 - id: cloze-bm25
-  type: text_input
+  type: multiple_choice
   tags: [retrieval]
   difficulty: 2
-  prompt: "The classic sparse, term-frequency lexical ranking function used as a baseline retriever is ____."
-  answer:
-    regex: '^bm25$'
-    normalize: true
+  prompt: "A team wants a retrieval baseline that needs no embedding model, GPU, or training. Why does BM25 fit that requirement?"
+  options:
+    - { text: "It ranks documents from term-frequency and document-length statistics computed directly from the text", correct: true }
+    - { text: "It fine-tunes a neural cross-encoder on the corpus first" }
+    - { text: "It requires a GPU to embed every document into vectors" }
+    - { text: "It learns a dense query representation from labeled data" }
+  explanation: "BM25 is a lexical scoring function over term frequencies and document lengths — no learned parameters, embeddings, or training, which is why it is the classic drop-in baseline."
 
 - id: cloze-hybrid
-  type: text_input
+  type: multiple_choice
   tags: [retrieval]
   difficulty: 2
-  prompt: "Combining dense (embedding) and sparse (keyword) retrieval into one result set is called ____ search."
-  answer:
-    regex: '^hybrid$'
-    normalize: true
+  prompt: "Why run dense and sparse retrieval together instead of committing to just one?"
+  options:
+    - { text: "They fail on different queries — dense catches paraphrase, sparse catches exact terms and IDs — so together they cover more", correct: true }
+    - { text: "Running both halves the total retrieval latency" }
+    - { text: "Sparse retrieval is strictly better, so dense only confirms it" }
+    - { text: "Combining them removes the need to chunk documents" }
+  explanation: "Dense and sparse retrieval have complementary blind spots; fusing them recovers queries that either method alone would miss, which is the whole point of hybrid search."
 
 - id: cloze-reranker
-  type: text_input
+  type: multiple_choice
   tags: [reranking]
   difficulty: 3
-  prompt: "A model that jointly scores each query–document pair to reorder candidates is a cross-____."
-  answer:
-    regex: '^encoder$'
-    normalize: true
+  prompt: "Why can't a cross-encoder reranker's scores be precomputed and stored in the index the way document embeddings are?"
+  options:
+    - { text: "The score depends on the specific query-document pair, so it can only be computed once the query arrives", correct: true }
+    - { text: "The scores are too large in bytes to fit in any index" }
+    - { text: "Cross-encoders have no parameters, so there is nothing to store" }
+    - { text: "Index formats forbid storing floating-point relevance scores" }
+  explanation: "A bi-encoder embeds each document independently, so vectors can be indexed ahead of time; a cross-encoder reads query and document jointly, so its score exists only per query — which is exactly why reranking is a query-time cost."

@@ -7,6 +7,6 @@ segments:
   - check: mc-sanitize
   - check: cloze-separate
   - check: fe-separate
-  - check: fe-sanitize
+  - apply: essay-sanitization
   - apply: code-injection-sanitize
   - apply: essay-injection

@@ -1,36 +1,48 @@
-# Free entry (short answer)
+# Conceptual multiple-choice: matching levers to goals and reasoning about their costs
 - id: fe-latency-lever
-  type: text_input
+  type: multiple_choice
   tags: [speculative, tradeoffs]
   difficulty: 2
-  prompt: "Which lever cuts latency without changing outputs? (one word)"
-  answer:
-    regex: '^(speculative|speculative decoding|spec-?dec)$'
-    normalize: true
+  prompt: "You need faster responses but must not change the model's outputs at all. Which lever fits, and why?"
+  options:
+    - { text: "Speculative decoding — it cuts latency while producing exactly the target model's tokens", correct: true }
+    - { text: "Quantization — lowering precision speeds things up with no quality change" }
+    - { text: "Distillation — the smaller student is guaranteed identical outputs" }
+    - { text: "None — latency cannot be reduced without changing outputs" }
+  explanation: "Only speculative decoding is lossless: it reaches the target model's own tokens faster. Quantization and distillation both risk altering the outputs."
 
 - id: fe-memory-lever
-  type: text_input
+  type: multiple_choice
   tags: [quantization, tradeoffs]
   difficulty: 2
-  prompt: "Which lever shrinks memory footprint by lowering weight precision? (one word)"
-  answer:
-    regex: '^(quantization|quantisation|quantize|quant)$'
-    normalize: true
+  prompt: "Your model barely fits in GPU memory and you can't afford to retrain it. Which lever addresses this most directly?"
+  options:
+    - { text: "Quantization — lowering weight precision shrinks the footprint immediately, with no retraining", correct: true }
+    - { text: "Distillation — it shrinks memory instantly at inference with no training step" }
+    - { text: "Speculative decoding — it reduces the model's memory footprint" }
+    - { text: "None of the levers can reduce memory use" }
+  explanation: "Quantization re-encodes existing weights at lower precision, cutting memory with no training. Distillation would help but needs an upfront training step; speculative decoding targets latency, not memory."
 
 - id: fe-teacher-student
-  type: text_input
+  type: multiple_choice
   tags: [distillation]
   difficulty: 2
-  prompt: "In distillation, the large model the student learns from is called the ____ (one word)."
-  answer:
-    regex: '^teacher$'
-    normalize: true
+  prompt: "In distillation, what role does the large model play relative to the student?"
+  options:
+    - { text: "It acts as the teacher, supplying the outputs/behavior the smaller student is trained to imitate", correct: true }
+    - { text: "It acts as a draft model, proposing tokens the student verifies" }
+    - { text: "It is quantized down in place to become the student" }
+    - { text: "It verifies the student's tokens at inference time" }
+  explanation: "The large model is the teacher: during training the student learns to reproduce its outputs. This is a training-time relationship, not the inference-time draft/verify loop of speculative decoding."
 
 - id: fe-specdec-cost
-  type: text_input
+  type: multiple_choice
   tags: [speculative, tradeoffs]
   difficulty: 3
-  prompt: "What draft-model quality metric determines whether speculative decoding actually speeds things up? (a few words)"
-  answer:
-    regex: '^(acceptance( rate)?|acceptance-rate|token acceptance( rate)?)$'
-    normalize: true
+  prompt: "A very large, highly accurate draft model raises the acceptance rate but can still fail to speed things up. Why?"
+  options:
+    - { text: "If the draft model itself is slow/expensive, the time spent drafting can outweigh the target-model passes it saves", correct: true }
+    - { text: "A higher acceptance rate always forces a slowdown" }
+    - { text: "The target model refuses to verify tokens from a large draft" }
+    - { text: "Acceptance rate has no bearing on speedup" }
+  explanation: "Speedup depends on both acceptance rate and draft cost. A draft model that is accurate but nearly as expensive as the target erases the savings, because every proposed run costs almost as much as generating directly."

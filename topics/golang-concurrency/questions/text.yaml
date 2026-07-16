@@ -1,19 +1,26 @@
+# Conceptual multiple-choice questions (converted from former fill-in-the-blank items).
 - id: text-buffered-cap
-  type: text_input
+  type: multiple_choice
   tags: [channels]
   difficulty: 1
-  parameters:
-    n: { random_int: [2, 8] }
-  prompt: "A buffered channel `make(chan int, {{n}})` can hold how many values before a send blocks?"
-  answer:
-    equals: "{{n}}"
-    numeric_tolerance: 0
+  prompt: "A buffered channel is created with capacity 3 and already holds 3 unreceived values. What happens when a goroutine tries to send a fourth value?"
+  shuffle_options: true
+  options:
+    - { text: "The send blocks until a receiver frees a slot", correct: true }
+    - { text: "The send panics because the buffer is full" }
+    - { text: "The oldest buffered value is silently dropped to make room" }
+    - { text: "The channel grows its buffer automatically to fit the value" }
+  explanation: "A buffered channel only decouples sender and receiver up to its capacity; once the buffer is full a send blocks until space is available."
 
 - id: text-race-flag
-  type: text_input
+  type: multiple_choice
   tags: [synchronization]
   difficulty: 2
-  prompt: "Which `go test` flag enables the data race detector? (include the leading dash)"
-  answer:
-    regex: "^-race$"
-    normalize: true
+  prompt: "Why would you run your tests with `go test -race` rather than relying on ordinary test runs to catch concurrency bugs?"
+  shuffle_options: true
+  options:
+    - { text: "It instruments memory accesses to detect unsynchronized concurrent reads/writes that may not fail deterministically", correct: true }
+    - { text: "It forces goroutines to run one at a time so races cannot occur during the test" }
+    - { text: "It guarantees every data race in the program will be reported on every run" }
+    - { text: "It automatically inserts mutexes around shared variables to fix races" }
+  explanation: "Data races are timing-dependent and often pass by luck; the race detector instruments memory accesses to flag unsynchronized concurrent access it actually observes, though only for code paths exercised at runtime."

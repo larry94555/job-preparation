@@ -1,45 +1,60 @@
-# Missing term (cloze)
+# Conceptual multiple choice (converted from cloze fill-in-the-blank)
 - id: cloze-golden-set
-  type: text_input
+  type: multiple_choice
   tags: [golden]
   difficulty: 1
-  prompt: "A curated set of inputs with known-good expected outputs, used as ground truth, is a ____ set."
-  answer:
-    regex: '^golden$'
-    normalize: true
+  prompt: "Why can't you build a golden set just by saving the model's current outputs as the expected answers?"
+  options:
+    - { text: "It would bake in the model's current mistakes; expected outputs must be independently known-good ground truth", correct: true }
+    - { text: "Saved outputs take up too much disk space to keep" }
+    - { text: "The model refuses to produce the same answer twice" }
+    - { text: "A golden set may only contain inputs, never expected outputs" }
+  explanation: "A golden set is ground truth: its expected outputs must be human-verified as correct, not just whatever the model happens to produce today."
 
 - id: cloze-regression
-  type: text_input
+  type: multiple_choice
   tags: [regression]
   difficulty: 2
-  prompt: "A CI check that blocks a change when the eval score drops below a threshold is a ____ gate."
-  answer:
-    regex: '^regression$'
-    normalize: true
+  prompt: "What does wiring a regression gate into CI give you that running the eval once by hand does not?"
+  options:
+    - { text: "Every change is automatically re-checked, so a fix for one case can't silently regress others", correct: true }
+    - { text: "A guarantee that the eval score can only ever go up" }
+    - { text: "The ability to drop the golden set entirely" }
+    - { text: "Deterministic outputs from the model on every run" }
+  explanation: "A regression gate re-runs the eval on every change and blocks a drop below threshold, catching silent regressions a one-off manual run would miss."
 
 - id: cloze-adversarial
-  type: text_input
+  type: multiple_choice
   tags: [adversarial]
   difficulty: 2
-  prompt: "Tests that deliberately probe edge cases and failure modes (a.k.a. red-team tests) are ____ tests."
-  answer:
-    regex: '^adversarial$'
-    normalize: true
+  prompt: "Where do the strongest cases in an adversarial / edge-case suite usually come from?"
+  options:
+    - { text: "Real production failures and deliberate red-team probing of edge cases", correct: true }
+    - { text: "Randomly sampling the most common, typical user inputs" }
+    - { text: "Copying the golden set's happy-path cases verbatim" }
+    - { text: "Whatever inputs the model already answers correctly" }
+  explanation: "Adversarial suites are built from observed production failures and intentional red-teaming, targeting the edge cases and failure modes a happy-path golden set never samples."
 
 - id: cloze-judge
-  type: text_input
+  type: multiple_choice
   tags: [judge]
   difficulty: 2
-  prompt: "Using a model to grade open-ended outputs against a rubric is the LLM-as-____ pattern."
-  answer:
-    regex: '^judge$'
-    normalize: true
+  prompt: "Why decompose an LLM judge's rubric into independent true/false checks instead of asking for one holistic 1-10 score?"
+  options:
+    - { text: "Discrete checks are more repeatable and easier to calibrate than a fuzzy holistic score", correct: true }
+    - { text: "It lets the judge grade without ever seeing the rubric" }
+    - { text: "A single numeric score is impossible for a model to produce" }
+    - { text: "Decomposition removes all bias from the judge automatically" }
+  explanation: "Breaking grading into concrete pass/fail criteria makes verdicts more consistent and auditable; a single holistic number is noisy and hard to reconcile with human labels."
 
 - id: cloze-calibration
-  type: text_input
+  type: multiple_choice
   tags: [judge]
   difficulty: 3
-  prompt: "Checking a judge's verdicts against human labels and measuring their agreement is called ____."
-  answer:
-    regex: '^calibration$'
-    normalize: true
+  prompt: "You start gating CI on an LLM judge whose verdicts were never checked against human labels. What is the core risk?"
+  options:
+    - { text: "The gate enforces an unvalidated opinion — it may pass or fail for reasons that don't track real quality", correct: true }
+    - { text: "The judge will simply run too slowly to fit in CI" }
+    - { text: "The judge can only ever grade one case at a time" }
+    - { text: "Human labels become impossible to collect afterward" }
+  explanation: "Calibration means measuring the judge's agreement with human labels first; without it you're gating on an opinion, not a trustworthy signal."

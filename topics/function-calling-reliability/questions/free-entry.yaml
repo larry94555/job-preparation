@@ -1,36 +1,48 @@
-# Free entry (short answer)
+# Conceptual multiple choice (validation & idempotency reasoning)
 - id: fe-unknown-tool
-  type: text_input
+  type: multiple_choice
   tags: [validation]
   difficulty: 2
-  prompt: "When the model calls a tool that does not exist in the registry, what should the harness do with the call? (one word)"
-  answer:
-    regex: '^(reject|refuse|deny|error|drop)$'
-    normalize: true
+  prompt: "Suppose the harness silently substituted the closest real tool whenever the model named one that doesn't exist. What is the main problem with that approach?"
+  options:
+    - { text: "It can execute an action the model never intended, hiding the error instead of letting the loop correct it", correct: true }
+    - { text: "It would make the harness slightly slower to respond" }
+    - { text: "It would use more tokens in the prompt" }
+    - { text: "Nothing — guessing the nearest tool is the recommended practice" }
+  explanation: "Substituting a guessed tool runs an unintended operation and masks the hallucination; rejecting the unknown call and returning a structured error lets the model retry correctly."
 
 - id: fe-invalid-args-feedback
-  type: text_input
+  type: multiple_choice
   tags: [validation]
   difficulty: 3
-  prompt: "After rejecting a call with invalid arguments, what should the harness return so the model can fix it?"
-  answer:
-    regex: '^(a )?(structured |model-facing |validation )?error( message)?$'
-    normalize: true
+  prompt: "After a call fails schema validation, why return a structured, model-facing error rather than just aborting the turn?"
+  options:
+    - { text: "The model can read the specific failures and emit a corrected call on the next step", correct: true }
+    - { text: "Structured errors execute faster than plain-text ones" }
+    - { text: "Aborting is technically impossible once a tool has been named" }
+    - { text: "It lets the model skip validation on future calls" }
+  explanation: "A machine-readable error naming what was wrong feeds the agent loop so it can self-correct; a bare abort ends the turn with no path to recovery."
 
 - id: fe-retry-risk
-  type: text_input
+  type: multiple_choice
   tags: [idempotency]
   difficulty: 3
-  prompt: "Retrying a non-idempotent charge tool after a timeout risks what to the customer? (one word or short phrase)"
-  answer:
-    regex: '^(a )?(double|duplicate)([ -](charge|charging|payment|effect|call))?$'
-    normalize: true
+  prompt: "A `chargeCard` call times out with no response. Why is blindly retrying risky even though the client saw no success?"
+  options:
+    - { text: "The first charge may have succeeded before the response was lost, so the retry charges the customer twice", correct: true }
+    - { text: "A retry after a timeout is always rejected by the server" }
+    - { text: "A timeout guarantees the first call did nothing" }
+    - { text: "Reads and writes behave identically after a timeout" }
+  explanation: "A timeout doesn't tell you whether the mutation committed; if it did, the retry double-applies the effect. That uncertainty is why naive retries on writes are unsafe."
 
 - id: fe-safe-retry
-  type: text_input
+  type: multiple_choice
   tags: [idempotency]
   difficulty: 2
-  prompt: "Name the property a mutating tool needs so a repeated call has no extra effect."
-  answer:
-    regex: '^idempoten(t|cy)$'
-    normalize: true
+  prompt: "Of these tools, which is inherently safe to retry after a timeout without any extra machinery?"
+  options:
+    - { text: "`getAccountBalance`, a read that returns state without changing it", correct: true }
+    - { text: "`chargeCard`, which moves money" }
+    - { text: "`sendEmail`, which delivers a message" }
+    - { text: "`createOrder`, which writes a new record" }
+  explanation: "Read-only operations don't change state, so repeating them has no extra effect — they're naturally idempotent. Mutating writes need keys or dedupe to be safe to repeat."

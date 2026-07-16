@@ -1,54 +1,72 @@
-# Free entry (short answer)
+# Conceptual multiple-choice (async/await boundary, gather, isolation, timeouts, jitter)
 - id: fe-coroutine-kw
-  type: text_input
+  type: multiple_choice
   tags: [eventloop]
   difficulty: 1
-  prompt: "Which keyword before `def` declares a coroutine function? (one word)"
-  answer:
-    regex: '^async$'
-    normalize: true
+  prompt: "You defined `async def main(): ...`. From ordinary synchronous code (like the bottom of your script), how do you actually run it?"
+  options:
+    - { text: "Call `asyncio.run(main())`, which starts an event loop, drives the coroutine to completion, and shuts the loop down", correct: true }
+    - { text: "Just call `main()` — the body runs immediately like any function" }
+    - { text: "Prefix the call with `await`, which works even in synchronous code" }
+    - { text: "Wrap it in a plain thread with `threading.Thread(target=main)`" }
+  explanation: "Calling `main()` only builds a coroutine object; it never runs on its own. `asyncio.run(...)` is the sync-to-async entry point: it creates the loop, runs the coroutine, and tears the loop down. `await` is illegal in sync code."
 
 - id: fe-await-kw
-  type: text_input
+  type: multiple_choice
   tags: [eventloop]
   difficulty: 1
-  prompt: "Which keyword do you put before an awaitable to suspend until it completes? (one word)"
-  answer:
-    regex: '^await$'
-    normalize: true
+  prompt: "Which of these can you legally put after `await`?"
+  options:
+    - { text: "An awaitable — a coroutine, a Task, or a Future; awaiting a plain value like an int or a normal function's return is an error", correct: true }
+    - { text: "Any expression at all — await turns whatever follows it into an async operation" }
+    - { text: "Only calls to functions defined inside the asyncio module" }
+    - { text: "Only variables, never function calls" }
+  explanation: "`await` operates on awaitables: coroutine objects, Tasks, and Futures (things that implement `__await__`). Awaiting a non-awaitable such as `await 5` raises a TypeError — await doesn't make arbitrary code asynchronous."
 
 - id: fe-gather
-  type: text_input
+  type: multiple_choice
   tags: [concurrency]
   difficulty: 2
-  prompt: "Which asyncio function fans out awaitables concurrently and returns their results in order? (one word)"
-  answer:
-    regex: '^gather$'
-    normalize: true
+  prompt: "What's the difference between `await asyncio.gather(*coros)` and the loop `for c in coros: await c`?"
+  options:
+    - { text: "The loop awaits each coroutine to completion before starting the next, so they run sequentially; gather schedules them together so their waits overlap", correct: true }
+    - { text: "Nothing — both run the coroutines concurrently" }
+    - { text: "The loop is concurrent; gather forces them to run one at a time" }
+    - { text: "gather runs them on separate threads while the loop uses one thread" }
+  explanation: "Awaiting inside a loop blocks on each coroutine in turn — a common accidental-serialization bug. `gather` schedules them all on the loop at once, so ten ~1s waits finish in ~1s instead of ~10s. Same single thread, overlapping waits."
 
 - id: fe-return-exceptions
-  type: text_input
+  type: multiple_choice
   tags: [errors]
   difficulty: 2
-  prompt: "Which gather keyword argument makes a failing call return its exception instead of aborting the batch? (one word)"
-  answer:
-    regex: '^return_exceptions$'
-    normalize: true
+  prompt: "You fan out 100 optional enrichment calls where a handful failing is acceptable, and you still want every successful result. Which gather policy fits?"
+  options:
+    - { text: "`return_exceptions=True`, so a few failures come back as exception objects in place and you keep the partial successes instead of losing the whole batch", correct: true }
+    - { text: "Default gather, which raises on the first failure — best when you want all-or-nothing" }
+    - { text: "return_exceptions=True, because it retries the failed calls until they all succeed" }
+    - { text: "Default gather, because it silently drops any call that fails" }
+  explanation: "When partial success is acceptable, `return_exceptions=True` collects results and failures side by side so a few bad calls don't sink the batch. Default gather is the all-or-nothing choice: it aborts on the first exception, which you'd want only when one failure invalidates the whole result."
 
 - id: fe-timeout-fn
-  type: text_input
+  type: multiple_choice
   tags: [resilience]
   difficulty: 2
-  prompt: "Name one asyncio primitive that bounds how long you wait on an awaitable. (one word)"
-  answer:
-    regex: '^(timeout|wait_for)$'
-    normalize: true
+  prompt: "You fan out many calls with gather and want one slow call to fail on its own without dragging down the batch. Where should the timeout go?"
+  options:
+    - { text: "On each individual call (wrap each coroutine in its own wait_for/timeout) so one hang becomes one isolated error, leaving the rest to finish", correct: true }
+    - { text: "A single timeout around the whole gather, which is strictly better than per-call timeouts" }
+    - { text: "Nowhere — gather already bounds each call automatically" }
+    - { text: "Only on the fastest call, since the slow ones need unlimited time" }
+  explanation: "A per-call timeout bounds each awaitable independently, so a single hung request turns into one catchable error while the others succeed. One outer timeout on the whole gather instead kills every in-flight call — the slow one takes the healthy ones down with it."
 
 - id: fe-jitter
-  type: text_input
+  type: multiple_choice
   tags: [resilience]
   difficulty: 2
-  prompt: "What do you add to exponential backoff delays to avoid synchronized retries? (one word)"
-  answer:
-    regex: '^jitter$'
-    normalize: true
+  prompt: "Is jitter a replacement for exponential backoff, or something you use together with it?"
+  options:
+    - { text: "Together — backoff sets the growing delay that relieves pressure, and jitter randomizes within it so clients don't retry in lockstep; you want both", correct: true }
+    - { text: "A replacement — jitter alone gives you everything backoff does" }
+    - { text: "A replacement — once you add jitter you no longer need to grow the delay" }
+    - { text: "Unrelated — jitter is about logging, backoff is about retries" }
+  explanation: "Backoff and jitter solve different halves of the problem: backoff grows the wait so an overloaded service recovers, while jitter spreads many clients' retries apart so they don't sync into waves. Real retry policies combine them — exponential backoff with jitter."

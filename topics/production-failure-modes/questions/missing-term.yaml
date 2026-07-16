@@ -1,45 +1,60 @@
-# Missing term (cloze)
+# Conceptual multiple-choice (converted from cloze fill-in-the-blank)
 - id: cloze-silent
-  type: text_input
+  type: multiple_choice
   tags: [failures]
   difficulty: 2
-  prompt: "A failure that returns a confident, well-formed but wrong answer without throwing any error is called a ____ failure."
-  answer:
-    regex: '^silent$'
-    normalize: true
+  prompt: "What makes a failure *silent* rather than *loud*?"
+  options:
+    - { text: "It returns a well-formed HTTP 200 with a confident but wrong answer, so no exception or status code flags it", correct: true }
+    - { text: "It throws an exception that the caller forgot to catch" }
+    - { text: "It writes an error to the logs but pages no one" }
+    - { text: "It crashes only intermittently, making it hard to reproduce" }
+  explanation: "A loud failure announces itself with an exception or non-2xx status you can catch and alert on. A silent failure emits a clean, well-formed response that happens to be wrong, so runtime error dashboards never see it — you need output validators and eval monitoring to catch it."
 
 - id: cloze-hallucinated
-  type: text_input
+  type: multiple_choice
   tags: [failures]
   difficulty: 2
-  prompt: "When a model invents a tool or arguments that do not exist in the schema, that is a ____ tool call."
-  answer:
-    regex: '^hallucinated$'
-    normalize: true
+  prompt: "Why is a hallucinated tool call — the model inventing a function or arguments absent from the schema — a *model-layer* failure rather than an infrastructure bug?"
+  options:
+    - { text: "The call is well-formed and no process crashes; the fault is in what the model produced, so only schema/allowlist validation catches it", correct: true }
+    - { text: "It only occurs when the API gateway's TLS certificate expires" }
+    - { text: "It is caused by the tool server running out of memory" }
+    - { text: "It behaves like a network timeout and is retried automatically" }
+  explanation: "Hallucinated tool calls come from the model's output, not a crashed process, expired cert, or full disk. Nothing throws, so you defend by validating the call against the tool schema/allowlist and refusing or re-asking when it doesn't match."
 
 - id: cloze-ttl
-  type: text_input
+  type: multiple_choice
   tags: [detection]
   difficulty: 2
-  prompt: "The freshness threshold that marks retrieved data as too old to trust is commonly abbreviated ____."
-  answer:
-    regex: '^ttl$'
-    normalize: true
+  prompt: "A retrieval pipeline stamps each chunk with a timestamp and enforces a freshness threshold (TTL). When the best-matching chunk is older than the TTL, what is the check *for*?"
+  options:
+    - { text: "To flag, refuse, or re-retrieve instead of answering confidently from data that may be out of date", correct: true }
+    - { text: "To delete the stale chunk from the vector store permanently" }
+    - { text: "To speed up retrieval by skipping older chunks" }
+    - { text: "To compress old chunks so they consume less memory" }
+  explanation: "Stale retrieval is silent — the pipeline runs cleanly but grounds the answer in old facts. A freshness/TTL check is how you *detect* that the source is too old, so you can flag, refuse, or re-retrieve from a re-indexed corpus rather than answer from stale data."
 
 - id: cloze-budget
-  type: text_input
+  type: multiple_choice
   tags: [mitigation]
   difficulty: 2
-  prompt: "The hard limit on steps, tokens, or dollars that halts a runaway agent is called a ____."
-  answer:
-    regex: '^budget$'
-    normalize: true
+  prompt: "A runaway agent is capped with a hard budget on steps, tokens, or dollars. What does that budget primarily protect against?"
+  options:
+    - { text: "Unbounded cost and looping — the agent is halted once it exceeds the cap instead of spending indefinitely", correct: true }
+    - { text: "The model returning malformed JSON on its first call" }
+    - { text: "Retrieved documents being out of date" }
+    - { text: "The tool schema missing a required field" }
+  explanation: "A runaway agent loops or spends without bound. A budget is a hard ceiling on steps, tokens, or dollars that trips and halts the agent, containing the blast radius after other controls fail — neither a bigger model nor more tools does this."
 
 - id: cloze-canary
-  type: text_input
+  type: multiple_choice
   tags: [prevention]
   difficulty: 3
-  prompt: "Routing a small slice of live traffic to a new version to watch its metrics before full rollout is a ____ deployment."
-  answer:
-    regex: '^canary$'
-    normalize: true
+  prompt: "Offline CI evals already passed for an LLM change. What does a *canary* deploy add that those evals cannot?"
+  options:
+    - { text: "Exposure to real production traffic on a small slice, surfacing regressions the fixed offline set didn't cover — before full rollout", correct: true }
+    - { text: "A mathematical proof that the new version is correct" }
+    - { text: "A guarantee that latency will improve after rollout" }
+    - { text: "Elimination of the need to monitor the full rollout afterward" }
+  explanation: "A fixed offline eval set can only measure what it contains. A canary routes a small percentage of live traffic to the new version and watches quality/latency/cost against the baseline, so a regression the offline evals missed shows up on a limited blast radius instead of everywhere at once."

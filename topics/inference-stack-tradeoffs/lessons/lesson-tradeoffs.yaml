@@ -5,8 +5,8 @@ segments:
   - present: the-four-axes-and-no-free-lunch
   - check: mc-four-axes
   - check: mc-no-free-lunch
-  - check: cloze-pareto
   - check: cloze-tail
+  - apply: essay-pareto-frontier
   - present: why-single-metric-optimization-fails
   - check: mc-single-metric
   - apply: essay-no-free-lunch

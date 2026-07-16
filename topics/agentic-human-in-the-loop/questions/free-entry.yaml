@@ -1,63 +1,84 @@
-# Free entry (short answer)
+# Conceptual multiple-choice (was short-answer free entry)
 - id: fe-approve
-  type: text_input
+  type: multiple_choice
   tags: [approval]
   difficulty: 2
-  prompt: "Before a high-risk action runs, a human must ____ it. (one word, the noun for the gate)"
-  answer:
-    regex: '^approval$'
-    normalize: true
+  prompt: "A design logs every high-risk action and shows it on a dashboard a human reviews once an hour. Is that an approval gate?"
+  options:
+    - { text: "No — a gate must block execution until a human approves; after-the-fact review lets the irreversible effect already happen", correct: true }
+    - { text: "Yes — as long as a human eventually sees it, oversight is satisfied" }
+    - { text: "Yes — a dashboard is stricter than an inline prompt" }
+    - { text: "No — but only because an hour is too long; five minutes would make it a gate" }
+  explanation: "The defining property of a gate is that the action does not run until approved. Reviewing a charge or deletion after it already executed is monitoring, not gating — the harm is done. The blocking-before-effect ordering is what makes it a gate, not the review interval."
 
 - id: fe-irreversible
-  type: text_input
+  type: multiple_choice
   tags: [risk]
   difficulty: 2
-  prompt: "The single most important property that makes an action high risk is that it is ____. (one word)"
-  answer:
-    regex: '^irreversible$'
-    normalize: true
+  prompt: "Deleting a user, charging a card, and sending a public tweet are all high-risk. What property do they share that a database update you can roll back lacks?"
+  options:
+    - { text: "None of them can be undone once done — they are irreversible, so a mistake is a permanent fact", correct: true }
+    - { text: "They all require a network connection to perform" }
+    - { text: "They are all slower to execute than a database update" }
+    - { text: "They all involve money, unlike a database update" }
+  explanation: "A rollback-able update is recoverable, so a mistake is fixable. Deletions, charges, and public posts have no undo — the effect persists. That shared irreversibility is what lifts them above a recoverable write and puts them behind an approval gate."
 
 - id: fe-high-risk
-  type: text_input
+  type: multiple_choice
   tags: [risk]
   difficulty: 1
-  prompt: "Charging a card or deleting a user is which risk level? (one word)"
-  answer:
-    regex: '^high$'
-    normalize: true
+  prompt: "Two agents classify 'charge a customer's card' differently — one calls it high, another medium. Why does a shared, fixed risk classification matter?"
+  options:
+    - { text: "So the same dangerous action is gated consistently every time, instead of depending on which agent or run happened to judge it", correct: true }
+    - { text: "So the audit log can be shorter for agents that agree" }
+    - { text: "So the model can lower a risk level when it is confident" }
+    - { text: "So low-risk actions can be reclassified as high to be safe" }
+  explanation: "If risk is judged ad hoc, the same irreversible action slips through ungated on some runs. A fixed classification makes gating predictable — a charge is always high, so it is always routed to approval regardless of context or the model's momentary confidence."
 
 - id: fe-audit
-  type: text_input
+  type: multiple_choice
   tags: [audit]
   difficulty: 2
-  prompt: "The append-only log of the agent's decisions is the ____ trail. (one word)"
-  answer:
-    regex: '^audit$'
-    normalize: true
+  prompt: "How does an audit trail differ from ordinary application logging?"
+  options:
+    - { text: "It deliberately records the decision — the risk level and whether a human approved or rejected — for accountability, not just debug output and errors", correct: true }
+    - { text: "It is written to a faster disk than debug logs" }
+    - { text: "It stores only errors, while debug logs store everything" }
+    - { text: "It is editable so operators can correct mistakes after the fact" }
+  explanation: "Debug logs exist to diagnose crashes. An audit trail answers a different question — what did the agent do, at what risk, and who authorized it — so it captures the action, its params, the risk level, and the approve/reject decision as an append-only record."
 
 - id: fe-resume
-  type: text_input
+  type: multiple_choice
   tags: [resume]
   difficulty: 2
-  prompt: "After the human approves, the agent should ____ from where it paused. (one word)"
-  answer:
-    regex: '^resume$'
-    normalize: true
+  prompt: "A human doesn't just approve the pending action — they EDIT it (e.g. lower a refund amount) and let the agent resume. What must the resume incorporate?"
+  options:
+    - { text: "The human's modified decision, folded into the saved state, then continue — not the original proposed action and not a restart", correct: true }
+    - { text: "The original action as proposed, since the agent planned it first" }
+    - { text: "A full restart of the task so the edit is planned from scratch" }
+    - { text: "Only a note in the audit log; the agent still runs the original action" }
+  explanation: "Human-in-the-loop includes approve, reject, AND edit. On resume the agent must act on the human's amended decision, merged into the durable state, and carry on from the checkpoint. Running the original or restarting would discard the human's actual input."
 
 - id: fe-timeout
-  type: text_input
+  type: multiple_choice
   tags: [resume]
   difficulty: 2
-  prompt: "A gate must fail safe if no human answers within the ____. (one word)"
-  answer:
-    regex: '^timeout$'
-    normalize: true
+  prompt: "Why does an approval gate need a timeout at all, instead of simply waiting indefinitely for a human to answer?"
+  options:
+    - { text: "Because a human may never answer — without a bound the task hangs forever holding state, so the gate needs a defined expiry that then fails safe", correct: true }
+    - { text: "Because timeouts make the model respond faster once approved" }
+    - { text: "Because waiting indefinitely would corrupt the audit log" }
+    - { text: "Because a timeout is required to auto-approve the action eventually" }
+  explanation: "Nothing guarantees a human ever responds. An unbounded wait leaves a pending irreversible action and its held resources hanging indefinitely. A timeout bounds that wait and then fails safe — defaulting to rejected, never auto-approving — so the task can't be stuck or silently released."
 
 - id: fe-idempotent
-  type: text_input
+  type: multiple_choice
   tags: [resume]
   difficulty: 3
-  prompt: "Because a resume can replay a delivery, the executed effect must be ____ so it applies at most once. (one word)"
-  answer:
-    regex: '^idempotent$'
-    normalize: true
+  prompt: "Durable pause/resume can deliver an approved 'charge the card' more than once (a replay or retry). What is a concrete way to make that delivery safe?"
+  options:
+    - { text: "Attach an idempotency key so a repeated delivery with the same key is deduplicated and the charge applies at most once", correct: true }
+    - { text: "Add a second human approval before each retry" }
+    - { text: "Slow the retries down so they never overlap" }
+    - { text: "Write the charge to the audit log so duplicates cancel out" }
+  explanation: "Resume introduces at-least-once delivery, so the executed effect must be keyed to run once. An idempotency key lets the payment system recognize a duplicate delivery and ignore it, so one approval produces exactly one charge — spacing retries or logging them doesn't prevent the double effect."

@@ -1,72 +1,96 @@
-# Free entry (short answer)
+# Conceptual multiple choice (converted from short-answer free entry)
 - id: fe-judge
-  type: text_input
+  type: multiple_choice
   tags: [judge]
   difficulty: 2
-  prompt: "What do you call a separate model call whose job is to score an agent's output? LLM-as-____ (one word)"
-  answer:
-    regex: '^judge$'
-    normalize: true
+  prompt: "An LLM-as-judge is handed a task and an agent's output. What is its job?"
+  options:
+    - { text: "Read the output and return a verdict scoring it against the task — an evaluation-only call, not a second attempt at the task", correct: true }
+    - { text: "Produce a better answer than the agent did and replace the original output" }
+    - { text: "Speed the agent up by caching and replaying its previous outputs" }
+    - { text: "Rewrite the task so it is easier for the agent to solve next time" }
+  explanation: "A judge does not redo the work. It is a separate, evaluation-only model call that reads the task and the output and returns a score or verdict, used when the answer can't be exact-matched."
 
 - id: fe-criteria
-  type: text_input
+  type: multiple_choice
   tags: [rubric]
   difficulty: 2
-  prompt: "A rubric is a list of explicit ____ the output is judged against. (one word)"
-  answer:
-    regex: '^criteria$'
-    normalize: true
+  prompt: "You grade summaries by asking the judge 'is this good?' The same summary scores 0.9 one run and 0.6 the next. What fixes the instability?"
+  options:
+    - { text: "Replace the vague prompt with explicit named criteria, so the verdict depends on the output and the criteria rather than the judge's mood", correct: true }
+    - { text: "Raise the judge's temperature so it explores more before answering" }
+    - { text: "Average the two scores together and move on" }
+    - { text: "Have the agent grade its own output instead of the judge" }
+  explanation: "'Is this good?' lets the verdict swing run to run. A rubric — a list of explicit criteria the output is judged against — makes scoring reproducible because the judge checks the same named things every time."
 
 - id: fe-pass-rate
-  type: text_input
+  type: multiple_choice
   tags: [suite]
   difficulty: 2
-  prompt: "What is the headline metric an eval suite reports — the fraction of cases that passed? (one term)"
-  answer:
-    regex: '^(pass_rate|pass rate|pass)$'
-    normalize: true
+  prompt: "A suite runs 200 cases and 150 pass, giving pass_rate 0.75. What does that number summarize?"
+  options:
+    - { text: "The fraction of cases across the whole suite that cleared the bar — performance over the distribution, not any single case", correct: true }
+    - { text: "How good the single best output in the suite was" }
+    - { text: "The average number of tokens each case consumed" }
+    - { text: "The judge model's confidence in its own verdicts" }
+  explanation: "pass_rate is the fraction of cases passing across the entire suite. It summarizes behavior over the distribution of inputs, which is why it beats grading one hand-picked transcript."
 
 - id: fe-threshold
-  type: text_input
+  type: multiple_choice
   tags: [gate]
   difficulty: 2
-  prompt: "A deploy gate blocks the release when pass-rate falls below a fixed ____. (one word)"
-  answer:
-    regex: '^threshold$'
-    normalize: true
+  prompt: "What should determine the pass-rate threshold your deploy gate enforces?"
+  options:
+    - { text: "The minimum quality you are willing to ship at, chosen from user and risk tolerance before the run", correct: true }
+    - { text: "Whatever pass-rate this week's run happened to score" }
+    - { text: "The pass-rate of the very first version, locked forever regardless of the stakes" }
+    - { text: "A round number like 0.9 that sounds strict, with no other reasoning" }
+  explanation: "The threshold encodes the quality bar you require, decided independently of any given run. Setting it from the current score or an arbitrary number makes the gate meaningless."
 
 - id: fe-gate
-  type: text_input
+  type: multiple_choice
   tags: [gate]
   difficulty: 2
-  prompt: "The automated check that stops a deploy below the bar is the deploy ____. (one word)"
-  answer:
-    regex: '^gate$'
-    normalize: true
+  prompt: "What has to be in place for a deploy gate to actually block a bad release?"
+  options:
+    - { text: "An eval suite that produces a pass_rate and a fixed threshold to compare it against, wired into the path to production", correct: true }
+    - { text: "A dashboard that a human remembers to check before each release" }
+    - { text: "A faster judge model so grading finishes sooner" }
+    - { text: "A larger agent model so the outputs are better" }
+  explanation: "A gate is mechanical: it consumes the suite's pass_rate, compares it against a preset threshold, and blocks the release automatically. Without a suite feeding it a number, there is nothing to gate on."
 
 - id: fe-metrics
-  type: text_input
+  type: multiple_choice
   tags: [suite]
   difficulty: 2
-  prompt: "Completion, accuracy, hallucination, and cost are the four ____ you track for an agent. (one word)"
-  answer:
-    regex: '^metrics$'
-    normalize: true
+  prompt: "Why track completion, accuracy, hallucination, and cost separately instead of collapsing them into one quality number?"
+  options:
+    - { text: "Each captures a distinct failure mode, and one blended number can hide a metric getting worse while another improves", correct: true }
+    - { text: "Because the judge can only output one metric per call" }
+    - { text: "Because more numbers always make a report look more rigorous" }
+    - { text: "So you can quietly drop the ones that look bad before shipping" }
+  explanation: "A single blended score masks trade-offs — accuracy can rise while hallucination doubles. Separate metrics keep each failure mode visible so a regression in one can't be averaged away."
 
 - id: fe-calibration
-  type: text_input
+  type: multiple_choice
   tags: [judge]
   difficulty: 2
-  prompt: "The set of labeled clear-pass and clear-fail exemplars you pin a judge to, so a change that breaks its verdicts is caught, is a ____ set. (one word)"
-  answer:
-    regex: '^calibration$'
-    normalize: true
+  prompt: "You upgrade your judge to a newer model. What is a calibration set of labeled clear-pass and clear-fail exemplars for?"
+  options:
+    - { text: "To catch when the new judge stops reproducing known-correct verdicts, before it silently corrupts every pass-rate built on it", correct: true }
+    - { text: "To make the judge run faster on the calibration cases" }
+    - { text: "To give the agent extra training examples to learn from" }
+    - { text: "To replace the need for any rubric, since the exemplars are enough" }
+  explanation: "The judge is part of the measuring instrument. Pinning it to labeled exemplars means a change — a new model or a reworded rubric — that breaks its known verdicts fails the check before it poisons downstream numbers."
 
 - id: fe-avg-score
-  type: text_input
+  type: multiple_choice
   tags: [suite]
   difficulty: 2
-  prompt: "Alongside pass_rate, the mean score over all cases — how good the passes were, not just how many — is the ____. (one term)"
-  answer:
-    regex: '^(avg_score|avg score|average score)$'
-    normalize: true
+  prompt: "Two suite runs both report pass_rate 0.80. Run A has avg_score 0.82, run B has avg_score 0.61. What does avg_score tell you that pass_rate cannot?"
+  options:
+    - { text: "How good the outputs were, not just how many cleared the bar — B's passes are barely scraping over while A's are comfortable", correct: true }
+    - { text: "Which judge model was faster on each run" }
+    - { text: "That run B contained fewer cases than run A" }
+    - { text: "Nothing — an identical pass_rate means the runs are identical" }
+  explanation: "pass_rate is binary per case; avg_score is the mean score over all cases. Equal pass-rates with different avg_scores means one run's passes are far weaker — quality that a binary fraction hides."

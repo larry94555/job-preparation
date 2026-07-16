@@ -1,54 +1,72 @@
-# Missing term (cloze)
+# Conceptual multiple choice (async job API + operability fundamentals)
 - id: cloze-async
-  type: text_input
+  type: multiple_choice
   tags: [asyncapi]
   difficulty: 1
-  prompt: "Because an agent run is slow, the submit endpoint returns a job id and does the work ____-hronously (one word for the whole style)."
-  answer:
-    regex: '^async$'
-    normalize: true
+  prompt: "What makes a job API 'asynchronous' rather than synchronous?"
+  options:
+    - { text: "The caller gets a response (a handle it can look up later) before the actual work has run", correct: true }
+    - { text: "The model generates its tokens on a background thread inside the handler" }
+    - { text: "The server compresses the response so it arrives faster" }
+    - { text: "Each request is answered on a different CPU core than the last one" }
+  explanation: "Asynchronous means the submit call returns before the work is done: it hands back a job id (a handle) immediately and the run happens later off the request thread. A synchronous endpoint would block until the result was ready."
 
 - id: cloze-job
-  type: text_input
+  type: multiple_choice
   tags: [jobs]
   difficulty: 1
-  prompt: "submit() stores a ____ record with status \"queued\" and returns its id."
-  answer:
-    regex: '^job$'
-    normalize: true
+  prompt: "Why does submit() persist a job record instead of just firing off the work in memory and forgetting it?"
+  options:
+    - { text: "A stored record survives so the caller and worker can look up the job's status and result later by its id", correct: true }
+    - { text: "Persisting the record is what makes the agent run faster" }
+    - { text: "A record is required only because HTTP cannot return a value otherwise" }
+    - { text: "It lets the handler skip enqueueing the work onto the queue" }
+  explanation: "The whole submit/poll shape depends on a durable job record keyed by id: the worker writes status and result onto it, and the caller reads them back. Fire-and-forget in-memory work would be unrecoverable once the process moved on."
 
 - id: cloze-poll
-  type: text_input
+  type: multiple_choice
   tags: [jobs]
   difficulty: 2
-  prompt: "To get the result, the caller repeatedly calls the status endpoint — it must ____ until the job is done."
-  answer:
-    regex: '^poll$'
-    normalize: true
+  prompt: "In the poll loop the client sleeps briefly between status calls. Why sleep instead of calling in a tight loop?"
+  options:
+    - { text: "A tight loop hammers the status endpoint with no benefit while the job isn't done; a brief backoff cuts load yet still notices completion quickly", correct: true }
+    - { text: "Sleeping is what actually advances the job from queued to running" }
+    - { text: "Without a sleep the status endpoint would return the wrong result" }
+    - { text: "The sleep is required so the worker can acquire a lock on the job" }
+  explanation: "Polling is a fast read that doesn't change the job's state, so calling it thousands of times per second just wastes resources. A short backoff between calls keeps the load reasonable while still detecting the terminal state promptly."
 
 - id: cloze-bucket
-  type: text_input
+  type: multiple_choice
   tags: [ratelimit]
   difficulty: 2
-  prompt: "The standard per-user rate limiter holds up to `capacity` tokens in a token ____."
-  answer:
-    regex: '^bucket$'
-    normalize: true
+  prompt: "The token bucket takes the current time as an injected `now` argument instead of reading the clock itself. Why shape it that way?"
+  options:
+    - { text: "Refill depends on elapsed time, so injecting the clock makes the limiter deterministic and testable — a test can advance time and assert the outcome", correct: true }
+    - { text: "Reading the system clock is forbidden inside a request handler" }
+    - { text: "Passing `now` in is what refills the bucket to full capacity each call" }
+    - { text: "It lets the bucket skip the refill step entirely" }
+  explanation: "The bucket refills from elapsed time, so its behavior is a function of the clock. Injecting `now` (rather than reading it internally) lets tests drive time forward deterministically — the same testability discipline the job-queue exercise uses by injecting the worker."
 
 - id: cloze-canary
-  type: text_input
+  type: multiple_choice
   tags: [rollout]
   difficulty: 2
-  prompt: "Releasing a new version to a small slice of traffic first is a ____ rollout."
-  answer:
-    regex: '^canary$'
-    normalize: true
+  prompt: "What is the main risk a canary rollout is designed to reduce?"
+  options:
+    - { text: "A bad new version hits only a small slice of traffic first, instead of every user at once", correct: true }
+    - { text: "It guarantees the new version has no bugs before any user sees it" }
+    - { text: "It makes the new version respond faster than the stable one" }
+    - { text: "It removes the need to watch error rates after deploying" }
+  explanation: "A canary limits blast radius: by routing a small deterministic slice to the new version first, a regression that tests missed damages a fraction of users, not all of them. You then widen or roll back based on what you observe."
 
 - id: cloze-rollback
-  type: text_input
+  type: multiple_choice
   tags: [rollout]
   difficulty: 2
-  prompt: "When the canary looks worse than stable, you ____ to the last known-good version."
-  answer:
-    regex: '^rollback$'
-    normalize: true
+  prompt: "A rollback returns traffic to which version, and what makes that version the safe choice?"
+  options:
+    - { text: "The last known-good (previously stable) version — safe precisely because it already ran correctly in production", correct: true }
+    - { text: "The newest canary build, because it has the most recent code" }
+    - { text: "A freshly written hotfix that hasn't been deployed yet" }
+    - { text: "Whichever version has the fewest lines of code" }
+  explanation: "Rolling back means repointing to the version that was already serving traffic correctly. Its safety is empirical — it worked in production moments ago — which is why a rollback is instant while rolling forward with an unproven fix costs time you don't have mid-incident."

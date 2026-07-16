@@ -1,45 +1,60 @@
-# Missing term (cloze)
+# Conceptual multiple-choice (converted from cloze fill-in-the-blank)
 - id: cloze-cascade
-  type: text_input
+  type: multiple_choice
   tags: [routing]
   difficulty: 2
-  prompt: "Trying a cheap model first and escalating to a stronger one only when a quality gate fails is called a model ____."
-  answer:
-    regex: '^cascade$'
-    normalize: true
+  prompt: "In a cheap→strong model cascade, what decides whether a request escalates to the stronger model?"
+  options:
+    - { text: "A quality gate (confidence score, verifier model, or self-check) rejecting the cheap model's answer", correct: true }
+    - { text: "A fixed random 50% escalation applied to every request" }
+    - { text: "Whether the strong model happens to be cheaper right now" }
+    - { text: "The number of words in the user's prompt" }
+  explanation: "The quality gate is what makes a cascade work: the cheap model answers first, and only when the gate rejects that answer does the request escalate. Without a gate, the cascade can't tell when the cheap answer is inadequate."
 
 - id: cloze-router
-  type: text_input
+  type: multiple_choice
   tags: [routing]
   difficulty: 1
-  prompt: "The component that inspects a request and decides which model should handle it is the ____."
-  answer:
-    regex: '^router$'
-    normalize: true
+  prompt: "What is the router's job in a multi-model system?"
+  options:
+    - { text: "Inspect each incoming request and decide which model should handle it", correct: true }
+    - { text: "Generate the final answer tokens itself instead of a model" }
+    - { text: "Store conversation history for billing purposes" }
+    - { text: "Encrypt requests before they reach any model" }
+  explanation: "The router is the dispatch component: it reads signals about the request and chooses a model, but it does not produce the answer itself."
 
 - id: cloze-circuit-breaker
-  type: text_input
+  type: multiple_choice
   tags: [resilience]
   difficulty: 2
-  prompt: "The pattern that trips open after repeated failures so calls fail fast instead of hammering a struggling provider is a circuit ____."
-  answer:
-    regex: '^breaker$'
-    normalize: true
+  prompt: "What problem does an open circuit breaker prevent while a provider is failing?"
+  options:
+    - { text: "A retry storm that piles more load onto an already-struggling provider and slows every caller", correct: true }
+    - { text: "Users ever seeing any error message at all" }
+    - { text: "The fallback provider from being used" }
+    - { text: "Failures from being logged" }
+  explanation: "When failures cross a threshold the breaker trips open and calls fail fast (or divert to fallback), so a drowning provider isn't hammered by synchronized retries and gets room to recover."
 
 - id: cloze-backoff
-  type: text_input
+  type: multiple_choice
   tags: [resilience]
   difficulty: 2
-  prompt: "Waiting progressively longer between retries — often doubling the delay each time — is called exponential ____."
-  answer:
-    regex: '^backoff$'
-    normalize: true
+  prompt: "Why increase the delay between successive retries (exponential backoff) instead of retrying at a fixed fast interval?"
+  options:
+    - { text: "Rapid fixed-interval retries keep loading a provider that's likely still recovering; growing delays give it time to recover", correct: true }
+    - { text: "Longer delays make the model's answer more accurate" }
+    - { text: "Fixed intervals violate the HTTP specification" }
+    - { text: "Exponential delays remove the need for a fallback provider" }
+  explanation: "Backing off progressively reduces pressure on a recovering provider. Retrying aggressively at a fast fixed rate can prolong the outage; cap retries and pair them with a breaker for persistent failures."
 
 - id: cloze-degraded
-  type: text_input
+  type: multiple_choice
   tags: [degraded]
   difficulty: 2
-  prompt: "Keeping the product usable at reduced capability while being transparent about it is serving a ____ mode."
-  answer:
-    regex: '^degraded$'
-    normalize: true
+  prompt: "What is the goal of serving a 'degraded mode' when the primary path is unavailable?"
+  options:
+    - { text: "Keep the product usable at reduced capability while being transparent, rather than a full outage or a silent quality drop", correct: true }
+    - { text: "Return an error page until the primary path recovers" }
+    - { text: "Silently swap to a weaker model as if nothing changed" }
+    - { text: "Permanently switch all users to the cheapest model" }
+  explanation: "Degraded mode balances availability and honesty: the user still gets something useful during an outage and knows its limits — which beats both a hard failure and a confusing silent substitution."

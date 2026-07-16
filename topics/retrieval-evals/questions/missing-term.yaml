@@ -1,66 +1,73 @@
-# Missing term (cloze) + parameterized numeric
+# Conceptual multiple-choice on the core metrics (recall@k, precision@k, MRR) and grounding.
+# (Formerly cloze/parameterized-numeric text_input; converted to understanding-focused MC.)
 - id: cloze-recall
-  type: text_input
+  type: multiple_choice
   tags: [metrics]
   difficulty: 1
-  prompt: "The fraction of all relevant documents that appear in the top-k results is called ____@k."
-  answer:
-    regex: '^recall$'
-    normalize: true
+  prompt: "A retriever returns 5 results for a query and all 5 are relevant, but the corpus actually contains 20 relevant documents for that query. What does this reveal?"
+  options:
+    - { text: "High precision@k but low recall@k — most relevant docs were never retrieved", correct: true }
+    - { text: "High recall@k but low precision@k — the results are mostly noise" }
+    - { text: "Both recall@k and precision@k are perfect" }
+    - { text: "Neither metric can be computed without knowing MRR" }
+  explanation: "Every returned result is relevant (precision high), but only 5 of 20 relevant docs were found, so recall is 5/20 = 0.25. Precision and recall move independently."
 
 - id: cloze-precision
-  type: text_input
+  type: multiple_choice
   tags: [metrics]
   difficulty: 1
-  prompt: "The fraction of the top-k retrieved results that are relevant is called ____@k."
-  answer:
-    regex: '^precision$'
-    normalize: true
+  prompt: "A retriever returns 10 results for a query, of which only 3 are relevant. What is precision@10, and what does it tell you?"
+  options:
+    - { text: "0.3 — most of what was surfaced to the user is irrelevant", correct: true }
+    - { text: "0.3 — 30% of all relevant documents were found" }
+    - { text: "3.0 — three relevant hits is the score" }
+    - { text: "It cannot be known without the total number of relevant docs" }
+  explanation: "precision@k divides relevant-in-top-k by k (here 3/10). It measures the quality of what was returned, not coverage of the relevant set — that is recall."
 
 - id: cloze-mrr
-  type: text_input
+  type: multiple_choice
   tags: [metrics]
   difficulty: 2
-  prompt: "The metric that averages 1/(rank of the first relevant result) across queries is abbreviated ____ (three letters)."
-  answer:
-    regex: '^mrr$'
-    normalize: true
+  prompt: "Two retrievers both place a relevant result in the top-k for every query, but retriever A puts it at rank 1 while retriever B puts it at rank 5. Which metric distinguishes them?"
+  options:
+    - { text: "MRR — it rewards a higher rank for the first relevant result, so A scores better", correct: true }
+    - { text: "recall@k — both would score differently because rank changes coverage" }
+    - { text: "precision@k — irrelevant results changed between the two" }
+    - { text: "None — all three metrics score A and B identically" }
+  explanation: "recall@k and precision@k only care whether the relevant doc is in the window, not where. MRR (1/rank of first relevant) is order-sensitive, so rank 1 beats rank 5."
 
 - id: cloze-grounding
-  type: text_input
+  type: multiple_choice
   tags: [grounding]
   difficulty: 2
-  prompt: "When the answer only makes claims the retrieved context actually supports, we say it is ____ in the context. (one word)"
-  answer:
-    regex: '^(grounded|faithful)$'
-    normalize: true
+  prompt: "Why do we require a RAG answer to be 'grounded' in the retrieved context — asserting only claims that context supports?"
+  options:
+    - { text: "It limits the model to what the evidence actually shows, reducing unsupported/hallucinated claims", correct: true }
+    - { text: "It guarantees the retrieved passages are the most relevant ones available" }
+    - { text: "It raises recall@k by pulling more documents into the top-k" }
+    - { text: "It makes the answer shorter and therefore cheaper to generate" }
+  explanation: "Grounding constrains generation to the supplied evidence, so the failure mode of confidently stating things the context does not support is caught — it is about faithfulness, not retrieval coverage."
 
-# Parameterized numeric: compute recall@k as a decimal from relevant/retrieved counts.
-# The grader substitutes only bare {{name}} placeholders into `equals`, so the total
-# is fixed at 10 in the prompt and `found` is the number of the 10 relevant docs that
-# landed in the top-k. recall@k = found / 10, so the expected decimal is 0.{{found}}
-# when found < 10 (and 1.0 when found = 10). We keep found in [1,9] so the answer is
-# exactly the single-digit decimal 0.{{found}} — a bare-parameter substitution.
 - id: num-recall-at-k-decimal
-  type: text_input
+  type: multiple_choice
   tags: [metrics]
   difficulty: 3
-  parameters:
-    found: { random_int: [1, 9] }
-  prompt: "A query has 10 relevant documents in the corpus. Of those, {{found}} appear in the top-k retrieved results. Compute recall@k as a decimal (e.g. 0.3)."
-  answer:
-    equals: "0.{{found}}"
-    numeric_tolerance: 0.001
+  prompt: "A query has 10 relevant documents in the corpus. Of those, 3 appear in the top-k retrieved results. What is recall@k?"
+  options:
+    - { text: "0.3", correct: true }
+    - { text: "0.7" }
+    - { text: "0.1" }
+    - { text: "1.0" }
+  explanation: "recall@k = relevant-found-in-top-k / total-relevant = 3/10 = 0.3. The 7 missed relevant docs are what keep it below 1.0."
 
-# Parameterized numeric: identify the recall@k numerator from stated counts.
 - id: num-recall-numerator
-  type: text_input
+  type: multiple_choice
   tags: [metrics]
   difficulty: 2
-  parameters:
-    found: { random_int: [1, 8] }
-    missed: { random_int: [1, 5] }
-  prompt: "recall@k = (relevant docs found in the top-k) / (total relevant docs). If {{found}} relevant docs appear in the top-k and {{missed}} relevant docs are missed, what number is the NUMERATOR of recall@k?"
-  answer:
-    equals: "{{found}}"
-    numeric_tolerance: 0
+  prompt: "recall@k = (relevant docs found in the top-k) / (total relevant docs). If 6 relevant docs appear in the top-k and 4 relevant docs are missed, what is recall@k?"
+  options:
+    - { text: "0.6", correct: true }
+    - { text: "1.5" }
+    - { text: "0.4" }
+    - { text: "6" }
+  explanation: "Total relevant = found + missed = 6 + 4 = 10, so recall@k = 6/10 = 0.6. The denominator is the whole relevant set, not the number missed."

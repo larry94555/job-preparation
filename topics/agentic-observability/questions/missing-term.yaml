@@ -1,54 +1,72 @@
-# Missing term (cloze)
+# Conceptual multiple choice (converted from cloze fill-in-the-blank)
 - id: cloze-trace
-  type: text_input
+  type: multiple_choice
   tags: [trace]
   difficulty: 1
-  prompt: "The complete per-step record of one agent run is called a ____."
-  answer:
-    regex: '^trace$'
-    normalize: true
+  prompt: "Why is a trace described as the 'complete per-step' record rather than just the final answer plus a total duration?"
+  options:
+    - { text: "Only a step-by-step record lets you reconstruct what the agent actually did and see where it went wrong", correct: true }
+    - { text: "Because the final answer of an agent run is always wrong and must be discarded" }
+    - { text: "Because total duration is the only number that ever matters in production" }
+    - { text: "Because keeping every step uses less storage than keeping the final answer" }
+  explanation: "A final answer plus a total tells you a run happened and roughly how long it took. The per-step record is what lets you replay the run and attribute a surprise to the exact step that caused it."
 
 - id: cloze-span
-  type: text_input
+  type: multiple_choice
   tags: [spans]
   difficulty: 1
-  prompt: "The record of a single step within a trace is a ____."
-  answer:
-    regex: '^span$'
-    normalize: true
+  prompt: "How does a span relate to the trace it belongs to?"
+  options:
+    - { text: "A trace is the ordered collection of spans, each span recording one step of the run", correct: true }
+    - { text: "A span contains many traces, one for each step it runs" }
+    - { text: "A span and a trace are two names for the same whole-run record" }
+    - { text: "A span is the run's total cost; the trace is everything else" }
+  explanation: "Trace and span are a whole-and-part pair: the trace is one run, made of an ordered list of spans, and each span is one step within it. That containment is what lets you drill from a run down to the step that misbehaved."
 
 - id: cloze-metrics
-  type: text_input
+  type: multiple_choice
   tags: [metrics]
   difficulty: 2
-  prompt: "Cost, latency, and failure rate are the production ____ you watch in aggregate."
-  answer:
-    regex: '^metrics$'
-    normalize: true
+  prompt: "Why are cost, latency, and failure rate watched in aggregate across many runs rather than judged from a single run?"
+  options:
+    - { text: "The production picture — total spend, the latency tail, and rare failures — only emerges across many runs", correct: true }
+    - { text: "A single run is always perfectly representative of production behavior" }
+    - { text: "Aggregating the metrics makes each individual run cheaper to execute" }
+    - { text: "Individual runs cannot be measured, so only aggregates exist" }
+  explanation: "One run shows you one point. Cost that compounds with volume, the p95/p99 tail, and one-in-a-thousand failures are all properties of the distribution — they only show up when you look at the aggregate."
 
 - id: cloze-alert
-  type: text_input
+  type: multiple_choice
   tags: [alerts]
   difficulty: 2
-  prompt: "A rule that fires when a metric crosses a threshold is an ____."
-  answer:
-    regex: '^alerts?$'
-    normalize: true
+  prompt: "An alert is configured on p95 latency. When does it actually do something?"
+  options:
+    - { text: "Only when p95 crosses the configured threshold — otherwise it stays silent", correct: true }
+    - { text: "Continuously, emitting a notification on every request" }
+    - { text: "Only while someone has the dashboard open and is watching it" }
+    - { text: "Whenever any span is recorded, regardless of the metric's value" }
+  explanation: "An alert is a threshold rule: it sits quiet until the metric it watches breaches its budget or SLO, then fires. That silence-until-breach is exactly what lets it catch an incident when nobody is looking."
 
 - id: cloze-latency
-  type: text_input
+  type: multiple_choice
   tags: [spans]
   difficulty: 1
-  prompt: "The time a step takes, recorded per span in milliseconds, is its ____."
-  answer:
-    regex: '^latency$'
-    normalize: true
+  prompt: "A span records latency_ms=8200. What does that number represent?"
+  options:
+    - { text: "How long that single step took, in wall-clock milliseconds", correct: true }
+    - { text: "The total duration of the entire run the span belongs to" }
+    - { text: "The number of tokens the model produced in that step" }
+    - { text: "The dollar cost of the step, expressed in thousandths" }
+  explanation: "Latency on a span is the wall-clock time of that one step. Recorded per span, it lets you point at the specific slow step instead of only knowing the whole run was slow."
 
 - id: cloze-dashboard
-  type: text_input
+  type: multiple_choice
   tags: [alerts]
   difficulty: 2
-  prompt: "The always-on view of aggregate trends you scan is a ____."
-  answer:
-    regex: '^dashboard$'
-    normalize: true
+  prompt: "A dashboard shows p95 latency and cost-per-hour over the past week. What kind of information is it built to surface?"
+  options:
+    - { text: "Aggregate trends across many runs that you scan at a glance", correct: true }
+    - { text: "The exact spans of one specific failing run, for debugging that run" }
+    - { text: "A page that wakes you the moment a threshold is breached" }
+    - { text: "The full raw trace of every run, stored for replay" }
+  explanation: "A dashboard is the always-on view of aggregate trends — cost per hour, p95 latency, failure rate over time — that you scan on your own schedule. Waking you on a breach is the alert's job, and inspecting one run's steps is the trace's."

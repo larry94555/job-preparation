@@ -1,36 +1,48 @@
-# Free entry (short answer)
+# Conceptual multiple-choice — footprint savings, quant targets, method families, verification
 - id: fe-int4-savings
-  type: text_input
+  type: multiple_choice
   tags: [formats]
   difficulty: 2
-  prompt: "Going from FP16 to INT4 weights cuts the weight footprint by roughly what factor? (a number, e.g. 4)"
-  answer:
-    equals: "4"
-    numeric_tolerance: 0
+  prompt: "The real-world memory saving from FP16 to INT4 weights is a bit LESS than the naive 4x because:"
+  options:
+    - { text: "Quantization also stores per-group scales (and often zero-points), which add a small overhead", correct: true }
+    - { text: "INT4 weights must be stored twice for redundancy" }
+    - { text: "The activations grow to compensate for the smaller weights" }
+    - { text: "INT4 actually uses more bits per weight than INT8" }
+  explanation: "16 bits to 4 bits is a ~4x cut on the raw weights, but each group carries a scale (and sometimes a zero-point), so the effective footprint reduction is slightly below 4x — smaller group sizes trade more overhead for better accuracy."
 
 - id: fe-harder-to-quant
-  type: text_input
+  type: multiple_choice
   tags: [quality]
   difficulty: 3
-  prompt: "Weights or activations — which is generally harder to quantize at low bit-width? (one word)"
-  answer:
-    regex: '^activations?$'
-    normalize: true
+  prompt: "Because activations are harder to quantize than weights, the common safe default for LLM serving is to:"
+  options:
+    - { text: "Quantize weights to low bit-width but keep activations in higher precision (weight-only quantization)", correct: true }
+    - { text: "Quantize activations aggressively and leave weights in FP16" }
+    - { text: "Quantize neither and just deploy a smaller model instead" }
+    - { text: "Quantize both weights and activations to INT4 by default" }
+  explanation: "Weights are static and calibrate well at low bit-width; activations vary per input and carry outliers. Weight-only INT4 (via GPTQ/AWQ) captures most of the memory/bandwidth win while dodging the activation-outlier problem, so it is the default."
 
 - id: fe-name-a-method
-  type: text_input
+  type: multiple_choice
   tags: [methods]
   difficulty: 2
-  prompt: "Name a post-training weight-quantization method for LLMs (one term)."
-  answer:
-    regex: '^(gptq|awq|smoothquant|llm\.?int8|bitsandbytes|k-?quants?|gguf)$'
-    normalize: true
+  prompt: "GPTQ, AWQ, and bitsandbytes NF4 are all examples of:"
+  options:
+    - { text: "Post-training weight quantization methods — applied after training, with no full retrain", correct: true }
+    - { text: "Quantization-aware training methods that retrain the model at low precision" }
+    - { text: "Activation-only quantization schemes that leave weights untouched" }
+    - { text: "KV-cache compression algorithms" }
+  explanation: "All three quantize the already-trained weights as a post-processing step (optionally with a small calibration set), which is why they are cheap to apply. Quantization-aware training instead simulates low precision during training and is far more expensive."
 
 - id: fe-verify-metric
-  type: text_input
+  type: multiple_choice
   tags: [quality]
   difficulty: 3
-  prompt: "Perplexity can hide quality loss, so you should also confirm quality with real task ____. (one word)"
-  answer:
-    regex: '^(evals?|evaluations?|benchmarks?|tasks?)$'
-    normalize: true
+  prompt: "When low-bit quantization degrades a model, which capabilities tend to degrade FIRST and most?"
+  options:
+    - { text: "Complex multi-step reasoning, code generation, and long-context tasks", correct: true }
+    - { text: "Simple next-token prediction on common everyday text" }
+    - { text: "The model's on-disk file size" }
+    - { text: "Basic tokenization of the input" }
+  explanation: "Quantization noise compounds over long chains of dependent steps, so reasoning (e.g. GSM8K), code, and long-context tasks break before generic next-token accuracy does. That is exactly the loss averaged perplexity hides, so you must gate on real task evals against the FP16 baseline."

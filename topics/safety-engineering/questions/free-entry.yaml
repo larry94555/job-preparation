@@ -1,36 +1,36 @@
-# Free entry (short answer)
+# Conceptual multiple-choice (formerly free-entry short answer)
 - id: fe-fence-untrusted
-  type: text_input
+  type: multiple_choice
   tags: [boundary]
   difficulty: 2
-  prompt: "Name one technique for keeping retrieved/tool content from being obeyed as instructions. (one word or short phrase)"
-  answer:
-    regex: '^(fenc(e|ing)|delimit(ing|ers?)?|quoting|provenance( tags?)?|trust tags?|tagging)$'
-    normalize: true
+  prompt: "A team fences all retrieved documents and considers prompt injection solved. What is the flaw in that reasoning?"
+  options:
+    - { text: "Fencing is one imperfect layer — a determined attacker can still craft content the model treats as instructions, so it must be combined with least privilege and egress control", correct: true }
+    - { text: "Fencing removes the need for any system prompt" }
+    - { text: "Fencing only works if the documents are encrypted at rest" }
+    - { text: "Fencing makes the model faster but less accurate" }
+  explanation: "Fencing marks the untrusted span as data and raises the bar, but it is not a complete defense; robust safety needs defense-in-depth, not a single control."
 
 - id: fe-egress-control
-  type: text_input
+  type: multiple_choice
   tags: [permission]
   difficulty: 3
-  prompt: "Name one control that stops an agent from sending sensitive data to an attacker's destination."
-  answer:
-    regex: '^(egress (gat(e|ing)|control|filter)|allow-?list|human confirm(ation)?|confirm(ation)? on egress|block egress|gated egress)$'
-    normalize: true
+  prompt: "Even if an attacker successfully injects instructions, a strong egress control limits the damage because it:"
+  options:
+    - { text: "Gates the data-out step, so private data cannot leave to an unapproved destination without an allow-list or human check", correct: true }
+    - { text: "Prevents the injected text from ever entering the context" }
+    - { text: "Rewrites the model's system prompt to strip out the attack" }
+    - { text: "Detects the injection pattern before the model reads it" }
+  explanation: "Egress control is the last line of defense: it blocks exfiltration at the boundary where data leaves, independent of whether upstream injection already succeeded."
 
 - id: fe-blast-radius
-  type: text_input
+  type: multiple_choice
   tags: [permission]
   difficulty: 3
-  prompt: "What do you shrink by giving an agent only least-privilege, scoped tools? (two words)"
-  answer:
-    regex: '^blast radius$'
-    normalize: true
-
-- id: fe-defense-depth
-  type: text_input
-  tags: [injection]
-  difficulty: 3
-  prompt: "Layering several imperfect defenses so no single failure is fatal is called defense in ____."
-  answer:
-    regex: '^depth$'
-    normalize: true
+  prompt: "An agent's database tool is scoped read-only to a single table rather than full admin. If that turn is compromised by injection, the main effect is that:"
+  options:
+    - { text: "The blast radius is smaller — the attacker can read one table but cannot write or reach other systems", correct: true }
+    - { text: "The injection is automatically detected and blocked" }
+    - { text: "The agent runs faster because it has fewer permissions" }
+    - { text: "The attacker gains the developer's full credentials anyway" }
+  explanation: "Least-privilege scoping shrinks the blast radius; a compromised turn can only do what the narrow token allows, containing the damage."

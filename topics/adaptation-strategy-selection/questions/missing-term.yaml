@@ -1,45 +1,60 @@
-# Missing term (cloze)
+# Conceptual multiple-choice (converted from missing-term cloze)
 - id: cloze-icl
-  type: text_input
+  type: multiple_choice
   tags: [approaches]
   difficulty: 1
-  prompt: "Steering the model at inference time with instructions and few-shot examples in the prompt, without touching the weights, is called in-context ____."
-  answer:
-    regex: '^learning$'
-    normalize: true
+  prompt: "In-context learning steers behavior purely through the prompt. What is a fundamental limitation compared with fine-tuning?"
+  options:
+    - { text: "The steering lasts only for that prompt and consumes context-window space on every call — nothing is retained between requests", correct: true }
+    - { text: "It permanently alters the model's weights after enough examples" }
+    - { text: "It requires collecting a labeled dataset and running training jobs" }
+    - { text: "It can only be used to add fresh external documents" }
+  explanation: "ICL is transient: it changes nothing permanent and pays prompt-token/context cost on each call, unlike fine-tuning, which bakes behavior into the weights."
 
 - id: cloze-distillation
-  type: text_input
+  type: multiple_choice
   tags: [approaches]
   difficulty: 2
-  prompt: "Training a smaller student model to reproduce a larger teacher's behavior for cheaper deployment is called ____."
-  answer:
-    regex: '^distillation$'
-    normalize: true
+  prompt: "In distillation, why can't the student model be expected to substantially outperform its teacher?"
+  options:
+    - { text: "The student is trained to reproduce the teacher's outputs, so the teacher's behavior is the target it approximates — flaws included", correct: true }
+    - { text: "The student always has more parameters than the teacher" }
+    - { text: "Distillation adds fresh external documents the teacher lacked" }
+    - { text: "The student updates its own weights from user feedback in production" }
+  explanation: "Distillation transfers the teacher's behavior into a smaller student, so quality is bounded by the teacher — which is why you only distill known-good behavior."
 
 - id: cloze-freshness
-  type: text_input
+  type: multiple_choice
   tags: [decision]
   difficulty: 2
-  prompt: "The decision axis about how current the model's knowledge must be — pointing toward RAG for fast-changing data — is knowledge ____."
-  answer:
-    regex: '^freshness$'
-    normalize: true
+  prompt: "Two knowledge sources feed an assistant: a fixed regulatory statute from 1998 and a price list updated hourly. How should the freshness axis shape your design?"
+  options:
+    - { text: "Route the hourly price list through retrieval so it stays current; the stable statute can safely be baked in or cached", correct: true }
+    - { text: "Fine-tune on both, since weights keep any fact current automatically" }
+    - { text: "Put both in weights and retrain hourly to cover the price list" }
+    - { text: "Neither needs retrieval; freshness is irrelevant to the design" }
+  explanation: "The freshness axis only forces retrieval for fast-changing data; stable knowledge doesn't need it. Match the mechanism to how often each source actually changes."
 
 - id: cloze-attribution
-  type: text_input
+  type: multiple_choice
   tags: [decision]
   difficulty: 2
-  prompt: "The requirement that an answer be traceable to the exact source document it came from is called ____."
-  answer:
-    regex: '^attribution$'
-    normalize: true
+  prompt: "Why can a fine-tuned model rarely satisfy a hard requirement to cite the exact source document behind each answer?"
+  options:
+    - { text: "Training blends all examples into the weights, so there is no retained link from an output back to a specific source document", correct: true }
+    - { text: "Fine-tuned models are contractually forbidden from showing citations" }
+    - { text: "Weights store each source as a separate retrievable file" }
+    - { text: "Citations are only possible when latency is below a fixed threshold" }
+  explanation: "Weights merge everything into parameters, losing the output-to-source link; retrieval preserves attribution because retrieved chunks carry source metadata."
 
 - id: cloze-volatile
-  type: text_input
+  type: multiple_choice
   tags: [antipatterns]
   difficulty: 3
-  prompt: "Fine-tuning is the wrong tool for facts that change constantly because such ____ facts go stale in the weights."
-  answer:
-    regex: '^volatile$'
-    normalize: true
+  prompt: "What general principle explains why volatile facts don't belong in fine-tuned weights?"
+  options:
+    - { text: "Change what changes often through context/retrieval, and reserve weights for stable behavior — facts that shift belong where they're cheap to update", correct: true }
+    - { text: "Anything a user might ask about should be trained into the weights first" }
+    - { text: "Weights update themselves continuously, so freshness is never a concern" }
+    - { text: "Retrieval should be avoided because it cannot handle private data" }
+  explanation: "Separate stable behavior (weights) from changing knowledge (retrieval/context); volatile facts go stale in weights and force constant retraining."

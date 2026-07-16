@@ -7,5 +7,5 @@ segments:
   - present: what-the-harness-owns
   - check: mc-prompt-cant-fix
   - check: cloze-harness
-  - check: fe-invalid-json
+  - apply: essay-invalid-json
   - apply: essay-boundary-explain

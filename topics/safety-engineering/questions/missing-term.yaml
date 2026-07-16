@@ -1,45 +1,60 @@
-# Missing term (cloze)
+# Conceptual multiple-choice (formerly cloze/missing-term)
 - id: cloze-injection
-  type: text_input
+  type: multiple_choice
   tags: [injection]
   difficulty: 1
-  prompt: "An attack where untrusted input smuggles instructions the model follows as if authoritative is prompt ____."
-  answer:
-    regex: '^injection$'
-    normalize: true
+  prompt: "Why is prompt injection possible in the first place?"
+  options:
+    - { text: "The model processes trusted instructions and untrusted content in one token stream and has no built-in way to tell which is authoritative", correct: true }
+    - { text: "The model's weights can be rewritten at runtime by any user" }
+    - { text: "Tool outputs are always executed as shell commands" }
+    - { text: "The tokenizer automatically decrypts hidden instructions" }
+  explanation: "Injection exploits that everything is just text in one context; the model has no inherent trust channel, so crafted content can pose as authoritative instructions."
 
 - id: cloze-indirect
-  type: text_input
+  type: multiple_choice
   tags: [injection]
   difficulty: 2
-  prompt: "Injection delivered through content the model retrieves or a tool returns, rather than typed by the user, is called ____ injection."
-  answer:
-    regex: '^indirect$'
-    normalize: true
+  prompt: "Which scenario is an example of *indirect* prompt injection?"
+  options:
+    - { text: "A web page the agent is asked to summarize contains hidden text telling it to email the user's contacts", correct: true }
+    - { text: "A user directly types 'ignore your previous instructions' into the chat" }
+    - { text: "A developer writes an overly permissive system prompt" }
+    - { text: "The model exceeds its context window mid-task" }
+  explanation: "Indirect injection is planted in content the model retrieves or a tool returns, not typed by the user; the malicious instruction rides in on ingested data."
 
 - id: cloze-boundary
-  type: text_input
+  type: multiple_choice
   tags: [boundary]
   difficulty: 2
-  prompt: "The point where data crosses from a less-trusted source into a more-trusted context is a ____ boundary."
-  answer:
-    regex: '^trust$'
-    normalize: true
+  prompt: "When content crosses a trust boundary into the model's context, how should it be treated?"
+  options:
+    - { text: "As untrusted data to analyze, never as instructions to obey, no matter what it says", correct: true }
+    - { text: "With the same authority as the developer's system prompt" }
+    - { text: "As a command to execute if it looks like a valid instruction" }
+    - { text: "As trusted once it has been cached, so it need not be re-checked" }
+  explanation: "A trust boundary is exactly where provenance changes; content from the less-trusted side must be handled as data, since it could carry injected instructions."
 
 - id: cloze-exfiltration
-  type: text_input
+  type: multiple_choice
   tags: [leakage]
   difficulty: 3
-  prompt: "The unauthorized outflow of sensitive data to a destination it should never reach is data ____."
-  answer:
-    regex: '^(exfiltration|leakage)$'
-    normalize: true
+  prompt: "Which of these is an example of data exfiltration by an agent?"
+  options:
+    - { text: "The agent embeds the user's API key in a URL and fetches an attacker-controlled site", correct: true }
+    - { text: "The agent forgets the first message in a long conversation" }
+    - { text: "The agent returns a slightly wrong summary of a document" }
+    - { text: "The agent asks the user to clarify an ambiguous request" }
+  explanation: "Exfiltration is sensitive data crossing a boundary to an unauthorized destination; here the key leaves the system via an outbound request the attacker controls."
 
 - id: cloze-least-privilege
-  type: text_input
+  type: multiple_choice
   tags: [permission]
   difficulty: 2
-  prompt: "Granting each tool only the minimum access it needs is the principle of least ____."
-  answer:
-    regex: '^privilege$'
-    normalize: true
+  prompt: "An agent needs to look up order status but never change orders. Least privilege says you should give it:"
+  options:
+    - { text: "A read-only tool scoped to order lookups, with no write or refund capability", correct: true }
+    - { text: "Full admin access so it never hits a permission error" }
+    - { text: "The same credentials the developers use" }
+    - { text: "Every available tool, disabled one by one as problems arise" }
+  explanation: "Least privilege means provisioning only the minimum capability the task needs, so a compromised turn cannot escalate to writes or reach unrelated systems."

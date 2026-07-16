@@ -1,36 +1,48 @@
-# Free entry (short answer)
+# Conceptual multiple-choice (converted from short-answer)
 - id: fe-routing-signal
-  type: text_input
+  type: multiple_choice
   tags: [routing]
   difficulty: 2
-  prompt: "Name one signal a router can use to decide which model handles a request. (a few words)"
-  answer:
-    regex: '^(difficulty|task difficulty|complexity|prompt length|input length|length|budget|cost budget|latency budget|required capabilit(y|ies)|capabilit(y|ies)|tool use|needs tools|vision|context (size|length))$'
-    normalize: true
+  prompt: "A user request includes an image that must be interpreted. Which routing signal most directly determines the correct model here?"
+  options:
+    - { text: "Required capabilities (e.g., vision) — only a multimodal model can handle it, whatever the difficulty or budget", correct: true }
+    - { text: "Prompt length alone, since longer prompts always need stronger models" }
+    - { text: "The per-request cost budget alone, ignoring what the task needs" }
+    - { text: "The time of day the request arrived" }
+  explanation: "Capability requirements can hard-constrain routing: a task needing vision, tools, or long context must go to a model that supports it, independent of difficulty or cost signals."
 
 - id: fe-fallback-trigger
-  type: text_input
+  type: multiple_choice
   tags: [fallback]
   difficulty: 2
-  prompt: "Name one condition that should trigger a fallback to another model or provider. (a few words)"
-  answer:
-    regex: '^(timeout|timeouts|time out|rate limit|rate-?limited|429|5xx|server error|5xx errors|error|errors|outage|provider down|down|unavailable|over budget|overloaded)$'
-    normalize: true
+  prompt: "Which situation should NOT trigger a fallback to an alternate provider?"
+  options:
+    - { text: "The primary model returned a correct answer within its normal latency", correct: true }
+    - { text: "A sustained burst of 429 rate-limit errors from the provider" }
+    - { text: "The provider repeatedly timing out on requests" }
+    - { text: "The provider returning 5xx server errors" }
+  explanation: "Fallback exists for failure conditions — timeouts, 5xx, 429/rate limits, outages. A normal successful, timely response is exactly the case where you stay on the primary."
 
 - id: fe-hedge-cost
-  type: text_input
+  type: multiple_choice
   tags: [resilience]
   difficulty: 3
-  prompt: "What is the main cost of hedging a request to a second model? (a few words)"
-  answer:
-    regex: '^(extra (cost|spend|tokens|compute|requests)|duplicate (cost|work|requests)|more cost|higher cost|cost|wasted (compute|tokens|work)|double (cost|spend|work))$'
-    normalize: true
+  prompt: "What is the main downside of hedging every request to a backup model?"
+  options:
+    - { text: "It roughly doubles compute/token spend, because two requests run for work only one needs", correct: true }
+    - { text: "It makes tail (p99) latency worse than a single request" }
+    - { text: "It removes the need for retries or circuit breakers" }
+    - { text: "It guarantees both models return identical answers" }
+  explanation: "Hedging trades money for a shorter latency tail: you sometimes pay for two requests to serve one. That is why you hedge selectively on latency-sensitive paths, not on everything."
 
 - id: fe-honest-degrade
-  type: text_input
+  type: multiple_choice
   tags: [degraded]
   difficulty: 3
-  prompt: "Name one honest way to signal to the user that a fallback/degraded path was used. (a few words)"
-  answer:
-    regex: '^(banner|notice|notification|warning|message|disclaimer|lower(ed)? confidence|confidence indicator|disable(d)? (a )?feature|disabled features|status indicator|badge|label)$'
-    normalize: true
+  prompt: "Beyond telling the user, what else does an honest degraded mode do so the degradation isn't invisible?"
+  options:
+    - { text: "Emit a signal/metric such as fallback rate so operators see the degradation on dashboards", correct: true }
+    - { text: "Suppress logs and metrics so the incident looks clean" }
+    - { text: "Automatically upgrade the user to a paid tier" }
+    - { text: "Raise the weaker model's temperature so it sounds more confident" }
+  explanation: "Honest degradation is transparent to users AND observable to operators: a fallback-rate metric on dashboards means the team sees when and how often the system runs degraded, not just confused users."

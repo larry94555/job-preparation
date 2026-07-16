@@ -5,6 +5,6 @@ segments:
   - present: control-the-egress
   - check: mc-egress
   - check: mc-exfiltration
-  - check: fe-egress
+  - apply: essay-exfiltration
   - present: layer-egress-with-the-rest
   - check: mc-defense-in-depth-layers

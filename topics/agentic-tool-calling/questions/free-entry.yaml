@@ -1,54 +1,72 @@
-# Free entry (short answer)
+# Conceptual multiple-choice (converted from short-answer free entry)
 - id: fe-stop-reason
-  type: text_input
+  type: multiple_choice
   tags: [toolloop]
   difficulty: 2
-  prompt: "What stop_reason signals the model wants to use a tool? (one token)"
-  answer:
-    regex: '^tool_use$'
-    normalize: true
+  prompt: "One turn returns text and no tool_use block; another returns text plus a tool_use block. Which single field should the loop switch on to decide whether to continue or stop?"
+  options:
+    - { text: "stop_reason — it is the loop's control variable, not the presence of text or the message length", correct: true }
+    - { text: "The number of content blocks in the message" }
+    - { text: "Whether the .text field is empty" }
+    - { text: "The total token count of the turn" }
+  explanation: "The loop is a branch on stop_reason: tool_use means run the tool and call the model again, end_turn means stop and return the text. Neither the presence of text nor message size reliably signals which branch to take."
 
 - id: fe-tool-result-id
-  type: text_input
+  type: multiple_choice
   tags: [toolloop]
   difficulty: 3
-  prompt: "What field ties a tool_result back to the call that produced it?"
-  answer:
-    regex: '^tool_use_id$'
-    normalize: true
+  prompt: "A single turn issues three parallel tool calls. If the harness returns all three tool_result blocks but mismatches which id pairs with which result, what happens?"
+  options:
+    - { text: "The model attributes outputs to the wrong calls and reasons over corrupted data — the tool_use_id is exactly what prevents this", correct: true }
+    - { text: "Nothing — the model matches results to calls by their position in the list" }
+    - { text: "The API silently discards all three results and asks the model to retry" }
+    - { text: "The harness merges the three results into one, so the mismatch is harmless" }
+  explanation: "With parallel calls, only the tool_use_id binds each result to its request. Mismatched ids feed each call the wrong output, so the model reasons on corrupted associations even though every individual result is correct."
 
 - id: fe-schema-required
-  type: text_input
+  type: multiple_choice
   tags: [schema]
   difficulty: 2
-  prompt: "Which JSON-schema key lists the mandatory arguments? (one word)"
-  answer:
-    regex: '^required$'
-    normalize: true
+  prompt: "An argument is defined in a tool's schema but left out of the schema's required list. How should the model and harness treat that argument?"
+  options:
+    - { text: "As optional — the model may omit it, the harness won't reject the call for its absence, and the tool must handle the missing value (default or None)", correct: true }
+    - { text: "As forbidden — including it will cause the call to fail validation" }
+    - { text: "As mandatory anyway, because every declared argument is implicitly required" }
+    - { text: "As ignored — arguments outside required are stripped before the tool runs" }
+  explanation: "required lists only the mandatory arguments; anything else is optional. The harness won't reject a call that omits an optional field, so the tool's own logic is responsible for a sensible default when it is absent."
 
 - id: fe-validate-lib
-  type: text_input
+  type: multiple_choice
   tags: [structured]
   difficulty: 2
-  prompt: "Which Python library is the standard for validating structured LLM output? (one word)"
-  answer:
-    regex: '^pydantic$'
-    normalize: true
+  prompt: "Rather than hand-writing an if-check for every field of a model's JSON, teams declare a typed model (e.g. with Pydantic) and parse into it. What is the main advantage of that declarative approach?"
+  options:
+    - { text: "The schema is declared once and validation, coercion, and error messages are generated from it, so the checks stay in sync with the types instead of drifting from hand-maintained if-statements", correct: true }
+    - { text: "It lets you skip defining the expected shape of the data entirely" }
+    - { text: "It makes the model emit valid JSON, so no validation actually runs" }
+    - { text: "It is faster only because it disables validation at runtime" }
+  explanation: "A declared typed model is a single source of truth: parsing, type coercion, and precise per-field errors all derive from it. Hand-rolled if-checks drift out of sync with the intended shape as fields are added or changed."
 
 - id: fe-unknown-tool
-  type: text_input
+  type: multiple_choice
   tags: [recovery]
   difficulty: 2
-  prompt: "The model calls a tool that isn't registered. The harness should ____ the call (one word)."
-  answer:
-    regex: '^(reject|refuse|deny|error|drop)$'
-    normalize: true
+  prompt: "Why should the set of tools the harness will actually execute be a fixed allowlist, so a call to any name outside it is rejected?"
+  options:
+    - { text: "The model can emit any string as a tool name — including hallucinated or, under adversarial input, dangerous ones — so an allowlist ensures only vetted tools ever run", correct: true }
+    - { text: "An allowlist makes each registered tool execute faster" }
+    - { text: "The API caps the number of tools, so an allowlist is only about staying under the limit" }
+    - { text: "Without an allowlist the model cannot see any tools at all" }
+  explanation: "Tool names come from the model, which can propose anything. A fixed allowlist is the trust boundary: only explicitly registered, vetted tools are runnable, and any other name is rejected rather than guessed or executed."
 
 - id: fe-recover-action
-  type: text_input
+  type: multiple_choice
   tags: [recovery]
   difficulty: 3
-  prompt: "After a bad tool call, what do you return so the model can fix it? (one word or two)"
-  answer:
-    regex: '^(a |an )?(structured |model-facing )?error( message)?$'
-    normalize: true
+  prompt: "A tool call failed validation. Compare returning a model-facing error versus silently retrying the identical call — which one recovers, and why?"
+  options:
+    - { text: "Returning the error recovers: the model reads what was wrong and changes its next call; retrying the identical call just fails again because nothing about the input changed", correct: true }
+    - { text: "Silently retrying recovers, because transient failures usually clear on a second attempt" }
+    - { text: "Both are equivalent, since the model resends the same call either way" }
+    - { text: "Neither recovers; a failed validation always ends the session" }
+  explanation: "Recovery depends on the model getting information it can act on. A model-facing error lets it fix the offending field on the next turn, whereas re-issuing the same call unchanged reproduces the same validation failure."

@@ -1,36 +1,48 @@
-# Free entry (short answer)
+# Conceptual multiple-choice (converted from short-answer free entry)
 - id: fe-budget-dimension
-  type: text_input
+  type: multiple_choice
   tags: [budgets]
   difficulty: 2
-  prompt: "Name one dimension an agent budget can cap. (one word or short term)"
-  answer:
-    regex: '^(steps?|iterations?|tool calls?|tools?|tokens?|cost|money|dollars?|wall-?clock|time|wall-?clock time|latency)$'
-    normalize: true
+  prompt: "A runner has independent caps on steps, tokens, and dollar cost. At what point should it terminate the run?"
+  options:
+    - { text: "As soon as any one of the caps is reached, whichever comes first", correct: true }
+    - { text: "Only after all three caps have been exhausted" }
+    - { text: "Only when the step cap is hit, since the others are advisory" }
+    - { text: "Only when the model reports that it is finished" }
+  explanation: "Multiple budgets combine with OR semantics: each is an independent upper bound, so the run stops the moment the first dimension is exceeded rather than waiting for every one to be exhausted."
 
 - id: fe-termination-reason
-  type: text_input
+  type: multiple_choice
   tags: [termination]
   difficulty: 3
-  prompt: "Besides reaching success, name one reason an agent loop should terminate. (a few words)"
-  answer:
-    regex: '^(budget( exhausted| exceeded)?|out of budget|exhausted budget|failure|failed|error|no progress|no-progress|loop|looping|stuck|oscillation|max steps|step limit|timeout|timed out|time limit)$'
-    normalize: true
+  prompt: "Besides reaching success, which of these is a legitimate, independent reason to terminate an agent loop mid-task?"
+  options:
+    - { text: "A budget (steps, tokens, or wall-clock time) has been exhausted", correct: true }
+    - { text: "The model produced an unusually long response on one step" }
+    - { text: "A single tool call returned an error, which normally warrants a retry" }
+    - { text: "The user switched to another browser tab" }
+  explanation: "Budget exhaustion is a first-class termination trigger alongside success and detected failure/no-progress. A one-off tool error usually calls for a retry, and response length or unrelated user activity are not termination conditions."
 
 - id: fe-loop-signal
-  type: text_input
+  type: multiple_choice
   tags: [termination]
   difficulty: 3
-  prompt: "What behavior signals that an agent is stuck rather than progressing? (a few words)"
-  answer:
-    regex: '^(repeat(s|ed|ing)?( actions?| states?| steps?)?|repeated action|repeated state|no progress|no-progress|same (action|state)( repeated| again)?|oscillation|oscillating|looping|loop|revisiting( the)? same state)$'
-    normalize: true
+  prompt: "How can a runner automatically detect that an agent is looping with no progress?"
+  options:
+    - { text: "Compare successive actions/states (e.g. by hashing them) and trip when they repeat or stop changing", correct: true }
+    - { text: "Check whether cumulative token usage is increasing each step" }
+    - { text: "Check whether wall-clock time is still below its budget" }
+    - { text: "Ask the model on each step whether it thinks it is stuck" }
+  explanation: "No-progress is detected structurally: record and compare consecutive states or actions and terminate when they repeat or the environment stops changing. Rising tokens or time are expected during normal progress, and model self-reports are unreliable."
 
 - id: fe-risky-action-guard
-  type: text_input
+  type: multiple_choice
   tags: [guardrails]
   difficulty: 3
-  prompt: "Name one guardrail for a high-risk or irreversible agent action. (a few words)"
-  answer:
-    regex: '^(human( |-)in( |-)the( |-)loop|hitl|human confirmation|confirmation|confirm|approval|human approval|allow-?list|allowlist|allow list|escalation|escalate to( a)? human|circuit breaker)$'
-    normalize: true
+  prompt: "Why is logging a destructive action after it executes an inadequate guardrail on its own?"
+  options:
+    - { text: "The harm is already done, so an irreversible action must be gated before it runs, not merely recorded after", correct: true }
+    - { text: "Logs consume too much storage to be practical" }
+    - { text: "Logging noticeably slows down the agent's loop" }
+    - { text: "Logs can only be read by a human, not by the agent" }
+  explanation: "Detection after the fact doesn't prevent damage from an irreversible action. Real guardrails act before execution — an allow-list plus a human-in-the-loop confirmation gate — while logging is for auditing, not prevention."

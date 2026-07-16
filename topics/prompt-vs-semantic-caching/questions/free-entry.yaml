@@ -1,36 +1,48 @@
-# Free entry (short answer)
+# Conceptual multiple-choice (converted from short-answer free entry)
 - id: fe-prefix-saves
-  type: text_input
+  type: multiple_choice
   tags: [prefix, tradeoffs]
   difficulty: 2
-  prompt: "A prefix-cache hit saves the compute for which pipeline stage? (one word)"
-  answer:
-    regex: '^prefill$'
-    normalize: true
+  prompt: "Two requests share the same 2,000-token system prompt but ask different questions. As that shared prefix gets longer, a prefix-cache hit's savings:"
+  options:
+    - { text: "Grow — more leading prefill compute is reused before the requests diverge", correct: true }
+    - { text: "Shrink — longer prefixes are more expensive to match" }
+    - { text: "Stay constant regardless of prefix length" }
+    - { text: "Disappear, because only short prompts can be cached" }
+  explanation: "Prefix caching reuses prefill for the identical leading tokens, so the longer the shared prefix, the more compute is skipped before the first differing token."
 
 - id: fe-prompt-order
-  type: text_input
+  type: multiple_choice
   tags: [prefix]
   difficulty: 3
-  prompt: "For prefix-cache hits, where in the prompt should the stable, shared content go? (one word)"
-  answer:
-    regex: '^(first|front|beginning|start|top|prefix)$'
-    normalize: true
+  prompt: "Why does placing the variable content LAST (after a shared prefix) improve prefix-cache hit rate?"
+  options:
+    - { text: "The cache matches from the start of the token stream, so a long identical prefix survives up to the first differing token", correct: true }
+    - { text: "The model reads prompts from the end, so trailing content is cached first" }
+    - { text: "Variable content at the end is automatically embedded and matched semantically" }
+    - { text: "Ordering has no effect; only total prompt length matters" }
+  explanation: "Prefix matching starts at the first token, so keeping the shared content up front and pushing per-request variation to the end preserves the longest possible reusable prefix."
 
 - id: fe-semantic-match
-  type: text_input
+  type: multiple_choice
   tags: [semantic]
   difficulty: 2
-  prompt: "A semantic cache decides a hit by comparing request ____ (one word)."
-  answer:
-    regex: '^(embeddings?|vectors?|similarity)$'
-    normalize: true
+  prompt: "Why does a semantic cache compare request *embeddings* instead of raw request strings?"
+  options:
+    - { text: "Embeddings place similar-meaning requests near each other in vector space, so paraphrases match even when the wording differs", correct: true }
+    - { text: "Embeddings are shorter than strings, so comparison is faster" }
+    - { text: "Raw strings cannot be stored in a database" }
+    - { text: "Embedding comparison guarantees an exact-prefix match" }
+  explanation: "A semantic cache aims to hit on meaning, not spelling; embeddings map semantically similar requests to nearby vectors, so a differently-worded but equivalent question can still match."
 
 - id: fe-false-positive-cost
-  type: text_input
+  type: multiple_choice
   tags: [semantic, tradeoffs]
   difficulty: 3
-  prompt: "The main correctness risk of a too-permissive semantic threshold is a false-____ hit. (one word)"
-  answer:
-    regex: '^positive$'
-    normalize: true
+  prompt: "Which change most directly reduces a semantic cache's false-positive rate?"
+  options:
+    - { text: "Raising the similarity threshold (making matches stricter), optionally with a verification step", correct: true }
+    - { text: "Lowering the similarity threshold so more requests match" }
+    - { text: "Increasing the TTL so entries live longer" }
+    - { text: "Removing tenant scoping from the cache key" }
+  explanation: "False positives come from loosely-related requests matching; a stricter (higher) threshold requires closer matches, cutting false positives at the cost of some hit rate."

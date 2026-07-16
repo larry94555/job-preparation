@@ -1,72 +1,96 @@
-# Free entry (short answer)
+# Conceptual multiple choice (async job API + operability — second angles)
 - id: fe-async
-  type: text_input
+  type: multiple_choice
   tags: [asyncapi]
   difficulty: 2
-  prompt: "The submit endpoint returns immediately instead of blocking. What style of job API is this? (one word)"
-  answer:
-    regex: '^async$'
-    normalize: true
+  prompt: "A synchronous endpoint returns the result directly; the async endpoint returns a job id and runs the work on a queue. What capability does the async shape unlock that the synchronous one can't?"
+  options:
+    - { text: "Many workers can drain the shared queue in parallel, so throughput scales independently of the number of request threads", correct: true }
+    - { text: "The model produces more accurate answers because it runs off the request thread" }
+    - { text: "The service no longer needs to store any job state anywhere" }
+    - { text: "Callers never have to check whether their job finished" }
+  explanation: "Once work is a queued job rather than inline handler code, you can point a pool of background workers at the queue and scale throughput by adding workers — decoupled from the scarce request-thread pool. A synchronous endpoint is bounded by its request threads."
 
 - id: fe-jobid
-  type: text_input
+  type: multiple_choice
   tags: [jobs]
   difficulty: 2
-  prompt: "What does submit() hand back to the caller so it can look the work up later?"
-  answer:
-    regex: '^(job_id|job id|id)$'
-    normalize: true
+  prompt: "What role does the job id play across the submit and poll calls?"
+  options:
+    - { text: "It is the stable handle that ties a later status/poll read back to the one specific stored job", correct: true }
+    - { text: "It encodes the finished result, so the caller never needs to poll" }
+    - { text: "It is the worker's thread id, so the caller knows which thread to interrupt" }
+    - { text: "It is a one-time token that becomes invalid the moment submit returns" }
+  explanation: "Submit returns a job id as a durable reference. The caller holds it and hands it to the status endpoint to read that exact job's current state and result — the id is what connects the fast write to every later fast read."
 
 - id: fe-poll
-  type: text_input
+  type: multiple_choice
   tags: [jobs]
   difficulty: 2
-  prompt: "What does the client do against the status endpoint until the job is done? (one word)"
-  answer:
-    regex: '^poll$'
-    normalize: true
+  prompt: "A poll response comes back with status \"running\" and result null. What should the client conclude?"
+  options:
+    - { text: "The worker hasn't finished yet — running is non-terminal and the result isn't ready, so keep polling", correct: true }
+    - { text: "The job failed, since a null result means an error occurred" }
+    - { text: "The job id is invalid and must be resubmitted from scratch" }
+    - { text: "The result is ready but was accidentally dropped in transit" }
+  explanation: "A job is a state machine: queued -> running -> (done | failed). Only done and failed are terminal. A running/null response simply means the work is in progress, so the client waits briefly and asks again."
 
 - id: fe-bucket
-  type: text_input
+  type: multiple_choice
   tags: [ratelimit]
   difficulty: 2
-  prompt: "A token ____ is the standard per-user rate-limiting mechanism (one word)."
-  answer:
-    regex: '^bucket$'
-    normalize: true
+  prompt: "A user sends no requests for a while, then fires a burst. Why can the first several requests all succeed immediately before throttling kicks in?"
+  options:
+    - { text: "During the idle time the bucket refilled up to `capacity`, so those accumulated tokens allow a short burst before the sustained rate applies", correct: true }
+    - { text: "Rate limiting only starts counting after a user's very first request" }
+    - { text: "Idle users are added to a whitelist that exempts them from limits" }
+    - { text: "The limiter resets to unlimited whenever a user pauses" }
+  explanation: "A token bucket refills over idle time up to its capacity ceiling. Those saved-up tokens are exactly what let a user burst back-to-back up to `capacity`; once they're spent, the user is throttled to the steady `refill_per_sec` average."
 
 - id: fe-canary
-  type: text_input
+  type: multiple_choice
   tags: [rollout]
   difficulty: 2
-  prompt: "What do you call the small slice of traffic a new version ships to first? (one word)"
-  answer:
-    regex: '^canary$'
-    normalize: true
+  prompt: "Why must canary routing send the SAME user to the same version on every request (sticky), rather than re-deciding per call?"
+  options:
+    - { text: "A user flipping between old and new versions per request gives inconsistent behavior and muddies the error comparison between the two slices", correct: true }
+    - { text: "Sticky routing is what makes the hash function run faster" }
+    - { text: "HTTP requires that a user stay on one server for the life of a session" }
+    - { text: "Without stickiness the canary would always route everyone to the new version" }
+  explanation: "The point of a canary is a clean comparison between a stable slice and a canary slice. If a user bounced between versions each request, their experience would be erratic and you could no longer attribute errors to one version or the other."
 
 - id: fe-rollback
-  type: text_input
+  type: multiple_choice
   tags: [rollout]
   difficulty: 2
-  prompt: "What one-command action returns traffic to the last known-good version? (one word)"
-  answer:
-    regex: '^rollback$'
-    normalize: true
+  prompt: "Rollout percentage is a single dial, `canary_pct`. What does setting `canary_pct` back to 0 accomplish?"
+  options:
+    - { text: "It routes all traffic back to stable — an instant rollback of the canary with no redeploy", correct: true }
+    - { text: "It permanently deletes the new version's code from the servers" }
+    - { text: "It pauses all traffic to the service until an operator resumes it" }
+    - { text: "It splits traffic evenly between the two versions" }
+  explanation: "Because routing is a function of one dial, `canary_pct=0` means the hash comparison sends every user to stable. That is the whole rollback: one dial back to zero, instant, versus building and shipping a forward fix mid-incident."
 
 - id: fe-idempotency
-  type: text_input
+  type: multiple_choice
   tags: [jobs]
   difficulty: 3
-  prompt: "What kind of key does a client send so a retried submit returns the same job instead of a duplicate? A(n) ____ key (one word)."
-  answer:
-    regex: '^idempotency$'
-    normalize: true
+  prompt: "A client submits a task, the response is lost in transit, and it retries the submit with NO idempotency key. What happens?"
+  options:
+    - { text: "A second job is enqueued for the same task, so the agent runs twice — duplicate work and duplicate token cost", correct: true }
+    - { text: "The server silently ignores the retry because it recognizes the task text" }
+    - { text: "The retry overwrites the first job, so exactly one run still happens" }
+    - { text: "The submit endpoint returns an error and refuses all retries" }
+  explanation: "Without an idempotency key, submit has no way to tell a retry from a brand-new request, so it creates a fresh job each time. A dropped response plus a retry becomes two runs — exactly the duplicate the idempotency key exists to prevent."
 
 - id: fe-deadletter
-  type: text_input
+  type: multiple_choice
   tags: [jobs]
   difficulty: 3
-  prompt: "A job that fails past its retry limit is parked in a ____-letter queue for inspection (one word)."
-  answer:
-    regex: '^(dead|dead-letter|deadletter)$'
-    normalize: true
+  prompt: "A job has exhausted its bounded retries and is permanently failed. Why park it in a dead-letter queue instead of just deleting it?"
+  options:
+    - { text: "It preserves the failed job for inspection, debugging, and possible manual replay, rather than losing all record of the failure", correct: true }
+    - { text: "The dead-letter queue automatically retries the job forever until it succeeds" }
+    - { text: "Failed jobs cannot be deleted, so a dead-letter queue is the only option" }
+    - { text: "Moving it there immediately marks the job as done with an empty result" }
+  explanation: "A dead-letter queue is a holding pen for jobs that failed past their retry cap. Keeping them lets you inspect why they failed and replay them after a fix, whereas deleting them would hide a real outage and lose the work entirely."

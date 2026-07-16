@@ -1,54 +1,72 @@
-# Missing term (cloze)
+# Conceptual multiple choice (converted from cloze / missing-term)
 - id: cloze-buffer
-  type: text_input
+  type: multiple_choice
   tags: [memory]
   difficulty: 1
-  prompt: "The most recent turns of the dialogue, held in context and capped, are the short-term conversation ____."
-  answer:
-    regex: '^buffer$'
-    normalize: true
+  prompt: "The short-term conversation buffer holds the most recent turns and is capped. Why must it be capped, and what follows from the cap?"
+  options:
+    - { text: "The context window is finite, so the buffer can only hold so many turns; as it fills, the oldest turns must be dropped or compressed to make room", correct: true }
+    - { text: "The cap is arbitrary and could be removed, since the window can grow without limit on demand" }
+    - { text: "Capping makes the model answer faster but has no effect on what it can remember" }
+    - { text: "The cap exists so the buffer can be stored on disk instead of in context" }
+  explanation: "The buffer lives in the finite context window, so it is necessarily bounded. Once it hits its cap the oldest turns have to give way — which is what forces compression and is why the buffer alone cannot be an agent's long-term memory."
 
 - id: cloze-scratchpad
-  type: text_input
+  type: multiple_choice
   tags: [types]
   difficulty: 2
-  prompt: "Structured, task-specific state the agent reads and writes mid-task is the working state or ____."
-  answer:
-    regex: '^scratchpad$'
-    normalize: true
+  prompt: "Why keep task state in a structured working scratchpad instead of just re-deriving it from the raw conversation buffer each turn?"
+  options:
+    - { text: "The scratchpad is compact, structured state read and rewritten directly, so the agent doesn't have to re-scan and re-infer its plan from noisy raw turns that may get compressed away", correct: true }
+    - { text: "The buffer cannot be read by the model at all, so state must live somewhere else" }
+    - { text: "Re-deriving state from the buffer is free and reliable, so the scratchpad is purely decorative" }
+    - { text: "The scratchpad lives in the vector store, making it faster to query than the buffer" }
+  explanation: "Working state has a different access pattern than recent chat: the agent reads and overwrites it directly. Distilling it into a scratchpad avoids re-inferring the plan from raw turns each time and keeps it from being diluted or compressed away in the buffer."
 
 - id: cloze-summary
-  type: text_input
+  type: multiple_choice
   tags: [compression]
   difficulty: 2
-  prompt: "When the buffer exceeds its token budget, the oldest turns are replaced by a running ____."
-  answer:
-    regex: '^summary$'
-    normalize: true
+  prompt: "When old turns are replaced by a running summary, what role does that summary play going forward?"
+  options:
+    - { text: "It stands in for the dropped turns as their proxy and is continuously updated as more turns age out, so the essentials survive without the raw tokens", correct: true }
+    - { text: "It is written once and frozen, never updated again for the rest of the session" }
+    - { text: "It is a verbatim copy of the dropped turns, so no information is lost" }
+    - { text: "It replaces the vector store as the agent's long-term memory" }
+  explanation: "The summary is a compact proxy carried forward in place of the raw turns it replaced. It is 'running' because each time the buffer overflows again the oldest survivors fold into it, keeping load-bearing state while shedding raw tokens."
 
 - id: cloze-relevance
-  type: text_input
+  type: multiple_choice
   tags: [recall]
   difficulty: 2
-  prompt: "You rank stored items by a ____ score and inject only the top-k most relevant ones."
-  answer:
-    regex: '^relevance$'
-    normalize: true
+  prompt: "You rank stored memories by a relevance score and inject only the top few. What is that relevance score fundamentally measuring?"
+  options:
+    - { text: "How well each stored item matches the current query — its semantic similarity to what the agent needs right now", correct: true }
+    - { text: "How many characters long each stored item is" }
+    - { text: "The alphabetical position of each stored item's first word" }
+    - { text: "How recently the vector store's index was rebuilt" }
+  explanation: "Relevance is fundamentally a match between the stored item and the current query — typically semantic similarity, sometimes blended with recency and importance. Ranking by it is what lets recall surface what bears on this query rather than returning items blindly."
 
 - id: cloze-episodic
-  type: text_input
+  type: multiple_choice
   tags: [memory]
   difficulty: 2
-  prompt: "A durable, append-only log of the agent's past runs, queried by time or run id, is the ____ history."
-  answer:
-    regex: '^episodic$'
-    normalize: true
+  prompt: "The episodic history is a durable, append-only log of the agent's past runs. Why append-only rather than freely editable?"
+  options:
+    - { text: "It is a factual record of what actually happened; rewriting or deleting past entries would corrupt the audit trail the agent relies on to answer 'have I done this before?'", correct: true }
+    - { text: "Append-only stores are the only kind that can be queried by time or run id" }
+    - { text: "Editing is disallowed only to save disk space, not for any correctness reason" }
+    - { text: "Because episodic entries are encrypted and therefore physically impossible to change" }
+  explanation: "Episodic history is an audit trail of past episodes, queried by time or run id. Keeping it append-only preserves an accurate record — if you could rewrite history, the agent could no longer trust it to tell whether a job has already run."
 
 - id: cloze-consolidation
-  type: text_input
+  type: multiple_choice
   tags: [compression]
   difficulty: 3
-  prompt: "Collapsing many verbose turns into a few sentences of durable state is summarization used as ____ (one word)."
-  answer:
-    regex: '^consolidation$'
-    normalize: true
+  prompt: "Collapsing many verbose turns into a few sentences of durable state is consolidation. What is fundamentally being traded in that operation?"
+  options:
+    - { text: "Fine-grained detail and fidelity are given up in exchange for compactness and durability — a few sentences carry forward what pages of turns held", correct: true }
+    - { text: "Speed is traded for accuracy, since the summary is slower to read than the raw turns" }
+    - { text: "Nothing is traded — consolidation is lossless and preserves every detail exactly" }
+    - { text: "Capacity is traded for cost, since the summary always uses more tokens than the turns" }
+  explanation: "Consolidation, like memory consolidation, converts transient verbose detail into compact durable state. The trade is detail for compactness: you keep the load-bearing essentials and accept that the fine grain of the original turns is gone — which is precisely why it is lossy."

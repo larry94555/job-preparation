@@ -1,63 +1,84 @@
-# Missing term (cloze)
+# Conceptual multiple-choice — roles, handoffs, validation, and topology tradeoffs
 - id: cloze-supervisor
-  type: text_input
+  type: multiple_choice
   tags: [supervisor]
-  difficulty: 1
-  prompt: "The agent that decomposes a task and routes sub-tasks to specialists is the ____."
-  answer:
-    regex: '^supervisor$'
-    normalize: true
+  difficulty: 2
+  prompt: "A system has three specialist agents but nothing that breaks the incoming task into pieces or merges the pieces back together. What is missing, and why does it matter?"
+  options:
+    - { text: "A supervisor — without a component to decompose the task and combine results, the specialists have no coherent job assignment or final answer", correct: true }
+    - { text: "Another specialist — three is simply too few to cover any real task" }
+    - { text: "A bigger model — decomposition and merging happen automatically once the model is large enough" }
+    - { text: "Nothing — specialists decompose and merge the work among themselves by default" }
+  explanation: "The supervisor is the coordinator that decomposes the task, routes sub-tasks to specialists, and combines their outputs. Without it there is no one to assign work or assemble the final answer, so a pile of specialists is not yet a system."
 
 - id: cloze-specialist
-  type: text_input
+  type: multiple_choice
   tags: [orchestration]
-  difficulty: 1
-  prompt: "The focused agents that each do one narrow job are the ____."
-  answer:
-    regex: '^specialists?$'
-    normalize: true
+  difficulty: 2
+  prompt: "You give one 'specialist' agent the job of researching, writing, and reviewing. What have you actually built, and what did you lose?"
+  options:
+    - { text: "A do-everything agent — you lose the reliability and testability that come from each agent having one narrow, focused job", correct: true }
+    - { text: "A supervisor — combining three jobs in one agent is exactly what a supervisor does" }
+    - { text: "A network topology — three responsibilities means three peers talking to each other" }
+    - { text: "Nothing is lost — one agent doing three jobs is always simpler and therefore better" }
+  explanation: "A specialist is defined by a narrow scope, a focused prompt, and a small tool set — that is what makes it reliable and easy to evaluate. Piling three jobs into one agent recreates the do-everything agent the pattern is meant to avoid."
 
 - id: cloze-handoff
-  type: text_input
+  type: multiple_choice
   tags: [handoff]
   difficulty: 2
-  prompt: "Passing one agent's output to the next agent is a ____."
-  answer:
-    regex: '^handoff$'
-    normalize: true
+  prompt: "A single-agent system has no handoffs. What new class of failure does adding a second agent introduce?"
+  options:
+    - { text: "Handoff failures — one agent's output becoming the next agent's input creates a boundary where bad or empty data can cross unchecked", correct: true }
+    - { text: "Model failures — a second agent means a second model that can hallucinate for the first time" }
+    - { text: "Tool failures — only multi-agent systems are allowed to call tools" }
+    - { text: "No new class — two agents fail in exactly the same ways one agent does" }
+  explanation: "Every point where one agent passes its output to another is a handoff, and handoffs are where multi-agent failure concentrates: a boundary that data crosses, where it can be empty, malformed, or plausibly-wrong. Single agents simply do not have this seam."
 
 - id: cloze-validate
-  type: text_input
+  type: multiple_choice
   tags: [validation]
   difficulty: 2
-  prompt: "To catch a silent bad output, ____ every handoff before the next agent uses it."
-  answer:
-    regex: '^validate$'
-    normalize: true
+  prompt: "Is it enough to validate only the final output of a multi-agent pipeline?"
+  options:
+    - { text: "No — validate at each handoff, so a bad output is caught at the seam that produced it instead of after it has corrupted everything downstream", correct: true }
+    - { text: "Yes — if the final output looks right, every intermediate handoff must have been fine" }
+    - { text: "Yes — intermediate outputs are internal and never affect the result" }
+    - { text: "No — you should skip validation entirely and let the last agent sort out any mess" }
+  explanation: "Checking only the end means a silent bad output can propagate through several agents before you notice, and you cannot tell which seam failed. Validating each handoff turns a diffuse late failure into a loud, localized one at its source."
 
 - id: cloze-single
-  type: text_input
+  type: multiple_choice
   tags: [supervisor]
-  difficulty: 1
-  prompt: "Before reaching for a team of agents, try a ____ agent first."
-  answer:
-    regex: '^single$'
-    normalize: true
+  difficulty: 2
+  prompt: "Before splitting a task across multiple agents, what should you try in order to push a single agent further?"
+  options:
+    - { text: "A sharper prompt and the right tools — a single agent usually has headroom left before multi-agent is justified", correct: true }
+    - { text: "Nothing — a single agent is at its ceiling the moment it makes one mistake" }
+    - { text: "Immediately add a critic, because one agent can never be trusted" }
+    - { text: "Switch to a network topology so the agent can consult peers" }
+  explanation: "A single agent is the default, and it has real headroom: a better prompt and the right tool set often close the gap. You earn the coordination cost of multi-agent only after a single well-equipped agent demonstrably falls short."
 
 - id: cloze-critic
-  type: text_input
+  type: multiple_choice
   tags: [validation]
-  difficulty: 2
-  prompt: "The agent that reviews a draft and approves or rejects it in an approval loop is the ____."
-  answer:
-    regex: '^critic$'
-    normalize: true
+  difficulty: 3
+  prompt: "Why put review in a separate critic agent instead of asking the writer agent to check its own draft?"
+  options:
+    - { text: "An independent critic does not share the writer's context and blind spots, so it catches issues a self-review would rationalize away", correct: true }
+    - { text: "A writer is technically incapable of reading its own output" }
+    - { text: "A separate critic is only about splitting the token cost across two calls" }
+    - { text: "Self-review is banned by every agent framework" }
+  explanation: "A writer grading itself carries the same assumptions that produced the flaw, so it tends to approve its own work. A separate critic with its own prompt reviews from the outside, which is exactly what makes the check meaningful — and independently testable."
 
 - id: cloze-network
-  type: text_input
+  type: multiple_choice
   tags: [orchestration]
-  difficulty: 2
-  prompt: "The peer-to-peer topology where agents talk directly with no single coordinator is the ____ topology."
-  answer:
-    regex: '^network$'
-    normalize: true
+  difficulty: 3
+  prompt: "A workflow can be modeled either as a peer-to-peer network or as a supervisor hierarchy, and both would work. Which should you pick, and why?"
+  options:
+    - { text: "The supervisor hierarchy — prefer the most constrained topology that works, because centralized coordination stays observable and boundable; reach for a network only when a hierarchy genuinely can't express the collaboration", correct: true }
+    - { text: "The network — peer-to-peer is always more flexible, so it is always the better choice" }
+    - { text: "Whichever uses more agents, since more agents means more capability" }
+    - { text: "It never matters — topology has no effect on how easy the system is to operate" }
+  explanation: "A network's emergent, uncoordinated interactions are the hardest to trace, bound, and control. When two topologies both work, choose the more constrained one; the supervisor hierarchy keeps every seam a clear, debuggable handoff. Save the network for collaborations a hierarchy truly cannot capture."
