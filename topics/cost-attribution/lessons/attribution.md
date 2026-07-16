@@ -37,3 +37,7 @@ flowchart TD
     G --> U
     Y -. tags dropped .-> X["Unattributed bucket"]
 ```
+
+**Why it matters.** Attribution is only as good as its coverage: the dimensions decide *where* you can
+optimize, and disciplined propagation is what keeps a request's fan-out from hiding real spend in the
+unattributed bucket.

@@ -1,18 +1,36 @@
 sections:
   - id: sec-foundations
-    title: "Foundations: isolation dimensions & cache safety"
-    lessons: [lesson-dimensions, lesson-cache, lesson-build-tenant-cache, lesson-expert-context, lesson-deep-dive, lesson-frontier-ops]
+    title: "Isolation dimensions & the threat model"
+    lessons: [lesson-roadmap-foundations, lesson-dimensions, lesson-deep-dive]
     assessment:
-      title: "Section 1 — Isolation & cache safety"
-      from_tags: [isolation, cache-safety]
+      title: "Section 1 — Isolation dimensions & the threat model"
+      from_tags: [isolation]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-cache
+    title: "Cache-key safety"
+    lessons: [lesson-roadmap-cache, lesson-cache, lesson-build-tenant-cache]
+    assessment:
+      title: "Section 2 — Cache-key safety & poisoning"
+      from_tags: [cache-safety]
       count: 5
       pass_threshold: 0.8
 
   - id: sec-scoping
-    title: "Scoping: retrieval filters & contamination"
-    lessons: [lesson-scoping]
+    title: "Retrieval scoping & context contamination"
+    lessons: [lesson-roadmap-scoping, lesson-scoping]
     assessment:
-      title: "Section 2 — Retrieval scoping & contamination"
+      title: "Section 3 — Retrieval scoping & contamination"
       from_tags: [retrieval-scoping, contamination]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-frontier
+    title: "Frontier & operating in production"
+    lessons: [lesson-roadmap-frontier, lesson-frontier-ops, lesson-expert-context]
+    assessment:
+      title: "Section 4 — Frontier, operations & interview"
+      from_tags: [frontier, ops]
       count: 5
       pass_threshold: 0.8

@@ -1,18 +1,36 @@
 sections:
   - id: sec-judge
     title: "LLM-as-judge"
-    lessons: [lesson-llm-judge, lesson-rubrics, lesson-expert-context, lesson-calibration]
+    lessons: [lesson-roadmap-judge, lesson-llm-judge, lesson-expert-context]
     assessment:
       title: "Section 1 — LLM-as-judge"
-      from_tags: [judge, rubric]
+      from_tags: [judge]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-rubric
+    title: "Rubrics & calibration"
+    lessons: [lesson-roadmap-rubric, lesson-rubrics, lesson-calibration]
+    assessment:
+      title: "Section 2 — Rubrics & calibration"
+      from_tags: [rubric]
       count: 5
       pass_threshold: 0.8
 
   - id: sec-suite
-    title: "Eval suites & gates"
-    lessons: [lesson-eval-suite, lesson-deploy-gate, lesson-frontier-ops]
+    title: "Eval suites & metrics"
+    lessons: [lesson-roadmap-suite, lesson-eval-suite, lesson-frontier-ops]
     assessment:
-      title: "Section 2 — Eval suites & gates"
-      from_tags: [suite, gate]
+      title: "Section 3 — Eval suites & metrics"
+      from_tags: [suite]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-gate
+    title: "Deploy gates"
+    lessons: [lesson-roadmap-gate, lesson-deploy-gate]
+    assessment:
+      title: "Section 4 — Deploy gates"
+      from_tags: [gate]
       count: 5
       pass_threshold: 0.8

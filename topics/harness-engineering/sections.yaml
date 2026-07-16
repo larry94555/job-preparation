@@ -1,18 +1,36 @@
 sections:
-  - id: sec-foundations
-    title: "Foundations: boundary & loop"
-    lessons: [lesson-boundary, lesson-loop, lesson-build-harness-loop, lesson-expert-context, lesson-deep-dive]
+  - id: sec-boundary
+    title: "The model/harness boundary"
+    lessons: [lesson-roadmap-boundary, lesson-boundary]
     assessment:
-      title: "Section 1 — Boundary & loop"
-      from_tags: [boundary, loop]
+      title: "Section 1 — The model/harness boundary"
+      from_tags: [boundary]
       count: 5
       pass_threshold: 0.8
 
-  - id: sec-reliability
-    title: "Reliability: verification & control"
-    lessons: [lesson-verification, lesson-frontier-ops]
+  - id: sec-loop
+    title: "The agent loop"
+    lessons: [lesson-roadmap-loop, lesson-loop, lesson-build-harness-loop]
     assessment:
-      title: "Section 2 — Verification & control"
+      title: "Section 2 — The agent loop"
+      from_tags: [loop]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-verification
+    title: "Verification & loop control"
+    lessons: [lesson-roadmap-verification, lesson-verification]
+    assessment:
+      title: "Section 3 — Verification & loop control"
       from_tags: [verification, control]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-frontier
+    title: "Design, frontier & operations"
+    lessons: [lesson-roadmap-frontier, lesson-deep-dive, lesson-frontier-ops, lesson-expert-context]
+    assessment:
+      title: "Section 4 — Design, frontier & operations"
+      from_tags: [canon, review, frontier, ops]
       count: 5
       pass_threshold: 0.8

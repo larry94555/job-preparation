@@ -33,3 +33,6 @@ flowchart LR
   A --> Gate
   Gate --> R["Merge or block"]
 ```
+
+This matters because production risk lives in the edges, not the average case: an adversarial suite is
+how a passing golden set stops being a false sense of safety.

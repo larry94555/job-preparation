@@ -39,3 +39,6 @@ handful of requests at once, then is throttled to the sustainable rate. Note the
 bucket refills from *elapsed time*, so passing the clock in (rather than reading it inside) makes the
 limiter deterministic and testable — the same discipline the [job queue](../lesson-jobs) exercise uses
 by injecting the worker. You will implement this exact bucket in the exercise.
+
+This is included because a shared agent service is only as fair as its weakest tenant: a concrete,
+enforced per-user cap is what keeps one caller's flood from becoming everyone else's outage.

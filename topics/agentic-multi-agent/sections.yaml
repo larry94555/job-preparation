@@ -1,18 +1,36 @@
 sections:
   - id: sec-supervisor
     title: "When multi-agent helps & the supervisor pattern"
-    lessons: [lesson-when-multi-agent, lesson-supervisor, lesson-topologies, lesson-expert-context]
+    lessons: [lesson-roadmap-supervisor, lesson-when-multi-agent, lesson-supervisor]
     assessment:
       title: "Section 1 — When multi-agent helps & the supervisor pattern"
-      from_tags: [supervisor, orchestration]
+      from_tags: [supervisor]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-topologies
+    title: "Topologies & frameworks"
+    lessons: [lesson-roadmap-topologies, lesson-topologies, lesson-expert-context]
+    assessment:
+      title: "Section 2 — Topologies & frameworks"
+      from_tags: [orchestration]
       count: 5
       pass_threshold: 0.8
 
   - id: sec-handoffs
-    title: "Handoffs & failure modes"
-    lessons: [lesson-handoffs, lesson-failure-modes, lesson-frontier-ops]
+    title: "Validating handoffs"
+    lessons: [lesson-roadmap-handoffs, lesson-handoffs]
     assessment:
-      title: "Section 2 — Handoffs & failure modes"
-      from_tags: [handoff, validation]
+      title: "Section 3 — Validating handoffs"
+      from_tags: [handoff]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-failure
+    title: "Failure modes & scale"
+    lessons: [lesson-roadmap-failure, lesson-failure-modes, lesson-frontier-ops]
+    assessment:
+      title: "Section 4 — Failure modes & scale"
+      from_tags: [validation]
       count: 5
       pass_threshold: 0.8

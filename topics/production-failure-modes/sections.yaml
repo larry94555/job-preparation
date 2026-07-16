@@ -1,18 +1,36 @@
 sections:
   - id: sec-catalog
-    title: "Foundations: the failure catalog & handling"
-    lessons: [lesson-catalog, lesson-handling, lesson-expert-context, lesson-frontier-ops]
+    title: "The failure catalog & the silent danger"
+    lessons: [lesson-roadmap-catalog, lesson-catalog]
     assessment:
-      title: "Section 1 — Failures & detection"
-      from_tags: [failures, detection]
+      title: "Section 1 — The failure catalog"
+      from_tags: [failures]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-playbook
+    title: "The detect → mitigate → prevent playbook"
+    lessons: [lesson-roadmap-playbook, lesson-handling]
+    assessment:
+      title: "Section 2 — Detection & the playbook"
+      from_tags: [detection]
       count: 5
       pass_threshold: 0.8
 
   - id: sec-guards
-    title: "Guarding & preventing failures"
-    lessons: [lesson-guards, lesson-build-run-safely, lesson-deep-dive]
+    title: "Guard suites & rollout safety"
+    lessons: [lesson-roadmap-guards, lesson-guards, lesson-build-run-safely]
     assessment:
-      title: "Section 2 — Mitigation & prevention"
+      title: "Section 3 — Mitigation, prevention & guard suites"
       from_tags: [mitigation, prevention]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-frontier
+    title: "Reviewing, operating & the frontier"
+    lessons: [lesson-roadmap-frontier, lesson-deep-dive, lesson-frontier-ops, lesson-expert-context]
+    assessment:
+      title: "Section 4 — Design review, operations & the frontier"
+      from_tags: [review, frontier, ops, canon, interview]
       count: 5
       pass_threshold: 0.8

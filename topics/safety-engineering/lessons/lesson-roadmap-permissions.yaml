@@ -1,0 +1,5 @@
+id: lesson-roadmap-permissions
+title: "Roadmap: permissions & operating in production"
+material: roadmap-permissions.md
+segments:
+  - present: roadmap-permissions-and-operating-in-production

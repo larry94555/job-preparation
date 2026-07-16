@@ -1,0 +1,5 @@
+id: lesson-roadmap-eviction
+title: "Roadmap: eviction under pressure"
+material: roadmap-eviction.md
+segments:
+  - present: roadmap-eviction-under-memory-pressure

@@ -56,3 +56,6 @@ Two levers fall straight out of the formula:
   contexts are what throttle concurrency.
 - **bytes_per_element** is set by the dtype. Quantizing KV from FP16 (2 bytes) to INT8 (1 byte)
   roughly **halves** KV memory, buying more context or more concurrency at some quality risk.
+
+This sizing arithmetic matters because it is long contexts and dtype choices — not the weights — that
+decide how many requests a server can hold at once; get the number wrong and you OOM under real traffic.

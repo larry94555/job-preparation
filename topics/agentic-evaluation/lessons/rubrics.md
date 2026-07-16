@@ -34,3 +34,6 @@ meta-eval judge does exactly this — it emits a JSON object of per-check boolea
 aggregates into a verdict — and it is calibrated against labeled exemplars so its criteria mean the same
 thing on every run. See [eval-methodology](../../eval-methodology/) for the general rubric-design
 discipline.
+
+A rubric matters because it makes a verdict *reproducible and defensible* — it is the difference between a
+score you can trust across runs and one that drifts with the judge's mood.

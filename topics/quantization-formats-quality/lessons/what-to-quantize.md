@@ -26,3 +26,7 @@ Storing KV in **INT8 or FP8** instead of FP16 roughly halves that per-token cost
 **longer contexts or larger batches**. The tradeoff is quality: KV entries feed attention across the whole
 sequence, so aggressive KV quantization can degrade long-sequence behavior and is applied more cautiously
 than weight-only quantization.
+
+This matters because *what* you quantize is your first and biggest quality lever: weight-only is the
+forgiving default, and knowing why activations and the KV cache are riskier is what keeps a low-bit
+deployment from silently degrading.

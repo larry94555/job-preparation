@@ -44,7 +44,7 @@ function SiteFooter() {
       }}
     >
       <Link href="/donate" style={{ fontWeight: 600 }}>
-        Enjoying this website? Feel free to pay what you can afford. 💛
+        Enjoying the website? Set your own price for the content. 💛
       </Link>
       <span style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
         <Link href="/topics">Topics</Link>

@@ -1,0 +1,5 @@
+id: lesson-roadmap-loop
+title: "Roadmap: the agent loop"
+material: roadmap-loop.md
+segments:
+  - present: roadmap-the-agent-loop

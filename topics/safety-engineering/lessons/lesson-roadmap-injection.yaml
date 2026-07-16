@@ -1,0 +1,5 @@
+id: lesson-roadmap-injection
+title: "Roadmap: prompt injection"
+material: roadmap-injection.md
+segments:
+  - present: roadmap-prompt-injection

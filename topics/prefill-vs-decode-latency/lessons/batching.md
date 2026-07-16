@@ -41,3 +41,6 @@ A more aggressive option is **prefill/decode (P/D) disaggregation** (DistServe, 
 and decode on **separate pools of hardware** so a compute-bound prefill can never interfere with a
 bandwidth-bound decode. Each pool is tuned for its own bottleneck, and TTFT and TPOT SLOs are managed
 independently.
+
+This matters because batching, chunked prefill, and disaggregation each help one phase and can tax the
+other — knowing which phase a lever touches is what turns effort into an actual latency win.

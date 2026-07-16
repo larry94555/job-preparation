@@ -1,18 +1,36 @@
 sections:
   - id: sec-routing
-    title: "Routing & fallback fundamentals"
-    lessons: [lesson-routing, lesson-build-router, lesson-expert-context, lesson-frontier-ops]
+    title: "Routing & model cascades"
+    lessons: [lesson-roadmap-routing, lesson-routing, lesson-frontier-ops]
     assessment:
-      title: "Section 1 — Routing & fallback"
-      from_tags: [routing, fallback]
+      title: "Section 1 — Routing & model cascades"
+      from_tags: [routing]
       count: 5
       pass_threshold: 0.8
 
-  - id: sec-resilience
-    title: "Resilience & degraded-mode UX"
-    lessons: [lesson-resilience, lesson-degraded, lesson-deep-dive]
+  - id: sec-fallback
+    title: "Fallback chains & the router"
+    lessons: [lesson-roadmap-fallback, lesson-build-router]
     assessment:
-      title: "Section 2 — Resilience & degraded UX"
-      from_tags: [resilience, degraded]
+      title: "Section 2 — Fallback chains & the router"
+      from_tags: [fallback]
+      count: 4
+      pass_threshold: 0.8
+
+  - id: sec-resilience
+    title: "Resilience — breakers, backoff & hedging"
+    lessons: [lesson-roadmap-resilience, lesson-resilience, lesson-deep-dive]
+    assessment:
+      title: "Section 3 — Resilience: breakers, backoff & hedging"
+      from_tags: [resilience]
       count: 5
+      pass_threshold: 0.8
+
+  - id: sec-degraded
+    title: "Degraded-mode UX"
+    lessons: [lesson-roadmap-degraded, lesson-degraded, lesson-expert-context]
+    assessment:
+      title: "Section 4 — Degraded-mode UX"
+      from_tags: [degraded]
+      count: 4
       pass_threshold: 0.8

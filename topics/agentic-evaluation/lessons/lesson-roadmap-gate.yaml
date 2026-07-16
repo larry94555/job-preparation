@@ -1,0 +1,5 @@
+id: lesson-roadmap-gate
+title: "Roadmap: deploy gates"
+material: roadmap-gate.md
+segments:
+  - present: roadmap-deploy-gates

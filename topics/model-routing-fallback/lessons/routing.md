@@ -45,3 +45,7 @@ to cheap-model cost. The tuning is the whole game, though:
 
 This is the FrugalGPT idea: spend more only where it buys quality, and let a gate decide where that
 is. Never invert the cascade — starting with the strongest model defeats the purpose.
+
+Routing and the cheap→strong cascade matter because they are the core economic lever of the whole
+topic: served well, most traffic runs cheap and fast while the expensive model is held in reserve for
+the requests that actually need it.

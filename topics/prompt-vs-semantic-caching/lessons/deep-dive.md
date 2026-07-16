@@ -114,3 +114,7 @@ it answers. A **toy** just calls the model with no caching. A **prototype** turn
 prompt structure. A **demo-ready** design adds a semantic layer with a threshold. A
 **production-ready** design also scopes semantic caching to safe queries, uses per-tenant keys and a
 TTL, verifies hits, and gates any threshold change behind a cache-correctness eval.
+
+**Why it matters.** Reviewing a design is the senior version of the whole topic: naming which lever
+does what, what it costs, and where it wins is exactly what separates "we added caching" from a system
+you can trust under real traffic.

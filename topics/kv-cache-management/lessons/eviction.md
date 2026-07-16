@@ -32,3 +32,6 @@ flowchart TD
   C -->|yes| S["swap: copy KV to host RAM, copy back on resume"]
   C -->|no| R
 ```
+
+Eviction matters because it is the server's last line of defense when the KV pool fills: choosing
+recompute versus swap well keeps sequences making progress under pressure instead of failing outright.

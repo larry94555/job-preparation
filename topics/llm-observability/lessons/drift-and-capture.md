@@ -32,3 +32,6 @@ flowchart LR
     S --> W["write to trace store"]
     W --> P["replay a failing run"]
 ```
+
+This matters because a mature system's worst failures — a silent quality slide, or a captured payload
+that leaks PII — never trip an error alarm; drift trends and redacted capture are how you catch them anyway.

@@ -1,0 +1,5 @@
+id: lesson-roadmap-playbook
+title: "Roadmap: the detect → mitigate → prevent playbook"
+material: roadmap-playbook.md
+segments:
+  - present: roadmap-the-detect-mitigate-prevent-playbook

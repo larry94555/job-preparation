@@ -35,3 +35,6 @@ flowchart LR
     C -->|read| R["auto-run, retry freely"]
     C -->|write| W["confirm, validate, idempotency key"]
 ```
+
+This framing matters because every later reliability decision — what to validate, what to gate, what
+to make idempotent — depends on first seeing the tool as a typed contract with a known side-effect class.

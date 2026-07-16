@@ -1,0 +1,5 @@
+id: lesson-roadmap-validation
+title: "Roadmap: validation and constrained decoding"
+material: roadmap-validation.md
+segments:
+  - present: roadmap-validation-and-constrained-decoding

@@ -1,0 +1,5 @@
+id: lesson-roadmap-idempotency
+title: "Roadmap: idempotency and safe retries"
+material: roadmap-idempotency.md
+segments:
+  - present: roadmap-idempotency-and-safe-retries

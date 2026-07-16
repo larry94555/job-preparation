@@ -1,18 +1,36 @@
 sections:
-  - id: sec-bounding
-    title: "Bounding the loop: termination & budgets"
-    lessons: [lesson-termination, lesson-budgets, lesson-build-bounded-loop, lesson-expert-context, lesson-deep-dive, lesson-frontier-ops]
+  - id: sec-termination
+    title: "Termination & progress detection"
+    lessons: [lesson-roadmap-termination, lesson-termination, lesson-build-bounded-loop]
     assessment:
-      title: "Section 1 — Termination & budgets"
-      from_tags: [termination, budgets]
+      title: "Section 1 — Termination & progress detection"
+      from_tags: [termination]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-budgets
+    title: "Budgets: steps, tools, tokens, cost, time"
+    lessons: [lesson-roadmap-budgets, lesson-budgets]
+    assessment:
+      title: "Section 2 — Agent budgets"
+      from_tags: [budgets]
       count: 5
       pass_threshold: 0.8
 
   - id: sec-guardrails
     title: "Guardrails for high-risk actions"
-    lessons: [lesson-guardrails]
+    lessons: [lesson-roadmap-guardrails, lesson-guardrails]
     assessment:
-      title: "Section 2 — Guardrails"
+      title: "Section 3 — Guardrails for high-risk actions"
       from_tags: [guardrails]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-synthesis
+    title: "Design review, frontier & interview"
+    lessons: [lesson-roadmap-synthesis, lesson-deep-dive, lesson-expert-context, lesson-frontier-ops]
+    assessment:
+      title: "Section 4 — Design review, frontier & interview"
+      from_tags: [review, frontier, ops, canon, interview]
       count: 5
       pass_threshold: 0.8

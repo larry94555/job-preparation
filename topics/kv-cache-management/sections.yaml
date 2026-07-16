@@ -1,18 +1,36 @@
 sections:
   - id: sec-memory
     title: "Memory & sizing: what the KV cache costs"
-    lessons: [lesson-kv-memory, lesson-expert-context, lesson-frontier-ops]
+    lessons: [lesson-roadmap-memory, lesson-kv-memory]
     assessment:
-      title: "Section 1 — KV memory & sizing"
+      title: "Section 1 — Memory & sizing"
       from_tags: [memory, sizing]
       count: 5
       pass_threshold: 0.8
 
-  - id: sec-paging-eviction
-    title: "Paging & eviction: fitting many sequences"
-    lessons: [lesson-paging, lesson-eviction, lesson-build-paged-allocator, lesson-deep-dive]
+  - id: sec-paging
+    title: "Paging & fragmentation: fitting many sequences"
+    lessons: [lesson-roadmap-paging, lesson-paging, lesson-build-paged-allocator]
     assessment:
-      title: "Section 2 — Paging & eviction"
-      from_tags: [paging, eviction]
+      title: "Section 2 — Paging & fragmentation"
+      from_tags: [paging]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-eviction
+    title: "Eviction under memory pressure"
+    lessons: [lesson-roadmap-eviction, lesson-eviction]
+    assessment:
+      title: "Section 3 — Eviction under pressure"
+      from_tags: [eviction]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-review
+    title: "Design review, frontier & interview"
+    lessons: [lesson-roadmap-review, lesson-deep-dive, lesson-frontier-ops, lesson-expert-context]
+    assessment:
+      title: "Section 4 — Design review & frontier"
+      from_tags: [review, frontier, ops, canon, interview]
       count: 5
       pass_threshold: 0.8

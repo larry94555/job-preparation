@@ -1,0 +1,5 @@
+id: lesson-roadmap-retrieval
+title: "Roadmap: retrieval and reranking"
+material: roadmap-retrieval.md
+segments:
+  - present: roadmap-retrieval-and-reranking

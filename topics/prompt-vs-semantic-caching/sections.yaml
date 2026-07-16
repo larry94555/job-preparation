@@ -1,18 +1,27 @@
 sections:
   - id: sec-prefix
-    title: "Prefix caching: mechanics & prompt structuring"
-    lessons: [lesson-two-caches, lesson-prefix-mechanics, lesson-expert-context]
+    title: "Prefix (prompt) caching: mechanics & prompt structuring"
+    lessons: [lesson-roadmap-prefix, lesson-two-caches, lesson-prefix-mechanics]
     assessment:
-      title: "Section 1 — Prefix caching"
+      title: "Section 1 — Prefix (prompt) caching"
       from_tags: [prefix]
       count: 5
       pass_threshold: 0.8
 
   - id: sec-semantic
-    title: "Semantic caching: thresholds & tradeoffs"
-    lessons: [lesson-semantic-thresholds, lesson-build-semantic-cache, lesson-deep-dive, lesson-frontier-ops]
+    title: "Semantic caching: thresholds, false positives & building it"
+    lessons: [lesson-roadmap-semantic, lesson-semantic-thresholds, lesson-build-semantic-cache]
     assessment:
-      title: "Section 2 — Semantic caching & tradeoffs"
+      title: "Section 2 — Semantic caching"
       from_tags: [semantic, tradeoffs]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-design
+    title: "Design tradeoffs, review & production ops"
+    lessons: [lesson-roadmap-design, lesson-deep-dive, lesson-frontier-ops, lesson-expert-context]
+    assessment:
+      title: "Section 3 — Tradeoffs, review & production ops"
+      from_tags: [tradeoffs, review, frontier, ops]
       count: 5
       pass_threshold: 0.8

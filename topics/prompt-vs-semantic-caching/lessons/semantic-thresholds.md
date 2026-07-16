@@ -30,3 +30,6 @@ Practical safeguards make the tradeoff manageable:
 - A **conservative threshold** plus a lightweight **verification** step before trusting a hit.
 - **Per-tenant / per-user cache keys** so one user's cached answer can never be served to another.
 - A **TTL** (time-to-live) on entries to bound how **stale** a cached response can get.
+
+**Why it matters.** The threshold is where semantic caching's whole savings-vs-correctness bargain
+lives — set it without an eval and you are guessing at how often you ship a confident wrong answer.

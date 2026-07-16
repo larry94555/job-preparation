@@ -1,0 +1,5 @@
+id: lesson-roadmap-memory
+title: "Roadmap: memory & sizing"
+material: roadmap-memory.md
+segments:
+  - present: roadmap-memory-and-sizing-the-kv-cache

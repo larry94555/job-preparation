@@ -1,18 +1,36 @@
 sections:
-  - id: sec-approaches-and-axes
-    title: "Approaches & decision axes"
-    lessons: [lesson-approaches, lesson-decision, lesson-build-choose-strategy, lesson-expert-context, lesson-deep-dive, lesson-frontier-ops]
+  - id: sec-approaches
+    title: "The four adaptation approaches"
+    lessons: [lesson-roadmap-approaches, lesson-approaches]
     assessment:
-      title: "Section 1 — Approaches & decision axes"
-      from_tags: [approaches, decision]
+      title: "Section 1 — The four adaptation approaches"
+      from_tags: [approaches]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-decision
+    title: "Choosing by decision axis"
+    lessons: [lesson-roadmap-decision, lesson-decision, lesson-build-choose-strategy, lesson-deep-dive]
+    assessment:
+      title: "Section 2 — Choosing by decision axis"
+      from_tags: [decision]
       count: 5
       pass_threshold: 0.8
 
   - id: sec-antipatterns
-    title: "When each is the wrong tool"
-    lessons: [lesson-antipatterns]
+    title: "Antipatterns: when each is the wrong tool"
+    lessons: [lesson-roadmap-antipatterns, lesson-antipatterns]
     assessment:
-      title: "Section 2 — Antipatterns"
+      title: "Section 3 — Antipatterns: when each is the wrong tool"
       from_tags: [antipatterns]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-frontier
+    title: "Frontier, operations & interview"
+    lessons: [lesson-roadmap-frontier, lesson-frontier-ops, lesson-expert-context]
+    assessment:
+      title: "Section 4 — Frontier, operations & interview"
+      from_tags: [frontier, ops, canon, interview]
       count: 5
       pass_threshold: 0.8

@@ -1,18 +1,36 @@
 sections:
   - id: sec-portfolio
-    title: "Portfolio architecture"
-    lessons: [lesson-what-to-ship, lesson-scope-and-build, lesson-capstone, lesson-expert-context]
+    title: "What to ship"
+    lessons: [lesson-roadmap-portfolio, lesson-what-to-ship, lesson-expert-context]
     assessment:
-      title: "Section 1 — Portfolio architecture"
-      from_tags: [portfolio, ship]
+      title: "Section 1 — What to ship"
+      from_tags: [portfolio]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-build
+    title: "Scope and build the capstone"
+    lessons: [lesson-roadmap-build, lesson-scope-and-build, lesson-capstone]
+    assessment:
+      title: "Section 2 — Scope and build the capstone"
+      from_tags: [ship]
       count: 5
       pass_threshold: 0.8
 
   - id: sec-communicate
-    title: "Communicating the work"
-    lessons: [lesson-communicate, lesson-get-hired, lesson-frontier-ops]
+    title: "Communicate the work"
+    lessons: [lesson-roadmap-communicate, lesson-communicate]
     assessment:
-      title: "Section 2 — Communicating the work"
-      from_tags: [communicate, proof]
+      title: "Section 3 — Communicate the work"
+      from_tags: [communicate]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-gethired
+    title: "Ship in public to get hired"
+    lessons: [lesson-roadmap-gethired, lesson-get-hired, lesson-frontier-ops]
+    assessment:
+      title: "Section 4 — Ship in public to get hired"
+      from_tags: [proof]
       count: 5
       pass_threshold: 0.8

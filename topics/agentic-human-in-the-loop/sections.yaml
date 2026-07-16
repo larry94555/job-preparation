@@ -1,18 +1,36 @@
 sections:
-  - id: sec-riskgate
-    title: "Risk-gated execution"
-    lessons: [lesson-why-hil, lesson-risk-gates, lesson-tiered-gating, lesson-expert-context]
+  - id: sec-risk
+    title: "Classifying actions by risk"
+    lessons: [lesson-roadmap-risk, lesson-why-hil, lesson-frontier-ops]
     assessment:
-      title: "Section 1 — Risk-gated execution"
-      from_tags: [risk, approval]
+      title: "Section 1 — Classifying actions by risk"
+      from_tags: [risk]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-approval
+    title: "Gating with human approval"
+    lessons: [lesson-roadmap-approval, lesson-risk-gates, lesson-tiered-gating, lesson-expert-context]
+    assessment:
+      title: "Section 2 — Gating with human approval"
+      from_tags: [approval]
       count: 5
       pass_threshold: 0.8
 
   - id: sec-audit
-    title: "Auditability & resumption"
-    lessons: [lesson-audit, lesson-resume, lesson-frontier-ops]
+    title: "The audit trail"
+    lessons: [lesson-roadmap-audit, lesson-audit]
     assessment:
-      title: "Section 2 — Auditability & resumption"
-      from_tags: [audit, resume]
+      title: "Section 3 — The audit trail"
+      from_tags: [audit]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-resume
+    title: "Pause, step in, resume"
+    lessons: [lesson-roadmap-resume, lesson-resume]
+    assessment:
+      title: "Section 4 — Pause, step in, resume"
+      from_tags: [resume]
       count: 5
       pass_threshold: 0.8

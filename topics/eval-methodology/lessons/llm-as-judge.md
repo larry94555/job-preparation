@@ -40,3 +40,6 @@ flowchart TD
   Fix --> J
   Q -->|Yes| Gate["Trust judge to drive regression gate"]
 ```
+
+This matters because most valuable outputs are open-ended: without a calibrated judge you either can't
+gate them at all or you gate on an unmeasured opinion, and both quietly let regressions ship.

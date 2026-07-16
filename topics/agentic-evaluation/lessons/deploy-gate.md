@@ -28,3 +28,6 @@ and fails CI when the judge's agreement drops below its threshold, so a change t
 merge. A gate you can bypass, a threshold nobody enforces, or a suite you run only after an incident are
 all the same anti-pattern: measuring without gating. Cross-reference
 [eval-methodology](../../eval-methodology/) for how thresholds are chosen.
+
+The gate matters because it is what converts a score into a *guarantee* — without it, every eval you built
+is optional, and "we'll fix it later" quietly wins.

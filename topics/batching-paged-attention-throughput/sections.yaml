@@ -1,18 +1,27 @@
 sections:
-  - id: sec-batching-scheduling
-    title: "Batching, scheduling & paged attention"
-    lessons: [lesson-batching, lesson-scheduling-paging, lesson-expert-context, lesson-deep-dive]
+  - id: sec-batching
+    title: "Forming the batch: static, dynamic & continuous"
+    lessons: [lesson-roadmap-batching, lesson-batching, lesson-build-continuous-batching]
     assessment:
-      title: "Section 1 — Batching, scheduling & paging"
-      from_tags: [batching, scheduling, paged-attention]
+      title: "Section 1 — Forming the batch"
+      from_tags: [batching]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-scheduling-paging
+    title: "The enablers: iteration-level scheduling & paged attention"
+    lessons: [lesson-roadmap-scheduling-paging, lesson-scheduling-paging, lesson-deep-dive, lesson-expert-context]
+    assessment:
+      title: "Section 2 — Iteration-level scheduling & paged attention"
+      from_tags: [scheduling, paged-attention]
       count: 5
       pass_threshold: 0.8
 
   - id: sec-throughput
-    title: "Throughput, latency & goodput"
-    lessons: [lesson-throughput, lesson-build-continuous-batching, lesson-frontier-ops]
+    title: "The objective: throughput, latency & goodput"
+    lessons: [lesson-roadmap-throughput, lesson-throughput, lesson-frontier-ops]
     assessment:
-      title: "Section 2 — Throughput & goodput"
+      title: "Section 3 — Throughput, latency & goodput"
       from_tags: [throughput]
       count: 5
       pass_threshold: 0.8

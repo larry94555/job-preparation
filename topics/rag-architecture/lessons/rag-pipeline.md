@@ -43,3 +43,6 @@ flowchart LR
     end
     IX -.-> R
 ```
+
+Seeing RAG as this fixed pipeline is what lets you locate a quality problem in a specific stage —
+chunking, retrieval, reranking, or generation — instead of treating "the RAG" as one opaque box.

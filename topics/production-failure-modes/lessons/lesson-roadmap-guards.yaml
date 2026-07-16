@@ -1,0 +1,5 @@
+id: lesson-roadmap-guards
+title: "Roadmap: guard suites & rollout safety"
+material: roadmap-guards.md
+segments:
+  - present: roadmap-guard-suites-rollout-safety

@@ -1,0 +1,5 @@
+id: lesson-roadmap-cache
+title: "Roadmap: cache-key safety"
+material: roadmap-cache.md
+segments:
+  - present: roadmap-cache-key-safety

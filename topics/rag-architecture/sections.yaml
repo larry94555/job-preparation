@@ -1,18 +1,45 @@
 sections:
-  - id: sec-foundations
-    title: "Foundations: pipeline & chunking"
-    lessons: [lesson-pipeline, lesson-chunking, lesson-expert-context]
+  - id: sec-pipeline
+    title: "The RAG pipeline"
+    lessons: [lesson-roadmap-pipeline, lesson-pipeline]
     assessment:
-      title: "Section 1 — Pipeline & chunking"
-      from_tags: [pipeline, chunking]
+      title: "Section 1 — The RAG pipeline"
+      from_tags: [pipeline]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-chunking
+    title: "Chunking the corpus"
+    lessons: [lesson-roadmap-chunking, lesson-chunking]
+    assessment:
+      title: "Section 2 — Chunking the corpus"
+      from_tags: [chunking]
       count: 5
       pass_threshold: 0.8
 
   - id: sec-retrieval
-    title: "Retrieval: search & reranking"
-    lessons: [lesson-retrieval, lesson-build-rrf, lesson-deep-dive, lesson-frontier-ops]
+    title: "Retrieval: dense, sparse, hybrid & reranking"
+    lessons: [lesson-roadmap-retrieval, lesson-retrieval, lesson-build-rrf]
     assessment:
-      title: "Section 2 — Search & reranking"
+      title: "Section 3 — Retrieval & reranking"
       from_tags: [retrieval, reranking]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-design
+    title: "Reviewing a RAG design"
+    lessons: [lesson-roadmap-design, lesson-deep-dive, lesson-expert-context]
+    assessment:
+      title: "Section 4 — Reviewing a RAG design"
+      from_tags: [review]
+      count: 3
+      pass_threshold: 0.8
+
+  - id: sec-frontier
+    title: "Frontier & operations"
+    lessons: [lesson-roadmap-frontier, lesson-frontier-ops]
+    assessment:
+      title: "Section 5 — Frontier & operations"
+      from_tags: [frontier, ops]
       count: 5
       pass_threshold: 0.8

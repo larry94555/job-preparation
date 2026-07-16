@@ -42,3 +42,6 @@ flowchart LR
     T100 --> X["Cross-encoder reranker (precise, slow)"]
     X --> TK["Top-k into context"]
 ```
+
+This two-stage shape — cheap wide recall, then precise reranking — is why hybrid retrieval plus a
+reranker is the production default: it buys precision where it counts without paying it on the whole corpus.

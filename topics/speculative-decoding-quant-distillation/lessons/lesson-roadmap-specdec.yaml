@@ -1,0 +1,5 @@
+id: lesson-roadmap-specdec
+title: "Roadmap: speculative decoding"
+material: roadmap-specdec.md
+segments:
+  - present: roadmap-speculative-decoding

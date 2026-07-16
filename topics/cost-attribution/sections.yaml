@@ -1,18 +1,36 @@
 sections:
-  - id: sec-foundations
-    title: "Foundations: cost drivers & attribution"
-    lessons: [lesson-drivers, lesson-attribution, lesson-expert-context]
+  - id: sec-drivers
+    title: "Cost drivers & the granularity trap"
+    lessons: [lesson-roadmap-drivers, lesson-drivers]
     assessment:
-      title: "Section 1 — Drivers & attribution"
-      from_tags: [drivers, attribution]
+      title: "Section 1 — Cost drivers & the granularity trap"
+      from_tags: [drivers]
+      count: 3
+      pass_threshold: 0.8
+
+  - id: sec-attribution
+    title: "Attribution dimensions & tag propagation"
+    lessons: [lesson-roadmap-attribution, lesson-attribution]
+    assessment:
+      title: "Section 2 — Attribution dimensions & tag propagation"
+      from_tags: [attribution]
       count: 5
       pass_threshold: 0.8
 
   - id: sec-economics
-    title: "Unit economics & hidden costs"
-    lessons: [lesson-economics, lesson-build-cost-aggregator, lesson-deep-dive, lesson-frontier-ops]
+    title: "Unit economics, hidden costs & building it"
+    lessons: [lesson-roadmap-economics, lesson-economics, lesson-build-cost-aggregator]
     assessment:
-      title: "Section 2 — Unit economics & hidden costs"
+      title: "Section 3 — Unit economics & hidden costs"
       from_tags: [economics, hidden]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-frontier
+    title: "Reviewing, operating & the frontier"
+    lessons: [lesson-roadmap-frontier, lesson-deep-dive, lesson-frontier-ops, lesson-expert-context]
+    assessment:
+      title: "Section 4 — Reviewing, operating & the frontier"
+      from_tags: [review, frontier, ops, canon, interview]
       count: 5
       pass_threshold: 0.8

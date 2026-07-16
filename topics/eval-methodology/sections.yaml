@@ -1,18 +1,36 @@
 sections:
-  - id: sec-foundations
-    title: "Foundations: golden sets & regression gates"
-    lessons: [lesson-golden, lesson-build-eval-gate, lesson-expert-context, lesson-deep-dive]
+  - id: sec-golden
+    title: "Golden sets & regression gates"
+    lessons: [lesson-roadmap-golden, lesson-golden, lesson-build-eval-gate]
     assessment:
       title: "Section 1 — Golden sets & regression gates"
       from_tags: [golden, regression]
       count: 5
       pass_threshold: 0.8
 
-  - id: sec-coverage
-    title: "Coverage & judging: adversarial tests & LLM-as-judge"
-    lessons: [lesson-adversarial, lesson-judge, lesson-frontier-ops]
+  - id: sec-adversarial
+    title: "Adversarial & edge-case coverage"
+    lessons: [lesson-roadmap-adversarial, lesson-adversarial]
     assessment:
-      title: "Section 2 — Adversarial tests & LLM-as-judge"
-      from_tags: [adversarial, judge]
+      title: "Section 2 — Adversarial & edge-case coverage"
+      from_tags: [adversarial]
+      count: 3
+      pass_threshold: 0.8
+
+  - id: sec-judge
+    title: "LLM-as-judge: rubrics, biases & calibration"
+    lessons: [lesson-roadmap-judge, lesson-judge]
+    assessment:
+      title: "Section 3 — LLM-as-judge"
+      from_tags: [judge]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-expert
+    title: "Design reviews, the frontier & production ops"
+    lessons: [lesson-roadmap-expert, lesson-deep-dive, lesson-expert-context, lesson-frontier-ops]
+    assessment:
+      title: "Section 4 — Design reviews, the frontier & production ops"
+      from_tags: [review, frontier, ops, canon, interview]
       count: 5
       pass_threshold: 0.8

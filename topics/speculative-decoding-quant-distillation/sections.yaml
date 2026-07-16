@@ -1,7 +1,7 @@
 sections:
   - id: sec-levers
-    title: "Three levers, three goals & when each is wrong"
-    lessons: [lesson-levers, lesson-when-wrong, lesson-expert-context, lesson-deep-dive, lesson-frontier-ops]
+    title: "Three levers, three goals — and lossless vs lossy"
+    lessons: [lesson-roadmap-levers, lesson-levers, lesson-when-wrong]
     assessment:
       title: "Section 1 — Levers, goals & tradeoffs"
       from_tags: [tradeoffs, quantization, distillation]
@@ -10,9 +10,18 @@ sections:
 
   - id: sec-specdec
     title: "Speculative decoding: draft, verify, accept"
-    lessons: [lesson-specdec, lesson-build-accepted-tokens]
+    lessons: [lesson-roadmap-specdec, lesson-specdec, lesson-build-accepted-tokens]
     assessment:
       title: "Section 2 — Speculative decoding"
       from_tags: [speculative]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-review
+    title: "Reviewing designs, the frontier & production ops"
+    lessons: [lesson-roadmap-review, lesson-deep-dive, lesson-frontier-ops, lesson-expert-context]
+    assessment:
+      title: "Section 3 — Review, frontier & operations"
+      from_tags: [review, frontier, ops, canon, interview]
       count: 5
       pass_threshold: 0.8

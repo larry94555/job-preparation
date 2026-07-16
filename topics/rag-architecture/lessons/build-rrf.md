@@ -40,3 +40,6 @@ flowchart LR
   normalizing incomparable score distributions. That simplicity is its main appeal.
 - **Determinism:** when two documents tie on score, break the tie by **id ascending** so the fused
   ranking is reproducible (important for eval stability).
+
+RRF matters because it makes hybrid search practical: it fuses incomparable dense and sparse rankings
+with no score calibration, which is why it's the default recipe for combining retrievers.

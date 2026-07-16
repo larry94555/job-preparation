@@ -32,3 +32,7 @@ The `+1` is the token the target always emits (the correction, or the bonus). Ex
 
 Stopping at the **first** reject matters: you can't keep a later match after an earlier miss, because
 once the target and draft diverge, everything after that point is off the target's true path.
+
+This counting rule matters because it *is* the speedup: every extra leading match is one more token
+you earned from a single verification pass, which is why acceptance rate — not draft speed — is the
+number the whole lever rides on.

@@ -1,0 +1,5 @@
+id: lesson-roadmap-recovery
+title: "Roadmap: recovering from bad tool calls"
+material: roadmap-recovery.md
+segments:
+  - present: roadmap-recovering-from-bad-tool-calls

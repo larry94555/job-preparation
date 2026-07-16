@@ -26,3 +26,5 @@ acts. Confusing the two is the root of most bad adaptation decisions: you cannot
 new behavior, and you cannot fine-tune your way to always-current facts. Distillation is a *deployment*
 move — it copies behavior you already trust into a cheaper package, so it only makes sense once that
 behavior is validated.
+
+Getting this four-lever mental model right is the whole game: every later decision axis and antipattern in this topic is just an application of *which thing you're actually trying to change.*
