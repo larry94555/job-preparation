@@ -26,7 +26,12 @@ export default async function HomePage() {
         <h1>AI-engineering lessons</h1>
         <p className="muted">
           {catalog.items.length} core topics plus a {catalog.agentic.total}-topic agentic
-          track — browse every topic free.
+          track — browse every topic free with sign up.
+        </p>
+        <p style={{ marginTop: 4 }}>
+          <Link className="btn ghost" href="/assessment">
+            Free Assessment of Knowledge →
+          </Link>
         </p>
 
         <div className="panel">
@@ -59,6 +64,11 @@ export default async function HomePage() {
       <p className="muted">
         {data.items.length} topics · {data.readinessPct}% section readiness ·{" "}
         {data.masteredTopics} topics fully proficient
+      </p>
+      <p style={{ marginTop: 4 }}>
+        <Link className="btn ghost" href="/assessment">
+          Free Assessment of Knowledge →
+        </Link>
       </p>
 
       <div className="panel">

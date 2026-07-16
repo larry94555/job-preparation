@@ -18,6 +18,7 @@ const { auth } = NextAuth(authConfig);
 const PUBLIC_BASES = [
   "/topics", // the public catalog
   "/sample", // the free, no-login sample lesson (and its sub-paths)
+  "/assessment", // the free "assess your knowledge" page (public)
   "/signup", // registration + its confirmation sub-pages
   "/help", // help + /help/signup troubleshooting
   "/login", // sign-in page

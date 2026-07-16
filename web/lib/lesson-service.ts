@@ -528,6 +528,54 @@ export async function catalogData() {
 /** Shape returned by `catalogData` — consumed by the public catalog UI. */
 export type CatalogData = Awaited<ReturnType<typeof catalogData>>;
 
+// ---- assessment page (Phase 1: topics + subtopics, no per-user status) ----
+
+/** A topic and its major subtopics (section titles) for the Assessment page. */
+export interface AssessmentTopic {
+  id: string;
+  title: string;
+  sections: { id: string; title: string }[];
+  built: boolean;
+}
+
+/**
+ * Data for the free Assessment page: every topic (the core grid + the agentic
+ * phases, exactly like the home hub) with its major subtopics. Public and
+ * progress-free for now — the per-topic mastery status + colors arrive later.
+ */
+export async function assessmentData(): Promise<{
+  items: AssessmentTopic[];
+  agentic: { phases: { title: string; items: AssessmentTopic[] }[]; total: number };
+}> {
+  const lessons = await allLessons();
+  const cardOf = (t: LoadedTopic): AssessmentTopic => ({
+    id: t.topic!.id,
+    title: t.topic!.title,
+    sections: t.sections.map((s) => ({ id: s.id, title: s.title })),
+    built: true,
+  });
+  const byId = new Map(lessons.map((t) => [t.topic!.id, cardOf(t)]));
+  const items = lessons
+    .filter((t) => (t.topic!.track ?? "core") !== "agentic")
+    .map((t) => byId.get(t.topic!.id)!);
+  const agenticPhases = AGENTIC_PHASES.map((ph) => ({
+    title: ph.title,
+    items: ph.slugs.map(
+      (slug): AssessmentTopic =>
+        byId.get(slug) ?? {
+          id: slug,
+          title: AGENTIC_TITLES[slug] ?? slug,
+          sections: [],
+          built: false,
+        },
+    ),
+  }));
+  return { items, agentic: { phases: agenticPhases, total: AGENTIC_TOTAL } };
+}
+
+/** Shape returned by `assessmentData` — consumed by the Assessment page UI. */
+export type AssessmentData = Awaited<ReturnType<typeof assessmentData>>;
+
 // ---- free sample lesson (anonymous, stateless, no LLM) --------------------
 
 /** Client-safe question view for a sample check (never carries the answer key). */
