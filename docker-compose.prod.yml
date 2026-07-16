@@ -69,9 +69,15 @@ services:
       LLM_BASE_URL: ${LLM_BASE_URL:-}
       LLM_API_KEY: ${LLM_API_KEY:-}
       LLM_TIMEOUT_MS: ${LLM_TIMEOUT_MS:-120000}
-      # Reword question prompts each session so lessons don't read identically every
-      # time (options are also reshuffled per session). Set PARAPHRASE=off to disable.
+      # Reword text each session so lessons don't read identically every time
+      # (options are also reshuffled per session; each rewrite is LLM-reviewed and
+      # rejected if not clean). Two independent switches, both default on:
+      #   PARAPHRASE_LESSONS — lesson material prose + formative check prompts
+      #   PARAPHRASE_TESTS   — section-assessment prompts
+      # PARAPHRASE is the shared fallback for both (set PARAPHRASE=off to disable all).
       PARAPHRASE: ${PARAPHRASE:-on}
+      PARAPHRASE_LESSONS: ${PARAPHRASE_LESSONS:-on}
+      PARAPHRASE_TESTS: ${PARAPHRASE_TESTS:-on}
       # Email magic-link sign-in (Resend). Without these the app falls back to a
       # "email sign-in not enabled" notice — set them for real registration.
       RESEND_API_KEY: ${RESEND_API_KEY:-}
