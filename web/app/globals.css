@@ -211,6 +211,99 @@ button.ghost,
   border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
+/* ---- Assessment page ---- */
+/* A topic box: the frame color reflects assessment status (white = untested). */
+.acard {
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.acard[data-status="all-green"] {
+  border-color: #16a34a;
+}
+.acard[data-status="some-green"] {
+  border-color: #86efac;
+}
+.acard[data-status="some-red"] {
+  border-color: #fca5a5;
+}
+.acard[data-status="all-red"] {
+  border-color: #dc2626;
+}
+.acard-row {
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+}
+.acard-row:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+.acard-topic h3 {
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+.acard .sub-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--ink);
+}
+.alinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.alink {
+  font-size: 12px;
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--ink);
+  cursor: pointer;
+  text-decoration: none;
+}
+.alink:hover {
+  border-color: var(--accent);
+  text-decoration: none;
+}
+.alink.learn {
+  border-color: var(--accent);
+  font-weight: 600;
+}
+/* Frame-color swatches for the assessment legend (override the base .sw border). */
+.sw.frame-none {
+  border: 2px solid var(--line);
+}
+.sw.frame-all-green {
+  border: 2px solid #16a34a;
+}
+.sw.frame-some-green {
+  border: 2px solid #86efac;
+}
+.sw.frame-some-red {
+  border: 2px solid #fca5a5;
+}
+.sw.frame-all-red {
+  border: 2px solid #dc2626;
+}
+/* Transient "not yet implemented" tip */
+.tip-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  background: #0f1b2b;
+  color: #e6edf5;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  z-index: 50;
+}
+
 /* Lesson loop */
 .progressbar {
   height: 8px;
