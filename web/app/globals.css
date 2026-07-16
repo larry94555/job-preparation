@@ -284,6 +284,37 @@ button.ghost,
   background: #eab308;
   border-color: #ca8a04;
 }
+/* Resume = an in-progress quick assessment — orange. */
+.alink.resume {
+  background: #fdba74;
+  border-color: #f97316;
+  color: #431407;
+  font-weight: 600;
+}
+.alink.resume:hover {
+  background: #fb923c;
+  border-color: #ea580c;
+}
+/* Quick-assessment tally row */
+.qtally {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 8px 0 4px;
+  font-size: 14px;
+}
+.qtally .qt.good {
+  color: #16a34a;
+  font-weight: 600;
+}
+.qtally .qt.soft {
+  color: #b45309;
+  font-weight: 600;
+}
+/* An already-tried (wrong) option in a quick assessment */
+.opt.tried {
+  opacity: 0.5;
+}
 /* Frame-color swatches for the assessment legend (override the base .sw border). */
 .sw.frame-none {
   border: 2px solid var(--line);
