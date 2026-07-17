@@ -83,16 +83,16 @@ test("pglite: content projection imports idempotently and reads back", async () 
   const db = await makeDb();
 
   const r1 = await importContentWithDb(db, topicsDir);
-  assert.equal(r1.imported, 35);
+  assert.equal(r1.imported, 36);
   assert.equal(r1.unchanged, 0);
 
   // Re-importing unchanged content is a no-op: everything reports unchanged.
   const r2 = await importContentWithDb(db, topicsDir);
   assert.equal(r2.imported, 0);
-  assert.equal(r2.unchanged, 35);
+  assert.equal(r2.unchanged, 36);
 
   const topics = await loadContentRows(db);
-  assert.equal(topics.length, 35);
+  assert.equal(topics.length, 36);
   const known = topics.find((t) => t.topic?.id === "kv-cache-management");
   assert.ok(known, "kv-cache-management topic present in projected rows");
   assert.equal(known!.topic?.id, "kv-cache-management");
