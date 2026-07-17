@@ -1,13 +1,21 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { accounts, sessions, users, verificationTokens } from "@job-prep/store";
+import { eq } from "drizzle-orm";
 import NextAuth, { type NextAuthConfig } from "next-auth";
 import type { Adapter } from "next-auth/adapters";
 import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
+import Nodemailer from "next-auth/providers/nodemailer";
 import Resend from "next-auth/providers/resend";
+import { cookies } from "next/headers";
 import { authConfig } from "./auth.config";
 import { authDb } from "@/lib/db";
+
+/** Short-lived cookie carrying the name typed on the sign-up form. A magic link
+ *  only transports an email, so the name is stashed here at sign-up and applied
+ *  to the user row when verification actually creates them. */
+export const SIGNUP_NAME_COOKIE = "signup_name";
 
 /**
  * Full Auth.js config (Node runtime — the Drizzle adapter needs `pg`). Spreads
@@ -43,11 +51,38 @@ const adapter: Adapter | undefined = db
     })()
   : undefined;
 
-const emailAuthConfigured = !!(db && process.env.RESEND_API_KEY);
+/**
+ * Outbound mail has two interchangeable transports; either one enables the
+ * magic-link sign-up. SMTP is preferred when both are set.
+ *
+ *  - **SMTP (`nodemailer`)** — any relay: OCI Email Delivery, SES, a corporate
+ *    smarthost. Uses the submission port (587), NOT port 25, so it works on a
+ *    cloud host that blocks 25 (as OCI does by default).
+ *  - **Resend** — an HTTP API; no SMTP ports needed at all.
+ *
+ * Both still require a database: the adapter stores the verification tokens.
+ * The transport only DELIVERS the link; it never verifies anything itself.
+ */
+export const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+const resendConfigured = !!process.env.RESEND_API_KEY;
+const emailAuthConfigured = !!(db && (smtpConfigured || resendConfigured));
 
 const providers: NextAuthConfig["providers"] = [];
 
-if (emailAuthConfigured) {
+if (db && smtpConfigured) {
+  providers.push(
+    Nodemailer({
+      server: {
+        host: process.env.SMTP_HOST,
+        port: Number(process.env.SMTP_PORT ?? 587),
+        // 587 = STARTTLS (secure:false upgrades in-band); 465 = implicit TLS.
+        secure: Number(process.env.SMTP_PORT ?? 587) === 465,
+        auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+      },
+      from: process.env.EMAIL_FROM ?? "onboarding@resend.dev",
+    }),
+  );
+} else if (db && resendConfigured) {
   providers.push(
     Resend({
       apiKey: process.env.RESEND_API_KEY,
@@ -105,8 +140,28 @@ export const oauthConfigured = !!(
 /** True when passwordless email sign-in is available (adapter + Resend key). */
 export { emailAuthConfigured };
 
+/** True only when the dev credentials stub is actually REGISTERED above. The UI
+ *  must gate on this: in production the provider does not exist, so rendering its
+ *  form would offer a sign-in that can only fail. */
+export const devAuthConfigured = process.env.NODE_ENV !== "production";
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter,
   providers,
+  events: {
+    // A magic link carries only an email, so a newly verified user has no name.
+    // Apply the one they typed on the sign-up form (stashed in a short-lived
+    // cookie). Best-effort: a missing cookie or a failed write just leaves the
+    // name unset — it must never break verification.
+    async createUser({ user }) {
+      if (!db || !user.id) return;
+      try {
+        const name = (await cookies()).get(SIGNUP_NAME_COOKIE)?.value?.trim();
+        if (name) await db.update(users).set({ name }).where(eq(users.id, user.id));
+      } catch {
+        /* no request scope / write failed — leave the name unset */
+      }
+    },
+  },
 });

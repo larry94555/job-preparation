@@ -78,9 +78,20 @@ services:
       PARAPHRASE: ${PARAPHRASE:-on}
       PARAPHRASE_LESSONS: ${PARAPHRASE_LESSONS:-on}
       PARAPHRASE_TESTS: ${PARAPHRASE_TESTS:-on}
-      # Email magic-link sign-in (Resend). Without these the app falls back to a
-      # "email sign-in not enabled" notice — set them for real registration.
+      # Email magic-link sign-in. TWO interchangeable transports — set ONE.
+      # Without either, sign-up shows "temporarily unavailable" and no mail sends.
+      #
+      # 1) SMTP (preferred; e.g. OCI Email Delivery). Connects on the SUBMISSION
+      #    port (587) — never port 25, which OCI blocks by default — so NO port
+      #    unblock request is needed. Any relay works (OCI, SES, a smarthost).
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      # 2) Resend (HTTP API) — used only when no SMTP_HOST/USER/PASS is set.
       RESEND_API_KEY: ${RESEND_API_KEY:-}
+      # The From address. With OCI Email Delivery this MUST be an Approved Sender
+      # on a domain you control (e.g. verify@yourdomain.com).
       EMAIL_FROM: ${EMAIL_FROM:-onboarding@resend.dev}
       # Support mailbox for the Help link + privacy/terms contact.
       SUPPORT_EMAIL: ${SUPPORT_EMAIL:-support@example.com}

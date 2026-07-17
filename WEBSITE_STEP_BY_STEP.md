@@ -361,19 +361,111 @@ before F.3 (and in Common Problems). Do **both** or you'll still get a timeout.
 | `AUTH_URL` | ✅ **Required** | **You set it** to your site URL. No domain yet? Use `http://<VM-PUBLIC-IP>:3000`. With a domain later: `https://yourdomain.com`. |
 | `LLM_BASE_URL` | ✅ **Required** | **You set it** to where your Oracle llama-server listens: `http://<VM-IP>:8080/v1`. |
 | `LLM_API_KEY` | ✅ **Required** | **You already have this** — the key your Oracle `llama-server --api-key` uses (it's in your existing `secrets/secrets.env`; or make one with `node utils/gen-api-key.mjs`). |
-| `RESEND_API_KEY` | ✅ **Required to register** | **Copy from Resend**: dashboard → **API Keys → Create**. (Needed even for testing — the deployed app has no dev sign-in.) |
+| `SMTP_HOST` / `SMTP_USER` / `SMTP_PASS` | ✅ **Required to register** | **Your mail relay.** On Oracle use **OCI Email Delivery** — see **step B.5** below. Connects on port **587**, so Oracle's port-25 block does not apply and no unblock request is needed. `SMTP_PORT` defaults to `587`. (Needed even for testing — the deployed app has no dev sign-in.) |
+| `RESEND_API_KEY` | ⬜ Alternative to SMTP | Used **only when no `SMTP_*` is set**. Resend → **API Keys → Create**. Gotcha: its `onboarding@resend.dev` test sender delivers **only to your own Resend-account address** until you verify a domain — a common "no email arrived" cause. |
 | `AUTH_ADMIN_EMAILS` | ⬜ Optional | **Your own email**, to give yourself the admin role. |
 | `SUPPORT_EMAIL` | ⬜ Recommended | **Any inbox that receives email** — the Help link opens a mailto to it (never used to send). **Your Gmail works now**; switch to `support@yourdomain.com` (Cloudflare Email Routing, E.1) after you pick a domain. |
 | `STRIPE_SECRET_KEY` | ⬜ Optional (donations) | The `sk_test_…` key from Stripe → **Developers → API keys** in **Test mode** — see the detailed walkthrough in **step D.1**. |
 | `STRIPE_WEBHOOK_SECRET` | ⬜ Optional, set **later** | **Copy from Stripe in step F.6**, after you create the webhook. Leave blank for now. |
-| `EMAIL_FROM` | ⬜ Has a default | Leave `onboarding@resend.dev` for testing; switch to your verified-domain sender later (step F.7). |
+| `EMAIL_FROM` | ✅ **Required with SMTP** | With **OCI Email Delivery** this must be an **Approved Sender** on a domain you control (e.g. `verify@yourdomain.com`). Only with Resend can you leave `onboarding@resend.dev` for testing. |
 | `AUTH_GOOGLE_*` / `AUTH_GITHUB_*` | ⬜ Optional | One-click OAuth credentials from Google Cloud / GitHub. Leave blank to skip. |
 | `DEPLOY_ENV`, `MODEL_CONFIG_PATH`, `LLM_TIMEOUT_MS` | — pre-filled | Leave the template's defaults as-is — these aren't secrets. |
 
-**Minimum to get a testable site up (no domain, no donations):** the **seven ✅ rows** —
-`POSTGRES_PASSWORD`, `DATABASE_URL`, `AUTH_SECRET`, `AUTH_URL`, `LLM_BASE_URL`, `LLM_API_KEY`,
-and `RESEND_API_KEY`. Add `STRIPE_SECRET_KEY` + `SUPPORT_EMAIL` when you want donations and the
-Help link working.
+**Minimum to get a testable site up (no donations):** `POSTGRES_PASSWORD`, `DATABASE_URL`,
+`AUTH_SECRET`, `AUTH_URL`, `LLM_BASE_URL`, `LLM_API_KEY`, plus a mail transport —
+`SMTP_HOST`/`SMTP_USER`/`SMTP_PASS` + `EMAIL_FROM` (step B.5). Add `STRIPE_SECRET_KEY` +
+`SUPPORT_EMAIL` when you want donations and the Help link working.
+
+---
+
+### B.5 📧 Turn on sign-up email (OCI Email Delivery)
+
+Sign-up sends a **verification link**. Without a mail transport the app disables registration
+(it shows "Sign-up is temporarily unavailable") — so this step is what makes sign-up work.
+
+> **Why not just run a mail server on the VM?** Because delivering mail yourself means connecting
+> to the recipient's mail server on **port 25**, and **Oracle blocks outbound port 25 by default**.
+> Oracle blocks it precisely because cloud IPs are a spam source, and points you at Email Delivery
+> instead. See "Do I need to unblock port 25?" below — **you don't.**
+
+**B.5.1 Pick your region's SMTP endpoint.** In the OCI Console: **Developer Services → Application
+Integration → Email Delivery**. The endpoint looks like
+`smtp.email.<region>.oci.oraclecloud.com` (e.g. `smtp.email.us-ashburn-1.oci.oraclecloud.com`).
+Use the region your VM is in.
+
+**B.5.2 Create SMTP credentials.** **Identity → Domains → (your domain) → Users → (your user) →
+SMTP Credentials → Generate credentials.**
+⚠️ These are **not** your console login. The username looks like
+`ocid1.user.oc1..aaaa...@ocid1.tenancy.oc1..aaaa...` and the **password is shown exactly once** —
+copy it immediately.
+
+**B.5.3 Add an Approved Sender.** **Email Delivery → Approved Senders → Create**, using the exact
+address you'll send *from* (e.g. `verify@yourdomain.com`). OCI will not send from an address that
+isn't approved. You need a domain you control here — this is the one place a domain is required.
+
+**B.5.4 Publish SPF + DKIM** for that domain (OCI shows the exact records under Email Delivery →
+Email Domains). Without them Gmail/Outlook will spam-folder or reject your verification links.
+
+**B.5.5 Fill in `secrets/prod.env`:**
+
+```bash
+SMTP_HOST=smtp.email.us-ashburn-1.oci.oraclecloud.com   # your region
+SMTP_PORT=587
+SMTP_USER=ocid1.user.oc1..aaaa...@ocid1.tenancy.oc1..aaaa...
+SMTP_PASS=<the password shown once in B.5.2>
+EMAIL_FROM=verify@yourdomain.com                         # the Approved Sender
+AUTH_URL=http://<VM-PUBLIC-IP>:3000                      # or https://yourdomain.com
+```
+
+`AUTH_URL` matters: it builds the link inside the email. Wrong value → the link 404s or points at
+localhost.
+
+**B.5.6 Rebuild and test.**
+
+```bash
+git pull
+docker compose -f docker-compose.prod.yml up -d --build web
+```
+
+Then open `/signup`, enter a name + email, and check the inbox. If nothing arrives:
+
+```bash
+# Did the app accept the relay, or reject the credentials?
+docker compose -f docker-compose.prod.yml logs --tail=100 web | grep -iE "smtp|mail|auth|EAUTH|ECONN"
+
+# Can the VM even reach the submission port? (should connect — 587 is NOT blocked)
+timeout 5 bash -c 'cat < /dev/tcp/smtp.email.us-ashburn-1.oci.oraclecloud.com/587' && echo OPEN || echo BLOCKED
+```
+
+Common causes: `SMTP_USER` is the console login instead of the generated SMTP username; `EMAIL_FROM`
+isn't an Approved Sender; SPF/DKIM missing (delivered but spam-foldered — check Junk).
+
+---
+
+### Do I need to unblock port 25? **No.**
+
+This trips people up, so to be explicit:
+
+| | Port | Blocked on Oracle? | Needed here? |
+|---|---|---|---|
+| App → **OCI Email Delivery relay** (what we do) | **587** (submission) | **No** | ✅ this is the path |
+| Your own mail server → recipient's mail server | **25** | **Yes, by default** | ❌ not used |
+
+Port 25 is only needed if *you* run the mail server that delivers direct to Gmail/Outlook. We don't —
+we hand the message to Oracle's relay on 587, and **Oracle** does the port-25 delivery from their own
+reputable IPs.
+
+If you still want it lifted (you don't need it for sign-up): OCI Console → **Help / Support → Create
+Support Request → Service Limit Increase**, category **Compute**, and ask for the outbound SMTP (port
+25) restriction to be removed for your tenancy. Be aware:
+
+- Oracle **routinely declines** this, especially on Free Tier / new accounts — their documented answer
+  is "use Email Delivery."
+- Even if granted, it is **not sufficient**: you'd still need a domain, SPF, DKIM, DMARC, a matching
+  **rDNS/PTR** record, bounce handling, and a warmed IP reputation. A fresh OCI IP sending a
+  verification link direct to Gmail will very likely be spam-foldered or rejected outright.
+
+**Recommendation: skip the unblock and use B.5.** Same result, no ticket, better deliverability.
 
 > **PROMPT ▸ Deployment doublecheck** (optional sanity check in Claude Code before deploying)
 > "Verify `docker-compose.prod.yml` passes every value from `secrets/prod.env` to the right
