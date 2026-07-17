@@ -22,6 +22,7 @@ interface QuickQuestion {
   prompt: string;
   options: string[];
   subtopic: string;
+  contextHref: string;
 }
 interface Data {
   topicId: string;
@@ -217,16 +218,11 @@ export default function QuickQuizClient({ data }: { data: Data }) {
             Topic: {data.topicTitle}
             {q?.subtopic ? ` · Subtopic: ${q.subtopic}` : ""}
           </span>
-          <a
-            className="alink"
-            href={`/assessment/review/context?topic=${encodeURIComponent(data.topicId)}${
-              data.sectionId ? `&section=${encodeURIComponent(data.sectionId)}` : ""
-            }&q=${encodeURIComponent(qid)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            context ↗
-          </a>
+          {q ? (
+            <a className="alink" href={q.contextHref} target="_blank" rel="noopener noreferrer">
+              context ↗
+            </a>
+          ) : null}
         </div>
         <div className="prompt" style={{ marginTop: 6 }}>
           {q?.prompt}
