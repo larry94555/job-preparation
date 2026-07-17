@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { emailAuthConfigured, signIn } from "@/auth";
+import { emailAuthConfigured, emailProviderId, signIn } from "@/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -55,7 +55,7 @@ export default async function SignupHelpPage({
           <form
             action={async (formData: FormData) => {
               "use server";
-              await signIn("resend", {
+              await signIn(emailProviderId ?? "nodemailer", {
                 email: String(formData.get("email") ?? "").trim(),
                 redirectTo: "/welcome",
               });

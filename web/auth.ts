@@ -65,7 +65,17 @@ const adapter: Adapter | undefined = db
  */
 export const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
 const resendConfigured = !!process.env.RESEND_API_KEY;
-const emailAuthConfigured = !!(db && (smtpConfigured || resendConfigured));
+
+/**
+ * The id of the magic-link provider that is ACTUALLY registered below — the exact
+ * string a `signIn(...)` call for email must use. It's `"nodemailer"` when SMTP is
+ * set (preferred) and `"resend"` for the HTTP fallback, so the sign-up form must
+ * read this rather than hardcode a name: hardcoding `"resend"` while SMTP is
+ * configured asks Auth.js for a provider that doesn't exist, and nothing sends.
+ */
+export const emailProviderId: "nodemailer" | "resend" | null =
+  db && smtpConfigured ? "nodemailer" : db && resendConfigured ? "resend" : null;
+const emailAuthConfigured = emailProviderId !== null;
 
 const providers: NextAuthConfig["providers"] = [];
 
