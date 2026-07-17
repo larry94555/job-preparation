@@ -388,16 +388,39 @@ Sign-up sends a **verification link**. Without a mail transport the app disables
 > Oracle blocks it precisely because cloud IPs are a spam source, and points you at Email Delivery
 > instead. See "Do I need to unblock port 25?" below — **you don't.**
 
-**B.5.1 Pick your region's SMTP endpoint.** In the OCI Console: **Developer Services → Application
-Integration → Email Delivery**. The endpoint looks like
-`smtp.email.<region>.oci.oraclecloud.com` (e.g. `smtp.email.us-ashburn-1.oci.oraclecloud.com`).
-Use the region your VM is in.
+**B.5.1 Get YOUR region's SMTP endpoint — don't copy the example.** In the OCI Console:
+**Developer Services → Application Integration → Email Delivery → Configuration**. That page prints
+the exact SMTP endpoint + ports for your region; **copy it from there.** It follows the pattern
+`smtp.email.<region>.oci.oraclecloud.com`, so it differs per region:
 
-**B.5.2 Create SMTP credentials.** **Identity → Domains → (your domain) → Users → (your user) →
-SMTP Credentials → Generate credentials.**
-⚠️ These are **not** your console login. The username looks like
-`ocid1.user.oc1..aaaa...@ocid1.tenancy.oc1..aaaa...` and the **password is shown exactly once** —
-copy it immediately.
+| Your region | `SMTP_HOST` |
+|---|---|
+| US East (Ashburn) | `smtp.email.us-ashburn-1.oci.oraclecloud.com` |
+| US West (Phoenix) | `smtp.email.us-phoenix-1.oci.oraclecloud.com` |
+| UK South (London) | `smtp.email.uk-london-1.oci.oraclecloud.com` |
+| Germany (Frankfurt) | `smtp.email.eu-frankfurt-1.oci.oraclecloud.com` |
+| Japan East (Tokyo) | `smtp.email.ap-tokyo-1.oci.oraclecloud.com` |
+
+Your region is in the **top-right region selector** of the Console (and in your VM's OCID). Use the
+region where you set Email Delivery up. Use **port 587**.
+
+**B.5.2 Generate SMTP credentials — these are NOT your console login.** This is the single most
+common mistake. Your Oracle sign-in email/password will **never** work as `SMTP_USER`/`SMTP_PASS`;
+you must generate a dedicated credential pair:
+
+**Identity & Security → Identity → Domains → (your domain, usually `Default`) → Users → (your user)
+→ SMTP Credentials → Generate credentials.**
+
+> On older tenancies without Identity Domains the path is **Identity & Security → Users → (your
+> user) → SMTP Credentials**. If you don't see the option, you lack the permission — use an
+> administrator user.
+
+Oracle then shows you two values — **copy both verbatim**, don't retype or construct them:
+
+- **Username** → `SMTP_USER`. A long OCID-shaped string, roughly
+  `ocid1.user.oc1..aaaa……@ocid1.tenancy.oc1..aaaa……`
+- **Password** → `SMTP_PASS`. ⚠️ **Shown exactly once.** Close the dialog without copying it and it's
+  gone forever — just delete that credential and generate a new one (each user can hold 2).
 
 **B.5.3 Add an Approved Sender.** **Email Delivery → Approved Senders → Create**, using the exact
 address you'll send *from* (e.g. `verify@yourdomain.com`). OCI will not send from an address that
@@ -420,7 +443,18 @@ AUTH_URL=http://<VM-PUBLIC-IP>:3000                      # or https://yourdomain
 `AUTH_URL` matters: it builds the link inside the email. Wrong value → the link 404s or points at
 localhost.
 
-**B.5.6 Rebuild and test.**
+**B.5.6 Check the credentials BEFORE rebuilding.** This connects to the relay, authenticates, and
+optionally sends a real message — and it names the actual cause when something's wrong:
+
+```bash
+node utils/test-smtp.mjs                  # connect + authenticate only
+node utils/test-smtp.mjs you@example.com  # …and send a real test email
+```
+
+It reads `SMTP_*` / `EMAIL_FROM` from `secrets/prod.env`. Get a ✓ here and the app will work —
+if it can't authenticate, the app can't either, so fix it here first.
+
+**B.5.7 Rebuild and test.**
 
 ```bash
 git pull
