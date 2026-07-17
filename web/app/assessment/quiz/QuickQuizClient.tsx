@@ -9,6 +9,7 @@ import {
   loadQA,
   newSeed,
   optionOrder,
+  type QAResult,
   type QAState,
   saveQA,
   shuffleSeeded,
@@ -31,6 +32,7 @@ interface Data {
   questions: QuickQuestion[];
 }
 type Picked = { choice: string; correct: boolean; explanation: string };
+const EMPTY: QAResult = { wrongTried: [], solved: false };
 
 export default function QuickQuizClient({ data }: { data: Data }) {
   const qById = useMemo(() => new Map(data.questions.map((q) => [q.id, q])), [data.questions]);
@@ -43,7 +45,6 @@ export default function QuickQuizClient({ data }: { data: Data }) {
     return { seed, order: shuffleSeeded(data.questions.map((q) => q.id), seed), index: 0, results: {} };
   }, [data.questions]);
 
-  // Resume a valid saved attempt, or start a fresh one.
   useEffect(() => {
     const existing = loadQA(data.topicId, data.sectionId);
     const ids = new Set(data.questions.map((q) => q.id));
@@ -65,6 +66,16 @@ export default function QuickQuizClient({ data }: { data: Data }) {
     [data.topicId, data.sectionId],
   );
 
+  const goTo = useCallback((idx: number) => {
+    setPicked(null);
+    setState((s) => {
+      if (!s) return s;
+      const next = { ...s, index: idx };
+      saveQA(data.topicId, data.sectionId, next);
+      return next;
+    });
+  }, [data.topicId, data.sectionId]);
+
   function startAgain() {
     if (!data.sectionId) {
       if (!window.confirm("Start over? This clears all tallies for this topic, including its subtopics.")) {
@@ -83,29 +94,43 @@ export default function QuickQuizClient({ data }: { data: Data }) {
   const t = tallies(state);
   const total = state.order.length;
   const finished = isFinished(state);
-  const qid = state.order[state.index];
-  const q = qid ? qById.get(qid) : undefined;
-  const res = (qid && state.results[qid]) || { wrongTried: [], solved: false };
+  const isSolved = (idx: number) => !!state.results[state.order[idx]]?.solved;
+  const firstUnsolved = state.order.findIndex((_, idx) => !isSolved(idx));
 
   async function pick(choice: string) {
-    if (checking || !qid || res.wrongTried.includes(choice) || res.solved) return;
+    if (checking) return;
+    const qid = state!.order[state!.index];
+    if (!qid) return;
+    const cur = state!.results[qid] ?? EMPTY;
+    if (!cur.solved && cur.wrongTried.includes(choice)) return; // pre-solve: don't re-try a wrong one
     setChecking(true);
     try {
       const r = await gradeQuick(data.topicId, qid, choice);
       setPicked({ choice, correct: r.correct, explanation: r.explanation });
-      const cur = state!.results[qid] ?? { wrongTried: [], solved: false };
-      const next: typeof cur = {
-        wrongTried: r.correct || cur.wrongTried.includes(choice) ? cur.wrongTried : [...cur.wrongTried, choice],
-        solved: cur.solved || r.correct,
-      };
-      persist({ ...state!, results: { ...state!.results, [qid]: next } });
+      if (!cur.solved) {
+        const next: QAResult = r.correct
+          ? { ...cur, solved: true, solvedChoice: choice, solvedExplanation: r.explanation }
+          : {
+              ...cur,
+              wrongTried: cur.wrongTried.includes(choice) ? cur.wrongTried : [...cur.wrongTried, choice],
+              lastWrongExplanation: r.explanation,
+            };
+        persist({ ...state!, results: { ...state!.results, [qid]: next } });
+      }
+      // Already solved → this is exploration: show the reason, but don't change
+      // results or the failed-attempts tally.
     } finally {
       setChecking(false);
     }
   }
-  function advance() {
-    setPicked(null);
-    persist({ ...state!, index: state!.index + 1 });
+
+  function nextUnsolved() {
+    const n = state!.order.length;
+    for (let k = 1; k <= n; k++) {
+      const idx = (state!.index + k) % n;
+      if (!isSolved(idx)) return goTo(idx);
+    }
+    goTo(n); // everything solved → finish
   }
 
   const header = (
@@ -120,7 +145,6 @@ export default function QuickQuizClient({ data }: { data: Data }) {
       ) : null}
     </div>
   );
-
   const scopeTitle = data.sectionTitle ? `${data.topicTitle}: ${data.sectionTitle}` : data.topicTitle;
 
   if (finished) {
@@ -132,8 +156,16 @@ export default function QuickQuizClient({ data }: { data: Data }) {
         </div>
         <h1>{scopeTitle}</h1>
         <TallyRow t={t} total={total} />
+        {firstUnsolved >= 0 ? (
+          <p className="muted">You still have {total - t.correct} question(s) unanswered.</p>
+        ) : null}
         <div className="row" style={{ marginTop: 12 }}>
-          <button onClick={startAgain}>Start again</button>
+          {firstUnsolved >= 0 ? (
+            <button onClick={() => goTo(firstUnsolved)}>Review remaining →</button>
+          ) : null}
+          <button className="ghost" onClick={startAgain}>
+            Start again
+          </button>
           <Link className="btn ghost" href="/assessment">
             ← Back to assessment
           </Link>
@@ -142,7 +174,27 @@ export default function QuickQuizClient({ data }: { data: Data }) {
     );
   }
 
+  const qid = state.order[state.index];
+  const q = qById.get(qid);
+  const res = state.results[qid] ?? EMPTY;
   const opts = q ? optionOrder(q.options, state.seed, qid) : [];
+  const otherUnsolved = state.order.some((_, idx) => idx !== state.index && !isSolved(idx));
+
+  const badge = res.solved
+    ? { cls: "correct", label: "✓ Correct" }
+    : res.wrongTried.length > 0
+      ? { cls: "wrong", label: "Incorrect — try again" }
+      : { cls: "none", label: "Please select an answer." };
+
+  // Feedback to show: the current pick, else the persisted state for this item.
+  const fb: { correct: boolean; explanation: string; exploring: boolean } | null = picked
+    ? { correct: picked.correct, explanation: picked.explanation, exploring: res.solved && !picked.correct }
+    : res.solved && res.solvedExplanation
+      ? { correct: true, explanation: res.solvedExplanation, exploring: false }
+      : !res.solved && res.wrongTried.length > 0 && res.lastWrongExplanation
+        ? { correct: false, explanation: res.lastWrongExplanation, exploring: false }
+        : null;
+  const checkedChoice = picked ? picked.choice : res.solved ? res.solvedChoice : undefined;
 
   return (
     <div>
@@ -161,17 +213,18 @@ export default function QuickQuizClient({ data }: { data: Data }) {
         <div className="prompt" style={{ marginTop: 6 }}>
           {q?.prompt}
         </div>
+        <div className={"qstate " + badge.cls}>{badge.label}</div>
         <div>
           {opts.map((opt) => {
-            const tried = res.wrongTried.includes(opt);
-            const chosenRight = picked?.correct && picked.choice === opt;
+            const triedPre = !res.solved && res.wrongTried.includes(opt);
+            const checked = checkedChoice === opt;
             return (
-              <label key={opt} className={"opt" + (chosenRight ? " sel" : "") + (tried ? " tried" : "")}>
+              <label key={opt} className={"opt" + (checked ? " sel" : "") + (triedPre ? " tried" : "")}>
                 <input
                   type="radio"
                   name={`q_${qid}`}
-                  disabled={tried || checking || res.solved}
-                  checked={!!chosenRight}
+                  disabled={triedPre || checking}
+                  checked={checked}
                   onChange={() => pick(opt)}
                 />
                 <span>{opt}</span>
@@ -179,26 +232,48 @@ export default function QuickQuizClient({ data }: { data: Data }) {
             );
           })}
         </div>
-        {picked ? (
-          <div className={"feedback " + (picked.correct ? "good" : "soft")}>
-            {picked.correct ? "✓ Correct. " : "✗ Not quite. "}
-            {picked.explanation}
-            {!picked.correct ? (
+        {res.solved ? (
+          <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+            Answered — you can still click any option to see why it&apos;s right or wrong.
+          </div>
+        ) : null}
+        {fb ? (
+          <div className={"feedback " + (fb.correct ? "good" : "soft")}>
+            {fb.exploring ? "This option is incorrect. " : fb.correct ? "✓ Correct. " : "✗ Not quite. "}
+            {fb.explanation}
+            {!fb.correct && !res.solved ? (
               <div style={{ marginTop: 6 }}>Pick a different answer to try again.</div>
             ) : null}
           </div>
         ) : null}
+
         <div className="row" style={{ justifyContent: "space-between", marginTop: 10 }}>
-          <button className="ghost" onClick={startAgain}>
-            Start again
-          </button>
-          {res.solved || picked?.correct ? (
-            <button onClick={advance}>
-              {state.index + 1 < total ? "Continue →" : "Finish →"}
+          <span className="row" style={{ gap: 8 }}>
+            {state.index > 0 ? (
+              <button className="ghost" onClick={() => goTo(state.index - 1)}>
+                ← Back
+              </button>
+            ) : null}
+            <button className="ghost" onClick={startAgain}>
+              Start again
             </button>
-          ) : (
-            <span />
-          )}
+          </span>
+          <span className="row" style={{ gap: 8 }}>
+            {otherUnsolved ? (
+              <button className="ghost" onClick={nextUnsolved}>
+                Proceed to next question →
+              </button>
+            ) : null}
+            {res.solved ? (
+              <button onClick={() => goTo(state.index + 1)}>
+                {state.index + 1 < total ? "Continue →" : "Finish →"}
+              </button>
+            ) : (
+              <button className="ghost" onClick={() => goTo(state.index + 1)}>
+                Skip →
+              </button>
+            )}
+          </span>
         </div>
       </div>
     </div>

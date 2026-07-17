@@ -4,9 +4,16 @@
 // here in the browser. Keyed per (topic, subtopic|main).
 
 export interface QAResult {
-  /** Distinct wrong option texts already tried on this question. */
+  /** Distinct wrong option texts tried BEFORE solving (these count as failed
+   *  attempts). Wrong picks made after solving — while exploring — are not here. */
   wrongTried: string[];
   solved: boolean;
+  /** The option the user picked to solve it (their own answer; for revisit). */
+  solvedChoice?: string;
+  /** "Why correct" note, kept so a revisit can re-show it. */
+  solvedExplanation?: string;
+  /** Last pre-solve "why wrong" note, kept for revisiting a wrong-pending item. */
+  lastWrongExplanation?: string;
 }
 export interface QAState {
   seed: number;

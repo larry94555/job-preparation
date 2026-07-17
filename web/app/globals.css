@@ -315,6 +315,27 @@ button.ghost,
 .opt.tried {
   opacity: 0.5;
 }
+/* The clear per-question state badge */
+.qstate {
+  display: inline-block;
+  margin: 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+.qstate.correct {
+  background: #dcfce7;
+  color: #166534;
+}
+.qstate.wrong {
+  background: #fef3c7;
+  color: #92400e;
+}
+.qstate.none {
+  background: #eef2f7;
+  color: #475569;
+}
 /* Frame-color swatches for the assessment legend (override the base .sw border). */
 .sw.frame-none {
   border: 2px solid var(--line);
