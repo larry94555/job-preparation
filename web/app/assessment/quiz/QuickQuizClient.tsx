@@ -40,6 +40,7 @@ export default function QuickQuizClient({ data }: { data: Data }) {
   const [state, setState] = useState<QAState | null>(null);
   const [picked, setPicked] = useState<Picked | null>(null);
   const [checking, setChecking] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
 
   const freshState = useCallback((): QAState => {
     const seed = newSeed();
@@ -69,6 +70,7 @@ export default function QuickQuizClient({ data }: { data: Data }) {
 
   const goTo = useCallback((idx: number) => {
     setPicked(null);
+    setErr(null);
     setState((s) => {
       if (!s) return s;
       const next = { ...s, index: idx };
@@ -105,6 +107,7 @@ export default function QuickQuizClient({ data }: { data: Data }) {
     const cur = state!.results[qid] ?? EMPTY;
     if (!cur.solved && cur.wrongTried.includes(choice)) return; // pre-solve: don't re-try a wrong one
     setChecking(true);
+    setErr(null);
     try {
       const r = await gradeQuick(data.topicId, qid, choice);
       setPicked({ choice, correct: r.correct, explanation: r.explanation });
@@ -120,6 +123,9 @@ export default function QuickQuizClient({ data }: { data: Data }) {
       }
       // Already solved → this is exploration: show the reason, but don't change
       // results or the failed-attempts tally.
+    } catch {
+      // Never fail silently (the grade call errored / timed out) — let the user retry.
+      setErr("Couldn't check that answer just now — please click it again.");
     } finally {
       setChecking(false);
     }
@@ -214,20 +220,17 @@ export default function QuickQuizClient({ data }: { data: Data }) {
           Topic: {data.topicTitle}
           {q?.subtopic ? ` · Subtopic: ${q.subtopic}` : ""}
         </div>
-        <div className="prompt" style={{ marginTop: 6, marginBottom: 2 }}>
+        <div className="prompt" style={{ marginTop: 6 }}>
           {q?.prompt}
         </div>
-        {q ? (
-          <a
-            href={q.contextHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ fontSize: 13 }}
-          >
-            (context — if needed)
-          </a>
-        ) : null}
         <div className={"qstate " + badge.cls}>{badge.label}</div>
+        {q ? (
+          <div style={{ margin: "2px 0 6px" }}>
+            <a href={q.contextHref} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13 }}>
+              (context — if needed)
+            </a>
+          </div>
+        ) : null}
         <div>
           {opts.map((opt) => {
             const triedPre = !res.solved && res.wrongTried.includes(opt);
@@ -260,6 +263,7 @@ export default function QuickQuizClient({ data }: { data: Data }) {
             ) : null}
           </div>
         ) : null}
+        {err ? <div className="feedback soft">{err}</div> : null}
 
         <div className="row" style={{ justifyContent: "space-between", marginTop: 10 }}>
           <span className="row" style={{ gap: 8 }}>

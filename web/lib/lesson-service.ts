@@ -656,6 +656,15 @@ export async function quickAssessmentData(
   };
 }
 
+/** Resolve `p`, but never wait longer than `ms` — returns `fallback` if it does.
+ *  Keeps an interactive request snappy even when a best-effort LLM call is slow. */
+function withTimeout<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return Promise.race([
+    p.catch(() => fallback),
+    new Promise<T>((resolve) => setTimeout(() => resolve(fallback), ms)),
+  ]);
+}
+
 /**
  * Grade one quick-assessment choice server-side (answer keys never reach the
  * client). On a correct pick returns the authored "why it's correct" note; on a
@@ -673,7 +682,11 @@ export async function gradeQuickChoice(
   if (gradeMultipleChoice(q, chosen)) {
     return { correct: true, explanation: q.explanation ?? "Correct." };
   }
-  const why = await explainWrongAnswer(q, chosen);
+  // The "why it's wrong" note is best-effort and BOUNDED: the deterministic
+  // result must never wait on a slow or unreachable LLM. The grading client
+  // retries with a 60s-per-attempt cap (fine for batch grading, but it would
+  // hang this interactive request), so cap the whole thing and fall back.
+  const why = await withTimeout(explainWrongAnswer(q, chosen), 6000, null);
   return {
     correct: false,
     explanation: why ?? "That's not the best choice here — reconsider the other options.",
@@ -967,7 +980,9 @@ export async function explainWrongAnswer(
     `The correct choice: ${correct}\n` +
     (question.explanation ? `Reference note: ${question.explanation}\n` : "");
   try {
-    const raw = await new LlamaClient().chatJson([
+    // Short per-attempt timeout: this is an interactive request, not batch
+    // grading, so fail fast to the neutral fallback rather than blocking.
+    const raw = await new LlamaClient({ timeoutMs: 4000 }).chatJson([
       { role: "system", content: sys },
       { role: "user", content: user },
     ]);
