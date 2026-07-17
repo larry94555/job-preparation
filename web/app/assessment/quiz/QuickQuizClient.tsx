@@ -209,9 +209,24 @@ export default function QuickQuizClient({ data }: { data: Data }) {
       <TallyRow t={t} total={total} />
 
       <div className="panel" style={{ marginTop: 14 }}>
-        <div className="muted" style={{ fontSize: 13 }}>
-          Topic: {data.topicTitle}
-          {q?.subtopic ? ` · Subtopic: ${q.subtopic}` : ""}
+        <div
+          className="muted"
+          style={{ fontSize: 13, display: "flex", justifyContent: "space-between", gap: 8 }}
+        >
+          <span>
+            Topic: {data.topicTitle}
+            {q?.subtopic ? ` · Subtopic: ${q.subtopic}` : ""}
+          </span>
+          <a
+            className="alink"
+            href={`/assessment/review/context?topic=${encodeURIComponent(data.topicId)}${
+              data.sectionId ? `&section=${encodeURIComponent(data.sectionId)}` : ""
+            }&q=${encodeURIComponent(qid)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            context ↗
+          </a>
         </div>
         <div className="prompt" style={{ marginTop: 6 }}>
           {q?.prompt}
