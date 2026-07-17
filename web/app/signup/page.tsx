@@ -5,6 +5,7 @@ import {
   auth,
   devAuthConfigured,
   emailAuthConfigured,
+  emailProviderId,
   SIGNUP_NAME_COOKIE,
   signIn,
 } from "@/auth";
@@ -49,7 +50,10 @@ export default async function SignupPage() {
                   maxAge: 60 * 60,
                 });
               }
-              await signIn("resend", {
+              // Use the id of whichever magic-link provider is actually
+              // registered (nodemailer for SMTP, resend for the HTTP fallback);
+              // hardcoding one that isn't registered sends nothing.
+              await signIn(emailProviderId ?? "nodemailer", {
                 email: String(formData.get("email") ?? "").trim(),
                 redirectTo: "/welcome",
               });

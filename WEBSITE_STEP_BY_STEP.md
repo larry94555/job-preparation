@@ -408,9 +408,17 @@ region where you set Email Delivery up. Use **port 587**.
 common mistake. Your Oracle sign-in email/password will **never** work as `SMTP_USER`/`SMTP_PASS`;
 you must generate a dedicated credential pair:
 
-**Identity & Security → Identity → Domains → (your domain, usually `Default`) → Users → (your user)
-→ SMTP Credentials → Generate credentials.**
+**Identity & Security → Identity → Domains → (your domain, usually `Default`) → User management →
+(your user) → SMTP Credentials → Generate credentials.**
 
+> **The users list may be labelled "User management" rather than "Users"** — Oracle relabels it.
+> Click **User management**, then pick your username; both lead to the same user list.
+>
+> **Foolproof shortcut:** use the **search box at the top of the OCI Console**, type your own
+> username, click your user in the results — that lands you straight on the user detail page, where
+> **SMTP Credentials** sits in the left-hand resource list (next to API Keys, Auth Tokens, Customer
+> Secret Keys, OAuth 2.0 Client Credentials).
+>
 > On older tenancies without Identity Domains the path is **Identity & Security → Users → (your
 > user) → SMTP Credentials**. If you don't see the option, you lack the permission — use an
 > administrator user.
@@ -442,6 +450,14 @@ AUTH_URL=http://<VM-PUBLIC-IP>:3000                      # or https://yourdomain
 
 `AUTH_URL` matters: it builds the link inside the email. Wrong value → the link 404s or points at
 localhost.
+
+> **Special characters in `SMTP_PASS` (OCI generates random passwords).** Wrap the value in
+> **single quotes** if it contains anything unusual — `SMTP_PASS='the[value]here'`. Single quotes
+> are literal, so brackets, `#`, and especially **`$`** are taken verbatim by both the tester and
+> docker compose. Do **not** use double quotes or leave a `$` unquoted: docker compose **interpolates
+> `$`** in env-file values, silently truncating the password (the tester in B.5.6 warns you if it
+> sees a `$`). Brackets/`#` alone are harmless either way; your editor's syntax colours may look
+> wrong, but that's cosmetic — parsing is unaffected.
 
 **B.5.6 Check the credentials BEFORE rebuilding.** This connects to the relay, authenticates, and
 optionally sends a real message — and it names the actual cause when something's wrong:
