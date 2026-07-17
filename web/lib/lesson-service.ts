@@ -30,6 +30,7 @@ import {
   masteryScore,
   type Playthrough,
   type Progress,
+  renderMarkdown,
   retentionStats,
   scheduleReview,
 } from "@job-prep/lesson";
@@ -672,6 +673,81 @@ export async function gradeQuickChoice(
   return {
     correct: false,
     explanation: why ?? "That's not the best choice here — reconsider the other options.",
+  };
+}
+
+// ---- review cheat sheets --------------------------------------------------
+
+/** Reframe one section's roadmap markdown into a compact "cheat sheet" section:
+ *  drop the topic-level H1 and the "Roadmap:" heading (re-titled with the
+ *  section's own title) and turn the preview-voice labels into review-voice ones.
+ *  The overview diagram, the key-terms glossary, and the "why it matters"
+ *  takeaway are kept verbatim — this is authored content, not generated. */
+function roadmapToCheatSheet(md: string, sectionTitle: string): string {
+  const lines = md.split(/\r?\n/);
+  // Keep the body under the "## Roadmap: …" heading (fallback: the first H2).
+  let start = lines.findIndex((l) => /^##\s+Roadmap\b/i.test(l));
+  if (start < 0) start = lines.findIndex((l) => /^##\s+/.test(l));
+  const body = (start >= 0 ? lines.slice(start + 1) : lines).join("\n").trim();
+  const reframed = body
+    .replace(/\*\*\s*What this section covers\.?\s*\*\*/gi, "**In brief.**")
+    .replace(/\*\*\s*The ideas you['’]ll meet[:.]?\s*\*\*/gi, "**Key terms.**");
+  return `## ${sectionTitle}\n\n${reframed}\n`;
+}
+
+/** A Review cheat sheet for a topic (or one subtopic) — rendered HTML. */
+export interface ReviewSheet {
+  topicId: string;
+  topicTitle: string;
+  sectionId: string | null;
+  sectionTitle: string | null;
+  /** Rendered cheat-sheet HTML (may contain mermaid diagrams). */
+  html: string;
+}
+
+/**
+ * The Review "cheat sheet" for a topic (or one subtopic): a compact, authored
+ * summary built from each section's roadmap — the key-terms glossary, the
+ * overview diagram, and the "why it matters" takeaway — reframed from a forward
+ * preview into a quick reference. Public and progress-free; no LLM.
+ */
+export async function reviewData(
+  topicId: string,
+  sectionId?: string | null,
+): Promise<ReviewSheet | null> {
+  const topic = await findTopic(topicId);
+  if (!topic) return null;
+  const lessonById = new Map(topic.lessons.map((l) => [l.id, l]));
+  const roadmapMd = (section: LoadedTopic["sections"][number]): string | null => {
+    for (const lid of section.lessons) {
+      const les = lessonById.get(lid);
+      if (!les) continue;
+      if (les.id.startsWith("lesson-roadmap-") || /^roadmap-/.test(les.material)) {
+        const p = join(topic.dir, "lessons", les.material);
+        if (existsSync(p)) return readFileSync(p, "utf8");
+      }
+    }
+    return null;
+  };
+
+  const sections = sectionId
+    ? topic.sections.filter((s) => s.id === sectionId)
+    : topic.sections;
+  if (sections.length === 0) return null;
+
+  const parts: string[] = [];
+  for (const s of sections) {
+    const md = roadmapMd(s);
+    if (md) parts.push(roadmapToCheatSheet(md, s.title));
+  }
+  if (parts.length === 0) return null;
+
+  return {
+    topicId: topic.topic!.id,
+    topicTitle: topic.topic!.title,
+    sectionId: sectionId ?? null,
+    sectionTitle: sectionId ? (sections[0]?.title ?? null) : null,
+    html: renderMarkdown(parts.join("\n\n")),
   };
 }
 
