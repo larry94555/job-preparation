@@ -15,7 +15,7 @@ import {
   shuffleSeeded,
   tallies,
 } from "@/lib/quick-store";
-import { gradeQuick } from "../actions";
+import { explainWrong, gradeQuick } from "../actions";
 
 interface QuickQuestion {
   id: string;
@@ -40,6 +40,7 @@ export default function QuickQuizClient({ data }: { data: Data }) {
   const [state, setState] = useState<QAState | null>(null);
   const [picked, setPicked] = useState<Picked | null>(null);
   const [checking, setChecking] = useState(false);
+  const [explaining, setExplaining] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
   const freshState = useCallback((): QAState => {
@@ -71,6 +72,7 @@ export default function QuickQuizClient({ data }: { data: Data }) {
   const goTo = useCallback((idx: number) => {
     setPicked(null);
     setErr(null);
+    setExplaining(false);
     setState((s) => {
       if (!s) return s;
       const next = { ...s, index: idx };
@@ -105,29 +107,61 @@ export default function QuickQuizClient({ data }: { data: Data }) {
     const qid = state!.order[state!.index];
     if (!qid) return;
     const cur = state!.results[qid] ?? EMPTY;
-    if (!cur.solved && cur.wrongTried.includes(choice)) return; // pre-solve: don't re-try a wrong one
+    const wasSolved = cur.solved;
+    if (!wasSolved && cur.wrongTried.includes(choice)) return; // pre-solve: don't re-try a wrong one
     setChecking(true);
     setErr(null);
+    let graded: { correct: boolean; explanation: string };
     try {
-      const r = await gradeQuick(data.topicId, qid, choice);
-      setPicked({ choice, correct: r.correct, explanation: r.explanation });
-      if (!cur.solved) {
-        const next: QAResult = r.correct
-          ? { ...cur, solved: true, solvedChoice: choice, solvedExplanation: r.explanation }
-          : {
-              ...cur,
-              wrongTried: cur.wrongTried.includes(choice) ? cur.wrongTried : [...cur.wrongTried, choice],
-              lastWrongExplanation: r.explanation,
-            };
-        persist({ ...state!, results: { ...state!.results, [qid]: next } });
-      }
-      // Already solved → this is exploration: show the reason, but don't change
-      // results or the failed-attempts tally.
+      graded = await gradeQuick(data.topicId, qid, choice); // deterministic + instant
     } catch {
-      // Never fail silently (the grade call errored / timed out) — let the user retry.
       setErr("Couldn't check that answer just now — please click it again.");
-    } finally {
       setChecking(false);
+      return;
+    }
+    setChecking(false);
+    // Show the verdict + update the tally IMMEDIATELY (no waiting on the LLM).
+    setPicked({ choice, correct: graded.correct, explanation: graded.explanation });
+    if (!wasSolved) {
+      const next: QAResult = graded.correct
+        ? { ...cur, solved: true, solvedChoice: choice, solvedExplanation: graded.explanation }
+        : {
+            ...cur,
+            wrongTried: cur.wrongTried.includes(choice) ? cur.wrongTried : [...cur.wrongTried, choice],
+            lastWrongExplanation: "",
+          };
+      persist({ ...state!, results: { ...state!.results, [qid]: next } });
+    }
+    // Wrong pick (fresh OR post-solve exploration): fetch the tailored "why it's
+    // wrong" separately, showing a "thinking" state, then fill it in when it lands.
+    if (!graded.correct) void loadWhyWrong(qid, choice, !wasSolved);
+  }
+
+  // Async, non-blocking: the grade is already shown; this fills in the reason.
+  async function loadWhyWrong(qid: string, choice: string, persistIt: boolean) {
+    setExplaining(true);
+    let explanation = "";
+    try {
+      explanation = (await explainWrong(data.topicId, qid, choice)).explanation;
+    } catch {
+      explanation = "";
+    }
+    setExplaining(false);
+    if (!explanation) return; // keep the short verdict; a neutral fallback shows instead
+    // Apply to the current view only if we're still on this same pick.
+    setPicked((p) => (p && p.choice === choice && !p.correct ? { ...p, explanation } : p));
+    if (persistIt) {
+      setState((s) => {
+        if (!s) return s;
+        const r = s.results[qid];
+        if (!r || r.solved) return s; // solved meanwhile → leave it
+        const nextState = {
+          ...s,
+          results: { ...s.results, [qid]: { ...r, lastWrongExplanation: explanation } },
+        };
+        saveQA(data.topicId, data.sectionId, nextState);
+        return nextState;
+      });
     }
   }
 
@@ -257,7 +291,13 @@ export default function QuickQuizClient({ data }: { data: Data }) {
         {fb ? (
           <div className={"feedback " + (fb.correct ? "good" : "soft")}>
             {fb.exploring ? "This option is incorrect. " : fb.correct ? "✓ Correct. " : "✗ Not quite. "}
-            {fb.explanation}
+            {fb.explanation ? (
+              fb.explanation
+            ) : !fb.correct && explaining ? (
+              <span className="muted">working out why that one doesn&apos;t fit…</span>
+            ) : !fb.correct ? (
+              "That option doesn't hold up here — look at what it's missing compared with the others."
+            ) : null}
             {!fb.correct && !res.solved ? (
               <div style={{ marginTop: 6 }}>Pick a different answer to try again.</div>
             ) : null}

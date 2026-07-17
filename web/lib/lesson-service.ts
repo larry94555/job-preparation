@@ -665,11 +665,16 @@ function withTimeout<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
   ]);
 }
 
+/** How long to wait for the "why that's wrong" LLM note (interactive, not batch).
+ *  Tunable for a slow CPU model via LLM_EXPLAIN_TIMEOUT_MS. */
+const EXPLAIN_TIMEOUT_MS = Number(process.env.LLM_EXPLAIN_TIMEOUT_MS) || 20000;
+
 /**
  * Grade one quick-assessment choice server-side (answer keys never reach the
- * client). On a correct pick returns the authored "why it's correct" note; on a
- * wrong pick returns a plain-English "why that's wrong" (LLM best-effort, and it
- * does NOT reveal which option is correct), falling back to a neutral nudge.
+ * client). DETERMINISTIC and instant — no LLM. A correct pick returns the authored
+ * "why it's correct" note; a wrong pick returns an EMPTY explanation (the tailored
+ * "why it's wrong" is fetched separately via `explainWrongChoice`, which needs the
+ * slow LLM and must not block grading).
  */
 export async function gradeQuickChoice(
   topicId: string,
@@ -682,15 +687,26 @@ export async function gradeQuickChoice(
   if (gradeMultipleChoice(q, chosen)) {
     return { correct: true, explanation: q.explanation ?? "Correct." };
   }
-  // The "why it's wrong" note is best-effort and BOUNDED: the deterministic
-  // result must never wait on a slow or unreachable LLM. The grading client
-  // retries with a 60s-per-attempt cap (fine for batch grading, but it would
-  // hang this interactive request), so cap the whole thing and fall back.
-  const why = await withTimeout(explainWrongAnswer(q, chosen), 6000, null);
-  return {
-    correct: false,
-    explanation: why ?? "That's not the best choice here — reconsider the other options.",
-  };
+  return { correct: false, explanation: "" };
+}
+
+/**
+ * The tailored "why that specific choice is wrong" note — fetched SEPARATELY from
+ * grading because it needs the slow LLM (the client shows a "thinking" state and
+ * fills this in when it arrives). Best-effort and bounded; it never reveals the
+ * correct option. Returns "" when the choice is actually correct or the LLM can't
+ * answer in time, so the client can show a neutral fallback.
+ */
+export async function explainWrongChoice(
+  topicId: string,
+  questionId: string,
+  chosen: string,
+): Promise<{ explanation: string }> {
+  const topic = await findTopic(topicId);
+  const q = topic?.questions.find((x): x is Mcq => x.id === questionId && isMcq(x));
+  if (!q || gradeMultipleChoice(q, chosen)) return { explanation: "" };
+  const why = await withTimeout(explainWrongAnswer(q, chosen), EXPLAIN_TIMEOUT_MS + 2000, null);
+  return { explanation: why ?? "" };
 }
 
 // ---- review cheat sheets --------------------------------------------------
@@ -970,19 +986,22 @@ export async function explainWrongAnswer(
   const correct = question.options.find((o) => o.correct)?.text;
   if (!correct) return null;
   const sys =
-    "You are a warm, encouraging tutor. A learner picked the wrong option on a quick " +
-    "multiple-choice check. In 1–2 short, plain-English sentences, explain why THEIR choice is " +
-    "not right and nudge them toward the correct idea — never condescending, and don't just restate " +
-    'the correct answer verbatim. Respond with ONLY a JSON object: {"explanation": "..."}.';
+    "You are a sharp, encouraging tutor. A learner picked a WRONG option on a multiple-choice " +
+    "check. In 1–2 short, plain-English sentences, explain the SPECIFIC reason THEIR chosen option " +
+    "is wrong — name the flaw in that option itself (what it confuses, misses, or gets backwards), " +
+    "concretely, not generically. Do NOT say 'reconsider the other options' or restate/point to the " +
+    'correct answer. Respond with ONLY JSON: {"explanation": "..."}.';
   const user =
     `Question: ${question.prompt}\n` +
-    `Their (incorrect) choice: ${studentAnswer}\n` +
-    `The correct choice: ${correct}\n` +
-    (question.explanation ? `Reference note: ${question.explanation}\n` : "");
+    `Their (incorrect) choice: "${studentAnswer}"\n` +
+    `The correct choice (do NOT reveal or restate this): "${correct}"\n` +
+    (question.explanation ? `Background on the concept: ${question.explanation}\n` : "") +
+    `\nExplain concretely why "${studentAnswer}" is wrong.`;
   try {
-    // Short per-attempt timeout: this is an interactive request, not batch
-    // grading, so fail fast to the neutral fallback rather than blocking.
-    const raw = await new LlamaClient({ timeoutMs: 4000 }).chatJson([
+    // Interactive (not batch): a short output cap keeps generation fast, and the
+    // timeout is generous because the caller runs this ASYNC (non-blocking) with a
+    // "thinking" indicator, so a slow CPU model still has time to answer.
+    const raw = await new LlamaClient({ timeoutMs: EXPLAIN_TIMEOUT_MS, maxTokens: 160 }).chatJson([
       { role: "system", content: sys },
       { role: "user", content: user },
     ]);
@@ -1021,7 +1040,9 @@ export async function gradeSampleCheck(
             : false;
       let explanation = q.type === "multiple_choice" ? (q.explanation ?? "") : "";
       if (!correct) {
-        const tailored = await explainWrongAnswer(q, answer);
+        // Bounded: the sample grades inline, so don't block on a slow model —
+        // fall back to the authored note if the tailored one isn't quick.
+        const tailored = await withTimeout(explainWrongAnswer(q, answer), 6000, null);
         if (tailored) explanation = tailored;
       }
       return { correct, explanation };
