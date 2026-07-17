@@ -1,0 +1,12 @@
+id: lesson-loop-anatomy
+title: "Anatomy of an agent loop"
+material: loop-anatomy.md
+segments:
+  - present: what-a-loop-is
+  - check: mc-loop-vs-pipeline
+  - check: mc-loop-is-unit
+  - present: the-observe-decide-act-verify-cycle
+  - check: mc-odav-owns-decide
+  - check: mc-verify-step
+  - present: loop-state-and-termination
+  - check: mc-termination-named-reason

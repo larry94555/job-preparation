@@ -48,6 +48,7 @@ import { currentSessionId } from "./session";
 // Kept in sync with app/server.ts so both runners present the same ordering.
 const ORDER = [
   "harness-engineering",
+  "loop-engineering",
   "context-engineering",
   "structured-output-reliability",
   "function-calling-reliability",

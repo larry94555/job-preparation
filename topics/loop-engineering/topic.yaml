@@ -1,0 +1,9 @@
+id: loop-engineering
+title: "Loop Engineering"
+description: "Getting an agent to reliably finish a real task is loop engineering — designing the observe → decide → act → verify cycle, keeping it making measurable progress toward a goal, verifying each step, and bounding it. The discipline behind coding agents and long-horizon autonomy."
+pass_threshold: 0.8
+tag_weights:
+  anatomy: 1.0
+  shapes: 1.1
+  progress: 1.2
+  recovery: 1.2

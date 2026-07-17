@@ -1,0 +1,9 @@
+sections:
+  - id: sec-anatomy
+    title: "Anatomy of an agent loop"
+    lessons: [lesson-roadmap-anatomy, lesson-loop-anatomy]
+    assessment:
+      title: "Section 1 — Anatomy of an agent loop"
+      from_tags: [anatomy]
+      count: 5
+      pass_threshold: 0.8
