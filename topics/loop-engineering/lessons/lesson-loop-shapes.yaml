@@ -1,0 +1,13 @@
+id: lesson-loop-shapes
+title: "Loop shapes and when to use each"
+material: loop-shapes.md
+segments:
+  - present: the-default-a-single-bounded-loop
+  - check: mc-react-default
+  - check: mc-most-constrained-shape
+  - present: structured-shapes-plan-then-execute-and-reflect-retry
+  - check: mc-plan-then-execute
+  - check: mc-reflect-retry
+  - present: the-coding-loop-and-choosing-a-shape
+  - check: mc-coding-loop-run
+  - check: mc-tree-search-when

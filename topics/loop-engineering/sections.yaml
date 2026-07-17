@@ -7,3 +7,21 @@ sections:
       from_tags: [anatomy]
       count: 5
       pass_threshold: 0.8
+
+  - id: sec-shapes
+    title: "Loop shapes & when to use each"
+    lessons: [lesson-roadmap-shapes, lesson-loop-shapes]
+    assessment:
+      title: "Section 2 — Loop shapes"
+      from_tags: [shapes]
+      count: 5
+      pass_threshold: 0.8
+
+  - id: sec-progress
+    title: "Progress, convergence & recovery"
+    lessons: [lesson-roadmap-progress, lesson-loop-progress]
+    assessment:
+      title: "Section 3 — Progress, convergence & recovery"
+      from_tags: [progress, recovery]
+      count: 5
+      pass_threshold: 0.8

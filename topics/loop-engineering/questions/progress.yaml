@@ -1,0 +1,96 @@
+# Multiple choice — Section 3: Progress, convergence and recovery
+- id: mc-measurable-progress
+  type: multiple_choice
+  tags: [progress]
+  difficulty: 3
+  prompt: "What does making \"measurable progress\" toward a goal mean in a loop?"
+  options:
+    - { text: "Each iteration moves a concrete, checkable signal toward the goal (a failing test passes, a subtask is verified) — not just that the agent took another action", correct: true }
+    - { text: "The agent produces more output text each turn" }
+    - { text: "The loop runs for more iterations than last time" }
+    - { text: "The model reports higher confidence each turn" }
+  explanation: "Activity is not achievement. Progress is a real signal moving, and it must be checkable."
+
+- id: mc-verify-gates-progress
+  type: multiple_choice
+  tags: [progress]
+  difficulty: 3
+  prompt: "How does step-verification relate to progress?"
+  options:
+    - { text: "Verifying each step is what makes progress real — unverified \"progress\" can be a false belief, so the loop should gate the next step on a checked result", correct: true }
+    - { text: "Verification slows the loop down and reduces progress" }
+    - { text: "Progress and verification are unrelated concerns" }
+    - { text: "Verification replaces the need to define a goal" }
+  explanation: "An unverified step may not have moved the real signal. A well-engineered loop advances only on a checked result."
+
+- id: mc-no-progress-detect
+  type: multiple_choice
+  tags: [progress]
+  difficulty: 2
+  prompt: "What is the clearest signal that an agent has stalled and the loop should intervene?"
+  options:
+    - { text: "The same action or state repeats with no change in the observed result", correct: true }
+    - { text: "The agent has used more than half its token budget" }
+    - { text: "The task has taken longer than a human would" }
+    - { text: "The model's replies are getting shorter" }
+  explanation: "No-progress is repetition without change. When the observable result stops moving, break the cycle, re-plan, or stop with a no-progress reason."
+
+- id: mc-oscillation
+  type: multiple_choice
+  tags: [progress]
+  difficulty: 3
+  prompt: "What does oscillation look like in an agent loop?"
+  options:
+    - { text: "The agent flips between two states — undoing and redoing the same change — so net progress is zero even though every step looks busy", correct: true }
+    - { text: "The agent gradually speeds up each iteration" }
+    - { text: "The agent calls more tools per turn over time" }
+    - { text: "The agent's answers get more confident each turn" }
+  explanation: "Oscillation is cycling through a small set of states rather than reducing the remaining work — a stuck pattern the loop must detect and break."
+
+- id: mc-convergence-vs-thrash
+  type: multiple_choice
+  tags: [progress]
+  difficulty: 3
+  prompt: "Convergence versus thrash is the difference between:"
+  options:
+    - { text: "A loop whose steps steadily reduce the remaining work until the goal is verified, versus one that stays busy without closing the gap", correct: true }
+    - { text: "A fast loop versus a slow loop" }
+    - { text: "A loop with tools versus a loop without tools" }
+    - { text: "A single-agent loop versus a multi-agent loop" }
+  explanation: "Convergence is measurable movement toward done; thrash is expensive activity that never closes the gap."
+
+- id: mc-recovery-next-action
+  type: multiple_choice
+  tags: [recovery]
+  difficulty: 3
+  prompt: "What does robust error recovery in a loop mean?"
+  options:
+    - { text: "Turning a failure into the next action — retry, re-plan, or escalate — instead of crashing or blindly repeating", correct: true }
+    - { text: "Catching the error and hiding it from the caller" }
+    - { text: "Always retrying the same action until it works" }
+    - { text: "Stopping the loop the moment anything fails" }
+  explanation: "Failures are normal inside a loop; recovery decides what the loop does with one, turning it into a deliberate next move."
+
+- id: mc-recovery-vs-retry
+  type: multiple_choice
+  tags: [recovery]
+  difficulty: 3
+  prompt: "Why is \"just retry on failure\" not sufficient recovery?"
+  options:
+    - { text: "A permanent failure fails identically every time, so a blind retry repeats it and burns the budget; recovery must classify the failure and change the approach or escalate when a retry can't fix it", correct: true }
+    - { text: "Retries are always slower than re-planning" }
+    - { text: "Retrying is against most model providers' terms" }
+    - { text: "A retry always corrupts the loop state" }
+  explanation: "Retry handles transient failures; it thrashes on permanent ones. Recovery classifies first, then retries, re-plans, or escalates."
+
+- id: mc-compaction
+  type: multiple_choice
+  tags: [recovery]
+  difficulty: 3
+  prompt: "As a loop runs long, its context grows. What is compaction?"
+  options:
+    - { text: "Summarizing or dropping stale observations so the loop keeps the signal it needs without paying to re-send everything — a way to sustain long runs", correct: true }
+    - { text: "Compressing the model weights to save memory" }
+    - { text: "Deleting the goal to shorten the prompt" }
+    - { text: "Restarting the loop from scratch each turn" }
+  explanation: "Unbounded history inflates cost and buries the signal. A long-horizon loop that never compacts spends its budget re-reading its own history."

@@ -1,0 +1,84 @@
+# Multiple choice — Section 2: Loop shapes
+- id: mc-react-default
+  type: multiple_choice
+  tags: [shapes]
+  difficulty: 2
+  prompt: "A single bounded loop (think → act → observe with budgets and guards) is best described as:"
+  options:
+    - { text: "The sensible default for most agent tasks — one reasoning thread, verifiable, budgeted, and easy to debug", correct: true }
+    - { text: "A legacy shape that multi-agent systems have replaced" }
+    - { text: "Only suitable for toy demos, never production" }
+    - { text: "The same thing as a pipeline" }
+  explanation: "One bounded loop is simple, cheap, and finishes most real tasks. Heavier shapes are for when it demonstrably fails."
+
+- id: mc-most-constrained-shape
+  type: multiple_choice
+  tags: [shapes]
+  difficulty: 3
+  prompt: "What is the guiding rule for choosing a loop shape?"
+  options:
+    - { text: "Reach for the most constrained shape that does the job; add structure only when a simpler loop demonstrably fails on a real signal", correct: true }
+    - { text: "Always start with multiple agents so you never have to change shape later" }
+    - { text: "Always plan first — planning can only help" }
+    - { text: "Pick the most capable shape available so you are never under-powered" }
+  explanation: "Simpler shapes are cheaper and have less failure surface. Escalate on evidence, not by reflex."
+
+- id: mc-plan-then-execute
+  type: multiple_choice
+  tags: [shapes]
+  difficulty: 3
+  prompt: "Plan-then-execute separates planning from doing so that:"
+  options:
+    - { text: "Each step is independently checkable and re-plannable — you can verify a step and re-plan from a failure instead of discovering it only at the end", correct: true }
+    - { text: "The model produces fewer tokens overall" }
+    - { text: "You never need to verify individual steps" }
+    - { text: "The loop can skip execution entirely" }
+  explanation: "The plan is inspectable before side effects, each step is verifiable, and failure triggers a re-plan from that point."
+
+- id: mc-reflect-retry
+  type: multiple_choice
+  tags: [shapes]
+  difficulty: 3
+  prompt: "What does reflect-and-retry (the Reflexion pattern) add over a plain retry?"
+  options:
+    - { text: "A critique step: the agent reflects on why the attempt failed and revises its approach, instead of repeating the same action", correct: true }
+    - { text: "It retries more times, faster" }
+    - { text: "It removes the need for a verification step" }
+    - { text: "It runs the same action on a bigger model" }
+  explanation: "A plain retry repeats the failure; reflection changes the approach — but only helps when the failure is informative."
+
+- id: mc-coding-loop-run
+  type: multiple_choice
+  tags: [shapes]
+  difficulty: 2
+  prompt: "In the edit → run → observe coding loop, what is the load-bearing step?"
+  options:
+    - { text: "Run — executing the project's tests or build is the deterministic signal that gates the next edit", correct: true }
+    - { text: "Edit — as long as the edit looks plausible, the run is optional" }
+    - { text: "Observe — reading the model's own summary of the change" }
+    - { text: "Asking the model whether it is confident in the edit" }
+  explanation: "Running the tests turns \"I think this fixes it\" into a checked fact. A coding loop that edits without running is guessing."
+
+- id: mc-tree-search-when
+  type: multiple_choice
+  tags: [shapes]
+  difficulty: 4
+  prompt: "When is a tree/graph search loop (explore and score multiple branches) worth its cost over a single loop?"
+  options:
+    - { text: "Only when the task genuinely has several viable paths worth pursuing in parallel AND you can score partial progress; otherwise it multiplies cost and coordination for no gain", correct: true }
+    - { text: "Whenever you want the agent to look more sophisticated" }
+    - { text: "For every task, since more exploration is always better" }
+    - { text: "Only when the model is small and weak" }
+  explanation: "Search shines when a task truly branches and progress is scorable. Reaching for it by reflex just multiplies model calls."
+
+- id: mc-shape-escalation
+  type: multiple_choice
+  tags: [shapes]
+  difficulty: 3
+  prompt: "A sound escalation policy across loop shapes looks like:"
+  options:
+    - { text: "Start with the single bounded loop and escalate to plan-then-execute or reflect-retry only when the simple loop fails on a real signal (repeated failures, no progress)", correct: true }
+    - { text: "Begin with the heaviest shape and simplify only if it is too slow" }
+    - { text: "Switch shapes at random until one works" }
+    - { text: "Never change shape once chosen, to keep the trace consistent" }
+  explanation: "Escalate on evidence. The senior move is naming why a heavier shape is warranted, not defaulting to it."
