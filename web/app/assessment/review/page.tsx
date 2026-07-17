@@ -50,6 +50,17 @@ export default async function ReviewPage({
       <div className="panel" style={{ marginTop: 14 }}>
         <Material html={data.html} />
       </div>
+
+      <div className="row" style={{ justifyContent: "flex-end", marginTop: 14 }}>
+        <Link
+          className="btn"
+          href={`/assessment/review/context?topic=${encodeURIComponent(data.topicId)}${
+            data.sectionId ? `&section=${encodeURIComponent(data.sectionId)}` : ""
+          }`}
+        >
+          Continue → question-by-question context
+        </Link>
+      </div>
     </main>
   );
 }

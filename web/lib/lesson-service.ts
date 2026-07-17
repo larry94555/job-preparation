@@ -751,6 +751,69 @@ export async function reviewData(
   };
 }
 
+/** One question's full context for a Review context page: the prompt, every
+ *  option (correct one flagged), the answer, and the authored explanation. */
+export interface ReviewContextItem {
+  id: string;
+  subtopic: string;
+  prompt: string;
+  options: { text: string; correct: boolean }[];
+  answer: string;
+  explanation: string;
+}
+export interface ReviewContext {
+  topicId: string;
+  topicTitle: string;
+  sectionId: string | null;
+  sectionTitle: string | null;
+  items: ReviewContextItem[];
+}
+
+/**
+ * The per-question "context" pages behind a quick assessment: for the whole
+ * topic (or one subtopic) every conceptual MC question, with its correct answer
+ * and the authored explanation — so each quiz question's "context" link lands on
+ * a short page that contains its answer. Same pool + scoping as
+ * `quickAssessmentData`. Unlike the quiz, these pages DO show answers on purpose
+ * (they are a review aid, reached deliberately, not the graded quiz).
+ */
+export async function reviewContextData(
+  topicId: string,
+  sectionId?: string | null,
+): Promise<ReviewContext | null> {
+  const topic = await findTopic(topicId);
+  if (!topic) return null;
+  const mcqs = topic.questions.filter(isMcq);
+  const subtopicOf = (q: Mcq): string =>
+    topic.sections.find((s) => q.tags.some((t) => s.assessment.from_tags.includes(t)))?.title ?? "";
+
+  let pool = mcqs;
+  let sectionTitle: string | null = null;
+  if (sectionId) {
+    const sec = topic.sections.find((s) => s.id === sectionId);
+    if (!sec) return null;
+    sectionTitle = sec.title;
+    const tags = new Set(sec.assessment.from_tags);
+    pool = mcqs.filter((q) => q.tags.some((t) => tags.has(t)));
+  }
+  if (pool.length === 0) return null;
+
+  return {
+    topicId: topic.topic!.id,
+    topicTitle: topic.topic!.title,
+    sectionId: sectionId ?? null,
+    sectionTitle,
+    items: pool.map((q) => ({
+      id: q.id,
+      subtopic: sectionId ? (sectionTitle ?? "") : subtopicOf(q),
+      prompt: q.prompt,
+      options: q.options.map((o) => ({ text: o.text, correct: !!o.correct })),
+      answer: q.options.find((o) => o.correct)?.text ?? "",
+      explanation: q.explanation ?? "",
+    })),
+  };
+}
+
 // ---- free sample lesson (anonymous, stateless, no LLM) --------------------
 
 /** Client-safe question view for a sample check (never carries the answer key). */
