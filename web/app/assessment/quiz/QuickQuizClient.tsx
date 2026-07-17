@@ -124,23 +124,14 @@ export default function QuickQuizClient({ data }: { data: Data }) {
     }
   }
 
-  function nextUnsolved() {
-    const n = state!.order.length;
-    for (let k = 1; k <= n; k++) {
-      const idx = (state!.index + k) % n;
-      if (!isSolved(idx)) return goTo(idx);
-    }
-    goTo(n); // everything solved → finish
-  }
-
   const header = (
     <div className="row" style={{ marginTop: 0, justifyContent: "space-between" }}>
       <Link className="btn ghost mini" href="/assessment">
         ← Assessment
       </Link>
       {!finished ? (
-        <span className="muted">
-          Question {state.index + 1} of {total}
+        <span style={{ fontWeight: 600 }}>
+          Question {state.index + 1} / {total}
         </span>
       ) : null}
     </div>
@@ -178,7 +169,19 @@ export default function QuickQuizClient({ data }: { data: Data }) {
   const q = qById.get(qid);
   const res = state.results[qid] ?? EMPTY;
   const opts = q ? optionOrder(q.options, state.seed, qid) : [];
-  const otherUnsolved = state.order.some((_, idx) => idx !== state.index && !isSolved(idx));
+  // Index of the next UNSOLVED question other than the current one (scan forward,
+  // wrapping). "Proceed to next question" only appears when it lands somewhere
+  // other than the plain next step (Skip/Continue → index+1); otherwise it would
+  // be redundant with Skip.
+  let nextUnsolvedIdx: number | null = null;
+  for (let k = 1; k < state.order.length; k++) {
+    const idx = (state.index + k) % state.order.length;
+    if (!isSolved(idx)) {
+      nextUnsolvedIdx = idx;
+      break;
+    }
+  }
+  const showProceed = nextUnsolvedIdx !== null && nextUnsolvedIdx !== state.index + 1;
 
   const badge = res.solved
     ? { cls: "correct", label: "✓ Correct" }
@@ -259,8 +262,8 @@ export default function QuickQuizClient({ data }: { data: Data }) {
             </button>
           </span>
           <span className="row" style={{ gap: 8 }}>
-            {otherUnsolved ? (
-              <button className="ghost" onClick={nextUnsolved}>
+            {showProceed ? (
+              <button className="ghost" onClick={() => goTo(nextUnsolvedIdx!)}>
                 Proceed to next question →
               </button>
             ) : null}
