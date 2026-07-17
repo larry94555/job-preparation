@@ -60,6 +60,11 @@ export default async function ReviewPage({
           ? " The review runs across several short pages — use Continue to read on."
           : ""}
       </p>
+      <div className="row" style={{ marginTop: 8 }}>
+        <Link className="btn ghost mini" href={`/lesson/${data.topicId}`}>
+          Need more detail? Work through the full lesson →
+        </Link>
+      </div>
 
       <div className="panel" style={{ marginTop: 14 }}>
         <Material html={data.html} />
