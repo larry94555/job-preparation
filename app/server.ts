@@ -45,6 +45,7 @@ const topicsDir = "topics";
 const ORDER = [
   // foundations
   "harness-engineering",
+  "loop-engineering",
   "context-engineering",
   // reliability
   "structured-output-reliability",

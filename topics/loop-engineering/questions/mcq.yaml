@@ -1,0 +1,84 @@
+# Multiple choice — Section 1: Anatomy of an agent loop
+- id: mc-loop-is-unit
+  type: multiple_choice
+  tags: [anatomy]
+  difficulty: 1
+  prompt: "\"The loop is the unit of agent design\" means:"
+  options:
+    - { text: "You build an agent by designing its loop — what it observes, acts on, verifies, and when it stops — not by writing one larger prompt", correct: true }
+    - { text: "Every agent must literally use a for-loop in its code" }
+    - { text: "A better prompt eventually removes the need for a loop" }
+    - { text: "The loop matters less than the model you pick" }
+  explanation: "Agents are designed at the loop level: the observations, actions, verification, and termination. A larger prompt cannot supply those; they are structural."
+
+- id: mc-loop-vs-pipeline
+  type: multiple_choice
+  tags: [anatomy]
+  difficulty: 2
+  prompt: "What distinguishes an agent loop from a pipeline?"
+  options:
+    - { text: "A loop repeats a variable number of iterations chosen at runtime from what it observes; a pipeline runs a fixed sequence of steps exactly once", correct: true }
+    - { text: "A loop is always faster than a pipeline" }
+    - { text: "A pipeline uses tools and a loop never does" }
+    - { text: "A loop needs no model and a pipeline does" }
+  explanation: "\"Summarize this document\" is a pipeline (one pass). \"Fix this failing test\" is a loop — the number of edit-and-run cycles is decided by observations, not known in advance."
+
+- id: mc-odav-owns-decide
+  type: multiple_choice
+  tags: [anatomy]
+  difficulty: 2
+  prompt: "In the observe → decide → act → verify cycle, which phase does the model own?"
+  options:
+    - { text: "Decide — proposing the next action", correct: true }
+    - { text: "Observe — assembling the context" }
+    - { text: "Act — executing the action" }
+    - { text: "Verify — checking what actually happened" }
+  explanation: "The model reasons and proposes; the harness owns observe, act, and verify. Keeping that split clear is what makes the loop reliable."
+
+- id: mc-verify-step
+  type: multiple_choice
+  tags: [anatomy]
+  difficulty: 3
+  prompt: "Why does an iteration include a verify phase before the next observe?"
+  options:
+    - { text: "Because the model's claim that an action worked is not a fact; without a real check the loop keeps deciding on a false belief", correct: true }
+    - { text: "Because verifying makes the model generate fewer tokens" }
+    - { text: "Because it is required by the model provider's API" }
+    - { text: "Because it replaces the need to feed the tool result back" }
+  explanation: "Verification turns a claim into a checked result. Skip it and the loop \"fixes\" a bug that is still broken and moves on — drifting on a false belief."
+
+- id: mc-termination-named-reason
+  type: multiple_choice
+  tags: [anatomy]
+  difficulty: 2
+  prompt: "Every agent loop should terminate for a named reason. Which set are the canonical stop reasons?"
+  options:
+    - { text: "done, budget, no-progress", correct: true }
+    - { text: "success, failure, timeout-only" }
+    - { text: "the model decides, always" }
+    - { text: "compile, run, ship" }
+  explanation: "A loop ends because the goal is verified (done), a cap was hit (budget), or it is stuck (no-progress). The harness owns termination and reports which reason fired."
+
+- id: mc-state-growth
+  type: multiple_choice
+  tags: [anatomy]
+  difficulty: 3
+  prompt: "Raw loop history grows every iteration. Why is that a design problem, not only a memory one?"
+  options:
+    - { text: "The growing context is both the running cost (every past observation is re-sent and re-billed) and a source of confusion; what to keep, summarize, or drop must be chosen deliberately", correct: true }
+    - { text: "Longer history always makes the model more accurate, so there is no downside" }
+    - { text: "History cannot be changed once written, so nothing can be done" }
+    - { text: "The model automatically forgets old history, so it never grows" }
+  explanation: "Loop state must be managed, not accumulated: unbounded history inflates cost and buries the signal the next decision needs."
+
+- id: mc-unbounded-anatomy
+  type: multiple_choice
+  tags: [anatomy]
+  difficulty: 2
+  prompt: "A loop whose only exit is the model saying \"I'm done\" is best described as:"
+  options:
+    - { text: "Unbounded — it can spin forever, oscillate, or run away the bill; the harness must own termination", correct: true }
+    - { text: "Safe, because the model knows when the goal is met" }
+    - { text: "A pipeline, because it ends on a condition" }
+    - { text: "Fine as long as the prompt is clear enough" }
+  explanation: "Trusting the model to stop itself is the classic unbounded-loop antipattern. Termination is a harness responsibility with named stop reasons and budgets."

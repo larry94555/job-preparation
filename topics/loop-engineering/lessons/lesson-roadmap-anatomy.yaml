@@ -1,0 +1,5 @@
+id: lesson-roadmap-anatomy
+title: "Roadmap: anatomy of an agent loop"
+material: roadmap-anatomy.md
+segments:
+  - present: roadmap-anatomy-of-an-agent-loop
