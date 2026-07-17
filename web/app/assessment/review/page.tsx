@@ -6,15 +6,17 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 // The Review "cheat sheet" (Phase 3). ?topic=<id> (whole topic) or
-// ?topic=<id>&section=<sectionId> (one subtopic). Public; an authored summary
-// (key terms + overview diagram + takeaway) derived from each section's roadmap.
+// ?topic=<id>&section=<sectionId> (one subtopic) shows page 1 — the section
+// roadmaps reframed into a quick reference. ?page=<id> shows an authored extra
+// cheat sheet (topics/<t>/review/*.md) that goes deeper on what a set of quiz
+// questions needs. Paginated with Back/Continue; public; authored content.
 export default async function ReviewPage({
   searchParams,
 }: {
-  searchParams: Promise<{ topic?: string; section?: string }>;
+  searchParams: Promise<{ topic?: string; section?: string; page?: string }>;
 }) {
   const sp = await searchParams;
-  const data = await reviewData(sp.topic ?? "", sp.section ?? null);
+  const data = await reviewData(sp.topic ?? "", sp.section ?? null, sp.page ?? null);
 
   if (!data) {
     return (
@@ -30,6 +32,7 @@ export default async function ReviewPage({
   const scopeTitle = data.sectionTitle
     ? `${data.topicTitle}: ${data.sectionTitle}`
     : data.topicTitle;
+  const isSheet = data.pageId === null;
 
   return (
     <main className="wrap">
@@ -37,30 +40,49 @@ export default async function ReviewPage({
         <Link className="btn ghost mini" href="/assessment">
           ← Assessment
         </Link>
+        {data.total > 1 ? (
+          <span style={{ fontWeight: 600 }}>
+            Page {data.index + 1} / {data.total}
+          </span>
+        ) : null}
       </div>
       <div className="eyebrow" style={{ marginTop: 12 }}>
         Review · cheat sheet
       </div>
-      <h1 style={{ marginTop: 4 }}>{scopeTitle}</h1>
+      <h1 style={{ marginTop: 4 }}>{isSheet ? scopeTitle : data.pageTitle}</h1>
       <p className="muted">
-        A quick reference to the key ideas and terms
-        {data.sectionTitle ? " for this subtopic" : " for each subtopic"} — skim it before an
-        assessment, or to refresh after one.
+        {isSheet
+          ? `A quick reference to the key ideas and terms${
+              data.sectionTitle ? " for this subtopic" : " for each subtopic"
+            }.`
+          : `A deeper cheat sheet for ${scopeTitle}.`}
+        {data.total > 1
+          ? " The review runs across several short pages — use Continue to read on."
+          : ""}
       </p>
+
       <div className="panel" style={{ marginTop: 14 }}>
         <Material html={data.html} />
       </div>
 
-      <div className="row" style={{ justifyContent: "flex-end", marginTop: 14 }}>
-        <Link
-          className="btn"
-          href={`/assessment/review/context?topic=${encodeURIComponent(data.topicId)}${
-            data.sectionId ? `&section=${encodeURIComponent(data.sectionId)}` : ""
-          }`}
-        >
-          Continue → question-by-question context
-        </Link>
-      </div>
+      {data.prevHref || data.nextHref ? (
+        <div className="row" style={{ justifyContent: "space-between", marginTop: 14 }}>
+          {data.prevHref ? (
+            <Link className="btn ghost" href={data.prevHref}>
+              ← Back
+            </Link>
+          ) : (
+            <span />
+          )}
+          {data.nextHref ? (
+            <Link className="btn" href={data.nextHref}>
+              Continue →
+            </Link>
+          ) : (
+            <span />
+          )}
+        </div>
+      ) : null}
     </main>
   );
 }

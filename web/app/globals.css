@@ -437,12 +437,6 @@ button.ghost,
   border-color: var(--accent);
   background: var(--soft-bg);
 }
-/* The correct option on a Review context page (a review aid, not the quiz). */
-.opt.correct {
-  border-color: var(--good-ink);
-  background: var(--good-bg);
-  color: var(--good-ink);
-}
 .opt input {
   margin-top: 3px;
 }

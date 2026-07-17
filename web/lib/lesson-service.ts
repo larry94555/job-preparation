@@ -9,8 +9,9 @@
  * uses (`@job-prep/store`, `@job-prep/lesson`, `@job-prep/engine`, ...).
  */
 import "server-only";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import YAML from "yaml";
 import {
   gradeMultipleChoice,
   gradeTextInput,
@@ -601,6 +602,8 @@ export interface QuickQuestion {
   prompt: string;
   options: string[];
   subtopic: string;
+  /** Review page whose content covers (indirectly answers) this question. */
+  contextHref: string;
 }
 export interface QuickAssessment {
   topicId: string;
@@ -648,6 +651,7 @@ export async function quickAssessmentData(
       prompt: q.prompt,
       options: q.options.map((o) => o.text),
       subtopic: sectionId ? (sectionTitle ?? "") : subtopicOf(q),
+      contextHref: contextHrefFor(topic, q.id),
     })),
   };
 }
@@ -695,122 +699,171 @@ function roadmapToCheatSheet(md: string, sectionTitle: string): string {
   return `## ${sectionTitle}\n\n${reframed}\n`;
 }
 
-/** A Review cheat sheet for a topic (or one subtopic) — rendered HTML. */
-export interface ReviewSheet {
+// A topic MAY ship extra cheat-sheet pages under `topics/<t>/review/*.md` beyond
+// page 1 (the section roadmaps): each a short, roadmap-format summary of deeper
+// lesson material that a set of quiz questions needs but the roadmaps only
+// preview. Authored content (YAML frontmatter: title/order/covers) read straight
+// from disk like the roadmaps above — no engine schema/loader involvement.
+interface ReviewExtraPage {
+  id: string;
+  title: string;
+  order: number;
+  /** Question ids whose answer this page's content provides (for the context link). */
+  covers: string[];
+  /** Roadmap-format markdown body (## title / **In brief.** / mermaid / **Key terms.** / …). */
+  body: string;
+}
+
+function loadReviewPages(topic: LoadedTopic): ReviewExtraPage[] {
+  const dir = join(topic.dir, "review");
+  if (!existsSync(dir)) return [];
+  const out: ReviewExtraPage[] = [];
+  for (const f of readdirSync(dir)) {
+    if (!f.endsWith(".md")) continue;
+    const raw = readFileSync(join(dir, f), "utf8");
+    const m = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/.exec(raw);
+    if (!m) continue;
+    let fm: { title?: unknown; order?: unknown; covers?: unknown };
+    try {
+      fm = (YAML.parse(m[1]) ?? {}) as typeof fm;
+    } catch {
+      continue;
+    }
+    out.push({
+      id: f.replace(/\.md$/, ""),
+      title: typeof fm.title === "string" ? fm.title : f,
+      order: typeof fm.order === "number" ? fm.order : 999,
+      covers: Array.isArray(fm.covers) ? fm.covers.map(String) : [],
+      body: m[2].trim(),
+    });
+  }
+  return out.sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
+}
+
+/** The section a question belongs to (first section whose from_tags intersect the
+ *  question's tags), or null. */
+function sectionOfQuestion(topic: LoadedTopic, questionId: string): string | null {
+  const q = topic.questions.find((x) => x.id === questionId);
+  if (!q) return null;
+  return (
+    topic.sections.find((s) => q.tags.some((t) => s.assessment.from_tags.includes(t)))?.id ?? null
+  );
+}
+
+/** True when an extra page covers at least one question that belongs to `sectionId`. */
+function pageInSection(topic: LoadedTopic, page: ReviewExtraPage, sectionId: string): boolean {
+  return page.covers.some((qid) => sectionOfQuestion(topic, qid) === sectionId);
+}
+
+const reviewBase = (topicId: string, sectionId?: string | null): string =>
+  `/assessment/review?topic=${encodeURIComponent(topicId)}${
+    sectionId ? `&section=${encodeURIComponent(sectionId)}` : ""
+  }`;
+
+/** The "context" link target for a quiz question: the extra review page that
+ *  covers it, else page 1 (the cheat sheet) scoped to the question's own
+ *  section. Every question therefore resolves to a review page. */
+export function contextHrefFor(topic: LoadedTopic, questionId: string): string {
+  const page = loadReviewPages(topic).find((p) => p.covers.includes(questionId));
+  if (page) return `${reviewBase(topic.topic!.id)}&page=${encodeURIComponent(page.id)}`;
+  return reviewBase(topic.topic!.id, sectionOfQuestion(topic, questionId));
+}
+
+/** One page of a topic's Review. Page 0 (pageId null) is the "cheat sheet" (the
+ *  section roadmaps, reframed); pages 1..N are the authored extra cheat sheets.
+ *  Paginated with prev/next hrefs. */
+export interface ReviewView {
   topicId: string;
   topicTitle: string;
   sectionId: string | null;
   sectionTitle: string | null;
-  /** Rendered cheat-sheet HTML (may contain mermaid diagrams). */
+  pageId: string | null;
+  pageTitle: string | null;
+  /** Rendered content HTML (may contain mermaid diagrams). */
   html: string;
+  index: number;
+  total: number;
+  prevHref: string | null;
+  nextHref: string | null;
 }
 
 /**
- * The Review "cheat sheet" for a topic (or one subtopic): a compact, authored
- * summary built from each section's roadmap — the key-terms glossary, the
- * overview diagram, and the "why it matters" takeaway — reframed from a forward
- * preview into a quick reference. Public and progress-free; no LLM.
+ * A Review page. With no `pageId` it's the cheat sheet — the section roadmaps
+ * reframed into a quick reference (the whole topic, or one subtopic). Authored
+ * extra pages (`topics/<t>/review/*.md`) render deeper cheat sheets and paginate
+ * after it, so a review is now potentially several short, coherent pages, each
+ * in the same format. Public and progress-free; no LLM.
  */
 export async function reviewData(
   topicId: string,
   sectionId?: string | null,
-): Promise<ReviewSheet | null> {
+  pageId?: string | null,
+): Promise<ReviewView | null> {
   const topic = await findTopic(topicId);
   if (!topic) return null;
-  const lessonById = new Map(topic.lessons.map((l) => [l.id, l]));
-  const roadmapMd = (section: LoadedTopic["sections"][number]): string | null => {
-    for (const lid of section.lessons) {
-      const les = lessonById.get(lid);
-      if (!les) continue;
-      if (les.id.startsWith("lesson-roadmap-") || /^roadmap-/.test(les.material)) {
-        const p = join(topic.dir, "lessons", les.material);
-        if (existsSync(p)) return readFileSync(p, "utf8");
+
+  const section = sectionId ? (topic.sections.find((s) => s.id === sectionId) ?? null) : null;
+  if (sectionId && !section) return null;
+
+  // Extra pages in scope: all for a whole-topic review, else only those covering
+  // a question that belongs to the chosen subtopic.
+  const extras = loadReviewPages(topic).filter(
+    (p) => !sectionId || pageInSection(topic, p, sectionId),
+  );
+  const order: (string | null)[] = [null, ...extras.map((p) => p.id)]; // [cheat sheet, ...extras]
+  const hrefOf = (id: string | null): string =>
+    id === null
+      ? reviewBase(topicId, sectionId)
+      : `${reviewBase(topicId, sectionId)}&page=${encodeURIComponent(id)}`;
+
+  let index = 0;
+  if (pageId) {
+    const i = order.indexOf(pageId);
+    if (i >= 0) index = i;
+  }
+
+  let html: string;
+  let pageTitle: string | null = null;
+  if (index === 0) {
+    // The cheat sheet: the section roadmap(s), reframed from preview to review.
+    const lessonById = new Map(topic.lessons.map((l) => [l.id, l]));
+    const roadmapMd = (sec: LoadedTopic["sections"][number]): string | null => {
+      for (const lid of sec.lessons) {
+        const les = lessonById.get(lid);
+        if (!les) continue;
+        if (les.id.startsWith("lesson-roadmap-") || /^roadmap-/.test(les.material)) {
+          const p = join(topic.dir, "lessons", les.material);
+          if (existsSync(p)) return readFileSync(p, "utf8");
+        }
       }
+      return null;
+    };
+    const secs = sectionId ? topic.sections.filter((s) => s.id === sectionId) : topic.sections;
+    const parts: string[] = [];
+    for (const s of secs) {
+      const md = roadmapMd(s);
+      if (md) parts.push(roadmapToCheatSheet(md, s.title));
     }
-    return null;
-  };
-
-  const sections = sectionId
-    ? topic.sections.filter((s) => s.id === sectionId)
-    : topic.sections;
-  if (sections.length === 0) return null;
-
-  const parts: string[] = [];
-  for (const s of sections) {
-    const md = roadmapMd(s);
-    if (md) parts.push(roadmapToCheatSheet(md, s.title));
+    if (parts.length === 0) return null;
+    html = renderMarkdown(parts.join("\n\n"));
+  } else {
+    const page = extras[index - 1];
+    html = renderMarkdown(page.body);
+    pageTitle = page.title;
   }
-  if (parts.length === 0) return null;
 
   return {
     topicId: topic.topic!.id,
     topicTitle: topic.topic!.title,
     sectionId: sectionId ?? null,
-    sectionTitle: sectionId ? (sections[0]?.title ?? null) : null,
-    html: renderMarkdown(parts.join("\n\n")),
-  };
-}
-
-/** One question's full context for a Review context page: the prompt, every
- *  option (correct one flagged), the answer, and the authored explanation. */
-export interface ReviewContextItem {
-  id: string;
-  subtopic: string;
-  prompt: string;
-  options: { text: string; correct: boolean }[];
-  answer: string;
-  explanation: string;
-}
-export interface ReviewContext {
-  topicId: string;
-  topicTitle: string;
-  sectionId: string | null;
-  sectionTitle: string | null;
-  items: ReviewContextItem[];
-}
-
-/**
- * The per-question "context" pages behind a quick assessment: for the whole
- * topic (or one subtopic) every conceptual MC question, with its correct answer
- * and the authored explanation — so each quiz question's "context" link lands on
- * a short page that contains its answer. Same pool + scoping as
- * `quickAssessmentData`. Unlike the quiz, these pages DO show answers on purpose
- * (they are a review aid, reached deliberately, not the graded quiz).
- */
-export async function reviewContextData(
-  topicId: string,
-  sectionId?: string | null,
-): Promise<ReviewContext | null> {
-  const topic = await findTopic(topicId);
-  if (!topic) return null;
-  const mcqs = topic.questions.filter(isMcq);
-  const subtopicOf = (q: Mcq): string =>
-    topic.sections.find((s) => q.tags.some((t) => s.assessment.from_tags.includes(t)))?.title ?? "";
-
-  let pool = mcqs;
-  let sectionTitle: string | null = null;
-  if (sectionId) {
-    const sec = topic.sections.find((s) => s.id === sectionId);
-    if (!sec) return null;
-    sectionTitle = sec.title;
-    const tags = new Set(sec.assessment.from_tags);
-    pool = mcqs.filter((q) => q.tags.some((t) => tags.has(t)));
-  }
-  if (pool.length === 0) return null;
-
-  return {
-    topicId: topic.topic!.id,
-    topicTitle: topic.topic!.title,
-    sectionId: sectionId ?? null,
-    sectionTitle,
-    items: pool.map((q) => ({
-      id: q.id,
-      subtopic: sectionId ? (sectionTitle ?? "") : subtopicOf(q),
-      prompt: q.prompt,
-      options: q.options.map((o) => ({ text: o.text, correct: !!o.correct })),
-      answer: q.options.find((o) => o.correct)?.text ?? "",
-      explanation: q.explanation ?? "",
-    })),
+    sectionTitle: section?.title ?? null,
+    pageId: index === 0 ? null : extras[index - 1].id,
+    pageTitle,
+    html,
+    index,
+    total: order.length,
+    prevHref: index > 0 ? hrefOf(order[index - 1]) : null,
+    nextHref: index < order.length - 1 ? hrefOf(order[index + 1]) : null,
   };
 }
 
