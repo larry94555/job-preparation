@@ -1,0 +1,15 @@
+id: lesson-loop-progress
+title: "Progress, convergence and recovery"
+material: loop-progress.md
+segments:
+  - present: measurable-progress
+  - check: mc-measurable-progress
+  - check: mc-verify-gates-progress
+  - present: detecting-no-progress-and-oscillation
+  - check: mc-no-progress-detect
+  - check: mc-oscillation
+  - present: recovery-turning-failure-into-a-next-action
+  - check: mc-recovery-next-action
+  - check: mc-recovery-vs-retry
+  - present: context-growth-and-compaction
+  - check: mc-compaction
