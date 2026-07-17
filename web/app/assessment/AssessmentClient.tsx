@@ -176,6 +176,12 @@ function quizHref(topicId: string, sectionId: string | null): string {
   }`;
 }
 
+function reviewHref(topicId: string, sectionId: string | null): string {
+  return `/assessment/review?topic=${encodeURIComponent(topicId)}${
+    sectionId ? `&section=${encodeURIComponent(sectionId)}` : ""
+  }`;
+}
+
 function LinkRow({
   t,
   sectionId,
@@ -216,9 +222,9 @@ function LinkRow({
           Retake
         </button>
       )}
-      <button type="button" className="alink" onClick={() => showTip("Review")}>
+      <Link className="alink" href={reviewHref(t.id, sectionId)}>
         Review
-      </button>
+      </Link>
       <button type="button" className="alink" onClick={() => showTip("Full Assessment")}>
         Full Assessment
       </button>
