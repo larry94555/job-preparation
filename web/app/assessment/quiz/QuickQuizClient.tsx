@@ -210,23 +210,23 @@ export default function QuickQuizClient({ data }: { data: Data }) {
       <TallyRow t={t} total={total} />
 
       <div className="panel" style={{ marginTop: 14 }}>
-        <div
-          className="muted"
-          style={{ fontSize: 13, display: "flex", justifyContent: "space-between", gap: 8 }}
-        >
-          <span>
-            Topic: {data.topicTitle}
-            {q?.subtopic ? ` · Subtopic: ${q.subtopic}` : ""}
-          </span>
-          {q ? (
-            <a className="alink" href={q.contextHref} target="_blank" rel="noopener noreferrer">
-              context ↗
-            </a>
-          ) : null}
+        <div className="muted" style={{ fontSize: 13 }}>
+          Topic: {data.topicTitle}
+          {q?.subtopic ? ` · Subtopic: ${q.subtopic}` : ""}
         </div>
-        <div className="prompt" style={{ marginTop: 6 }}>
+        <div className="prompt" style={{ marginTop: 6, marginBottom: 2 }}>
           {q?.prompt}
         </div>
+        {q ? (
+          <a
+            href={q.contextHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ fontSize: 13 }}
+          >
+            (context — if needed)
+          </a>
+        ) : null}
         <div className={"qstate " + badge.cls}>{badge.label}</div>
         <div>
           {opts.map((opt) => {
