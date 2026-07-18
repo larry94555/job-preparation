@@ -361,7 +361,8 @@ before F.3 (and in Common Problems). Do **both** or you'll still get a timeout.
 | `AUTH_URL` | ✅ **Required** | **You set it** to your site URL. No domain yet? Use `http://<VM-PUBLIC-IP>:3000`. With a domain later: `https://yourdomain.com`. |
 | `LLM_BASE_URL` | ✅ **Required** | **You set it** to where your Oracle llama-server listens: `http://<VM-IP>:8080/v1`. |
 | `LLM_API_KEY` | ✅ **Required** | **You already have this** — the key your Oracle `llama-server --api-key` uses (it's in your existing `secrets/secrets.env`; or make one with `node utils/gen-api-key.mjs`). |
-| `SMTP_HOST` / `SMTP_USER` / `SMTP_PASS` | ✅ **Required to register** | **Your mail relay.** On Oracle use **OCI Email Delivery** — see **step B.5** below. Connects on port **587**, so Oracle's port-25 block does not apply and no unblock request is needed. `SMTP_PORT` defaults to `587`. (Needed even for testing — the deployed app has no dev sign-in.) |
+| `REQUIRE_SIGNUP` | ⬜ Access toggle | Default `true` = the normal gated site (sign-up + email verification required). Set **`false`** to **open the whole site to anyone with no sign-up** — everyone shares one "guest" progress. Use it to validate the entire site **before** you set up an email-sending domain; the email rows below are then irrelevant. Flip back to `true` (and configure email) for real per-user accounts. Runtime env — no rebuild, just `up -d web`. |
+| `SMTP_HOST` / `SMTP_USER` / `SMTP_PASS` | ✅ **Required to register** *(only when `REQUIRE_SIGNUP=true`)* | **Your mail relay.** On Oracle use **OCI Email Delivery** — see **step B.5** below. Connects on port **587**, so Oracle's port-25 block does not apply and no unblock request is needed. `SMTP_PORT` defaults to `587`. (Needed even for testing — the deployed app has no dev sign-in.) |
 | `RESEND_API_KEY` | ⬜ Alternative to SMTP | Used **only when no `SMTP_*` is set**. Resend → **API Keys → Create**. Gotcha: its `onboarding@resend.dev` test sender delivers **only to your own Resend-account address** until you verify a domain — a common "no email arrived" cause. |
 | `AUTH_ADMIN_EMAILS` | ⬜ Optional | **Your own email**, to give yourself the admin role. |
 | `SUPPORT_EMAIL` | ⬜ Recommended | **Any inbox that receives email** — the Help link opens a mailto to it (never used to send). **Your Gmail works now**; switch to `support@yourdomain.com` (Cloudflare Email Routing, E.1) after you pick a domain. |
@@ -379,6 +380,11 @@ before F.3 (and in Common Problems). Do **both** or you'll still get a timeout.
 ---
 
 ### B.5 📧 Turn on sign-up email (OCI Email Delivery)
+
+> **Want to validate the site first, without email or a domain?** Set **`REQUIRE_SIGNUP=false`** in
+> `secrets/prod.env` and `docker compose -f docker-compose.prod.yml up -d web`. The whole site opens with
+> no sign-up (everyone shares one "guest" progress), and you can skip this entire step for now. Come back
+> and set `REQUIRE_SIGNUP=true` + the email settings below when you're ready for real per-user accounts.
 
 Sign-up sends a **verification link**. Without a mail transport the app disables registration
 (it shows "Sign-up is temporarily unavailable") — so this step is what makes sign-up work.
