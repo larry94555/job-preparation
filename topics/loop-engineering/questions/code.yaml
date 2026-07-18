@@ -1,0 +1,22 @@
+# Coding exercise — engine type: code (graded by tests + concept skill)
+- id: code-bounded-loop
+  type: code
+  language: typescript
+  tags: [progress]
+  difficulty: 3
+  prompt: >-
+    Implement `runBoundedLoop(step, opts)`. `step(i)` returns the i-th `{ action, state, done }` — the
+    proposed action, the observed state after acting, and whether the goal is met. `opts` is
+    `{ maxSteps }`. Each iteration, after counting the step, stop with (in this precedence): "done" if
+    the step reports done (a verified goal wins, even at the cap); "no-progress" if the observed state
+    equals the previous step's state; "budget" when the step count reaches maxSteps. Return
+    `{ steps, stoppedBy }`.
+  starter_file: exercises/bounded-loop/starter.ts
+  test_file: exercises/bounded-loop/solution.test.ts
+  test_command: "npm test"
+  runner_image: "quiz-runner-node:20"
+  timeout_sec: 30
+  eval_skill: eval-loop-code
+  concept_checks:
+    must_use: ["no-progress detection via unchanged state", "max-steps budget", "done takes precedence over budget", "returns the named stop reason"]
+    avoid_antipattern: ["unbounded loop", "no progress detection"]

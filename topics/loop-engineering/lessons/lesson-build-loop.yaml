@@ -1,0 +1,11 @@
+id: lesson-build-loop
+title: "Build it: a bounded loop with progress detection"
+material: build-loop.md
+segments:
+  - present: the-loop-skeleton
+  - check: mc-build-progress-signal
+  - present: detecting-no-progress-from-unchanged-state
+  - check: mc-build-stop-precedence
+  - present: named-termination-and-precedence
+  - apply: code-bounded-loop
+  - apply: essay-loop-project

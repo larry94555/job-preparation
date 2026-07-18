@@ -1,0 +1,24 @@
+# Build-lesson checks — Section 3 (bounded loop with progress detection)
+- id: mc-build-progress-signal
+  type: multiple_choice
+  tags: [progress]
+  difficulty: 2
+  prompt: "In a bounded loop, the cleanest signal that the agent made no progress this step is:"
+  options:
+    - { text: "The observed state is unchanged from the previous step", correct: true }
+    - { text: "The step took longer than the previous one" }
+    - { text: "The action string is longer than before" }
+    - { text: "The model returned more tokens than last time" }
+  explanation: "Progress is a real signal moving; no-progress is that signal (the observed state) staying put. Compare state to the previous iteration."
+
+- id: mc-build-stop-precedence
+  type: multiple_choice
+  tags: [progress]
+  difficulty: 3
+  prompt: "A step both reports done AND lands exactly on the maxSteps cap. What should the loop report?"
+  options:
+    - { text: "\"done\" — a verified goal takes precedence over the budget cap, because the task actually succeeded", correct: true }
+    - { text: "\"budget\" — hitting the cap always wins" }
+    - { text: "Both reasons, concatenated" }
+    - { text: "\"no-progress\", to be safe" }
+  explanation: "Precedence is done → no-progress → budget. Reporting \"budget\" when the task actually finished would misread a success as a timeout."

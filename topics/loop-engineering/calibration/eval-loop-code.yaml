@@ -1,0 +1,45 @@
+# Calibration for eval-loop-code.
+# 'answer' summarizes the submitted approach + provided signals (the grader sees extracted evidence,
+# not raw code). Exemplars target the bounded-loop exercise. no_progress_guard is the gate.
+skill: eval-loop-code
+cases:
+  - answer: >-
+      tests_passed=true. no_progress_guard holds: it stores the previous step's state and returns
+      "no-progress" when the current state equals it. max_steps_budget holds: a hard maxSteps cap
+      returns "budget" once steps>=maxSteps. stops_on_done holds: it returns "done" when a step reports
+      done, checked before the budget so a goal at the cap still reports "done". returns_reason holds:
+      it returns { steps, stoppedBy } naming why it stopped. signals.must_use=[previous-state compare,
+      maxSteps cap, done-first precedence, stop reason]; avoid=[].
+    expect:
+      verdict: pass
+      checks: { no_progress_guard: true, max_steps_budget: true, stops_on_done: true, returns_reason: true }
+
+  - answer: >-
+      tests_passed=true. no_progress_guard holds: it compares each state to the previous one and stops
+      with "no-progress" on an unchanged state. max_steps_budget does not hold: there is no maxSteps
+      cap, so a run that keeps changing state and never finishes loops until something else stops it.
+      stops_on_done holds: it returns "done" when a step is done. returns_reason holds: it reports the
+      stop reason. signals.must_use=[previous-state compare, done stop, stop reason]; avoid=[unbounded].
+    expect:
+      verdict: pass
+      checks: { no_progress_guard: true, max_steps_budget: false, stops_on_done: true, returns_reason: true }
+
+  - answer: >-
+      tests_passed=true. no_progress_guard does not hold: it never compares the current state to the
+      previous one, so an agent stuck on an unchanged state just runs to the cap. max_steps_budget
+      holds: a hard maxSteps cap returns "budget" and guarantees termination. stops_on_done holds: it
+      returns "done" when a step reports done. returns_reason holds: it returns { steps, stoppedBy }.
+      signals.must_use=[maxSteps cap, done stop, stop reason]; avoid=[no progress detection].
+    expect:
+      verdict: borderline
+      checks: { no_progress_guard: false, max_steps_budget: true, stops_on_done: true, returns_reason: true }
+
+  - answer: >-
+      tests_passed=true. no_progress_guard does not hold: it never tracks the previous state.
+      max_steps_budget does not hold: there is no cap, so distinct-state non-terminating runs loop
+      forever. stops_on_done holds: it returns "done" when a step reports done. returns_reason does not
+      hold: it returns only the step count and never says which condition stopped it.
+      signals.must_use=[done stop]; avoid=[unbounded loop, no progress detection, silent stop].
+    expect:
+      verdict: fail
+      checks: { no_progress_guard: false, max_steps_budget: false, stops_on_done: true, returns_reason: false }

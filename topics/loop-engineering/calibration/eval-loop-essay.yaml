@@ -1,0 +1,31 @@
+# Calibration for eval-loop-essay (exemplars target essay-loop-deep-dive: reviewing a loop design).
+skill: eval-loop-essay
+cases:
+  - answer: >-
+      The design acts and moves on without checking anything, so "progress" is just activity — it can
+      drift on a false belief. Gate each step on a measurable, verified signal (a failing test now
+      passes) before continuing. It is also unbounded: the only exit is the model saying done, so add
+      a step/token budget, no-progress detection (stop when the observed state stops changing), and a
+      named stop reason. Finally it blind-retries every failure; classify the failure first and
+      re-plan or escalate when a retry cannot fix it. Reach for the most constrained shape that works.
+    expect:
+      verdict: pass
+      checks: { addresses_question: true, covers_key_points: true, technically_correct: true, concrete: true }
+
+  - answer: "The loop should be well designed and robust, and handle errors gracefully."
+    expect:
+      verdict: fail
+      checks: { addresses_question: false, covers_key_points: false, concrete: false }
+
+  - answer: >-
+      The loop needs a budget so it doesn't run forever, and it should check its work sometimes before
+      moving on. Recovery matters too.
+    expect:
+      verdict: borderline
+
+  - answer: >-
+      Add more agents so the work goes faster, and let each agent decide when it is finished. A bigger
+      model removes the need for verification, so the loop can trust its own output and skip the tests.
+    expect:
+      verdict: fail
+      checks: { technically_correct: false }
