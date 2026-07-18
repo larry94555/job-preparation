@@ -19,9 +19,18 @@ sections:
 
   - id: sec-progress
     title: "Progress, convergence & recovery"
-    lessons: [lesson-roadmap-progress, lesson-loop-progress]
+    lessons: [lesson-roadmap-progress, lesson-loop-progress, lesson-build-loop]
     assessment:
       title: "Section 3 — Progress, convergence & recovery"
       from_tags: [progress, recovery]
       count: 5
+      pass_threshold: 0.8
+
+  - id: sec-frontier
+    title: "Design review, frontier & operations"
+    lessons: [lesson-deep-dive]
+    assessment:
+      title: "Section 4 — Design review, frontier & operations"
+      from_tags: [review]
+      count: 3
       pass_threshold: 0.8

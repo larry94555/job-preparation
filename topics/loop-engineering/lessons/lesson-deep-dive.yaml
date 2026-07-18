@@ -1,0 +1,14 @@
+id: lesson-deep-dive
+title: "Architecture & tradeoffs: reviewing a loop design"
+material: deep-dive.md
+segments:
+  - present: the-loop-design-space
+  - present: a-tradeoff-table-for-loop-engineering
+  - check: mc-review-loop-noverify
+  - check: mc-review-loop-unbounded
+  - present: common-sota-and-antipattern
+  - check: mc-review-loop-blind-retry
+  - check: mc-review-loop-wrong-shape
+  - present: scaling-length-and-the-token-budget
+  - present: reviewing-a-loop-design
+  - apply: essay-loop-deep-dive

@@ -1,0 +1,39 @@
+# Long-form essays (LLM-graded via eval-loop-essay)
+- id: essay-loop-project
+  type: essay
+  length: long
+  tags: [progress]
+  difficulty: 4
+  prompt: >-
+    Project: design the loop for a coding agent that fixes a failing test in a real repo. Cover the
+    loop shape you'd choose and why, the edit → run → observe cycle with test-run verification gating
+    each step, what counts as measurable progress, the bounding (step/token budget, no-progress and
+    oscillation detection, named stop reasons), recovery from a failed edit (classify → retry / re-plan
+    / escalate), and how you keep the growing context legible (compaction). Include a short test plan.
+  eval_skill: eval-loop-essay
+  reference_points:
+    - "Shape: a single bounded edit → run → observe loop (most constrained that works); escalate to plan-then-execute or reflect-retry only if it stalls."
+    - "Verification: run the project's tests after each edit and gate the next edit on the result — don't trust, check."
+    - "Progress: a concrete signal moves (a failing test passes, error count drops), not just that an edit was made."
+    - "Bounding: step/token budget, no-progress detection (state unchanged) and oscillation detection, with named stop reasons (done/budget/no-progress)."
+    - "Recovery: classify the failure; retry transient, re-plan the approach, or escalate when a retry can't fix it — not a blind retry."
+    - "State: compact stale observations so long runs stay legible and affordable."
+    - "Test plan: trigger a done stop, a budget stop, a no-progress/oscillation stop, and a failed-verification recovery path."
+
+# Design-review essay for the deep-dive lesson
+- id: essay-loop-deep-dive
+  type: essay
+  length: long
+  tags: [review]
+  difficulty: 4
+  prompt: >-
+    A teammate proposes an agent that loops "call the model, apply whatever it says, repeat until the
+    model reports it's finished." Review the design: name what is wrong and the specific loop-engineering
+    fixes for each problem.
+  eval_skill: eval-loop-essay
+  reference_points:
+    - "No verification: it applies the model's output without checking a real signal, so it drifts on a false belief — gate each step on a verified result."
+    - "Unbounded: the only exit is the model saying done — add a step/token/time budget, no-progress detection, and named stop reasons; the harness owns termination."
+    - "No progress notion: it can't tell finishing from thrashing — define measurable progress and detect no-progress/oscillation."
+    - "No recovery: a failure crashes or repeats — classify failures and retry / re-plan / escalate instead of blindly repeating."
+    - "State/shape: unmanaged growing context and a reflexive shape — compact stale context and pick the most constrained shape that works."

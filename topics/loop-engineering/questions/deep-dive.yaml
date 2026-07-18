@@ -1,0 +1,57 @@
+# Design-review multiple choice (difficulty 4) — Section 4: Reviewing a loop design
+- id: mc-review-loop-noverify
+  type: multiple_choice
+  tags: [review]
+  difficulty: 4
+  prompt: >-
+    A loop applies each model-proposed edit and immediately moves to the next step, treating "the model
+    said it fixed it" as success. Reviewing it, what is the most important problem?
+  options:
+    - { text: "It never verifies against a real signal, so \"progress\" can be a false belief; each step must be gated on a checked result (run the tests / read the diff) before continuing", correct: true }
+    - { text: "It should use a larger model so the edits are correct the first time" }
+    - { text: "It should add more example edits to the prompt" }
+    - { text: "It should log more so the trace is easier to read" }
+  explanation: "Unverified progress is the core flaw: the loop advances on a claim, not a fact, and drifts. Verification gating each step is the fix, not a bigger prompt or model."
+
+- id: mc-review-loop-unbounded
+  type: multiple_choice
+  tags: [review]
+  difficulty: 4
+  prompt: >-
+    A PR adds a loop: "while not done: call model → apply action → repeat," where `done` is set only
+    when the model says it's finished. There is no step, token, or time cap and no stuck detection.
+    Rate it and pick the best fix.
+  options:
+    - { text: "Prototype-grade: it's an unbounded loop that can spin, oscillate, or run away the bill; add step/token/time budgets, no-progress detection, and named stop reasons", correct: true }
+    - { text: "Production-ready: trusting the model to declare done is sufficient" }
+    - { text: "Toy: just rename the loop variable and remove tools" }
+    - { text: "Fine once the prompt tells the model to stop when appropriate" }
+  explanation: "The only exit being the model's say-so is the classic unbounded antipattern. Bound it with budgets, no-progress detection, and explicit stop reasons — termination is the harness's job."
+
+- id: mc-review-loop-blind-retry
+  type: multiple_choice
+  tags: [review]
+  difficulty: 4
+  prompt: >-
+    A loop's recovery is "on any failure, retry the same action, up to 20 times." What is the strongest
+    objection?
+  options:
+    - { text: "A permanent failure fails identically every time, so blind retries just repeat it and burn the budget; recovery must classify the failure and re-plan or escalate when a retry can't fix it", correct: true }
+    - { text: "20 is too few — it should retry until the token budget is gone" }
+    - { text: "Retrying is fine; the real fix is a faster model" }
+    - { text: "It should retry a different action chosen at random each time" }
+  explanation: "Retry only helps transient failures. On a permanent one it thrashes to the cap. Real recovery classifies first, then retries, re-plans, or escalates."
+
+- id: mc-review-loop-wrong-shape
+  type: multiple_choice
+  tags: [review]
+  difficulty: 4
+  prompt: >-
+    A design reaches for a multi-agent tree-search loop for a task that a single bounded loop resolves
+    in a few steps. What does a reviewer flag?
+  options:
+    - { text: "Over-engineered shape: search and multi-agent multiply cost and coordination surface for no gain here; use the most constrained shape that works and escalate only on a real signal", correct: true }
+    - { text: "Under-engineered: it should add even more agents for redundancy" }
+    - { text: "Nothing — the fancier shape is always safer" }
+    - { text: "It should drop verification since more agents cross-check each other" }
+  explanation: "The most-constrained-shape rule: start simple, escalate on evidence. Reaching for search by reflex adds failure surface and cost without buying reliability."
