@@ -52,6 +52,12 @@ COPY --from=build --chown=nextjs:nodejs /app/web/.next/static ./web/.next/static
 # + TOPICS_DIR=/app/topics (see docker-compose.prod.yml).
 COPY --chown=nextjs:nodejs topics ./topics
 
+# Grader model config, read at runtime by the /models page + evaluator
+# (MODEL_CONFIG_PATH=/app/model_configuration.yaml). Like topics/, the standalone
+# tracer doesn't capture this disk read, so copy it in explicitly — without it the
+# /models page shows "No valid model_configuration.yaml was found".
+COPY --chown=nextjs:nodejs model_configuration.yaml ./model_configuration.yaml
+
 USER nextjs
 EXPOSE 3000
 

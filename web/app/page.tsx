@@ -30,7 +30,7 @@ export default async function HomePage() {
         </p>
         <p style={{ marginTop: 4 }}>
           <Link className="btn ghost" href="/assessment">
-            Free Assessment of Knowledge →
+            Assessment of Knowledge →
           </Link>
         </p>
 
