@@ -20,6 +20,17 @@ test **idea↔method↔system/people** attribution, not exact years.
 - **Interview signals:** can you split model vs. harness responsibilities; how you bound/verify an agent.
 - **Red flags:** "just improve the prompt" for structural failures; trusting model output unverified; unbounded loops.
 
+## loop-engineering
+- **Papers/people:** reason-then-act loop → **ReAct** (Yao et al., 2022); reflect-and-retry → **Reflexion**
+  (Shinn et al., 2023); learned tool use → **Toolformer** (Schick et al., Meta, 2023); deliberate search →
+  **Tree of Thoughts** (Yao et al., 2023); most-constrained-shape guidance → Anthropic **"Building Effective
+  Agents"** (2024).
+- **Tools/OSS:** Claude Agent SDK, LangGraph, OpenAI Agents SDK; SWE-agent (agentic-coding harness); AutoGPT (unbounded-loop cautionary).
+- **SOTA now:** single bounded edit → run → observe loops with per-step verification and named termination; plan-then-execute and reflect-retry for long-horizon work; SWE-bench-style harnesses.
+- **Open problems:** reliable long-horizon autonomy; verifying open-ended tasks (no crisp gate); robust error recovery and context compaction over length.
+- **Interview signals:** design the loop not the prompt; pick the most-constrained shape; bound and verify; classify-then-recover.
+- **Red flags:** unbounded loop whose only exit is the model saying "done"; trusting unverified progress; blind-retrying permanent failures; reaching for multi-agent/search when one loop would do.
+
 ## context-engineering
 - **Papers/people:** mid-context under-use → **"Lost in the Middle"** (Liu et al., Stanford, 2023);
   long-context stress tests → **Needle-in-a-Haystack**, **RULER** (NVIDIA, 2024).

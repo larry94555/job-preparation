@@ -6,7 +6,7 @@ engine code changes. Open-ended answers are graded by a **small local LLM** driv
 carefully engineered, individually-tested evaluation skills.
 
 - **▶ New here? Start with the [`Full Walkthrough`](WALKTHROUGH.md)** — run it in two commands, do the
-  first lesson, and flow through all 22 topics in the recommended order.
+  first lesson, and flow through all 23 topics in the recommended order.
 - **Design & rationale:** [`DESIGN.md`](DESIGN.md)
 - **How to run it:** [`GettingStarted.md`](GettingStarted.md)
 - **Recommended learning order + all topics:** [`WALKTHROUGH.md`](WALKTHROUGH.md)

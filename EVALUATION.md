@@ -6,6 +6,14 @@ and expert at passing state-of-the-art interviews.**
 
 Date: 2026-07-09.
 
+> **Addendum (2026-07-17):** a 23rd core lesson topic, **`loop-engineering`** (designing the agent
+> observe → decide → act → verify loop), was added at A+ parity — 4 sections, 11 lessons, 40 questions,
+> a sandbox-verified code exercise, essay+code eval-skills with calibration, an Expert Surface (18 items,
+> 100%), a reading list, and two review pages. It sits at curriculum position 2 (after Harness
+> Engineering). Core Topic Mastery Index is now **474/474 = 100%** across 23 topics. The historical
+> numbers below (22 topics · 456 items) predate it. Pending: run the eval-gate on the two new skills
+> (`eval-loop-essay`, `eval-loop-code`) against the pinned judge, as with the other 46 skills.
+
 > **Progress update (2026-07-09):** WS1 (literature/canon/frontier), WS2 (career/interview track),
 > WS3 (deepen material + architecture taxonomy + code-review & debugging exercises + more L4), and
 > **WS4 (certification rigor)** are **done**.

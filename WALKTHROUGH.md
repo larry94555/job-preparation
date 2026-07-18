@@ -81,46 +81,47 @@ the way through the course without ever deciding what to open.
 
 ---
 
-## 4. The recommended order (all 22 topics)
+## 4. The recommended order (all 23 topics)
 
 Do them top to bottom — this is exactly the order **Proceed** and **Next** follow. Check them off as you
 go. Grouped into clusters; each cluster builds on the previous one.
 
 ### Foundations — start here
 - [ ] 1. **Harness Engineering** — the agent loop, tools, control flow *(47 steps)*
-- [ ] 2. **Context Engineering** — what goes in the window and why *(51)*
+- [ ] 2. **Loop Engineering** — engineering the observe → decide → act → verify loop: shapes, progress & recovery *(67)*
+- [ ] 3. **Context Engineering** — what goes in the window and why *(51)*
 
 ### Reliability — make the model's outputs trustworthy
-- [ ] 3. **Structured Output Reliability** — schemas, validation, bounded repair, fallback *(53)*
-- [ ] 4. **Function-Calling Reliability** — typed tool contracts, idempotency *(51)*
-- [ ] 5. **Agent Guardrails & Budgets** — bounding loops, budgets, stop conditions *(54)*
-- [ ] 6. **Model Routing & Fallback** — cascades, circuit breakers, degraded UX *(51)*
+- [ ] 4. **Structured Output Reliability** — schemas, validation, bounded repair, fallback *(53)*
+- [ ] 5. **Function-Calling Reliability** — typed tool contracts, idempotency *(51)*
+- [ ] 6. **Agent Guardrails & Budgets** — bounding loops, budgets, stop conditions *(54)*
+- [ ] 7. **Model Routing & Fallback** — cascades, circuit breakers, degraded UX *(51)*
 
 ### Retrieval — ground answers in your data
-- [ ] 7. **RAG Architecture** — hybrid retrieval, reranking, RRF *(52)*
-- [ ] 8. **Retrieval Evals** — recall@k / precision@k / MRR / nDCG *(54)*
+- [ ] 8. **RAG Architecture** — hybrid retrieval, reranking, RRF *(52)*
+- [ ] 9. **Retrieval Evals** — recall@k / precision@k / MRR / nDCG *(54)*
 
 ### Quality & Ops — know if it's working and what it costs
-- [ ] 9. **Eval Methodology** — golden sets, judges, regression gates *(51)*
-- [ ] 10. **LLM Observability** — traces, spans, token/cost/latency, drift *(51)*
-- [ ] 11. **Cost Attribution** — cost-per-successful-outcome, per-feature/tenant *(51)*
+- [ ] 10. **Eval Methodology** — golden sets, judges, regression gates *(51)*
+- [ ] 11. **LLM Observability** — traces, spans, token/cost/latency, drift *(51)*
+- [ ] 12. **Cost Attribution** — cost-per-successful-outcome, per-feature/tenant *(51)*
 
 ### Serving & Inference — the systems that make it fast and cheap
-- [ ] 12. **Prompt vs. Semantic Caching** — prefix caching vs. similarity cache *(52)*
-- [ ] 13. **KV Cache Management** — sizing, paging, eviction *(55)*
-- [ ] 14. **Prefill vs. Decode Latency** — TTFT/ITL, chunked prefill, disaggregation *(52)*
-- [ ] 15. **Batching, Paged Attention & Throughput** — continuous batching *(51)*
-- [ ] 16. **Speculative Decoding, Quantization & Distillation** — the speedup levers *(49)*
-- [ ] 17. **Quantization: Formats & Quality** — GPTQ/AWQ, int8/fp8, quality gates *(54)*
+- [ ] 13. **Prompt vs. Semantic Caching** — prefix caching vs. similarity cache *(52)*
+- [ ] 14. **KV Cache Management** — sizing, paging, eviction *(55)*
+- [ ] 15. **Prefill vs. Decode Latency** — TTFT/ITL, chunked prefill, disaggregation *(52)*
+- [ ] 16. **Batching, Paged Attention & Throughput** — continuous batching *(51)*
+- [ ] 17. **Speculative Decoding, Quantization & Distillation** — the speedup levers *(49)*
+- [ ] 18. **Quantization: Formats & Quality** — GPTQ/AWQ, int8/fp8, quality gates *(54)*
 
 ### Safety & Multi-tenancy
-- [ ] 18. **Safety Engineering** — prompt injection, trust boundaries, egress *(51)*
-- [ ] 19. **Multi-tenant Isolation** — tenant-scoped data and caches *(54)*
+- [ ] 19. **Safety Engineering** — prompt injection, trust boundaries, egress *(51)*
+- [ ] 20. **Multi-tenant Isolation** — tenant-scoped data and caches *(54)*
 
 ### Capstones — integrative; they synthesize everything above
-- [ ] 20. **Adaptation Strategy Selection** — prompt vs. RAG vs. fine-tune vs. distill *(55)*
-- [ ] 21. **Inference-Stack Tradeoffs** — the four-way latency/throughput/cost/quality call *(52)*
-- [ ] 22. **Production Failure Modes** — detect → mitigate → prevent *(51)*
+- [ ] 21. **Adaptation Strategy Selection** — prompt vs. RAG vs. fine-tune vs. distill *(55)*
+- [ ] 22. **Inference-Stack Tradeoffs** — the four-way latency/throughput/cost/quality call *(52)*
+- [ ] 23. **Production Failure Modes** — detect → mitigate → prevent *(51)*
 
 > **In a hurry / picking à la carte?** The first two (Foundations) are the only hard prerequisites for
 > the vocabulary. After that, each cluster is fairly self-contained — you can jump to the cluster you
@@ -150,4 +151,4 @@ Nothing is one-and-done. To reinforce or push a section to bright green:
 4. At the end, click **"Next: … →"** to flow into the next topic — repeat 22 times.
 5. Use **Review due**, **Mock**, and **Restart** any time to reinforce; **Analytics** to see progress.
 
-That's the whole loop. Start with Proceed and let **Next** carry you through all 22 topics in order.
+That's the whole loop. Start with Proceed and let **Next** carry you through all 23 topics in order.
