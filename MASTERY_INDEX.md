@@ -1,12 +1,14 @@
 # Topic Mastery Index — coverage of the Expert Surface
 
-**Snapshot: 2026-07-10.** Regenerate with `npm run mastery` (parses the machine-readable coverage line
+**Snapshot: 2026-07-17.** Regenerate with `npm run mastery` (parses the machine-readable coverage line
 in each `topics/<t>/expert-surface.md`). This is the *content* completeness metric of Goals §8/§9: for
 each topic we enumerate the capabilities a SOTA expert commands (the **Expert Surface**) and measure how
 much of that surface the course covers. Weighted coverage counts ✅ covered = 1, 🟡 partial = 0.5,
 ⬜ gap = 0.
 
-## Topic Mastery Index = **100%** — all 22 lesson topics fully covered (456 / 456 enumerated items)
+## Topic Mastery Index = **100%** — all 23 core lesson topics fully covered (474 / 474 enumerated items)
+
+_Core curriculum: 23 topics · 474 items · 100%. Agentic track: 12 topics · 252 items · 100%._
 
 | Topic | Items | ✅ | 🟡 | ⬜ | Coverage |
 |---|---|---|---|---|---|
@@ -21,6 +23,7 @@ much of that surface the course covers. Weighted coverage counts ✅ covered = 1
 | inference-stack-tradeoffs | 20 | 20 | 0 | 0 | 100% |
 | kv-cache-management | 21 | 21 | 0 | 0 | 100% |
 | llm-observability | 22 | 22 | 0 | 0 | 100% |
+| loop-engineering | 18 | 18 | 0 | 0 | 100% |
 | model-routing-fallback | 21 | 21 | 0 | 0 | 100% |
 | multi-tenant-isolation | 21 | 21 | 0 | 0 | 100% |
 | prefill-vs-decode-latency | 20 | 20 | 0 | 0 | 100% |

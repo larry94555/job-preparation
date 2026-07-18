@@ -67,7 +67,44 @@ prompt string. This topic establishes that boundary as the central mental model.
 
 ---
 
-# 2. Context engineering, not just long prompts
+# 2. Loop engineering: designing the agent loop that finishes real tasks
+
+**Slug:** `loop-engineering`
+**Scope:** Getting an agent to reliably *finish* a real task is loop engineering — designing the
+observe → decide → act → verify cycle, keeping it making measurable progress toward a goal, verifying
+each step, recovering from failure, and bounding it. This is the discipline behind coding agents and
+long-horizon autonomy. It builds on `harness-engineering` (the primitive loop and its guards) and goes
+deeper on the loop as a system.
+
+**Core subtopics:**
+1. Anatomy of a loop: observe → decide → act → verify; the loop as the unit of design; loop vs.
+   pipeline; loop state; termination as a first-class output (done / budget / no-progress).
+2. Loop shapes and when to use each: single bounded loop (ReAct), plan-then-execute, reflect-and-retry
+   (Reflexion), the edit → run → observe coding loop, tree/graph search; the most-constrained-shape rule.
+3. Progress, convergence & recovery: measurable progress; no-progress and oscillation detection;
+   step-verification gating; recovery (classify → retry / re-plan / escalate); context compaction.
+4. Design review, frontier & operations: the five-lever review checklist; canon (ReAct, Reflexion,
+   Tree of Thoughts, "Building Effective Agents"); long-horizon autonomy and open-ended verification;
+   operating signals (steps/task, stop-reason distribution, no-progress rate, verification-failure rate).
+
+**Assessment blueprint:**
+- **Multiple choice:** distinguish loop vs. pipeline; identify which loop phase the model owns; pick the
+  right shape for a scenario; read a stop-reason distribution.
+- **Missing term / free entry:** name the loop phases and stop reasons; the term for a stuck loop
+  (no-progress / oscillation); the signal that gates the next step (verification).
+- **Essay (design review):** review a "loop until the model says done" design and name the fixes.
+- **Essay (project / interview):** design the loop for a coding agent that fixes a failing test; mock
+  interview on loop design.
+- **Coding:** implement a bounded loop with no-progress detection (unchanged state), named termination,
+  and correct precedence (done > no-progress > budget).
+
+**Relationship to neighbors:** see also `harness-engineering` (primitive loop + guards),
+`agentic-react-loop` (ReAct as one shape), `agent-guardrails-budgets` (bounding mechanics),
+`agentic-tool-calling` (the tool-use loop), `production-failure-modes` (what goes wrong live).
+
+---
+
+# 3. Context engineering, not just long prompts
 
 **Slug:** `context-engineering`
 **Scope:** Getting the *right* tokens into a bounded window at the right time — selection,
@@ -97,7 +134,7 @@ context is a budget to manage, not a dumping ground.
 
 ---
 
-# 3. Prompt caching vs. semantic caching tradeoffs
+# 4. Prompt caching vs. semantic caching tradeoffs
 
 **Slug:** `prompt-vs-semantic-caching`
 **Scope:** Two different caches often confused. **Prompt (prefix) caching** reuses computed
@@ -125,7 +162,7 @@ a semantically similar *request*. Different hit conditions, correctness risks, a
 
 ---
 
-# 4. KV cache management, eviction, reuse, and memory pressure at scale
+# 5. KV cache management, eviction, reuse, and memory pressure at scale
 
 **Slug:** `kv-cache-management`
 **Scope:** The per-request key/value tensors dominate serving memory and cap concurrency. Managing
@@ -153,7 +190,7 @@ fragmentation.
 
 ---
 
-# 5. Prefill vs. decode latency and why they optimize differently
+# 6. Prefill vs. decode latency and why they optimize differently
 
 **Slug:** `prefill-vs-decode-latency`
 **Scope:** Inference has two phases with opposite performance profiles: **prefill** (process the
@@ -181,7 +218,7 @@ memory-bandwidth-bound). They set TTFT vs. TPOT and demand different optimizatio
 
 ---
 
-# 6. Continuous batching, paged attention, and throughput optimization
+# 7. Continuous batching, paged attention, and throughput optimization
 
 **Slug:** `batching-paged-attention-throughput`
 **Scope:** The serving techniques that turn a GPU into a high-throughput multi-request engine:
@@ -208,7 +245,7 @@ continuous (in-flight) batching to keep the GPU full, and paged attention to pac
 
 ---
 
-# 7. Speculative decoding vs. quantization vs. distillation tradeoffs
+# 8. Speculative decoding vs. quantization vs. distillation tradeoffs
 
 **Slug:** `speculative-decoding-quant-distillation`
 **Scope:** Three distinct levers to make inference faster/cheaper, often conflated. Speculative
@@ -237,7 +274,7 @@ distillation trains a *smaller model*. When to reach for which.
 
 ---
 
-# 8. INT8, INT4, FP8, AWQ, GPTQ, and when quantization hurts quality
+# 9. INT8, INT4, FP8, AWQ, GPTQ, and when quantization hurts quality
 
 **Slug:** `quantization-formats-quality`
 **Scope:** The concrete quantization formats and methods, what they cost in quality, and the
@@ -266,7 +303,7 @@ failure signatures that tell you a model was quantized too aggressively.
 
 ---
 
-# 9. Structured output failures, schema validation, repair loops, and fallback chains
+# 10. Structured output failures, schema validation, repair loops, and fallback chains
 
 **Slug:** `structured-output-reliability`
 **Scope:** Making models emit valid, schema-conformant data reliably — and recovering when they
@@ -294,7 +331,7 @@ don't — via validation, targeted repair, and layered fallbacks.
 
 ---
 
-# 10. Function calling reliability, tool contracts, argument validation, and idempotency
+# 11. Function calling reliability, tool contracts, argument validation, and idempotency
 
 **Slug:** `function-calling-reliability`
 **Scope:** Treating tools as APIs with contracts: validated arguments, well-typed schemas, and
@@ -322,7 +359,7 @@ idempotent execution so a retried or hallucinated call can't corrupt state.
 
 ---
 
-# 11. Agent guardrails, loop budgets, tool budgets, and termination conditions
+# 12. Agent guardrails, loop budgets, tool budgets, and termination conditions
 
 **Slug:** `agent-guardrails-budgets`
 **Scope:** Keeping autonomous agents bounded and safe: step/tool/token budgets, explicit
@@ -349,7 +386,7 @@ termination, and guardrails that prevent runaway loops and unsafe actions.
 
 ---
 
-# 12. Model routing, graceful fallback logic, and degraded-mode UX
+# 13. Model routing, graceful fallback logic, and degraded-mode UX
 
 **Slug:** `model-routing-fallback`
 **Scope:** Choosing the right model per request and degrading gracefully when a provider is slow,
@@ -376,7 +413,7 @@ down, rate-limited, or over budget — without a hard failure for the user.
 
 ---
 
-# 13. RAG architecture: chunking, embeddings, hybrid search, reranking, and freshness
+# 14. RAG architecture: chunking, embeddings, hybrid search, reranking, and freshness
 
 **Slug:** `rag-architecture`
 **Scope:** The end-to-end retrieval pipeline that grounds generation: how documents are split,
@@ -403,7 +440,7 @@ embedded, searched (dense + sparse), reranked, and kept fresh.
 
 ---
 
-# 14. Retrieval evals: recall, precision, grounding, attribution, and citation quality
+# 15. Retrieval evals: recall, precision, grounding, attribution, and citation quality
 
 **Slug:** `retrieval-evals`
 **Scope:** Measuring whether retrieval actually helps: did we fetch the right context (recall/
@@ -430,7 +467,7 @@ precision), did the answer *use* it (grounding), and are citations correct (attr
 
 ---
 
-# 15. Evals: golden sets, regression tests, adversarial tests, LLM-as-judge, and human evals
+# 16. Evals: golden sets, regression tests, adversarial tests, LLM-as-judge, and human evals
 
 **Slug:** `eval-methodology`
 **Scope:** The discipline of measuring LLM system quality: curated golden sets, regression gates,
@@ -458,7 +495,7 @@ adversarial coverage, judge models, and human review — and the failure modes o
 
 ---
 
-# 16. LLM observability: traces, spans, tokens, latency, errors, and drift
+# 17. LLM observability: traces, spans, tokens, latency, errors, and drift
 
 **Slug:** `llm-observability`
 **Scope:** Treating observability as a first-class discipline for LLM systems: structured traces of
@@ -485,7 +522,7 @@ multi-step calls, token/latency/error telemetry, and drift detection over time.
 
 ---
 
-# 17. Cost attribution per feature, workflow, tenant, and user journey
+# 18. Cost attribution per feature, workflow, tenant, and user journey
 
 **Slug:** `cost-attribution`
 **Scope:** Attributing LLM spend to the dimensions the business cares about — feature, workflow,
@@ -513,7 +550,7 @@ tenant, user journey — not just "per model," so cost can be optimized where it
 
 ---
 
-# 18. Safety engineering: prompt injection defense, data leakage prevention, permission boundaries
+# 19. Safety engineering: prompt injection defense, data leakage prevention, permission boundaries
 
 **Slug:** `safety-engineering`
 **Scope:** Defending LLM systems against prompt injection and data exfiltration, and enforcing
@@ -541,7 +578,7 @@ permission boundaries so tools and context can't be abused via crafted input.
 
 ---
 
-# 19. Multi-tenant isolation, cache safety, and cross-user context contamination prevention
+# 20. Multi-tenant isolation, cache safety, and cross-user context contamination prevention
 
 **Slug:** `multi-tenant-isolation`
 **Scope:** Keeping tenants and users cryptographically and logically separated across caches,
@@ -568,7 +605,7 @@ context, embeddings, and retrieval — so one user's data never surfaces in anot
 
 ---
 
-# 20. Fine-tuning vs. in-context learning vs. RAG vs. distillation — and when each is the wrong tool
+# 21. Fine-tuning vs. in-context learning vs. RAG vs. distillation — and when each is the wrong tool
 
 **Slug:** `adaptation-strategy-selection`
 **Scope:** Choosing how to adapt a model to a task/domain. Each approach fits different problems;
@@ -597,7 +634,7 @@ the skill is recognizing when a popular choice is the *wrong* one.
 
 ---
 
-# 21. Latency, quality, cost, and reliability tradeoffs across the full inference stack
+# 22. Latency, quality, cost, and reliability tradeoffs across the full inference stack
 
 **Slug:** `inference-stack-tradeoffs`
 **Scope:** The system-level view: every layer (routing, caching, batching, quantization, retrieval,
@@ -624,7 +661,7 @@ decoding) trades among latency, quality, cost, and reliability. This topic integ
 
 ---
 
-# 22. Production failure modes: hallucinated tool calls, malformed JSON, stale retrieval, runaway agents, and silent eval regressions
+# 23. Production failure modes: hallucinated tool calls, malformed JSON, stale retrieval, runaway agents, and silent eval regressions
 
 **Slug:** `production-failure-modes`
 **Scope:** A capstone catalog of how LLM systems fail in production, how to detect each, and how to
