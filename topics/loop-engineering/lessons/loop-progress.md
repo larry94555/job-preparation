@@ -8,7 +8,7 @@ subtask is verified complete, the error count drops, a required file now exists.
 another action" is not progress — activity is not achievement.
 
 This is why progress and verification are joined at the hip. Unverified "progress" can be a false
-belief: the agent believes it advanced because it *did* something, while the real signal hasn't moved.
+belief: the agent believes it advanced because it **did** something, while the real signal hasn't moved.
 So a well-engineered loop **gates the next step on a checked result** — it advances only when
 verification confirms the signal moved, and treats an unverified step as not-yet-done rather than done.
 

@@ -1,0 +1,57 @@
+# Canon + interview questions. [canon]/[interview] — canon enters sec-frontier; interview is
+# whole-topic only (not in any section's from_tags), matching the harness pattern.
+- id: mc-canon-loop-react
+  type: multiple_choice
+  tags: [canon]
+  difficulty: 3
+  prompt: "Which work introduced the reason-then-act agent loop that interleaves chain-of-thought reasoning with tool actions?"
+  options:
+    - { text: "ReAct (Yao et al., 2022)", correct: true }
+    - { text: "Reflexion (Shinn et al., 2023)" }
+    - { text: "Toolformer (Schick et al., 2023)" }
+    - { text: "Tree of Thoughts (Yao et al., 2023)" }
+  explanation: "ReAct established the reason-then-act loop. Reflexion adds self-reflection/retry, Toolformer showed learned tool use, and Tree of Thoughts generalized to deliberate search."
+
+- id: mc-interview-loop-redflag
+  type: multiple_choice
+  tags: [interview]
+  difficulty: 3
+  prompt: "Which answer is a red flag that should worry a senior interviewer assessing loop-engineering judgment?"
+  options:
+    - { text: "Proposing an unbounded loop whose only exit is the model saying it's done, with no verification of progress", correct: true }
+    - { text: "Starting with a single bounded loop and escalating only on a real signal" }
+    - { text: "Gating each step on a verified success signal" }
+    - { text: "Reporting a named stop reason for every run" }
+  explanation: "Unbounded loops and trusting unverified progress are classic red flags; bounding, verifying, and picking the most-constrained shape are the signals of strong judgment."
+
+- id: essay-loop-literature
+  type: essay
+  length: long
+  tags: [canon]
+  difficulty: 4
+  prompt: >-
+    Name the loop-engineering canon and what each work contributes to how we design agent loops today:
+    ReAct, Reflexion, Toolformer, Tree of Thoughts, and Anthropic's "Building Effective Agents".
+  eval_skill: eval-loop-essay
+  reference_points:
+    - "ReAct (Yao et al., 2022): the reason-then-act loop most agents harden into a single bounded loop."
+    - "Reflexion (Shinn et al., 2023): self-reflection and retry — critique a failed attempt and revise (the reflect-retry shape)."
+    - "Toolformer (Schick et al., 2023): models learning to call tools/APIs, grounding the 'act' phase."
+    - "Tree of Thoughts (Yao et al., 2023): generalizes the loop into deliberate search over scored branches (the search shape)."
+    - "Building Effective Agents (Anthropic, 2024): prefer the simplest loop that works; add structure only when it earns its keep."
+
+- id: essay-loop-interview
+  type: essay
+  length: long
+  tags: [interview]
+  difficulty: 4
+  prompt: >-
+    Mock interview: you're asked to design the loop for an agent that resolves GitHub issues. Walk your
+    answer the way a strong candidate would, and name the red flags you're deliberately avoiding.
+  eval_skill: eval-loop-essay
+  reference_points:
+    - "Lead with shape: a single bounded edit → run → observe loop; escalate to plan-then-execute or reflect-retry only on a real signal."
+    - "Progress + verification: run the tests after each edit and gate the next step on the result — measurable progress, not activity."
+    - "Bounding: step/token budget, no-progress and oscillation detection, named stop reasons; the harness owns termination."
+    - "Recovery: classify a failed edit and retry / re-plan / escalate, not blind retry; keep context legible with compaction."
+    - "Red flags avoided: unbounded loop, trusting unverified progress, blind retry, reaching for multi-agent/search when one loop would do."

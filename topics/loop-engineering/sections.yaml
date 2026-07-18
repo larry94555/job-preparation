@@ -28,9 +28,9 @@ sections:
 
   - id: sec-frontier
     title: "Design review, frontier & operations"
-    lessons: [lesson-deep-dive]
+    lessons: [lesson-roadmap-frontier, lesson-deep-dive, lesson-frontier-ops, lesson-expert-context]
     assessment:
       title: "Section 4 — Design review, frontier & operations"
-      from_tags: [review]
-      count: 3
+      from_tags: [canon, review, frontier, ops]
+      count: 5
       pass_threshold: 0.8

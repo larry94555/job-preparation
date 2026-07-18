@@ -1,0 +1,11 @@
+id: lesson-expert-context
+title: "Expert context: papers, frontier & interview"
+material: expert-context.md
+segments:
+  - present: papers-people-and-the-frontier
+  - check: mc-canon-loop-react
+  - present: interviewing-on-loop-engineering
+  - check: mc-interview-loop-redflag
+  - present: related-topics-and-how-they-connect
+  - apply: essay-loop-literature
+  - apply: essay-loop-interview
