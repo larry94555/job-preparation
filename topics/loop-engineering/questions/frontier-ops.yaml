@@ -1,0 +1,70 @@
+# Frontier + operations multiple choice (difficulty 4) — Section 4
+- id: mc-frontier-loop-longhorizon
+  type: multiple_choice
+  tags: [canon, frontier]
+  difficulty: 4
+  prompt: >-
+    Reliable long-horizon autonomy is a live open problem in loop engineering. As a loop gets longer,
+    what is the core failure it fights, and where does the fix live?
+  options:
+    - { text: "Context accumulates and small errors compound so the agent drifts or gets stuck; reliability at length comes from harness structure (plan-then-execute, reflect/retry, recovery, compaction), not a longer prompt", correct: true }
+    - { text: "The model runs out of parameters, so the fix is a bigger model" }
+    - { text: "The prompt gets stale, so the fix is to rewrite it each turn" }
+    - { text: "Nothing fails — longer loops are strictly more reliable" }
+  explanation: "Length is the enemy: observations pile up and errors compound. The frontier fix is structural — plan-execute, reflect/retry, recovery, and compaction — not a longer prompt."
+
+- id: mc-frontier-loop-swebench
+  type: multiple_choice
+  tags: [canon, frontier]
+  difficulty: 4
+  prompt: >-
+    SWE-bench-style agentic-coding harnesses are the benchmark frontier for long-horizon, verifiable
+    loop work. What, more than raw model capability, most determines whether such a harness succeeds?
+  options:
+    - { text: "Verification — running the project's tests and reading the diff so a claimed fix is checked against a real success signal, not trusted", correct: true }
+    - { text: "The size of the base model's context window" }
+    - { text: "How many agents run in parallel" }
+    - { text: "How detailed the system prompt is" }
+  explanation: "These harnesses win or lose on executing the test suite to gate on a real signal. A loop that trusts \"I fixed it\" without running the tests is not at the frontier."
+
+- id: mc-frontier-loop-openended
+  type: multiple_choice
+  tags: [canon, frontier]
+  difficulty: 4
+  prompt: >-
+    Verifying open-ended tasks is the hardest open problem. Why doesn't the edit → run → observe gate
+    that works for coding transfer to a task like "improve this design doc"?
+  options:
+    - { text: "Open-ended tasks have no crisp success check, so a deterministic gate like 'tests pass' doesn't exist; the honest move is proxy / rubric / human-in-the-loop verification, not pretending a soft check is a hard one", correct: true }
+    - { text: "Design docs are always shorter, so verification is unnecessary" }
+    - { text: "The model refuses open-ended tasks, so there is nothing to verify" }
+    - { text: "Open-ended tasks converge faster, so any check will do" }
+  explanation: "The transferable strength of the coding loop is a deterministic gate on a real signal. Open-ended work lacks that ground truth, so the frontier is trustworthy soft verification, honestly labeled."
+
+- id: mc-ops-loop-stop-reason
+  type: multiple_choice
+  tags: [ops]
+  difficulty: 4
+  prompt: >-
+    You track the stop-reason distribution of a live loop fleet dominated by "done". Which shift is the
+    leading indicator that budgets are too tight or tasks too hard?
+  options:
+    - { text: "A rising budget-exhaustion share in the stop-reason distribution", correct: true }
+    - { text: "A rising 'done' share" }
+    - { text: "Shorter model replies on average" }
+    - { text: "More tokens per completed run" }
+  explanation: "Every run ends for a named reason. A rising budget-exhaustion share means runs hit the cap before finishing; a rising no-progress share means they're getting stuck."
+
+- id: mc-ops-loop-progress-rate
+  type: multiple_choice
+  tags: [ops]
+  difficulty: 4
+  prompt: >-
+    Which operational signal is the loop-specific runaway-cost early warning — the one that catches a
+    stuck loop before its budget cap fires?
+  options:
+    - { text: "The no-progress / stuck rate — the share of runs the no-progress guard catches", correct: true }
+    - { text: "Average response length" }
+    - { text: "Total requests per second" }
+    - { text: "The number of distinct tools registered" }
+  explanation: "Catching \"stuck\" before the budget cap fires is the operational discipline that keeps a long loop from becoming a runaway bill — read it from the no-progress rate."

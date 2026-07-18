@@ -27,7 +27,7 @@ and recover.
 re-running a failed action, the agent **reflects** on why the attempt failed and revises its approach
 before trying again. The distinction from a plain retry is the whole point: a plain retry repeats the
 same action and often the same failure; reflection changes the approach. It costs an extra reasoning
-turn per retry and only helps when a failure is actually *informative* — when there's something to
+turn per retry and only helps when a failure is actually **informative** — when there's something to
 learn from what went wrong.
 
 ## The coding loop, and choosing a shape
@@ -40,12 +40,12 @@ checked fact, and it is exactly why SWE-bench-style harnesses win or lose on ver
 raw model strength.
 
 **Search loops** (tree or graph) explore multiple branches and score them. They are genuinely more
-powerful when a task has several viable paths worth pursuing in parallel *and* you have a way to score
+powerful when a task has several viable paths worth pursuing in parallel **and** you have a way to score
 partial progress — but they multiply model calls and add coordination surface, so they are the wrong
 reflex for a task a single loop would close.
 
 **Choosing** comes back to the most-constrained-shape rule and an **escalation** policy: start with the
 single bounded loop; escalate to plan-then-execute or reflect-retry only when the simple loop fails on a
 real signal (repeated failures, no progress, a plan that clearly needs checkpointing); reserve search
-for the rare task that truly branches. The senior move is naming *why* a shape is warranted, not
+for the rare task that truly branches. The senior move is naming **why** a shape is warranted, not
 reaching for the most elaborate one available.

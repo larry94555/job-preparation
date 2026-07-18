@@ -1,0 +1,11 @@
+id: lesson-frontier-ops
+title: "Frontier & operations: long-horizon autonomy, agentic-coding, and the signals to watch"
+material: frontier-ops.md
+segments:
+  - present: the-loop-engineering-frontier
+  - check: mc-frontier-loop-longhorizon
+  - check: mc-frontier-loop-swebench
+  - check: mc-frontier-loop-openended
+  - present: operating-a-loop-in-production
+  - check: mc-ops-loop-stop-reason
+  - check: mc-ops-loop-progress-rate
