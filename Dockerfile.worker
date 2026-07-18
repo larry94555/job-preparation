@@ -29,6 +29,8 @@ RUN npm ci --include=dev
 
 COPY tsconfig.base.json ./
 COPY topics ./topics
+# Grader model config — the worker reads MODEL_CONFIG_PATH to resolve the judge model.
+COPY model_configuration.yaml ./model_configuration.yaml
 
 # Unprivileged user.
 RUN groupadd --system --gid 1001 nodejs \

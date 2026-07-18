@@ -17,31 +17,42 @@ import type { ProgressStore } from "./types.js";
  * This preserves the hard requirement: the file path has ZERO required runtime
  * deps; `pg` is only touched when STORE=pg is explicitly selected.
  */
+/**
+ * ONE connection pool per connection string, shared PROCESS-WIDE. A new
+ * `PgProgressStore` is built on every request (the web app calls `createStore()`
+ * per request, several times per request), so a per-instance pool would open a
+ * fresh `pg.Pool` each time and never release it — under rapid navigation those
+ * pools accumulate and exhaust Postgres's connection slots, surfacing as
+ * intermittent server errors. Caching the pool by connection string means every
+ * store instance reuses the same bounded pool. `pg`/drizzle are still loaded
+ * lazily, so importing this module never pulls in `pg`.
+ */
+const pools = new Map<string, Promise<{ pool: PgPool; db: NodePgDatabase }>>();
+
+function getPooled(connectionString: string): Promise<{ pool: PgPool; db: NodePgDatabase }> {
+  let entry = pools.get(connectionString);
+  if (!entry) {
+    entry = (async () => {
+      const { Pool } = await import("pg");
+      const { drizzle } = await import("drizzle-orm/node-postgres");
+      const pool = new Pool({ connectionString });
+      return { pool, db: drizzle(pool) };
+    })();
+    pools.set(connectionString, entry);
+  }
+  return entry;
+}
+
 export class PgProgressStore implements ProgressStore {
   private readonly connectionString: string;
-  private pool?: PgPool;
-  private db?: NodePgDatabase;
-  private initialized?: Promise<void>;
 
   constructor(connectionString: string) {
     this.connectionString = connectionString;
   }
 
-  private async init(): Promise<void> {
-    if (!this.initialized) {
-      this.initialized = (async () => {
-        const { Pool } = await import("pg");
-        const { drizzle } = await import("drizzle-orm/node-postgres");
-        this.pool = new Pool({ connectionString: this.connectionString });
-        this.db = drizzle(this.pool);
-      })();
-    }
-    await this.initialized;
-  }
-
   private async database(): Promise<Db> {
-    await this.init();
-    return this.db! as unknown as Db;
+    const { db } = await getPooled(this.connectionString);
+    return db as unknown as Db;
   }
 
   async get(userId: string, topicId: string): Promise<unknown | null> {
