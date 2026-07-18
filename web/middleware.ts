@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
 import { authConfig } from "@/auth.config";
+import { signupRequired } from "@/lib/access";
 
 // Build a lightweight, EDGE-SAFE `auth` from the base config only (no adapter,
 // no providers, no `pg`) — enough to verify the JWT session in middleware. The
@@ -45,6 +46,13 @@ function isPublicPath(pathname: string): boolean {
  */
 export default auth((req) => {
   const { pathname } = req.nextUrl;
+
+  // Open-access mode (REQUIRE_SIGNUP=false): no path is gated — anyone reaches
+  // everything with no sign-in. currentUserId() supplies a shared guest user so
+  // pages/routes that need a user still work. See web/lib/access.ts.
+  if (!signupRequired()) {
+    return NextResponse.next();
+  }
 
   if (isPublicPath(pathname)) {
     return NextResponse.next();

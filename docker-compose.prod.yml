@@ -93,6 +93,11 @@ services:
       # The From address. With OCI Email Delivery this MUST be an Approved Sender
       # on a domain you control (e.g. verify@yourdomain.com).
       EMAIL_FROM: ${EMAIL_FROM:-onboarding@resend.dev}
+      # Whether sign-up + email verification is REQUIRED. Default true = the
+      # normal gated site. Set false to OPEN the whole site to anyone with no
+      # sign-up (shared "guest" progress) — lets you validate everything before an
+      # email-sending domain is configured. See WEBSITE_STEP_BY_STEP.md.
+      REQUIRE_SIGNUP: ${REQUIRE_SIGNUP:-true}
       # Support mailbox for the Help link + privacy/terms contact.
       SUPPORT_EMAIL: ${SUPPORT_EMAIL:-support@example.com}
       # Donations (Stripe). Without these, donation endpoints return a graceful
