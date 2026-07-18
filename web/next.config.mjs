@@ -5,6 +5,13 @@ const nextConfig = {
   // production Docker image can run the app without the full monorepo /
   // node_modules tree. See web/Dockerfile. (Phase 6 hosting — deployment.)
   output: "standalone",
+  // Keep nodemailer OUT of the webpack server bundle. Auth.js's Nodemailer email
+  // provider (magic-link sign-in) loads it via a dynamic import that the
+  // standalone tracer misses when it's bundled — so the deployed container throws
+  // "Cannot find module 'nodemailer'" on send and bounces sign-up to the error
+  // page. Marking it external makes the tracer copy it into standalone/node_modules
+  // and require() it at runtime. web/lib/email.ts (feedback) imports it too.
+  serverExternalPackages: ["nodemailer"],
   // Compile the raw-TS ESM workspace packages (they ship .ts, no build step).
   transpilePackages: [
     "@job-prep/schema",
